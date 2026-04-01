@@ -108,3 +108,23 @@ class TestEvolverColors:
     def test_status_error(self):
         c = colors.STATUS_ERROR
         assert (c.red(), c.green(), c.blue()) == (0xE0, 0x30, 0x30)
+
+
+class TestDashboardColors:
+    """Dashboard-origin tokens added during Tkinter→PyQt6 migration."""
+
+    def test_accent_pink(self):
+        c = colors.ACCENT_PINK
+        assert (c.red(), c.green(), c.blue()) == (200, 80, 160)
+
+    def test_cable_active(self):
+        c = colors.CABLE_ACTIVE
+        assert (c.red(), c.green(), c.blue()) == (160, 168, 180)
+
+    def test_cable_inactive(self):
+        c = colors.CABLE_INACTIVE
+        assert (c.red(), c.green(), c.blue()) == (80, 88, 96)
+
+    def test_border_panel(self):
+        c = colors.BORDER_PANEL
+        assert (c.red(), c.green(), c.blue()) == (112, 119, 128)

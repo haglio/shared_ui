@@ -75,3 +75,11 @@ TIMELINE_CURSOR = QColor(255, 255, 255)  # current cursor position
 TIMELINE_LOOP = QColor(255, 50, 50)  # loop frame position  (was BGR 50,50,255)
 TIMELINE_SUGGESTED_IN = QColor(255, 220, 90)  # suggested in-point  (was BGR 90,220,255)
 TIMELINE_SUGGESTED_OUT = QColor(90, 210, 255)  # suggested out-point  (was BGR 255,210,90)
+
+# ---------------------------------------------------------------------------
+# Dashboard (cable visualization, mode accents, panel outlines)
+# ---------------------------------------------------------------------------
+ACCENT_PINK = QColor(200, 80, 160)  # robot-hand / OSR2-auto mode accent
+CABLE_ACTIVE = QColor(160, 168, 180)  # connected cable / connector
+CABLE_INACTIVE = QColor(80, 88, 96)  # disconnected cable / connector
+BORDER_PANEL = QColor(112, 119, 128)  # panel outline

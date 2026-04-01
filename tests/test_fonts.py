@@ -5,7 +5,9 @@ from __future__ import annotations
 from PyQt6.QtGui import QFont
 
 from shared_ui.fonts import (
+    FONT_EMOJI,
     FONT_MONO,
+    FONT_SYMBOL,
     FONT_UI,
     SIZE_BODY,
     SIZE_HEADING,
@@ -54,3 +56,13 @@ class TestMonoFont:
     def test_style_hint_is_monospace(self):
         f = mono_font()
         assert f.styleHint() == QFont.StyleHint.Monospace
+
+
+class TestIconFontFamilies:
+    """Font family constants for icon/symbol rendering."""
+
+    def test_font_symbol_is_str(self):
+        assert FONT_SYMBOL == "Segoe UI Symbol"
+
+    def test_font_emoji_is_str(self):
+        assert FONT_EMOJI == "Segoe UI Emoji"
