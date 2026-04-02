@@ -59,20 +59,14 @@ class TestCollectFontTokens:
     def test_includes_font_families(self):
         tokens = dict(collect_font_tokens())
         assert "--font-ui" in tokens
-        assert "--font-mono" in tokens
 
     def test_font_ui_has_web_fallbacks(self):
         tokens = dict(collect_font_tokens())
         assert tokens["--font-ui"] == '"Segoe UI", system-ui, sans-serif'
 
-    def test_font_mono_has_fallback_chain(self):
-        tokens = dict(collect_font_tokens())
-        assert tokens["--font-mono"] == '"Cascadia Mono", Consolas, monospace'
-
     def test_includes_size_tiers_in_px(self):
         tokens = dict(collect_font_tokens())
         assert tokens["--size-body"] == "11px"
-        assert tokens["--size-title"] == "16px"
         assert tokens["--size-heading"] == "14px"
         assert tokens["--size-small"] == "9px"
         assert tokens["--size-tiny"] == "8px"

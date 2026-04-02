@@ -23,8 +23,5 @@ class TestSpacingTokens:
     def test_standard_is_8(self):
         assert spacing.MARGIN_STANDARD == 8
 
-    def test_ordering(self):
-        assert spacing.MARGIN_TIGHT < spacing.MARGIN_STANDARD < spacing.MARGIN_WIDE
-
     def test_gap_ordering(self):
-        assert spacing.GAP_SMALL < spacing.GAP_MEDIUM < spacing.GAP_LARGE
+        assert spacing.GAP_SMALL < spacing.GAP_MEDIUM

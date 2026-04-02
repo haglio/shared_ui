@@ -6,14 +6,11 @@ from PyQt6.QtGui import QFont
 
 from shared_ui.fonts import (
     FONT_EMOJI,
-    FONT_MONO,
     FONT_SYMBOL,
     FONT_UI,
     SIZE_BODY,
     SIZE_HEADING,
-    SIZE_TITLE,
     make_font,
-    mono_font,
 )
 
 
@@ -27,8 +24,8 @@ class TestMakeFont:
         assert f.family() == FONT_UI
 
     def test_custom_size(self):
-        f = make_font(size=SIZE_TITLE)
-        assert f.pointSize() == SIZE_TITLE
+        f = make_font(size=SIZE_HEADING)
+        assert f.pointSize() == SIZE_HEADING
 
     def test_bold(self):
         f = make_font(bold=True)
@@ -42,20 +39,6 @@ class TestMakeFont:
         a = make_font(FONT_UI, SIZE_BODY, False)
         b = make_font(FONT_UI, SIZE_BODY, False)
         assert a is b
-
-
-class TestMonoFont:
-    def test_returns_qfont(self):
-        f = mono_font()
-        assert isinstance(f, QFont)
-
-    def test_family_is_mono(self):
-        f = mono_font()
-        assert f.family() == FONT_MONO
-
-    def test_style_hint_is_monospace(self):
-        f = mono_font()
-        assert f.styleHint() == QFont.StyleHint.Monospace
 
 
 class TestIconFontFamilies:
