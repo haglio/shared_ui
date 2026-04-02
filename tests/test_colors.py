@@ -54,24 +54,14 @@ class TestBGRConversions:
         c = colors.TIMELINE_LOOP
         assert (c.red(), c.green(), c.blue()) == (255, 50, 50)
 
-    def test_bg_button_active(self):
-        # Original BGR: (80, 90, 130) → RGB (130, 90, 80)
-        c = colors.BG_BUTTON_ACTIVE
-        assert (c.red(), c.green(), c.blue()) == (130, 90, 80)
-
-    def test_border_focus(self):
-        # Original BGR: (110, 220, 255) → RGB (255, 220, 110)
-        c = colors.BORDER_FOCUS
-        assert (c.red(), c.green(), c.blue()) == (255, 220, 110)
-
-    def test_accent_error(self):
+    def test_red(self):
         # Original BGR: (60, 60, 255) → RGB (255, 60, 60)
-        c = colors.ACCENT_ERROR
+        c = colors.RED
         assert (c.red(), c.green(), c.blue()) == (255, 60, 60)
 
-    def test_accent_warning(self):
+    def test_amber(self):
         # Original BGR: (120, 200, 255) → RGB (255, 200, 120)
-        c = colors.ACCENT_WARNING
+        c = colors.AMBER
         assert (c.red(), c.green(), c.blue()) == (255, 200, 120)
 
 
@@ -91,30 +81,22 @@ class TestGrayValuesUnchanged:
         assert c.red() == c.green() == c.blue() == 230
 
 
-class TestEvolverColors:
-    """Verify Evolver-origin tokens match their original hex values."""
+class TestPaletteColors:
+    """Verify the core palette hues."""
 
-    def test_accent_primary(self):
-        c = colors.ACCENT_PRIMARY
+    def test_blue(self):
+        c = colors.BLUE
         assert (c.red(), c.green(), c.blue()) == (0x30, 0x80, 0xE0)
 
-    def test_toggle_on_is_accent_primary(self):
-        assert colors.TOGGLE_ON is colors.ACCENT_PRIMARY
+    def test_toggle_on_is_blue(self):
+        assert colors.TOGGLE_ON is colors.BLUE
 
-    def test_status_success(self):
-        c = colors.STATUS_SUCCESS
+    def test_green(self):
+        c = colors.GREEN
         assert (c.red(), c.green(), c.blue()) == (0x30, 0xA0, 0x30)
 
-    def test_status_error(self):
-        c = colors.STATUS_ERROR
-        assert (c.red(), c.green(), c.blue()) == (0xE0, 0x30, 0x30)
-
-
-class TestDashboardColors:
-    """Dashboard-origin tokens added during Tkinter→PyQt6 migration."""
-
-    def test_accent_pink(self):
-        c = colors.ACCENT_PINK
+    def test_pink(self):
+        c = colors.PINK
         assert (c.red(), c.green(), c.blue()) == (200, 80, 160)
 
     def test_cable_active(self):

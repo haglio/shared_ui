@@ -51,8 +51,8 @@ class TestCollectColorTokens:
 
     def test_aliases_resolve_to_values(self):
         tokens = dict(collect_color_tokens())
-        # TOGGLE_ON = ACCENT_PRIMARY — should resolve to same hex
-        assert tokens["--toggle-on"] == tokens["--accent-primary"]
+        # TOGGLE_ON = BLUE — should resolve to same hex
+        assert tokens["--toggle-on"] == tokens["--blue"]
 
 
 class TestCollectFontTokens:
