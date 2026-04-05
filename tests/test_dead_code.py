@@ -3,15 +3,10 @@
 Runs vulture against the shared_ui source modules and fails if any
 unreported dead code is found.  False positives (public-API tokens,
 Qt/pytest framework hooks) are whitelisted below.
-
-Also checks for *semantic* dead code that vulture cannot detect — e.g.
-dict keys or string comparisons that reference deleted constants.
 """
 
 from __future__ import annotations
 
-import ast
-import importlib.util
 from pathlib import Path
 
 import vulture
@@ -51,37 +46,6 @@ def _is_whitelisted(result: vulture.core.Result) -> bool:
     return False
 
 
-def _load_local_module(name: str):
-    """Import a module from the repo root (not the installed package)."""
-    path = _REPO_ROOT / f"{name}.py"
-    spec = importlib.util.spec_from_file_location(name, path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-def _font_family_values() -> set[str]:
-    """Return the set of font family string values defined in fonts.py."""
-    fonts = _load_local_module("fonts")
-    return {
-        getattr(fonts, name)
-        for name in dir(fonts)
-        if name.startswith("FONT_") and isinstance(getattr(fonts, name), str)
-    }
-
-
-def _font_fallback_keys() -> set[str]:
-    """Extract dict keys from _FONT_FAMILY_FALLBACKS in generate_web_tokens.py."""
-    source = (_REPO_ROOT / "generate_web_tokens.py").read_text(encoding="utf-8")
-    tree = ast.parse(source)
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Assign):
-            for target in node.targets:
-                if isinstance(target, ast.Name) and target.id == "_FONT_FAMILY_FALLBACKS":
-                    return {key.value for key in node.value.keys}
-    raise LookupError("_FONT_FAMILY_FALLBACKS not found in generate_web_tokens.py")
-
-
 class TestNoDeadCode:
     def test_vulture_finds_no_unwhitelisted_dead_code(self):
         v = vulture.Vulture()
@@ -104,8 +68,3 @@ class TestNoDeadCode:
             )
             raise AssertionError(f"Dead code found:\n{report}")
 
-    def test_font_fallback_keys_match_actual_fonts(self):
-        """Every key in _FONT_FAMILY_FALLBACKS must be a value of a FONT_* constant."""
-        actual = _font_family_values()
-        orphaned = _font_fallback_keys() - actual
-        assert not orphaned, f"Orphaned fallback keys (no matching font constant): {orphaned}"

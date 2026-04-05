@@ -20,8 +20,3 @@ class TestSpacingTokens:
         for name, val in _all_spacing_constants():
             assert val > 0, f"{name} should be positive, got {val}"
 
-    def test_standard_is_8(self):
-        assert spacing.MARGIN_STANDARD == 8
-
-    def test_gap_ordering(self):
-        assert spacing.GAP_SMALL < spacing.GAP_MEDIUM

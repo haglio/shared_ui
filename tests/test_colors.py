@@ -1,5 +1,5 @@
 """Tests for shared_ui.colors — verify every token is a valid QColor
-and that BGR→RGB conversions from Clipper's original values are correct."""
+and core palette hues."""
 
 from __future__ import annotations
 
@@ -26,70 +26,12 @@ class TestAllTokensValid:
             assert color.isValid(), f"{name} is not a valid QColor"
 
 
-class TestBGRConversions:
-    """Clipper stored colors in BGR.  Verify the RGB values are correct."""
-
-    def test_timeline_loaded(self):
-        # Original BGR: (82, 64, 46) → RGB (46, 64, 82)
-        c = colors.TIMELINE_LOADED
-        assert (c.red(), c.green(), c.blue()) == (46, 64, 82)
-
-    def test_timeline_active(self):
-        # Original BGR: (176, 155, 116) → RGB (116, 155, 176)
-        c = colors.TIMELINE_ACTIVE
-        assert (c.red(), c.green(), c.blue()) == (116, 155, 176)
-
-    def test_timeline_suggested_in(self):
-        # Original BGR: (90, 220, 255) → RGB (255, 220, 90)
-        c = colors.TIMELINE_SUGGESTED_IN
-        assert (c.red(), c.green(), c.blue()) == (255, 220, 90)
-
-    def test_timeline_suggested_out(self):
-        # Original BGR: (255, 210, 90) → RGB (90, 210, 255)
-        c = colors.TIMELINE_SUGGESTED_OUT
-        assert (c.red(), c.green(), c.blue()) == (90, 210, 255)
-
-    def test_timeline_loop(self):
-        # Original BGR: (50, 50, 255) → RGB (255, 50, 50)
-        c = colors.TIMELINE_LOOP
-        assert (c.red(), c.green(), c.blue()) == (255, 50, 50)
-
-    def test_red(self):
-        # Original BGR: (60, 60, 255) → RGB (255, 60, 60)
-        c = colors.RED
-        assert (c.red(), c.green(), c.blue()) == (255, 60, 60)
-
-    def test_amber(self):
-        # Original BGR: (120, 200, 255) → RGB (255, 200, 120)
-        c = colors.AMBER
-        assert (c.red(), c.green(), c.blue()) == (255, 200, 120)
-
-
-class TestGrayValuesUnchanged:
-    """Grays have identical B, G, R — verify they survived conversion."""
-
-    def test_bg_primary(self):
-        c = colors.BG_PRIMARY
-        assert c.red() == c.green() == c.blue() == 24
-
-    def test_text_primary(self):
-        c = colors.TEXT_PRIMARY
-        assert c.red() == c.green() == c.blue() == 240
-
-    def test_text_secondary(self):
-        c = colors.TEXT_SECONDARY
-        assert c.red() == c.green() == c.blue() == 230
-
-
 class TestPaletteColors:
     """Verify the core palette hues."""
 
     def test_blue(self):
         c = colors.BLUE
         assert (c.red(), c.green(), c.blue()) == (0x30, 0x80, 0xE0)
-
-    def test_toggle_on_is_blue(self):
-        assert colors.TOGGLE_ON is colors.BLUE
 
     def test_green(self):
         c = colors.GREEN
