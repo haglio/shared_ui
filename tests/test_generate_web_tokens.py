@@ -2,14 +2,20 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 from PyQt6.QtGui import QColor
 
+import shared_ui
 from shared_ui.generate_web_tokens import (
     collect_color_tokens,
     collect_font_tokens,
     qcolor_to_hex,
     render_css,
 )
+
+_PACKAGE_DIR = Path(shared_ui.__file__).resolve().parent
 
 
 class TestQColorToHex:
@@ -97,18 +103,17 @@ class TestRenderCss:
 
 
 class TestCli:
+    _SCRIPT = str(_PACKAGE_DIR / "generate_web_tokens.py")
+    _ENV = {**os.environ, "PYTHONPATH": str(_PACKAGE_DIR.parent)}
+
     def test_writes_to_file(self, tmp_path):
         import subprocess
         import sys
 
         out = tmp_path / "tokens.css"
         subprocess.check_call(
-            [
-                sys.executable,
-                "C:/path/to/suite-root/projects/shared_ui/generate_web_tokens.py",
-                "--output",
-                str(out),
-            ],
+            [sys.executable, self._SCRIPT, "--output", str(out)],
+            env=self._ENV,
         )
         content = out.read_text(encoding="utf-8")
         assert ":root {" in content
@@ -119,10 +124,11 @@ class TestCli:
         import sys
 
         result = subprocess.run(
-            [sys.executable, "C:/path/to/suite-root/projects/shared_ui/generate_web_tokens.py"],
+            [sys.executable, self._SCRIPT],
             capture_output=True,
             text=True,
             check=True,
+            env=self._ENV,
         )
         assert ":root {" in result.stdout
         assert "--bg-primary:" in result.stdout
