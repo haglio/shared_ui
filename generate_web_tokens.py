@@ -27,7 +27,6 @@ def collect_color_tokens() -> list[tuple[str, str]]:
 
 _FONT_FAMILY_FALLBACKS = {
     "Segoe UI": '"Segoe UI", system-ui, sans-serif',
-    "Cascadia Mono": '"Cascadia Mono", Consolas, monospace',
 }
 
 
@@ -41,8 +40,6 @@ def collect_font_tokens() -> list[tuple[str, str]]:
             continue
         val = getattr(fonts, name)
         if name.startswith("FONT_") and isinstance(val, str):
-            if name == "FONT_MONO_FALLBACK":
-                continue  # folded into FONT_MONO's fallback chain
             css_name = "--" + name.lower().replace("_", "-")
             tokens.append((css_name, _FONT_FAMILY_FALLBACKS.get(val, val)))
         elif name.startswith("SIZE_") and isinstance(val, int):
