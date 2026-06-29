@@ -16,8 +16,11 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 # -- Whitelist ---------------------------------------------------------------
 # Names that vulture flags but are intentionally public API or framework hooks.
 #
-# Qt overrides / framework callbacks:
+# Framework callbacks:
 #   qapp              – pytest autouse fixture (conftest.py)
+#
+# Qt method overrides (invoked by the C++ event loop, never from Python):
+#   paintEvent, sizeHint, minimumSizeHint – widget hooks (check_box.py)
 #
 # Public-API tokens (consumed by downstream projects, not within this repo):
 #   Every ALL_CAPS constant in colors.py, fonts.py, spacing.py is part of the
@@ -25,6 +28,12 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 #   exempts module-level ALL_CAPS names from those modules.
 FRAMEWORK_HOOKS = {
     "qapp",  # pytest fixture – conftest.py
+}
+
+QT_OVERRIDES = {
+    "paintEvent",
+    "sizeHint",
+    "minimumSizeHint",
 }
 
 _TOKEN_MODULES = {"colors", "fonts", "spacing"}
@@ -41,6 +50,8 @@ def _is_public_token(result: vulture.core.Result) -> bool:
 def _is_whitelisted(result: vulture.core.Result) -> bool:
     if result.name in FRAMEWORK_HOOKS:
         return True
+    if result.name in QT_OVERRIDES:
+        return True
     if _is_public_token(result):
         return True
     return False
@@ -54,6 +65,7 @@ class TestNoDeadCode:
                 str(_REPO_ROOT / "colors.py"),
                 str(_REPO_ROOT / "fonts.py"),
                 str(_REPO_ROOT / "spacing.py"),
+                str(_REPO_ROOT / "check_box.py"),
                 str(_REPO_ROOT / "generate_web_tokens.py"),
                 str(_REPO_ROOT / "tests"),
             ],
