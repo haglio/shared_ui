@@ -42,6 +42,7 @@ BLUE = QColor(0x30, 0x80, 0xE0)  # (48, 128, 224)
 GREEN = QColor(0x30, 0xA0, 0x30)  # (48, 160, 48)
 RED = QColor(255, 60, 60)  # (was BGR 60,60,255)
 AMBER = QColor(255, 200, 120)  # (was BGR 120,200,255)
+ORANGE = QColor(190, 105, 15)  # dark orange-amber; readable under white text
 PINK = QColor(200, 80, 160)
 
 # ---------------------------------------------------------------------------
