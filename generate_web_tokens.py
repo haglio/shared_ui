@@ -2,7 +2,25 @@
 
 from __future__ import annotations
 
+import importlib
+import sys
+from pathlib import Path
+
 from PyQt6.QtGui import QColor
+
+
+def _tokens(name: str):
+    """Import a sibling token module by name.
+
+    Prefer the package import, but fall back to a plain module import when this
+    file is run by path from a checkout whose directory is not named
+    ``shared_ui`` — a git worktree, or a clone under any other name.
+    """
+    try:
+        return importlib.import_module(f"shared_ui.{name}")
+    except ModuleNotFoundError:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        return importlib.import_module(name)
 
 
 def qcolor_to_hex(color: QColor) -> str:
@@ -12,7 +30,7 @@ def qcolor_to_hex(color: QColor) -> str:
 
 def collect_color_tokens() -> list[tuple[str, str]]:
     """Collect all QColor constants from colors.py as (--css-var, #hex) pairs."""
-    from shared_ui import colors
+    colors = _tokens("colors")
 
     tokens = []
     for name in sorted(dir(colors)):
@@ -32,7 +50,7 @@ _FONT_FAMILY_FALLBACKS = {
 
 def collect_font_tokens() -> list[tuple[str, str]]:
     """Collect font families and size tiers from fonts.py as (--css-var, value) pairs."""
-    from shared_ui import fonts
+    fonts = _tokens("fonts")
 
     tokens = []
     for name in sorted(dir(fonts)):

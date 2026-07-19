@@ -1,1 +1,1 @@
-"""Shared design tokens for the suite-root project family."""
+"""Shared design tokens for the app family."""
