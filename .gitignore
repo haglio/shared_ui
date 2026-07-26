@@ -1,4 +1,5 @@
 __pycache__/
+*.egg-info/
 
 # Private overlay — the real blocklist is itself a catalogue of excluded terms,
 # so it stays local; sanitize/blocklist.example.txt documents the format.
