@@ -8,11 +8,10 @@ name: merge gate (full suite)
 # windows-latest: shared_ui is the Qt widget/token library the family's Windows
 # apps build on, so its suite is validated on the platform it ships to. The Qt
 # tests render real widgets, so they need a headless display -- QT_QPA_PLATFORM=
-# offscreen supplies one on the runner. The package uses a flat root layout (its
-# modules sit at the repo root and the checkout dir is itself named "shared_ui"),
-# so the editable install uses compat mode: a clean wheel-based editable that maps
-# the import name onto the repo root without scattering .egg-info build metadata
-# into the tree, matching how the rest of the app family installs.
+# offscreen supplies one on the runner. The package sits in a shared_ui/ subdir
+# under the repo root (like the rest of the app family), so a plain editable
+# install maps the import name correctly; compat mode keeps it a clean wheel-based
+# editable that does not scatter .egg-info build metadata into the tree.
 
 on:
   pull_request:
