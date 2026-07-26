@@ -15,3 +15,7 @@ dev = ["pytest", "vulture"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+include = ["shared_ui*"]
+namespaces = false
