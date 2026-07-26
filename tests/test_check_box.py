@@ -9,15 +9,29 @@ box; unchecked = an empty dark box with no tick.
 
 from __future__ import annotations
 
-from PyQt6.QtGui import QColor
+from PyQt6.QtGui import QColor, QPixmap
+from PyQt6.QtWidgets import QWidget
 
 from shared_ui.check_box import CheckBox, _BOX
-from shared_ui.colors import BLUE
+from shared_ui.colors import BLUE, BG_PRIMARY
 
 
 def _classify(cb):
-    """Tally indicator-region pixels by kind (accent fill / light tick / dark box)."""
-    img = cb.grab().toImage()
+    """Tally indicator-region pixels by kind (accent fill / light tick / dark box).
+
+    The widget is rendered onto a pixmap pre-filled with ``BG_PRIMARY`` -- the
+    dark canvas these checkboxes always sit on -- with the window background
+    suppressed (``DrawChildren`` only).  A bare ``grab()`` instead paints every
+    uncovered pixel with the palette's Window colour, which is dark on native
+    Windows but light under Qt's offscreen backend; that light backing read as
+    hundreds of phantom "tick" pixels, so ``white`` depended on the platform
+    rather than on the widget.  Rendering on a fixed dark backing keeps ``white``
+    measuring only the real tick and makes the counts identical everywhere.
+    """
+    pix = QPixmap(cb.size())
+    pix.fill(BG_PRIMARY)
+    cb.render(pix, flags=QWidget.RenderFlag.DrawChildren)
+    img = pix.toImage()
     blue = white = dark = 0
     for x in range(0, _BOX + 3):
         for y in range(cb.height()):
