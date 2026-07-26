@@ -62,11 +62,7 @@ class TestNoDeadCode:
         v = vulture.Vulture()
         v.scavenge(
             [
-                str(_REPO_ROOT / "colors.py"),
-                str(_REPO_ROOT / "fonts.py"),
-                str(_REPO_ROOT / "spacing.py"),
-                str(_REPO_ROOT / "check_box.py"),
-                str(_REPO_ROOT / "generate_web_tokens.py"),
+                str(_REPO_ROOT / "shared_ui"),
                 str(_REPO_ROOT / "tests"),
             ],
         )
