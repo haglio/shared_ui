@@ -1,0 +1,43 @@
+name: merge gate (full suite)
+
+# The merge queue's required check. The queue builds the candidate merge of a PR
+# onto current main, runs the whole suite on that candidate, and fast-forwards
+# main only when this is green -- so a red tree can never land. Also runs on PRs
+# for early feedback and on push to main as a visible post-merge backstop.
+#
+# windows-latest: shared_ui is the Qt widget/token library the family's Windows
+# apps build on, so its suite is validated on the platform it ships to. The Qt
+# tests render real widgets, so they need a headless display -- QT_QPA_PLATFORM=
+# offscreen supplies one on the runner. The package uses a flat root layout (its
+# modules sit at the repo root and the checkout dir is itself named "shared_ui"),
+# so the editable install uses compat mode: a clean wheel-based editable that maps
+# the import name onto the repo root without scattering .egg-info build metadata
+# into the tree, matching how the rest of the app family installs.
+
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+  push:
+    branches: [main]
+
+concurrency:
+  group: merge-gate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  full-suite:
+    runs-on: windows-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install (editable, compat mode)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" --config-settings editable_mode=compat
+      - name: Run the suite
+        run: python -m pytest -q
