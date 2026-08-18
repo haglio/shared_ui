@@ -11,7 +11,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "vulture"]
+# Pillow is not a runtime dependency: shared_ui.icons_pil is imported only by
+# the players, which already have it, and nothing here imports Qt and Pillow at
+# once. The suite needs it to check the two renderers draw the same marks.
+dev = ["pytest", "vulture", "pillow"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
