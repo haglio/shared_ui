@@ -93,6 +93,11 @@ def _draw(draw: ImageDraw.ImageDraw, shape, ink, scale: float) -> None:
     elif isinstance(shape, Polygon):
         if shape.fill:
             draw.polygon([(px * scale, py * scale) for px, py in shape.points], fill=ink)
+            if shape.round_radius:
+                # Its own outline, stroked with round joins -- which is what
+                # rounds the corners, and grows the shape by the radius.
+                _stroke_path(draw, (*shape.points, shape.points[0]), ink,
+                             shape.round_radius * 2 * scale, scale)
         else:
             # Closed as a path rather than as an outlined polygon: Pillow's
             # polygon outline is hard-cornered whatever the width, and a star's
@@ -133,8 +138,12 @@ def _arc(draw: ImageDraw.ImageDraw, shape: Arc, ink, scale: float) -> None:
     box = _centered(_box(shape.x, shape.y, shape.x + shape.w, shape.y + shape.h, scale),
                     shape.width * scale)
     width = max(1, round(shape.width * scale))
-    draw.arc(box, -(shape.start + shape.span), -shape.start, fill=ink, width=width)
-    for angle in (shape.start, shape.start + shape.span):
+    # A negative span sweeps the same arc for Qt and the long way round here, so
+    # it is turned into the equivalent positive one before converting.
+    start = shape.start if shape.span >= 0 else shape.start + shape.span
+    span = abs(shape.span)
+    draw.arc(box, -(start + span), -start, fill=ink, width=width)
+    for angle in (start, start + span):
         _cap(draw, *_on_arc(shape, angle), ink, shape.width * scale, scale)
 
 

@@ -124,7 +124,12 @@ def _draw(painter: QPainter, shape, ink: QColor) -> None:
         _stroke(painter, ink, shape.width)
         painter.drawPolyline(*(QPointF(px, py) for px, py in shape.points))
     elif isinstance(shape, Polygon):
-        if shape.fill:
+        if shape.fill and shape.round_radius:
+            # Filled AND stroked with its own outline: the stroke's round joins
+            # are what round the corners, and it grows the shape by the radius.
+            _stroke(painter, ink, shape.round_radius * 2)
+            painter.setBrush(ink)
+        elif shape.fill:
             _solid(painter, ink)
         else:
             _stroke(painter, ink, shape.width)
