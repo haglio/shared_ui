@@ -31,7 +31,7 @@ from __future__ import annotations
 import math
 
 from PyQt6.QtCore import Qt, QPointF, QRectF
-from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
+from PyQt6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap
 
 from shared_ui.colors import TEXT_MUTED, TEXT_PRIMARY
 
@@ -308,6 +308,35 @@ def _photo(painter: QPainter, ink) -> None:
                         QPointF(37, 34))
 
 
+def _copy(painter: QPainter, _ink) -> None:
+    """Two overlapping sheets -- copy this to the clipboard.
+
+    The back sheet is CLIPPED around the front one rather than erased out from
+    under it.  Erasing (a Clear-mode fill, which is how the apps each did this)
+    punches a hole through whatever is already painted underneath, so the mark
+    could not be laid over a chip or a thumbnail; clipping only limits what this
+    drawing paints, and leaves the ground alone.  The gap matters either way --
+    two bare outlines at icon size read as a lattice rather than as one sheet in
+    front of another.
+    """
+    front = QRectF(8, 16, 24, 26)
+    back = QRectF(16, 6, 24, 26)
+    radius = 3.5
+    gap = 2.5
+
+    everywhere = QPainterPath()
+    everywhere.addRect(QRectF(-CANVAS, -CANVAS, 3 * CANVAS, 3 * CANVAS))
+    around_the_front = QPainterPath()
+    around_the_front.addRoundedRect(front.adjusted(-gap, -gap, gap, gap),
+                                    radius + gap, radius + gap)
+    painter.save()
+    painter.setClipPath(everywhere.subtracted(around_the_front),
+                        Qt.ClipOperation.IntersectClip)
+    painter.drawRoundedRect(back, radius, radius)
+    painter.restore()
+    painter.drawRoundedRect(front, radius, radius)
+
+
 def _check(painter: QPainter, ink) -> None:
     """A check mark -- yes, keep it."""
     painter.setPen(_line_art_pen(ink))
@@ -341,6 +370,7 @@ _GLYPHS = {
     "chevron_left": lambda p, ink: _chevron(p, ink, pointing_left=True),
     "chevron_right": lambda p, ink: _chevron(p, ink, pointing_left=False),
     "clock": _clock,
+    "copy": _copy,
     "cross": _cross,
     "die": _die,
     "flask": _flask,
