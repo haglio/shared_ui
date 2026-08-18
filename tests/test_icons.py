@@ -232,3 +232,24 @@ def test_the_canvas_and_stroke_are_stated_in_canvas_units(qapp):
     # box the geometry is written against.
     assert icons.CANVAS == 48.0
     assert 0 < icons.STROKE < icons.CANVAS
+
+
+def test_a_mark_never_erases_the_ground_it_is_drawn_on(qapp):
+    # The copy mark holds a gap between its two sheets, and the apps each cut
+    # that gap by erasing -- which works on an empty pixmap and punches a hole
+    # through anything else.  Clipping is what makes the mark safe to lay over a
+    # chip or a thumbnail, so the ground has to survive under every glyph.
+    for name in icons.glyph_names():
+        canvas = QPixmap(48, 48)
+        canvas.fill(QColor(GREEN))
+        painter = QPainter(canvas)
+        icons.draw_glyph(painter, name, RED)
+        painter.end()
+        image = canvas.toImage()
+        cleared = [
+            (x, y)
+            for y in range(48)
+            for x in range(48)
+            if image.pixelColor(x, y).alpha() < 255
+        ]
+        assert not cleared, f"{name} cleared {len(cleared)} px of what was under it"
