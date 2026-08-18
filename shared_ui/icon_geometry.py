@@ -60,9 +60,19 @@ class Polyline:
 
 @dataclass(frozen=True)
 class Polygon:
+    """A closed shape, solid when *fill* is set and an outline otherwise.
+
+    *round_radius* rounds a solid one's corners, by stroking its own outline at
+    twice that width with round joins before filling it.  A play triangle drawn
+    with hard points reads as sharper and lighter than the marks beside it, and
+    a filled polygon is the one place this family's round caps and joins did not
+    reach.
+    """
+
     points: tuple[tuple[float, float], ...]
     fill: bool = True
     width: float = STROKE
+    round_radius: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -93,7 +103,8 @@ class Arc:
     ``start`` and ``span`` are degrees counter-clockwise from 3 o'clock, the
     convention QPainter uses (in sixteenths, which the Qt renderer multiplies
     back in).  Pillow measures clockwise and takes two absolute angles, so its
-    renderer converts.
+    renderer converts.  Give a positive span and let the start go negative: a
+    negative span means the same arc to Qt and the long way round to Pillow.
     """
 
     x: float
@@ -216,17 +227,64 @@ def _reset() -> tuple:
     )
 
 
+# The power mark's two parts, shared by quit and restart so the pair reads as one
+# family: a ring broken at the top, and the stroke standing in that break.  Quit
+# is the two of them; restart is the two of them with the ring running on into an
+# arrowhead.  Drawn to the weight of a toolbar icon font's power symbol, which is
+# what the apps' menus sat next to.
+_POWER_RING = (9.0, 12.0, 30.0, 30.0)  # center (24, 27), radius 15
+_POWER_STROKE = Line(24, 6, 24, 24)
+
+
+def _power() -> tuple:
+    """A ring broken at the top with a stroke standing in the break -- power.
+
+    Off, quit, shut down: the mark every one of these apps' quit controls wears,
+    so the same act looks the same whichever window it is in.
+    """
+    return (Arc(*_POWER_RING, 128, 284), _POWER_STROKE)
+
+
 def _restart() -> tuple:
-    """A power symbol whose ring runs on into an arrowhead -- off, then on again.
+    """The power mark whose ring runs on into an arrowhead -- off, then on again.
 
     Not the plain circular arrow: that is undo's mark, and this is the control
-    that takes the whole app down and brings it back.  The power stroke in the
-    ring's gap is what says so.
+    that takes the whole app down and brings it back.  It is built from quit's
+    own ring and stroke, so the two sit together in a menu as obvious relatives
+    rather than as two unrelated drawings.
     """
     return (
-        Arc(9, 12, 30, 30, 130, 275),                     # the ring, open at the top
-        Polygon(((28.9, 10.7), (38.1, 12.9), (31.1, 19.9))),  # where it runs out
-        Line(24, 8, 24, 20),                              # the power stroke
+        Arc(*_POWER_RING, 128, 272),                          # the ring, stopping short
+        Polygon(((30.4, 11.3), (39.3, 14.2), (31.7, 20.6))),  # where it runs on
+        _POWER_STROKE,
+    )
+
+
+def _question() -> tuple:
+    """A question mark -- the help control.
+
+    Drawn rather than typed, for the reason every mark here is: set in the body
+    face it came out a text character among icons, visibly lighter and smaller
+    than the marks it sat beside.
+    """
+    return (
+        Arc(14, 6, 20, 20, -25, 215),    # the hook: up the right, over, down the left
+        Line(33.1, 20.2, 24, 31),        # the tail, sweeping in under it
+        Ellipse(24, 40, 3, 3, fill=True),
+    )
+
+
+def _expand_horizontal() -> tuple:
+    """A double-headed arrow lying flat -- widen this.
+
+    Deliberately chunky.  Typed as a character it was a hairline beside the solid
+    arrowheads of the transport controls, which made one control look like a
+    different class of thing from its neighbors.
+    """
+    return (
+        Line(15, 24, 33, 24, 6),
+        Polygon(((5, 24), (17, 13), (17, 35))),
+        Polygon(((43, 24), (31, 13), (31, 35))),
     )
 
 
@@ -246,6 +304,7 @@ GLYPHS: dict[str, tuple] = {
         Line(11, 11, 37, 37, 5.5),
         Line(37, 11, 11, 37, 5.5),
     ),
+    "expand_horizontal": _expand_horizontal(),
     "die": (                                              # a five-pip face
         RoundedRect(8, 8, 32, 32, 7),
         *(Ellipse(cx, cy, 3.2, 3.2, fill=True)
@@ -271,13 +330,21 @@ GLYPHS: dict[str, tuple] = {
         Ellipse(17, 21, 3.2, 3.2, fill=True),
         Polygon(((11, 34), (22, 22), (37, 34))),
     ),
-    # The play triangle's ink sits right of the box's center because a triangle's
-    # weight does: the centroid lands on 24, which is where the eye reads middle.
-    "play": (Polygon(((15, 8), (15, 40), (39, 24))),),
+    # The play triangle's corners are rounded, like the transport marks in an icon
+    # font: hard points read as a sharper, lighter mark than the ones beside it.
+    # Its ink sits right of the box's center because a triangle's weight does --
+    # the centroid lands on 24, which is where the eye reads middle.
+    "play": (Polygon(((15, 8), (15, 40), (39, 24)), round_radius=3),),
+    "pause": (                                            # two bars, rounded to match
+        RoundedRect(13, 7, 8.5, 34, 3.5, fill=True),
+        RoundedRect(26.5, 7, 8.5, 34, 3.5, fill=True),
+    ),
+    "power": _power(),
     "plus": (
         Line(24, 9, 24, 39, 7),
         Line(9, 24, 39, 24, 7),
     ),
+    "question": _question(),
     "redo_arrow": _history_arrow(forward=True),
     "reset": _reset(),
     "restart": _restart(),

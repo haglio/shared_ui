@@ -16,6 +16,11 @@ BG_SECONDARY = QColor(40, 40, 40)  # elevated surfaces (panes, cards)
 BG_TERTIARY = QColor(50, 50, 50)  # overlay / dialog background
 BG_BUTTON = QColor(62, 62, 62)  # default button fill
 BG_KEYCAP = QColor(72, 72, 72)  # keycap / legend background
+# A control that is ON -- toggled, engaged, holding something down -- sits on a
+# LIGHTER ground than one at rest.  One rule, so an active control reads the same
+# whichever app it is in; the apps had each answered it their own way, and some
+# not at all.
+BG_BUTTON_ACTIVE = QColor(92, 92, 92)
 
 # ---------------------------------------------------------------------------
 # Text tiers (brightest → dimmest)
@@ -61,8 +66,13 @@ STATUS_NUMBER = QColor(0x80, 0x80, 0x80)
 # ---------------------------------------------------------------------------
 # Clipper timeline  (all originally BGR — converted to RGB)
 # ---------------------------------------------------------------------------
-TIMELINE_LOADED = QColor(46, 64, 82)  # loaded range  (was BGR 82,64,46)
-TIMELINE_ACTIVE = QColor(116, 155, 176)  # active range  (was BGR 176,155,116)
+# The two ranges are the family's BLUE, dark for what is merely loaded and light
+# for what is in play.  They were a pair of muted greenish blues carried over
+# from Clipper's original OpenCV values -- shades that appeared in this palette
+# and nowhere in any app that reads it, so the timeline read as a piece of some
+# other program's chrome.
+TIMELINE_LOADED = QColor(24, 64, 112)  # loaded range: BLUE, held back
+TIMELINE_ACTIVE = QColor(96, 160, 232)  # active range: BLUE, brought forward
 TIMELINE_CURSOR = QColor(255, 255, 255)  # current cursor position
 TIMELINE_LOOP = QColor(255, 50, 50)  # loop frame position  (was BGR 50,50,255)
 TIMELINE_SUGGESTED_IN = QColor(255, 220, 90)  # suggested in-point  (was BGR 90,220,255)

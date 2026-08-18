@@ -253,3 +253,49 @@ def test_a_mark_never_erases_the_ground_it_is_drawn_on(qapp):
             if image.pixelColor(x, y).alpha() < 255
         ]
         assert not cleared, f"{name} cleared {len(cleared)} px of what was under it"
+
+
+def test_quit_and_restart_are_built_from_one_power_mark(qapp):
+    from shared_ui.icon_geometry import GLYPHS, Arc, Line
+
+    # They sit together in a menu, so they have to read as relatives rather than
+    # as two unrelated drawings. Restart IS quit's ring and stroke, with the ring
+    # running on into an arrowhead -- the same numbers, not merely a similar look.
+    power = GLYPHS["power"]
+    restart = GLYPHS["restart"]
+    power_stroke = next(s for s in power if isinstance(s, Line))
+    assert power_stroke in restart
+
+    power_ring = next(s for s in power if isinstance(s, Arc))
+    restart_ring = next(s for s in restart if isinstance(s, Arc))
+    assert (power_ring.x, power_ring.y, power_ring.w, power_ring.h) ==         (restart_ring.x, restart_ring.y, restart_ring.w, restart_ring.h)
+    assert power_ring.start == restart_ring.start
+    assert restart_ring.span < power_ring.span   # it stops short, for the head
+
+
+def test_the_transport_marks_have_rounded_corners(qapp):
+    from shared_ui.icon_geometry import GLYPHS, Polygon
+
+    # A play triangle with hard points reads as a sharper, lighter mark than the
+    # ones beside it -- and beside an icon font's transport controls it plainly
+    # was not the same drawing.
+    triangle = next(s for s in GLYPHS["play"] if isinstance(s, Polygon))
+    assert triangle.round_radius > 0
+
+    # The rounding grows the mark, so it is visible in what is drawn rather than
+    # only in the data.
+    rounded = _ink_pixels(icons.glyph_pixmap("play", 48, TEXT_PRIMARY))
+    bare = _ink_pixels(_render_shape(Polygon(triangle.points)))
+    assert rounded > bare
+
+
+def _render_shape(shape):
+    """One geometry shape, drawn on its own -- for comparing against a glyph."""
+    from shared_ui.icons import _draw
+
+    pixmap = _blank(48)
+    painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+    _draw(painter, shape, QColor(TEXT_PRIMARY))
+    painter.end()
+    return pixmap
