@@ -119,6 +119,41 @@ class Arc:
 # ---------------------------------------------------------------------------
 # The marks
 # ---------------------------------------------------------------------------
+# The bolt and the ring it bursts out of.  The ring is centered and broken where
+# the bolt crosses it, top-right and bottom-left, so the bolt reads as passing
+# THROUGH rather than as a scribble laid on top of a circle -- the gaps are what
+# make the two one mark.  Kept in canvas units here so both are stated against
+# one center: the ring's radius, and the angles its two arcs stop at.
+_BOLT_RING = (8.5, 8.5, 31.0, 31.0)   # center (24, 24), radius 15.5
+_BOLT_RING_ARC = 148.0                # each arc's span; the two gaps take the rest
+_BOLT_RING_STROKE = 4.2               # thinner than the default: at the full weight
+                                      # the ring closes on the bolt and the two
+                                      # merge into one blob at button size
+
+
+def _bolt_ring() -> tuple:
+    """A lightning bolt bursting out of a broken ring -- run this by itself.
+
+    The ring says "keeps going" and the bolt says "on its own", which together
+    are what an unattended, self-restarting run is.  The bolt is a solid, and it
+    is what the eye lands on: the ring alone would be another circular arrow, and
+    undo and redo already wear one two buttons away.  Its points are left hard --
+    a bolt is its points, and rounding them off costs the mark the very thing
+    that tells it apart from the arcs beside it.
+    """
+    return (
+        # Over the top and down the left; under the bottom and up the right.
+        Arc(*_BOLT_RING, 78, _BOLT_RING_ARC, _BOLT_RING_STROKE),
+        Arc(*_BOLT_RING, 258, _BOLT_RING_ARC, _BOLT_RING_STROKE),
+        Polygon((
+            (34, 6),                              # the top point, clear of the ring
+            (28.5, 22.5), (36, 22.5),             # in to the waist, out to the ledge
+            (14.5, 42),                           # the bottom point, clear of it too
+            (20, 27.5), (12, 27.5),               # back up to the waist's other side
+        )),
+    )
+
+
 def _chevron(pointing_left: bool) -> tuple:
     """A left or right chevron, drawn corner to corner of the canvas."""
     near, far, top, bottom = 15, 31, 9, 39
@@ -293,6 +328,7 @@ def _expand_horizontal() -> tuple:
 
 
 GLYPHS: dict[str, tuple] = {
+    "bolt_ring": _bolt_ring(),
     "check": (
         Polyline(((10, 25), (19, 35), (38, 13)), 5.5),
     ),
