@@ -41,17 +41,12 @@ class TestPaletteColors:
         c = colors.PINK
         assert (c.red(), c.green(), c.blue()) == (200, 80, 160)
 
-    def test_cable_active(self):
-        c = colors.CABLE_ACTIVE
-        assert (c.red(), c.green(), c.blue()) == (160, 168, 180)
-
-    def test_cable_inactive(self):
-        c = colors.CABLE_INACTIVE
-        assert (c.red(), c.green(), c.blue()) == (80, 88, 96)
 
     def test_border_panel(self):
+        # A neutral gray. It carried a blue cast before -- a fourth near-gray no
+        # app in the family used anywhere else.
         c = colors.BORDER_PANEL
-        assert (c.red(), c.green(), c.blue()) == (112, 119, 128)
+        assert (c.red(), c.green(), c.blue()) == (120, 120, 120)
 
 
 def test_an_active_control_sits_on_a_lighter_ground_than_a_resting_one():
@@ -81,3 +76,37 @@ def test_the_timeline_ranges_are_the_familys_blue():
         # dark and that color light rather than as a colour of their own.
         assert abs(color.hue() - BLUE.hue()) <= 12, color.name()
     assert TIMELINE_ACTIVE.lightness() > TIMELINE_LOADED.lightness()
+
+
+def test_the_palette_holds_as_few_grays_as_it_can():
+    """Every app was reaching for its own dark and medium grays, and the palette
+    itself carried near-duplicates that made that easy to excuse -- three border
+    shades within ten points of each other, two legend tiers within twenty, a
+    status gray eight off the muted one.  A name may still say what it is FOR;
+    what it must not do is introduce a shade the eye cannot tell from another."""
+    values = set()
+    for name in dir(colors):
+        if not name.isupper():
+            continue
+        color = getattr(colors, name)
+        if hasattr(color, "saturation") and color.saturation() <= 40:
+            values.add(color.name())
+
+    # The ladder: three backgrounds under a button, the button and its on-state,
+    # the muted gray, the standard outline, and white.
+    assert len(values) <= 11, sorted(values)
+
+
+def test_no_two_grays_sit_within_a_hair_of_each_other():
+    """Which is the rule behind the count: two shades nobody can tell apart are
+    one shade with two names, and they drift into different apps."""
+    lightnesses = sorted(
+        getattr(colors, name).lightness()
+        for name in dir(colors)
+        if name.isupper()
+        and hasattr(getattr(colors, name), "saturation")
+        and getattr(colors, name).saturation() <= 40
+    )
+    distinct = sorted(set(lightnesses))
+    for first, second in zip(distinct, distinct[1:]):
+        assert second - first >= 10, f"{first} and {second} are the same gray twice"
