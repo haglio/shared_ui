@@ -310,6 +310,28 @@ def test_quit_and_restart_are_built_from_one_power_mark(qapp):
     assert restart_ring.span < power_ring.span   # it stops short, for the head
 
 
+def test_the_enhance_filter_lays_its_funnel_over_the_plus(qapp):
+    from shared_ui.icon_geometry import GLYPHS, Line, Polygon
+
+    # Two marks set apart in one box read as two crowded controls; one laid over
+    # the other reads as a single sign. So the funnel's mouth has to reach back
+    # across the plus's lower arm rather than starting clear of it.
+    mark = GLYPHS["enhance_filter"]
+    down_arm = max((s for s in mark if isinstance(s, Line)), key=lambda s: s.y2)
+    funnel = next(s for s in mark if isinstance(s, Polygon))
+    half = down_arm.width / 2
+    mouth_left = min(x for x, _y in funnel.points)
+    mouth_top = min(y for _x, y in funnel.points)
+    assert mouth_left < down_arm.x1 + half   # reaches back across the arm...
+    assert mouth_top < down_arm.y2 + half    # ...while the arm's own ink is there
+
+    # And it hangs off that corner rather than sitting on the mark: a funnel
+    # centered on the plus would read as one sign struck through.
+    plus_x, plus_y = down_arm.x1, down_arm.y1 + (down_arm.y2 - down_arm.y1) / 2
+    assert sum(x for x, _y in funnel.points) / len(funnel.points) > plus_x
+    assert sum(y for _x, y in funnel.points) / len(funnel.points) > plus_y
+
+
 def test_the_transport_marks_have_rounded_corners(qapp):
     from shared_ui.icon_geometry import GLYPHS, Polygon
 

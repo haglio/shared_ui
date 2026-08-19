@@ -228,6 +228,33 @@ def _plus_outline() -> tuple:
     return (Polygon(tuple(points), fill=False, width=2.4),)
 
 
+def _enhance_filter() -> tuple:
+    """The enhancement plus with a funnel over its corner -- show only the
+    enhanced ones.
+
+    Built the way ``reset`` is, out of the two marks it means at once: the plus
+    is the very sign an enhanced picture wears in its corner across this family,
+    and the funnel is what narrows a set to part of itself.  Either alone is a
+    different control -- a bare plus is Enhance, which exists on the toolbar, and
+    a bare funnel would not say WHAT it kept.
+
+    The funnel sits down and right of the plus and crosses its lower arm rather
+    than clearing it: two marks set apart in one box read as two controls
+    crowded together, where one laid over the other reads as a single sign about
+    a single thing.
+    """
+    plus = (16.0, 16.0)                                   # up in the box's corner
+    bar, reach = 6.0, 10.0
+    return (
+        Line(plus[0], plus[1] - reach, plus[0], plus[1] + reach, bar),
+        Line(plus[0] - reach, plus[1], plus[0] + reach, plus[1], bar),
+        Polygon(((17, 26), (45, 26),                      # the funnel's mouth...
+                 (33.5, 36), (33.5, 45),                  # ...down its right side
+                 (28.5, 41), (28.5, 36)),                 # ...and back up its left
+                fill=False, width=3.2),
+    )
+
+
 def _copy() -> tuple:
     """Two overlapping sheets -- copy this to the clipboard.
 
@@ -375,6 +402,7 @@ GLYPHS: dict[str, tuple] = {
         Line(11, 11, 37, 37, 5.5),
         Line(37, 11, 11, 37, 5.5),
     ),
+    "enhance_filter": _enhance_filter(),
     "expand_horizontal": _expand_horizontal(),
     "die": (                                              # a five-pip face
         RoundedRect(8, 8, 32, 32, 7),
