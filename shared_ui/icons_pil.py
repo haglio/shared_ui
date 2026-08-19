@@ -54,13 +54,23 @@ def glyph_image(name: str, size: int, color) -> Image.Image:
     """
     side = max(1, int(size))
     big = side * SUPERSAMPLE
-    image = Image.new("RGBA", (big, big), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(image)
+    # Drawn as a COVERAGE MASK and colored afterwards, rather than drawn in color
+    # and resampled.  Lanczos overshoots at a hard edge, so resampling colored
+    # ink put pixels brighter than the ink itself around every mark -- a faint
+    # halo, and enough to trip a HUD's own "is anything near-white here" checks.
+    # A mask overshoots too, but only in coverage, which saturates harmlessly.
+    mask = Image.new("L", (big, big), 0)
+    draw = ImageDraw.Draw(mask)
     scale = big / CANVAS
-    ink = _rgba(color)
     for shape in GLYPHS[name]:
-        _draw(draw, shape, ink, scale)
-    return image.resize((side, side), Image.LANCZOS)
+        _draw(draw, shape, 255, scale)
+    mask = mask.resize((side, side), Image.LANCZOS)
+    red, green, blue, alpha = _rgba(color)
+    if alpha != 255:
+        mask = mask.point(lambda value: value * alpha // 255)
+    image = Image.new("RGBA", (side, side), (red, green, blue, 0))
+    image.putalpha(mask)
+    return image
 
 
 def paste_glyph(image: Image.Image, name: str, box: tuple[int, int, int, int],
