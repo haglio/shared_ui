@@ -131,3 +131,16 @@ def test_drawing_a_hud_mark_never_drags_qt_into_a_player(qapp):
     result = subprocess.run([sys.executable, "-c", probe],
                             capture_output=True, text=True, check=True)
     assert result.stdout.strip() == "False", result.stdout
+
+
+def test_a_mark_is_never_brighter_than_the_ink_it_was_drawn_in(qapp):
+    # Lanczos overshoots at a hard edge. Drawn in color and then resampled, a
+    # mark came out with pixels brighter than its own ink around every stroke --
+    # a faint halo, and enough near-white to trip a HUD's own checks for it.
+    # Drawing a coverage mask and coloring afterwards keeps the ink exact.
+    for name in icons_pil.glyph_names():
+        image = icons_pil.glyph_image(name, 24, _INK)
+        for y in range(24):
+            for x in range(24):
+                red, green, blue, _alpha = image.getpixel((x, y))
+                assert (red, green, blue) == _INK, f"{name} at {x},{y}"
