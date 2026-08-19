@@ -67,16 +67,38 @@ def test_the_glyphs_are_all_different_marks(qapp):
             assert drawn[first] != drawn[second], f"{first} and {second} draw alike"
 
 
+# A mark whose whole identity is a single bar cannot fill a square and should not
+# try: a minus stretched to be tall is a rectangle, not a minus. Named here one by
+# one, so widening the exemption takes a decision rather than a shrug.
+_ONE_BAR = {"minus"}
+
+
 def test_every_glyph_fills_its_canvas(qapp):
     # A mark using only the middle of its box is a mark the eye can't find once
     # the box is scaled onto a 16px tree row -- the empty margin shrinks with it.
     # The long side has to carry most of the canvas; the short side is allowed to
     # be narrow, because some marks (a chevron) genuinely are.
-    for name in icons.glyph_names():
+    for name in set(icons.glyph_names()) - _ONE_BAR:
         left, top, right, bottom = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
         width, height = right - left, bottom - top
         assert max(width, height) >= 0.6 * 48, f"{name} is small in its box"
         assert min(width, height) >= 0.4 * 48, f"{name} is thin in its box"
+
+
+def test_a_one_bar_mark_still_spans_its_canvas_the_long_way(qapp):
+    # The exemption is for the SHORT side only. A minus that also stopped short
+    # left to right would read as a hyphen dropped into an empty square.
+    for name in _ONE_BAR:
+        left, _top, right, _bottom = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+        assert right - left >= 0.6 * 48, f"{name} is short in its box"
+
+
+def test_the_speed_pair_is_one_control_drawn_twice(qapp):
+    # Minus and plus sit side by side on a speed control, so they have to be the
+    # same bar at the same weight -- one of them with a second bar across it.
+    from shared_ui.icon_geometry import GLYPHS
+
+    assert set(GLYPHS["minus"]).issubset(set(GLYPHS["plus"]))
 
 
 def test_every_glyph_sits_in_the_middle_of_its_canvas(qapp):

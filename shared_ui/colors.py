@@ -66,13 +66,13 @@ STATUS_NUMBER = QColor(0x80, 0x80, 0x80)
 # ---------------------------------------------------------------------------
 # Clipper timeline  (all originally BGR — converted to RGB)
 # ---------------------------------------------------------------------------
-# The two ranges are the family's BLUE, dark for what is merely loaded and light
-# for what is in play.  They were a pair of muted greenish blues carried over
-# from Clipper's original OpenCV values -- shades that appeared in this palette
-# and nowhere in any app that reads it, so the timeline read as a piece of some
-# other program's chrome.
-TIMELINE_LOADED = QColor(24, 64, 112)  # loaded range: BLUE, held back
-TIMELINE_ACTIVE = QColor(96, 160, 232)  # active range: BLUE, brought forward
+# There is ONE blue in this family, and the timeline's darker range IS it -- not
+# a shade near it.  A timeline needs two, so the lighter range is that same blue
+# tinted toward white; nothing here invents a second hue.  Both were muted
+# greenish blues before, carried over from Clipper's original OpenCV values --
+# shades that lived in this palette and in no app that reads it.
+TIMELINE_LOADED = BLUE                    # loaded range: the family's blue
+TIMELINE_ACTIVE = QColor(140, 192, 240)   # in play: that blue, tinted lighter
 TIMELINE_CURSOR = QColor(255, 255, 255)  # current cursor position
 TIMELINE_LOOP = QColor(255, 50, 50)  # loop frame position  (was BGR 50,50,255)
 TIMELINE_SUGGESTED_IN = QColor(255, 220, 90)  # suggested in-point  (was BGR 90,220,255)

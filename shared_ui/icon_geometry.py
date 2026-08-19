@@ -255,7 +255,11 @@ def _restart() -> tuple:
     """
     return (
         Arc(*_POWER_RING, 128, 272),                          # the ring, stopping short
-        Polygon(((30.4, 11.3), (39.3, 14.2), (31.7, 20.6))),  # where it runs on
+        # Short and wide rather than long and narrow.  A head drawn along the
+        # tangent at the stroke's own weight was barely visible at button size --
+        # it read as the ring simply ending.  Widening it is what makes the mark
+        # say "and back on again" instead of "off, with a nick in the circle".
+        Polygon(((29.1, 9.8), (41.6, 12.3), (29.4, 22.5))),
         _POWER_STROKE,
     )
 
@@ -340,6 +344,9 @@ GLYPHS: dict[str, tuple] = {
         RoundedRect(26.5, 7, 8.5, 34, 3.5, fill=True),
     ),
     "power": _power(),
+    # A pair: one bar and two, at one weight, so a speed-down and a speed-up
+    # beside each other read as the same control twice rather than as two.
+    "minus": (Line(9, 24, 39, 24, 7),),
     "plus": (
         Line(24, 9, 24, 39, 7),
         Line(9, 24, 39, 24, 7),
