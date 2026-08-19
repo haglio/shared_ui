@@ -101,6 +101,21 @@ def test_the_speed_pair_is_one_control_drawn_twice(qapp):
     assert set(GLYPHS["minus"]).issubset(set(GLYPHS["plus"]))
 
 
+def test_the_hollow_plus_traces_the_solid_one(qapp):
+    # They are one sign drawn two ways, and a badge lays the outline straight
+    # over the solid to say "this has an enhancement, and can take another".
+    # That only reads if the outline lands on the solid's own edge rather than
+    # beside it -- an outline a size out reads as two plus signs, not one.
+    solid = icons.glyph_pixmap("plus", 48, TEXT_PRIMARY)
+    hollow = icons.glyph_pixmap("plus_outline", 48, TEXT_PRIMARY)
+    for solid_edge, hollow_edge in zip(_ink_box(solid), _ink_box(hollow)):
+        assert abs(solid_edge - hollow_edge) <= 2
+    # And hollow means hollow: the middle of the mark is left empty, which is
+    # what the solid underneath it shows through.
+    assert hollow.toImage().pixelColor(24, 24).alpha() < 32
+    assert solid.toImage().pixelColor(24, 24).alpha() > 32
+
+
 def test_every_glyph_sits_in_the_middle_of_its_canvas(qapp):
     # Marks are laid beside each other in a button bank, so one drawn off-center
     # reads as misaligned with its neighbors rather than as its own shape.

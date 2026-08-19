@@ -197,6 +197,37 @@ def _star(filled: bool) -> tuple:
     return (Polygon(tuple(points), fill=filled, width=3),)
 
 
+# The two bars ``plus`` is drawn as, in one place: the outline below traces the
+# very silhouette they fill, and ``minus`` is the horizontal one of them, so all
+# three move together rather than being three hand-measured crosses.
+_PLUS_BAR = 7.0     # how wide a bar is drawn
+_PLUS_REACH = 15.0  # from the center to where a bar's stroke ends, before its cap
+
+
+def _plus_outline() -> tuple:
+    """The outline of the cross ``plus`` fills -- its hollow counterpart, the way
+    ``star_outline`` answers ``star``.
+
+    Twelve corners walked round the two bars' silhouette: out along an arm, back
+    across its tip, and in to the notch where the next arm starts.  The tips are
+    left square where the bars' own round caps are curved -- the pen's round join
+    softens them, and matching those caps exactly would cost an arc per arm for a
+    difference under a pixel at any size a badge is drawn at.
+
+    Stroked thin, and thinner than the default: at the full weight the two arms
+    close up and the inside of the mark reads as a heavier bar rather than as
+    empty.
+    """
+    half, arm = _PLUS_BAR / 2, _PLUS_REACH + _PLUS_BAR / 2
+    points = []
+    for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):     # up, right, down, left
+        px, py = -dy, dx                                  # that arm's own crossways
+        for along, across in ((arm, -half), (arm, half), (half, half)):
+            points.append((24 + dx * along + px * across,
+                           24 + dy * along + py * across))
+    return (Polygon(tuple(points), fill=False, width=2.4),)
+
+
 def _copy() -> tuple:
     """Two overlapping sheets -- copy this to the clipboard.
 
@@ -382,11 +413,12 @@ GLYPHS: dict[str, tuple] = {
     "power": _power(),
     # A pair: one bar and two, at one weight, so a speed-down and a speed-up
     # beside each other read as the same control twice rather than as two.
-    "minus": (Line(9, 24, 39, 24, 7),),
+    "minus": (Line(24 - _PLUS_REACH, 24, 24 + _PLUS_REACH, 24, _PLUS_BAR),),
     "plus": (
-        Line(24, 9, 24, 39, 7),
-        Line(9, 24, 39, 24, 7),
+        Line(24, 24 - _PLUS_REACH, 24, 24 + _PLUS_REACH, _PLUS_BAR),
+        Line(24 - _PLUS_REACH, 24, 24 + _PLUS_REACH, 24, _PLUS_BAR),
     ),
+    "plus_outline": _plus_outline(),
     "question": _question(),
     "redo_arrow": _history_arrow(forward=True),
     "reset": _reset(),
