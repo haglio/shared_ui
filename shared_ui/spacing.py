@@ -43,3 +43,9 @@ BUTTON_ROW_GAP = 8
 # A button carrying a word rather than a mark: the room around the word.
 BUTTON_PAD_H = 10
 BUTTON_PAD_V = 4
+
+# The same button where a ROW of them has to fit a strip of fixed width -- a
+# toolbar's own buttons are padded about this much, and the full pad above turns
+# five short words into nearly twice the room the strip has.  It is a narrower
+# pad, not a different button: same height, same radius, same grounds.
+BUTTON_PAD_H_TIGHT = 6
