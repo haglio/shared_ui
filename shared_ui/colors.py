@@ -27,18 +27,25 @@ BG_BUTTON_ACTIVE = QColor(92, 92, 92)
 # ---------------------------------------------------------------------------
 TEXT_PRIMARY = QColor(240, 240, 240)  # titles, headings, button labels
 TEXT_SECONDARY = QColor(230, 230, 230)  # body text, info labels
-TEXT_LEGEND_LABEL = QColor(225, 225, 225)  # legend item labels
-TEXT_LEGEND_JOIN = QColor(205, 205, 205)  # legend joiner text (" or ")
 TEXT_MUTED = QColor(120, 120, 120)  # disabled / placeholder text
+# The legend's two tiers are the body tiers.  They were their own pair of shades
+# twenty points apart, which nobody could see and which cost the palette two
+# greys; a label reads as body text and the " or " between items reads as muted.
+TEXT_LEGEND_LABEL = TEXT_SECONDARY
+TEXT_LEGEND_JOIN = TEXT_MUTED
 
 # ---------------------------------------------------------------------------
 # Borders
 # ---------------------------------------------------------------------------
 BORDER_DEFAULT = QColor(210, 210, 210)  # standard border / outline
-BORDER_SUBTLE = QColor(95, 95, 95)  # disabled / de-emphasized border
-BORDER_TIMELINE = QColor(220, 220, 220)  # timeline outer stroke
-BORDER_TICK = QColor(210, 210, 210)  # timeline tick dots
-BORDER_PANEL = QColor(112, 119, 128)  # panel outline
+BORDER_SUBTLE = BG_BUTTON_ACTIVE  # disabled / de-emphasized border
+# Three names that had three near-identical greys between them.  A timeline's
+# stroke and its ticks are the standard outline; a panel's edge is the muted
+# gray, minus the blue cast it used to carry, which was a fourth shade nothing
+# else in the family used.
+BORDER_TIMELINE = BORDER_DEFAULT
+BORDER_TICK = BORDER_DEFAULT
+BORDER_PANEL = QColor(120, 120, 120)
 
 # ---------------------------------------------------------------------------
 # Palette colors (named by hue, not purpose)
@@ -54,14 +61,16 @@ PINK = QColor(200, 80, 160)
 # Toggle switch
 # ---------------------------------------------------------------------------
 TOGGLE_ON = BLUE
-TOGGLE_OFF = QColor(0xB0, 0xB0, 0xB0)  # gray inactive
+TOGGLE_OFF = TEXT_MUTED  # the muted gray everything else off wears
 TOGGLE_KNOB = QColor(255, 255, 255)
 
 # ---------------------------------------------------------------------------
 # Status (gray variants used in run history)
 # ---------------------------------------------------------------------------
-STATUS_SKIP = QColor(0x80, 0x80, 0x80)
-STATUS_NUMBER = QColor(0x80, 0x80, 0x80)
+# A skipped step and its number are muted, like anything else with nothing to
+# say; they were their own gray, eight points off the muted one.
+STATUS_SKIP = TEXT_MUTED
+STATUS_NUMBER = TEXT_MUTED
 
 # ---------------------------------------------------------------------------
 # Clipper timeline  (all originally BGR — converted to RGB)
@@ -77,9 +86,3 @@ TIMELINE_CURSOR = QColor(255, 255, 255)  # current cursor position
 TIMELINE_LOOP = QColor(255, 50, 50)  # loop frame position  (was BGR 50,50,255)
 TIMELINE_SUGGESTED_IN = QColor(255, 220, 90)  # suggested in-point  (was BGR 90,220,255)
 TIMELINE_SUGGESTED_OUT = QColor(90, 210, 255)  # suggested out-point  (was BGR 255,210,90)
-
-# ---------------------------------------------------------------------------
-# Dashboard (cable visualization)
-# ---------------------------------------------------------------------------
-CABLE_ACTIVE = QColor(160, 168, 180)  # connected cable / connector
-CABLE_INACTIVE = QColor(80, 88, 96)  # disconnected cable / connector
