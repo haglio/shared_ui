@@ -23,23 +23,6 @@ def _blank(size: int) -> QPixmap:
     return pixmap
 
 
-def _ink_box(pixmap: QPixmap) -> tuple[int, int, int, int]:
-    """The bounding box of what was drawn: ``(left, top, right, bottom)``."""
-    image = pixmap.toImage()
-    xs, ys = [], []
-    for y in range(image.height()):
-        for x in range(image.width()):
-            if image.pixelColor(x, y).alpha() > 32:
-                xs.append(x)
-                ys.append(y)
-    assert xs, "nothing was drawn"
-    return min(xs), min(ys), max(xs), max(ys)
-
-
-def _ink_pixels(pixmap: QPixmap) -> int:
-    return len(_ink(pixmap))
-
-
 def _ink(pixmap: QPixmap) -> set[tuple[int, int]]:
     """Every pixel of *pixmap* that was drawn on."""
     image = pixmap.toImage()
@@ -49,6 +32,19 @@ def _ink(pixmap: QPixmap) -> set[tuple[int, int]]:
         for x in range(image.width())
         if image.pixelColor(x, y).alpha() > 32
     }
+
+
+def _ink_box(pixmap: QPixmap) -> tuple[int, int, int, int]:
+    """The bounding box of what was drawn: ``(left, top, right, bottom)``."""
+    ink = _ink(pixmap)
+    assert ink, "nothing was drawn"
+    xs = [x for x, _y in ink]
+    ys = [y for _x, y in ink]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _ink_pixels(pixmap: QPixmap) -> int:
+    return len(_ink(pixmap))
 
 
 def _pieces(ink: set[tuple[int, int]]) -> int:
