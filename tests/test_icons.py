@@ -37,13 +37,35 @@ def _ink_box(pixmap: QPixmap) -> tuple[int, int, int, int]:
 
 
 def _ink_pixels(pixmap: QPixmap) -> int:
+    return len(_ink(pixmap))
+
+
+def _ink(pixmap: QPixmap) -> set[tuple[int, int]]:
+    """Every pixel of *pixmap* that was drawn on."""
     image = pixmap.toImage()
-    return sum(
-        1
+    return {
+        (x, y)
         for y in range(image.height())
         for x in range(image.width())
         if image.pixelColor(x, y).alpha() > 32
-    )
+    }
+
+
+def _pieces(ink: set[tuple[int, int]]) -> int:
+    """How many separate marks *ink* falls into, counting a diagonal as joined."""
+    unvisited, pieces = set(ink), 0
+    while unvisited:
+        pieces += 1
+        stack = [unvisited.pop()]
+        while stack:
+            x, y = stack.pop()
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    neighbour = (x + dx, y + dy)
+                    if neighbour in unvisited:
+                        unvisited.discard(neighbour)
+                        stack.append(neighbour)
+    return pieces
 
 
 def test_every_registered_glyph_draws_something(qapp):
@@ -96,9 +118,14 @@ def test_a_one_bar_mark_still_spans_its_canvas_the_long_way(qapp):
 def test_the_speed_pair_is_one_control_drawn_twice(qapp):
     # Minus and plus sit side by side on a speed control, so they have to be the
     # same bar at the same weight -- one of them with a second bar across it.
-    from shared_ui.icon_geometry import GLYPHS
-
-    assert set(GLYPHS["minus"]).issubset(set(GLYPHS["plus"]))
+    # Said in ink rather than in primitives: every pixel the minus lays down is a
+    # pixel the plus lays down too, so the bar they share is one bar however the
+    # geometry happens to spell it.  Drawn large, because the bars differing by a
+    # canvas unit is a difference a 48px rendering rounds away.
+    minus = _ink(icons.glyph_pixmap("minus", 96, TEXT_PRIMARY))
+    plus = _ink(icons.glyph_pixmap("plus", 96, TEXT_PRIMARY))
+    assert minus <= plus
+    assert len(plus) > len(minus)   # and the second bar is really there
 
 
 def test_the_hollow_plus_traces_the_solid_one(qapp):
@@ -293,68 +320,55 @@ def test_a_mark_never_erases_the_ground_it_is_drawn_on(qapp):
 
 
 def test_quit_and_restart_are_built_from_one_power_mark(qapp):
-    from shared_ui.icon_geometry import GLYPHS, Arc, Line
-
     # They sit together in a menu, so they have to read as relatives rather than
-    # as two unrelated drawings. Restart IS quit's ring and stroke, with the ring
-    # running on into an arrowhead -- the same numbers, not merely a similar look.
-    power = GLYPHS["power"]
-    restart = GLYPHS["restart"]
-    power_stroke = next(s for s in power if isinstance(s, Line))
-    assert power_stroke in restart
+    # as two unrelated drawings. Restart IS quit's ring and stroke with the ring
+    # running on into an arrowhead, and in ink that is a containment: quit's mark
+    # is drawn in full inside restart's, and what restart adds is the head.
+    power = _ink(icons.glyph_pixmap("power", 48, TEXT_PRIMARY))
+    restart = _ink(icons.glyph_pixmap("restart", 48, TEXT_PRIMARY))
+    assert power <= restart
 
-    power_ring = next(s for s in power if isinstance(s, Arc))
-    restart_ring = next(s for s in restart if isinstance(s, Arc))
-    assert (power_ring.x, power_ring.y, power_ring.w, power_ring.h) ==         (restart_ring.x, restart_ring.y, restart_ring.w, restart_ring.h)
-    assert power_ring.start == restart_ring.start
-    assert restart_ring.span < power_ring.span   # it stops short, for the head
+    # Below the break the two are the same drawing pixel for pixel -- the ring at
+    # the same weight around the same center, with the same stroke standing in
+    # it. Everything either of them does differently happens up at the break.
+    assert {p for p in power if p[1] >= 26} == {p for p in restart if p[1] >= 26}
+
+    # And what it runs on into is a head rather than a nick: it adds ink, and
+    # enough of it to be seen at button size.
+    assert len(restart) - len(power) > 40
 
 
 def test_the_enhance_filter_lays_its_funnel_over_the_plus(qapp):
-    from shared_ui.icon_geometry import GLYPHS, Line, Polygon
-
     # Two marks set apart in one box read as two crowded controls; one laid over
-    # the other reads as a single sign. So the funnel's mouth has to reach back
-    # across the plus's lower arm rather than starting clear of it.
-    mark = GLYPHS["enhance_filter"]
-    down_arm = max((s for s in mark if isinstance(s, Line)), key=lambda s: s.y2)
-    funnel = next(s for s in mark if isinstance(s, Polygon))
-    half = down_arm.width / 2
-    mouth_left = min(x for x, _y in funnel.points)
-    mouth_top = min(y for _x, y in funnel.points)
-    assert mouth_left < down_arm.x1 + half   # reaches back across the arm...
-    assert mouth_top < down_arm.y2 + half    # ...while the arm's own ink is there
+    # the other reads as a single sign about a single thing. So the funnel's
+    # mouth has to reach back across the plus's lower arm rather than starting
+    # clear of it -- which in ink is that the mark comes out in ONE piece. Set
+    # the two apart and the ink falls into two.
+    mark = _ink(icons.glyph_pixmap("enhance_filter", 48, TEXT_PRIMARY))
+    assert _pieces(mark) == 1
 
-    # And it hangs off that corner rather than sitting on the mark: a funnel
-    # centered on the plus would read as one sign struck through.
-    plus_x, plus_y = down_arm.x1, down_arm.y1 + (down_arm.y2 - down_arm.y1) / 2
-    assert sum(x for x, _y in funnel.points) / len(funnel.points) > plus_x
-    assert sum(y for _x, y in funnel.points) / len(funnel.points) > plus_y
+    # It is still two marks in one box, though, rather than a single drawing:
+    # the plus's arm reaches the left edge and the funnel's stem hangs to the
+    # bottom, and the piece above is what holds those two ends together.
+    assert any(x <= 8 for x, _y in mark), "the plus's arm is missing"
+    assert any(y >= 42 for _x, y in mark), "the funnel's stem is missing"
 
 
-def test_the_transport_marks_have_rounded_corners(qapp):
+def test_the_transport_marks_have_rounded_corners(qapp, monkeypatch):
     from shared_ui.icon_geometry import GLYPHS, Polygon
 
     # A play triangle with hard points reads as a sharper, lighter mark than the
     # ones beside it -- and beside an icon font's transport controls it plainly
     # was not the same drawing.
-    triangle = next(s for s in GLYPHS["play"] if isinstance(s, Polygon))
-    assert triangle.round_radius > 0
+    #
+    # The rounding grows the mark, so it shows in what is drawn: the very same
+    # corners with the rounding taken off cover less ground. The bare one is
+    # registered as a glyph of its own for the length of the test, so it is drawn
+    # by the same public route as the real mark rather than through the
+    # renderer's insides.
+    (triangle,) = GLYPHS["play"]
+    monkeypatch.setitem(GLYPHS, "_play_with_hard_points", (Polygon(triangle.points),))
 
-    # The rounding grows the mark, so it is visible in what is drawn rather than
-    # only in the data.
     rounded = _ink_pixels(icons.glyph_pixmap("play", 48, TEXT_PRIMARY))
-    bare = _ink_pixels(_render_shape(Polygon(triangle.points)))
+    bare = _ink_pixels(icons.glyph_pixmap("_play_with_hard_points", 48, TEXT_PRIMARY))
     assert rounded > bare
-
-
-def _render_shape(shape):
-    """One geometry shape, drawn on its own -- for comparing against a glyph."""
-    from shared_ui.icons import _draw
-
-    pixmap = _blank(48)
-    painter = QPainter(pixmap)
-    painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-    _draw(painter, shape, QColor(TEXT_PRIMARY))
-    painter.end()
-    return pixmap
