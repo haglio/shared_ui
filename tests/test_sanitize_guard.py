@@ -5,6 +5,7 @@ blocklist is git-ignored, and these tests must themselves stay publishable.
 """
 from __future__ import annotations
 
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -180,7 +181,13 @@ class TestHookEntryPoint:
                     "tools/githooks/pre-commit", "tools/githooks/commit-msg"):
             dest = repo / rel
             dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_bytes((here / rel).read_bytes())
+            # copy2, not write_bytes: the mode comes with the file. The hooks are
+            # committed executable, and git silently IGNORES a hook that is not
+            # ("hook was ignored because it's not set as executable") -- so a copy
+            # that dropped the bit let every commit through, which made the two
+            # refusal cases fail off Windows and the three that expect a commit
+            # to go through pass without the guard having run at all.
+            shutil.copy2(here / rel, dest)
         _git(repo, "init", "-b", "main")
         _git(repo, "config", "user.email", "guard@example.test")
         _git(repo, "config", "user.name", "Guard Test")
