@@ -10,8 +10,6 @@ from PyQt6.QtGui import QFont
 # Font families
 # ---------------------------------------------------------------------------
 FONT_UI = "Segoe UI"
-FONT_SYMBOL = "Segoe UI Symbol"
-FONT_EMOJI = "Segoe UI Emoji"
 
 # ---------------------------------------------------------------------------
 # Size tiers (points)
