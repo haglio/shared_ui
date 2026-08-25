@@ -68,7 +68,7 @@ def _pieces(ink: set[tuple[int, int]]) -> int:
     return pieces
 
 
-def test_every_registered_glyph_draws_something(qapp):
+def test_every_registered_glyph_draws_something():
     # A name in the registry that paints nothing is worse than a missing one:
     # the caller gets a button with an empty square on it and no error.
     for name in icons.glyph_names():
@@ -77,7 +77,7 @@ def test_every_registered_glyph_draws_something(qapp):
         assert _ink_pixels(pixmap) > 0, name
 
 
-def test_the_glyphs_are_all_different_marks(qapp):
+def test_the_glyphs_are_all_different_marks():
     # Icon-only controls are only as good as the marks telling each other apart.
     drawn = {
         name: icons.glyph_pixmap(name, 48, TEXT_PRIMARY).toImage()
@@ -95,7 +95,7 @@ def test_the_glyphs_are_all_different_marks(qapp):
 _ONE_BAR = {"minus"}
 
 
-def test_every_glyph_fills_its_canvas(qapp):
+def test_every_glyph_fills_its_canvas():
     # A mark using only the middle of its box is a mark the eye can't find once
     # the box is scaled onto a 16px tree row -- the empty margin shrinks with it.
     # The long side has to carry most of the canvas; the short side is allowed to
@@ -107,7 +107,7 @@ def test_every_glyph_fills_its_canvas(qapp):
         assert min(width, height) >= 0.4 * 48, f"{name} is thin in its box"
 
 
-def test_a_one_bar_mark_still_spans_its_canvas_the_long_way(qapp):
+def test_a_one_bar_mark_still_spans_its_canvas_the_long_way():
     # The exemption is for the SHORT side only. A minus that also stopped short
     # left to right would read as a hyphen dropped into an empty square.
     for name in _ONE_BAR:
@@ -115,7 +115,7 @@ def test_a_one_bar_mark_still_spans_its_canvas_the_long_way(qapp):
         assert right - left >= 0.6 * 48, f"{name} is short in its box"
 
 
-def test_the_speed_pair_is_one_control_drawn_twice(qapp):
+def test_the_speed_pair_is_one_control_drawn_twice():
     # Minus and plus sit side by side on a speed control, so they have to be the
     # same bar at the same weight -- one of them with a second bar across it.
     # Said in ink rather than in primitives: every pixel the minus lays down is a
@@ -128,7 +128,7 @@ def test_the_speed_pair_is_one_control_drawn_twice(qapp):
     assert len(plus) > len(minus)   # and the second bar is really there
 
 
-def test_the_hollow_plus_traces_the_solid_one(qapp):
+def test_the_hollow_plus_traces_the_solid_one():
     # They are one sign drawn two ways, and a badge lays the outline straight
     # over the solid to say "this has an enhancement, and can take another".
     # That only reads if the outline lands on the solid's own edge rather than
@@ -143,7 +143,7 @@ def test_the_hollow_plus_traces_the_solid_one(qapp):
     assert solid.toImage().pixelColor(24, 24).alpha() > 32
 
 
-def test_every_glyph_sits_in_the_middle_of_its_canvas(qapp):
+def test_every_glyph_sits_in_the_middle_of_its_canvas():
     # Marks are laid beside each other in a button bank, so one drawn off-center
     # reads as misaligned with its neighbors rather than as its own shape.
     for name in icons.glyph_names():
@@ -152,7 +152,7 @@ def test_every_glyph_sits_in_the_middle_of_its_canvas(qapp):
         assert abs((top + bottom) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
 
 
-def test_a_glyph_is_drawn_in_the_color_it_is_asked_for(qapp):
+def test_a_glyph_is_drawn_in_the_color_it_is_asked_for():
     # The apps tint marks to say what they do -- a delete in red, a star in the
     # green that means "bookmarked" across the family -- so the ink has to be
     # the color handed in rather than a fixed one.
@@ -161,7 +161,7 @@ def test_a_glyph_is_drawn_in_the_color_it_is_asked_for(qapp):
         assert image.pixelColor(24, 25) == color
 
 
-def test_a_glyph_scales_to_the_size_it_is_asked_for(qapp):
+def test_a_glyph_scales_to_the_size_it_is_asked_for():
     # Fun Time paints its bar's own panel size; Origenerator draws big and lets
     # Qt scale down.  Both get a square of exactly the side they named.
     for size in (16, 24, 48, 96):
@@ -169,7 +169,7 @@ def test_a_glyph_scales_to_the_size_it_is_asked_for(qapp):
         assert pixmap.size() == QSize(size, size)
 
 
-def test_a_small_glyph_is_the_same_mark_rather_than_a_heavier_one(qapp):
+def test_a_small_glyph_is_the_same_mark_rather_than_a_heavier_one():
     # The painter is scaled, not the coordinates, so the pen scales with the
     # drawing: the mark takes up the same share of its box at every size.  A
     # fixed stroke width instead leaves a 16px glyph a blob and a 96px one a
@@ -189,7 +189,7 @@ def test_a_small_glyph_is_the_same_mark_rather_than_a_heavier_one(qapp):
     assert max(coverage) < 1.3 * min(coverage)
 
 
-def test_an_icon_carries_a_normal_and_a_dimmed_rendering(qapp):
+def test_an_icon_carries_a_normal_and_a_dimmed_rendering():
     # Qt swaps to the disabled pixmap itself when a button goes dead, so both
     # have to be there and the dim one has to actually read as dim.
     icon = icons.glyph_icon("trash", color=RED)
@@ -201,7 +201,7 @@ def test_an_icon_carries_a_normal_and_a_dimmed_rendering(qapp):
     assert normal.toImage() != disabled.toImage()
 
 
-def test_a_disabled_icon_is_the_muted_gray_whatever_its_color(qapp):
+def test_a_disabled_icon_is_the_muted_gray_whatever_its_color():
     # A colored button that dims to a paler version of its own color reads as a
     # lighter red rather than as a button with nothing to act on.
     for color in (RED, GREEN, None):
@@ -210,13 +210,13 @@ def test_a_disabled_icon_is_the_muted_gray_whatever_its_color(qapp):
         assert image.pixelColor(24, 25) == TEXT_MUTED
 
 
-def test_an_uncolored_icon_wears_the_chrome_text_color(qapp):
+def test_an_uncolored_icon_wears_the_chrome_text_color():
     icon = icons.glyph_icon("star")
     image = icon.pixmap(QSize(48, 48), QIcon.Mode.Normal).toImage()
     assert image.pixelColor(24, 25) == TEXT_PRIMARY
 
 
-def test_the_pixmap_and_the_icon_draw_the_very_same_mark(qapp):
+def test_the_pixmap_and_the_icon_draw_the_very_same_mark():
     # The mark Fun Time paints into its bar and the one Origenerator hands a
     # toolbar button are one drawing -- which is the whole reason this module
     # exists, since the two apps' microphones had drifted into different shapes.
@@ -225,7 +225,7 @@ def test_the_pixmap_and_the_icon_draw_the_very_same_mark(qapp):
     assert from_pixmap.toImage() == from_icon.toImage()
 
 
-def test_painting_into_a_caller_s_painter_draws_that_same_mark_too(qapp):
+def test_painting_into_a_caller_s_painter_draws_that_same_mark_too():
     # The third route: a badge paints its chip, then asks for the mark on top.
     # It has to be the same drawing as the other two, in the place it asked for.
     direct = icons.glyph_pixmap("play", 48, TEXT_PRIMARY)
@@ -236,7 +236,7 @@ def test_painting_into_a_caller_s_painter_draws_that_same_mark_too(qapp):
     assert composed.toImage() == direct.toImage()
 
 
-def test_a_glyph_lands_where_the_caller_placed_it(qapp):
+def test_a_glyph_lands_where_the_caller_placed_it():
     # A badge draws its mark inset into a chip, so the offset has to move the
     # whole drawing rather than clip it.
     canvas = _blank(48)
@@ -248,7 +248,7 @@ def test_a_glyph_lands_where_the_caller_placed_it(qapp):
     assert 12 <= top and bottom <= 36
 
 
-def test_drawing_a_glyph_leaves_the_caller_s_painter_as_it_found_it(qapp):
+def test_drawing_a_glyph_leaves_the_caller_s_painter_as_it_found_it():
     # A caller part-way through drawing a chip must not find its pen, brush or
     # transform swapped out underneath it -- the mark goes on top of the chip,
     # and whatever the caller draws next still comes out in its own colors.
@@ -265,7 +265,7 @@ def test_drawing_a_glyph_leaves_the_caller_s_painter_as_it_found_it(qapp):
     painter.end()
 
 
-def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath(qapp):
+def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath():
     # What the badge callers actually do: fill a chip, then lay the mark on it.
     # The glyph paints only its own ink, so the chip still shows around it.
     canvas = _blank(48)
@@ -296,11 +296,11 @@ _THE_MARKS = (
 )
 
 
-def test_the_marks_this_family_draws_are_the_ones_the_apps_ask_for(qapp):
+def test_the_marks_this_family_draws_are_the_ones_the_apps_ask_for():
     assert icons.glyph_names() == _THE_MARKS
 
 
-def test_the_registry_is_what_glyph_names_reports(qapp):
+def test_the_registry_is_what_glyph_names_reports():
     # Callers walk the names to build a bank of buttons, and the tests above walk
     # them to check every mark -- so a glyph added without a name is a glyph no
     # test ever renders.
@@ -310,14 +310,14 @@ def test_the_registry_is_what_glyph_names_reports(qapp):
         assert icons.glyph_pixmap(name, 24, TEXT_PRIMARY).size() == QSize(24, 24)
 
 
-def test_the_canvas_and_stroke_are_stated_in_canvas_units(qapp):
+def test_the_canvas_and_stroke_are_stated_in_canvas_units():
     # Both are public: a caller composing a mark into its own drawing needs the
     # box the geometry is written against.
     assert icons.CANVAS == 48.0
     assert 0 < icons.STROKE < icons.CANVAS
 
 
-def test_a_mark_never_erases_the_ground_it_is_drawn_on(qapp):
+def test_a_mark_never_erases_the_ground_it_is_drawn_on():
     # The copy mark holds a gap between its two sheets, and the apps each cut
     # that gap by erasing -- which works on an empty pixmap and punches a hole
     # through anything else.  Clipping is what makes the mark safe to lay over a
@@ -338,7 +338,7 @@ def test_a_mark_never_erases_the_ground_it_is_drawn_on(qapp):
         assert not cleared, f"{name} cleared {len(cleared)} px of what was under it"
 
 
-def test_quit_and_restart_are_built_from_one_power_mark(qapp):
+def test_quit_and_restart_are_built_from_one_power_mark():
     # They sit together in a menu, so they have to read as relatives rather than
     # as two unrelated drawings. Restart IS quit's ring and stroke with the ring
     # running on into an arrowhead, and in ink that is a containment: quit's mark
@@ -357,7 +357,7 @@ def test_quit_and_restart_are_built_from_one_power_mark(qapp):
     assert len(restart) - len(power) > 40
 
 
-def test_the_enhance_filter_lays_its_funnel_over_the_plus(qapp):
+def test_the_enhance_filter_lays_its_funnel_over_the_plus():
     # Two marks set apart in one box read as two crowded controls; one laid over
     # the other reads as a single sign about a single thing. So the funnel's
     # mouth has to reach back across the plus's lower arm rather than starting
@@ -373,7 +373,7 @@ def test_the_enhance_filter_lays_its_funnel_over_the_plus(qapp):
     assert any(y >= 42 for _x, y in mark), "the funnel's stem is missing"
 
 
-def test_the_transport_marks_have_rounded_corners(qapp, monkeypatch):
+def test_the_transport_marks_have_rounded_corners(monkeypatch):
     from shared_ui.icon_geometry import GLYPHS, Polygon
 
     # A play triangle with hard points reads as a sharper, lighter mark than the

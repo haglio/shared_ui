@@ -16,9 +16,6 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 # -- Whitelist ---------------------------------------------------------------
 # Names that vulture flags but are intentionally public API or framework hooks.
 #
-# Framework callbacks:
-#   qapp              – pytest autouse fixture (conftest.py)
-#
 # Qt method overrides (invoked by the C++ event loop, never from Python):
 #   paintEvent, sizeHint, minimumSizeHint – widget hooks (check_box.py)
 #
@@ -26,10 +23,6 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 #   Every ALL_CAPS constant in colors.py, fonts.py, spacing.py is part of the
 #   library's public surface.  Rather than listing each individually, the test
 #   exempts module-level ALL_CAPS names from those modules.
-FRAMEWORK_HOOKS = {
-    "qapp",  # pytest fixture – conftest.py
-}
-
 QT_OVERRIDES = {
     "paintEvent",
     "sizeHint",
@@ -48,8 +41,6 @@ def _is_public_token(result: vulture.core.Result) -> bool:
 
 
 def _is_whitelisted(result: vulture.core.Result) -> bool:
-    if result.name in FRAMEWORK_HOOKS:
-        return True
     if result.name in QT_OVERRIDES:
         return True
     if _is_public_token(result):
