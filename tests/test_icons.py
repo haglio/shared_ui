@@ -280,13 +280,32 @@ def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath(qapp):
     assert image.pixelColor(0, 0).alpha() == 0        # outside the chip, still clear
 
 
+# Every name here is a string literal in at least one of the six repos that draw
+# these marks -- clipper, evolver, fun_time, origenerator, player_core and
+# promptcrafter -- and they reach for one by writing it out: GLYPHS[name] raises
+# KeyError at paint time, so a rename lands as an empty button or a traceback in
+# an app whose suite never ran. Renaming or dropping one therefore has to be a
+# decision taken here, in the open, rather than a green run in this repo.
+# Adding a mark means adding it below; that is the point.
+_THE_MARKS = (
+    "bolt_ring", "check", "chevron_left", "chevron_right", "clock", "copy",
+    "cross", "die", "enhance_filter", "expand_horizontal", "flask", "folder",
+    "loop", "mic", "minus", "pause", "photo", "play", "plus", "plus_outline",
+    "power", "question", "redo_arrow", "reset", "restart", "slideshow",
+    "speaker", "star", "star_outline", "trash", "undo_arrow", "wave",
+)
+
+
+def test_the_marks_this_family_draws_are_the_ones_the_apps_ask_for(qapp):
+    assert icons.glyph_names() == _THE_MARKS
+
+
 def test_the_registry_is_what_glyph_names_reports(qapp):
     # Callers walk the names to build a bank of buttons, and the tests above walk
     # them to check every mark -- so a glyph added without a name is a glyph no
     # test ever renders.
     names = icons.glyph_names()
     assert names == tuple(sorted(names))
-    assert "mic" in names
     for name in names:
         assert icons.glyph_pixmap(name, 24, TEXT_PRIMARY).size() == QSize(24, 24)
 
