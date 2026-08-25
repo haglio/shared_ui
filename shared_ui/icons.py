@@ -77,14 +77,14 @@ def glyph_pixmap(name: str, size: int, color) -> QPixmap:
     return pixmap
 
 
-def glyph_icon(name: str, *, color=None, disabled_color=None,
-               size: int = int(CANVAS)) -> QIcon:
+def glyph_icon(name: str, *, color=None, size: int = int(CANVAS)) -> QIcon:
     """*name* as an icon carrying its normal and its disabled rendering.
 
     *color* tints the normal one -- a button that says what it does before its
     tooltip does -- and the disabled one stays the muted gray whatever that
     color is, so a button with nothing to act on reads as dead rather than as a
-    dimmer shade of red.
+    dimmer shade of red.  There is deliberately no way to override the second:
+    the override would be the thing the rule above rules out.
 
     Drawn at *size* and left for Qt to scale down onto the button, so the edges
     stay crisp at whatever size the chrome ends up asking for.
@@ -94,10 +94,7 @@ def glyph_icon(name: str, *, color=None, disabled_color=None,
         glyph_pixmap(name, size, TEXT_PRIMARY if color is None else color),
         QIcon.Mode.Normal,
     )
-    icon.addPixmap(
-        glyph_pixmap(name, size, TEXT_MUTED if disabled_color is None else disabled_color),
-        QIcon.Mode.Disabled,
-    )
+    icon.addPixmap(glyph_pixmap(name, size, TEXT_MUTED), QIcon.Mode.Disabled)
     return icon
 
 
