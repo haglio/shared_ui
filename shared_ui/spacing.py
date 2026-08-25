@@ -49,7 +49,7 @@ BUTTON_ROW_GAP = 8
 # groups sat different distances apart depending on which app drew them.
 BUTTON_GROUP_GAP = BUTTON_GAP * 3
 
-# A button carrying a word rather than a mark: the room around the word.
+# A button carrying a word rather than a mark: the room above and below it.
 BUTTON_PAD_V = 4
 
 # The room to either side of that word where a ROW of such buttons has to fit a
