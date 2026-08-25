@@ -14,9 +14,16 @@ dependencies = [
 # Pillow is not a runtime dependency: shared_ui.icons_pil is imported only by
 # the players, which already have it, and nothing here imports Qt and Pillow at
 # once. The suite needs it to check the two renderers draw the same marks.
-dev = ["pytest", "vulture", "pillow"]
+dev = ["pytest", "pytest-timeout", "vulture", "pillow"]
 
 [tool.pytest.ini_options]
+# A test that never returns used to hold the merge queue's required check until
+# GitHub's six-hour job limit, with no output naming it. 60 s is a ceiling, not a
+# target: the slowest test here is the tracked-tree content scan at ~1.5 s, so the
+# budget clears it forty times over and can only bite on a hang. The thread method
+# is the one that prints the hung stack, which is what turns a stall into a
+# one-line diagnosis. See tests/test_timeouts.py.
+addopts = "--timeout=60 --timeout-method=thread"
 testpaths = ["tests"]
 
 [tool.setuptools.packages.find]
