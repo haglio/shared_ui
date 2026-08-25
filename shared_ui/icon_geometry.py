@@ -404,11 +404,6 @@ GLYPHS: dict[str, tuple] = {
     ),
     "enhance_filter": _enhance_filter(),
     "expand_horizontal": _expand_horizontal(),
-    "die": (                                              # a five-pip face
-        RoundedRect(8, 8, 32, 32, 7),
-        *(Ellipse(cx, cy, 3.2, 3.2, fill=True)
-          for cx, cy in ((17, 17), (31, 17), (24, 24), (17, 31), (31, 31))),
-    ),
     "flask": (                                            # an Erlenmeyer, with liquid
         Polyline(((19, 8), (19, 18), (9, 38), (39, 38), (29, 18), (29, 8))),
         Line(16, 8, 32, 8),                               # the lip
