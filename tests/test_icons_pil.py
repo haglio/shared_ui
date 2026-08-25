@@ -110,10 +110,26 @@ def test_a_pasted_mark_sits_on_what_the_hud_already_drew(qapp):
 def test_a_pasted_mark_is_centered_in_the_box_it_was_given(qapp):
     # HUD buttons are square-ish but not square, and a mark hugging one edge
     # reads as misaligned with the buttons beside it.
-    panel = Image.new("RGBA", (48, 24), (0, 0, 0, 255))
+    #
+    # The panel is TRANSPARENT so that the ink scan sees the mark and only the
+    # mark: drawn on an opaque one it measured the panel's own every pixel, so
+    # the centre came out the panel's centre whatever paste_glyph did with it.
+    panel = Image.new("RGBA", (48, 24), (0, 0, 0, 0))
     icons_pil.paste_glyph(panel, "plus", (0, 0, 48, 24), _INK)
-    left, _top, right, _bottom, _count = _pil_ink(panel)
+    left, top, right, bottom, _count = _pil_ink(panel)
     assert abs((left + right) / 2 - 24) <= 1
+    assert abs((top + bottom) / 2 - 12) <= 1
+
+
+def test_a_pasted_mark_is_centered_in_a_box_that_is_not_at_the_origin(qapp):
+    # The box a HUD hands over is wherever its button is, so the centring is of
+    # the box rather than of the panel -- a mark centred on the panel instead
+    # would land right for the one button that happens to sit in the middle.
+    panel = Image.new("RGBA", (64, 40), (0, 0, 0, 0))
+    icons_pil.paste_glyph(panel, "plus", (36, 8, 24, 28), _INK)
+    left, top, right, bottom, _count = _pil_ink(panel)
+    assert abs((left + right) / 2 - 48) <= 1
+    assert abs((top + bottom) / 2 - 22) <= 1
 
 
 def test_the_geometry_and_both_renderers_offer_the_same_marks(qapp):
