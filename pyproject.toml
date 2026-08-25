@@ -17,12 +17,14 @@ dependencies = [
 dev = ["pytest", "pytest-timeout", "vulture", "pillow"]
 
 [tool.pytest.ini_options]
-# A test that never returns used to hold the merge queue's required check until
-# GitHub's six-hour job limit, with no output naming it. 60 s is a ceiling, not a
-# target: the slowest test here is the tracked-tree content scan at ~1.5 s, so the
-# budget clears it forty times over and can only bite on a hang. The thread method
-# is the one that prints the hung stack, which is what turns a stall into a
-# one-line diagnosis. See tests/test_timeouts.py.
+# A ceiling on a hang, not a performance budget. The slowest test on a
+# developer machine is the tracked-tree content scan, but it is not the
+# slowest on a runner: it returns early when no blocklist is reachable, and
+# the blocklist is git-ignored, so a fresh checkout has none. What CI does run
+# longest here is the collection-order probe, which spawns a pytest child, at
+# about a third of a second. --timeout-method=thread is the half that pays for
+# itself: it dumps the hung stack, which turns a stalled required check into a
+# one-line diagnosis. tests/test_timeouts.py holds all three halves of it.
 addopts = "--timeout=60 --timeout-method=thread"
 testpaths = ["tests"]
 
