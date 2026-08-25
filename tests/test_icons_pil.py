@@ -17,7 +17,6 @@ import sys
 from pathlib import Path
 
 from PIL import Image
-from PyQt6.QtGui import QIcon  # noqa: F401  -- proves Qt is importable here
 
 from shared_ui import icon_geometry, icons, icons_pil
 
@@ -55,7 +54,7 @@ def _qt_ink(name: str, size: int) -> tuple[int, int, int, int, int]:
     return min(xs), min(ys), max(xs), max(ys), count
 
 
-def test_every_glyph_draws_through_pillow_too(qapp):
+def test_every_glyph_draws_through_pillow_too():
     # A mark the Qt side can draw and the Pillow side cannot is a mark that goes
     # missing on a HUD -- an empty button, with nothing raised.
     for name in icons_pil.glyph_names():
@@ -64,7 +63,7 @@ def test_every_glyph_draws_through_pillow_too(qapp):
         assert _pil_ink(image)[4] > 0, name
 
 
-def test_the_two_renderers_put_the_mark_in_the_same_place(qapp):
+def test_the_two_renderers_put_the_mark_in_the_same_place():
     # The whole point. A HUD's trash can and a toolbar's are one drawing now, so
     # their ink has to occupy the same box -- within a pixel, which is what is
     # left after Pillow's inside-the-box outlines are corrected for.
@@ -75,7 +74,7 @@ def test_the_two_renderers_put_the_mark_in_the_same_place(qapp):
             assert abs(pillow[edge] - qt[edge]) <= 1, f"{name} edge {edge}"
 
 
-def test_the_two_renderers_lay_down_a_like_amount_of_ink(qapp):
+def test_the_two_renderers_lay_down_a_like_amount_of_ink():
     # Same box could still mean a hairline against a slab, so the weight has to
     # agree too. Pillow's arcs have no round caps and its resampling is not Qt's,
     # so this is a band rather than an equality.
@@ -85,7 +84,7 @@ def test_the_two_renderers_lay_down_a_like_amount_of_ink(qapp):
         assert abs(pillow - qt) / qt < 0.15, name
 
 
-def test_a_glyph_is_drawn_in_the_color_it_is_asked_for(qapp):
+def test_a_glyph_is_drawn_in_the_color_it_is_asked_for():
     # The HUDs tint marks the way the chrome does -- a muted control, a green
     # favorite -- so the ink is whatever tuple was handed in.
     for color in ((*RED.getRgb()[:3],), (*GREEN.getRgb()[:3],)):
@@ -93,7 +92,7 @@ def test_a_glyph_is_drawn_in_the_color_it_is_asked_for(qapp):
         assert image.getpixel((24, 25))[:3] == color
 
 
-def test_a_pasted_mark_sits_on_what_the_hud_already_drew(qapp):
+def test_a_pasted_mark_sits_on_what_the_hud_already_drew():
     # A HUD button paints its fill and then asks for the mark. The mark has to
     # composite onto that fill, not stamp a transparent square over it.
     panel = Image.new("RGBA", (40, 24), (0, 80, 0, 255))
@@ -107,7 +106,7 @@ def test_a_pasted_mark_sits_on_what_the_hud_already_drew(qapp):
     assert any(pixel[0] > 200 for pixel in pixels), "the mark did not land"
 
 
-def test_a_pasted_mark_is_centered_in_the_box_it_was_given(qapp):
+def test_a_pasted_mark_is_centered_in_the_box_it_was_given():
     # HUD buttons are square-ish but not square, and a mark hugging one edge
     # reads as misaligned with the buttons beside it.
     #
@@ -121,7 +120,7 @@ def test_a_pasted_mark_is_centered_in_the_box_it_was_given(qapp):
     assert abs((top + bottom) / 2 - 12) <= 1
 
 
-def test_a_pasted_mark_is_centered_in_a_box_that_is_not_at_the_origin(qapp):
+def test_a_pasted_mark_is_centered_in_a_box_that_is_not_at_the_origin():
     # The box a HUD hands over is wherever its button is, so the centring is of
     # the box rather than of the panel -- a mark centred on the panel instead
     # would land right for the one button that happens to sit in the middle.
@@ -132,14 +131,14 @@ def test_a_pasted_mark_is_centered_in_a_box_that_is_not_at_the_origin(qapp):
     assert abs((top + bottom) / 2 - 22) <= 1
 
 
-def test_the_geometry_and_both_renderers_offer_the_same_marks(qapp):
+def test_the_geometry_and_both_renderers_offer_the_same_marks():
     # One registry. A glyph added for the toolbar and not reachable from a HUD is
     # how the two sides drifted apart in the first place.
     assert icons_pil.glyph_names() == icons.glyph_names()
     assert icons_pil.glyph_names() == icon_geometry.glyph_names()
 
 
-def test_drawing_a_hud_mark_never_drags_qt_into_a_player(qapp):
+def test_drawing_a_hud_mark_never_drags_qt_into_a_player():
     # The players are mpv and Pillow and nothing else; PyQt6 in that process
     # would be a GUI toolkit loaded into a video pipeline for the sake of a
     # dozen-pixel icon. The geometry module is what makes that avoidable, so
@@ -168,7 +167,7 @@ def test_drawing_a_hud_mark_never_drags_qt_into_a_player(qapp):
     assert qt_was_loaded == "False", result.stdout
 
 
-def test_a_mark_is_never_brighter_than_the_ink_it_was_drawn_in(qapp):
+def test_a_mark_is_never_brighter_than_the_ink_it_was_drawn_in():
     # Lanczos overshoots at a hard edge. Drawn in color and then resampled, a
     # mark came out with pixels brighter than its own ink around every stroke --
     # a faint halo, and enough near-white to trip a HUD's own checks for it.
