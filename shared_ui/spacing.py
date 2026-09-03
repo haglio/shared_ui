@@ -38,6 +38,19 @@ BUTTON_RADIUS = 4
 BUTTON_GAP = 4
 BUTTON_ROW_GAP = 8
 
+# Between one GROUP of buttons and the next along a row.  Three times the gap
+# inside a group, which is what makes a boundary read as one without a rule
+# drawn there -- stated as that ratio rather than as a number of its own, so a
+# change to the gap inside a group carries the grouping with it.
+#
+# Imported by player_core (both HUD painters: the mode pair and the minimize
+# beside it) and by origenerator (the browser's button bank, the combine
+# panel).  Named here rather than in each of them because that is exactly what
+# went wrong before it existed: every bar that grouped its buttons picked its
+# own number -- 6, 8, 12 and 14 across three apps -- so the same two groups sat
+# different distances apart depending on which app drew them.
+BUTTON_GROUP_GAP = BUTTON_GAP * 3
+
 # A button carrying a word rather than a mark: the room above and below it.
 BUTTON_PAD_V = 4
 
