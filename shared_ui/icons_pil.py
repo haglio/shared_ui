@@ -36,7 +36,7 @@ from shared_ui.icon_geometry import (
     glyph_names,
 )
 
-__all__ = ["CANVAS", "STROKE", "SUPERSAMPLE", "glyph_names", "glyph_image", "paste_glyph"]
+__all__ = ["CANVAS", "STROKE", "SUPERSAMPLE", "glyph_image", "glyph_names", "paste_glyph"]
 
 # Pillow's draw calls are hard-edged, so a glyph is drawn this many times too big
 # and resampled down; the resampling is where the smooth edge comes from.  Four
