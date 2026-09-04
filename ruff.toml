@@ -1,0 +1,12 @@
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["F", "E", "W", "I", "UP", "B", "C4", "SIM", "RUF", "PL", "PT", "DTZ", "PIE", "PERF", "FLY", "ISC", "RET", "FURB", "EXE"]
+ignore = ["E501", "BLE001", "S110",
+    # This repo's ratchet: what the family config found here, to be worked off rule by rule.
+    "PLR2004", "B905", "PLW1510", "PLC0415", "PT018", "PLR0913", "PLR0912", "PLR0917", "PT006", "RUF007", "RUF003", "SIM103", "RUF001", "E402"]
+external = ["ARG", "N", "S", "E501", "BLE001", "S110", "PLR2004", "B905", "PLW1510", "PLC0415", "PT018", "PLR0913", "PLR0912", "PLR0917", "PT006", "RUF007", "RUF003", "SIM103", "RUF001", "E402"]
+
+[format]
+quote-style = "double"

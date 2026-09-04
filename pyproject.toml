@@ -14,7 +14,7 @@ dependencies = [
 # Pillow is not a runtime dependency: shared_ui.icons_pil is imported only by
 # the players, which already have it, and nothing here imports Qt and Pillow at
 # once. The suite needs it to check the two renderers draw the same marks.
-dev = ["pytest", "pytest-timeout", "vulture", "pillow"]
+dev = ["pytest", "pytest-timeout", "vulture", "pillow", "ruff==0.16.6"]
 
 [tool.pytest.ini_options]
 # The content guard's enforcement check, taken from app_support rather than
