@@ -1,69 +1,59 @@
-"""Dead-code detection test.
-
-Runs vulture against the shared_ui source modules and fails if any
-unreported dead code is found.  False positives (public-API tokens,
-Qt/pytest framework hooks) are whitelisted below.
-"""
-
+"""This repo's dead-code gate. Every check it runs is `app_support.dead_code` or
+`app_support.unread`, the family's one shape."""
 from __future__ import annotations
 
 from pathlib import Path
 
-import vulture
+from app_support import unread
+from app_support.dead_code import (
+    assert_every_package_is_scanned,
+    assert_no_dead_code,
+    assert_no_function_takes_an_argument_it_never_reads,
+    assert_nothing_is_imported_or_assigned_and_left_unread,
+    assert_whitelist_is_live,
+)
 
-_REPO_ROOT = Path(__file__).resolve().parent.parent
-
-# -- Whitelist ---------------------------------------------------------------
-# Names that vulture flags but are intentionally public API or framework hooks.
-#
-# Qt method overrides (invoked by the C++ event loop, never from Python):
-#   paintEvent, sizeHint, minimumSizeHint – widget hooks (check_box.py)
-#
-# Public-API tokens (consumed by downstream projects, not within this repo):
-#   Every ALL_CAPS constant in colors.py, fonts.py, spacing.py is part of the
-#   library's public surface.  Rather than listing each individually, the test
-#   exempts module-level ALL_CAPS names from those modules.
-QT_OVERRIDES = {
-    "paintEvent",
-    "sizeHint",
-    "minimumSizeHint",
-}
-
-_TOKEN_MODULES = {"colors", "fonts", "spacing"}
+ROOT = Path(__file__).resolve().parent.parent
+PACKAGES = (ROOT / "shared_ui",)
+SCANNED = (*PACKAGES, ROOT / "tests", ROOT / "tools")
+WHITELIST = ROOT / "vulture_whitelist.py"
 
 
-def _is_public_token(result: vulture.core.Result) -> bool:
-    """True if *result* is an ALL_CAPS name in a token module."""
-    module = result.filename.stem
-    if module not in _TOKEN_MODULES:
-        return False
-    return result.name.isupper()
+def test_no_dead_code():
+    assert_no_dead_code(*SCANNED, whitelist=WHITELIST)
 
 
-def _is_whitelisted(result: vulture.core.Result) -> bool:
-    if result.name in QT_OVERRIDES:
-        return True
-    if _is_public_token(result):
-        return True
-    return False
+def test_the_whitelist_still_suppresses_what_it_claims_to():
+    assert_whitelist_is_live(*SCANNED, whitelist=WHITELIST)
 
 
-class TestNoDeadCode:
-    def test_vulture_finds_no_unwhitelisted_dead_code(self):
-        v = vulture.Vulture()
-        v.scavenge(
-            [
-                str(_REPO_ROOT / "shared_ui"),
-                str(_REPO_ROOT / "tests"),
-            ],
-        )
+def test_every_package_in_the_tree_is_scanned():
+    assert_every_package_is_scanned(ROOT, ("shared_ui",))
 
-        violations = [r for r in v.get_unused_code() if not _is_whitelisted(r)]
 
-        if violations:
-            report = "\n".join(
-                f"  {r.filename}:{r.first_lineno} – {r.name} ({r.confidence}%)"
-                for r in violations
-            )
-            raise AssertionError(f"Dead code found:\n{report}")
+def test_nothing_is_imported_or_assigned_and_left_unread():
+    assert_nothing_is_imported_or_assigned_and_left_unread(ROOT, *SCANNED, ROOT / "tests")
 
+
+def test_no_function_takes_an_argument_it_never_reads():
+    assert_no_function_takes_an_argument_it_never_reads(ROOT, *SCANNED)
+
+
+def test_no_module_level_constant_goes_unread():
+    unread.assert_no_module_constant_goes_unread(ROOT, SCANNED)
+
+
+def test_no_constructor_parameter_is_stored_and_never_read():
+    unread.assert_no_constructor_parameter_is_stored_and_never_read(ROOT, SCANNED)
+
+
+def test_no_dataclass_field_goes_unread():
+    unread.assert_no_dataclass_field_goes_unread(ROOT, SCANNED)
+
+
+def test_every_declared_command_line_option_is_read():
+    unread.assert_every_argparse_option_is_read(ROOT, SCANNED)
+
+
+def test_no_test_helper_is_written_and_never_called():
+    unread.assert_no_test_helper_is_written_and_never_called(ROOT, ROOT / "tests")
