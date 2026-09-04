@@ -10,7 +10,7 @@ hardest on the routes agreeing.
 
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt, QRectF, QSize
+from PyQt6.QtCore import QRectF, QSize, Qt
 from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 
 from shared_ui import icons
@@ -240,8 +240,8 @@ def test_a_glyph_lands_where_the_caller_placed_it():
     icons.draw_glyph(painter, "star", TEXT_PRIMARY, size=24, x=12, y=12)
     painter.end()
     left, top, right, bottom = _ink_box(canvas)
-    assert 12 <= left and right <= 36
-    assert 12 <= top and bottom <= 36
+    assert left >= 12 and right <= 36
+    assert top >= 12 and bottom <= 36
 
 
 def test_drawing_a_glyph_leaves_the_caller_s_painter_as_it_found_it():

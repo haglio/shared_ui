@@ -17,7 +17,7 @@ import pytest
 # something on a real display.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PyQt6.QtWidgets import QApplication  # noqa: E402  -- after the platform is set
+from PyQt6.QtWidgets import QApplication
 
 
 def pytest_collection_modifyitems(items):

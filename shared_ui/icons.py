@@ -26,7 +26,7 @@ business and it stays there.
 
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt, QPointF, QRectF
+from PyQt6.QtCore import QPointF, QRectF, Qt
 from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 
 from shared_ui.colors import TEXT_MUTED, TEXT_PRIMARY
@@ -44,7 +44,12 @@ from shared_ui.icon_geometry import (
 )
 
 __all__ = [
-    "CANVAS", "STROKE", "glyph_names", "draw_glyph", "glyph_pixmap", "glyph_icon",
+    "CANVAS",
+    "STROKE",
+    "draw_glyph",
+    "glyph_icon",
+    "glyph_names",
+    "glyph_pixmap",
 ]
 
 

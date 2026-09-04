@@ -10,11 +10,11 @@ actually looks like checking a box, independent of the OS theme.
 
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt, QSize, QRectF, QPointF
-from PyQt6.QtGui import QPainter, QPen, QColor, QPolygonF
+from PyQt6.QtCore import QPointF, QRectF, QSize, Qt
+from PyQt6.QtGui import QColor, QPainter, QPen, QPolygonF
 from PyQt6.QtWidgets import QCheckBox
 
-from shared_ui.colors import BLUE, BG_SECONDARY, BORDER_SUBTLE, TEXT_SECONDARY, TEXT_MUTED
+from shared_ui.colors import BG_SECONDARY, BLUE, BORDER_SUBTLE, TEXT_MUTED, TEXT_SECONDARY
 
 _BOX = 16        # indicator side length (px)
 _GAP = 7         # space between the box and the label

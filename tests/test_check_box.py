@@ -12,8 +12,8 @@ from __future__ import annotations
 from PyQt6.QtGui import QColor, QPixmap
 from PyQt6.QtWidgets import QWidget
 
-from shared_ui.check_box import CheckBox, _BOX
-from shared_ui.colors import BLUE, BG_PRIMARY
+from shared_ui.check_box import _BOX, CheckBox
+from shared_ui.colors import BG_PRIMARY, BLUE
 
 
 def _classify(cb):
@@ -33,7 +33,7 @@ def _classify(cb):
     cb.render(pix, flags=QWidget.RenderFlag.DrawChildren)
     img = pix.toImage()
     blue = white = dark = 0
-    for x in range(0, _BOX + 3):
+    for x in range(_BOX + 3):
         for y in range(cb.height()):
             c = QColor(img.pixel(x, y))
             r, g, b = c.red(), c.green(), c.blue()

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import threading
+from collections.abc import Callable
 from enum import Enum
 from pathlib import Path
-from typing import Callable
 
 from PyQt6.QtCore import QObject, Qt, QThread, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QIcon
@@ -29,7 +29,6 @@ from shared_ui.colors import (
 )
 from shared_ui.fonts import SIZE_BODY, make_font
 from shared_ui.spacing import GAP_DIALOG, MARGIN_DIALOG
-
 
 # The mark beside the message, in pixels square.  Windows' own message boxes
 # draw theirs at this size.
