@@ -12,17 +12,9 @@ report, and an entry may only be added with the reason it answers one.
 # --- Qt method overrides, called by the event loop, not by us ---
 _.paintEvent  # check_box, toggle_switch
 
-# --- colors: read by the apps named ---
-TEXT_LEGEND_LABEL  # clipper
-TEXT_LEGEND_JOIN  # clipper
-BORDER_TIMELINE  # clipper
-BORDER_TICK  # clipper
-TIMELINE_LOADED  # clipper
-TIMELINE_ACTIVE  # clipper, origenerator
-TIMELINE_CURSOR  # clipper
-TIMELINE_LOOP  # clipper
-TIMELINE_SUGGESTED_IN  # clipper
-TIMELINE_SUGGESTED_OUT  # clipper
+# --- colors: none.  Every QColor in colors.py reads its palette twin by name, so
+#     vulture sees each token used; a palette token nobody reads shows up in
+#     colors.py's own tests instead. ---
 
 # --- fonts ---
 SIZE_SMALL  # clipper, fun_time, scripture

@@ -52,18 +52,3 @@ WHITE = QColor(*palette.WHITE)
 TOGGLE_ON = QColor(*palette.TOGGLE_ON)
 TOGGLE_OFF = QColor(*palette.TOGGLE_OFF)
 TOGGLE_KNOB = QColor(*palette.TOGGLE_KNOB)
-
-# ---------------------------------------------------------------------------
-# Clipper's timeline and legend -- leaving for clipper, which is the one app
-# that draws them.  Every one is a hue or a tier under a purpose name.
-# ---------------------------------------------------------------------------
-TEXT_LEGEND_LABEL = TEXT_SECONDARY
-TEXT_LEGEND_JOIN = TEXT_MUTED
-BORDER_TIMELINE = BORDER_DEFAULT
-BORDER_TICK = BORDER_DEFAULT
-TIMELINE_LOADED = BLUE
-TIMELINE_ACTIVE = BLUE_LIGHT
-TIMELINE_CURSOR = WHITE
-TIMELINE_LOOP = RED
-TIMELINE_SUGGESTED_IN = AMBER
-TIMELINE_SUGGESTED_OUT = BLUE_LIGHT
