@@ -18,10 +18,8 @@ TEXT_LEGEND_LABEL  # clipper
 TEXT_LEGEND_JOIN  # clipper
 BORDER_TIMELINE  # clipper
 BORDER_TICK  # clipper
-AMBER  # fun_time, origenerator, player_core
-TOGGLE_ON  # origenerator, promptcrafter
-TOGGLE_OFF  # origenerator, promptcrafter
-TOGGLE_KNOB  # origenerator
+TIMELINE_LOADED  # clipper
+TIMELINE_ACTIVE  # clipper, origenerator
 TIMELINE_CURSOR  # clipper
 TIMELINE_LOOP  # clipper
 TIMELINE_SUGGESTED_IN  # clipper
@@ -35,7 +33,5 @@ SIZE_TINY  # clipper
 GAP_SMALL  # promptcrafter
 BUTTON_SIZE_HUD  # origenerator, player_core
 BUTTON_ICON  # clipper, evolver, fun_time, origenerator, scripture
-BUTTON_RADIUS  # fun_time
 BUTTON_ROW_GAP  # origenerator
-BUTTON_PAD_V  # fun_time
 BUTTON_PAD_H_TIGHT  # fun_time

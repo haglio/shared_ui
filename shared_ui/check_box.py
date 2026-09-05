@@ -11,16 +11,22 @@ actually looks like checking a box, independent of the OS theme.
 from __future__ import annotations
 
 from PyQt6.QtCore import QPointF, QRectF, QSize, Qt
-from PyQt6.QtGui import QColor, QPainter, QPen, QPolygonF
+from PyQt6.QtGui import QPainter, QPen, QPolygonF
 from PyQt6.QtWidgets import QCheckBox
 
-from shared_ui.colors import BG_SECONDARY, BLUE, BORDER_SUBTLE, TEXT_MUTED, TEXT_SECONDARY
+from shared_ui.colors import (
+    BG_BUTTON_ACTIVE,
+    BG_SECONDARY,
+    BLUE,
+    BORDER_SUBTLE,
+    TEXT_MUTED,
+    TEXT_SECONDARY,
+    WHITE,
+)
 
 _BOX = 16        # indicator side length (px)
 _GAP = 7         # space between the box and the label
 _RADIUS = 3.0    # indicator corner rounding
-_TICK = QColor(255, 255, 255)
-_TICK_DISABLED = QColor(220, 220, 220)
 
 # The check mark as a fraction of the box: a short down-stroke into a long
 # up-stroke -- the classic tick, not a symmetric "v".
@@ -35,7 +41,9 @@ class CheckBox(QCheckBox):
         enabled = self.isEnabled()
 
         if self.isChecked():
-            fill = BLUE if enabled else BORDER_SUBTLE
+            # A box that is on and cannot be changed still reads as on: the
+            # ground a control that is on sits on, in place of the accent.
+            fill = BLUE if enabled else BG_BUTTON_ACTIVE
             painter.setPen(QPen(fill, 1))
             painter.setBrush(fill)
             painter.drawRoundedRect(box, _RADIUS, _RADIUS)
@@ -66,7 +74,7 @@ class CheckBox(QCheckBox):
             QPointF(box.left() + fx * side, box.top() + fy * side)
             for fx, fy in _TICK_POINTS
         ])
-        pen = QPen(_TICK if enabled else _TICK_DISABLED)
+        pen = QPen(WHITE if enabled else TEXT_SECONDARY)
         pen.setWidthF(2.0)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)

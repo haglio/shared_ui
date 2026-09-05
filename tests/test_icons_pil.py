@@ -142,7 +142,8 @@ def test_drawing_a_hud_mark_never_drags_qt_into_a_player():
     # The players are mpv and Pillow and nothing else; PyQt6 in that process
     # would be a GUI toolkit loaded into a video pipeline for the sake of a
     # dozen-pixel icon. The geometry module is what makes that avoidable, so
-    # neither it nor the Pillow renderer may reach for Qt.
+    # neither it nor the Pillow renderer may reach for Qt -- nor may the palette
+    # the HUDs color with, nor the chrome, which is a string built from it.
     #
     # The probe says which tree it read before it says what it loaded: `python -c`
     # puts the process cwd first on sys.path and nothing else, so run from
@@ -150,7 +151,8 @@ def test_drawing_a_hud_mark_never_drags_qt_into_a_player():
     # primary one -- and every branch is worked on in a worktree, so a branch that
     # dragged Qt in here passed this guard.
     probe = (
-        "import sys; import shared_ui.icons_pil, shared_ui.icon_geometry; "
+        "import sys; import shared_ui.icons_pil, shared_ui.icon_geometry, "
+        "shared_ui.palette, shared_ui.chrome; "
         "print(shared_ui.__file__); "
         "print(any(m == 'PyQt6' or m.startswith('PyQt6.') for m in sys.modules))"
     )

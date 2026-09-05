@@ -57,11 +57,13 @@ BUTTON_ROW_GAP = 8
 # different distances apart depending on which app drew them.
 BUTTON_GROUP_GAP = BUTTON_GAP * 3
 
-# A button carrying a word rather than a mark: the room above and below it.
+# A button carrying a word rather than a mark: the room above and below it, and
+# the room to either side.
 BUTTON_PAD_V = 4
+BUTTON_PAD_H = 16
 
-# The room to either side of that word where a ROW of such buttons has to fit a
-# strip of fixed width -- narrow, because at a toolbar button's usual side pad
-# five short words come to nearly twice the room the strip has.  A narrower pad,
-# not a different button: same height, same radius, same grounds.
+# The side room where a ROW of such buttons has to fit a strip of fixed width --
+# narrow, because at BUTTON_PAD_H five short words come to nearly twice the room
+# the strip has.  A narrower pad, not a different button: same height, same
+# radius, same grounds.
 BUTTON_PAD_H_TIGHT = 6
