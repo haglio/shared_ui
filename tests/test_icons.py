@@ -15,6 +15,7 @@ from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
+from shared_ui.icon_geometry import glyph_names
 
 
 def _blank(size: int) -> QPixmap:
@@ -67,7 +68,7 @@ def _pieces(ink: set[tuple[int, int]]) -> int:
 def test_every_registered_glyph_draws_something():
     # A name in the registry that paints nothing is worse than a missing one:
     # the caller gets a button with an empty square on it and no error.
-    for name in icons.glyph_names():
+    for name in glyph_names():
         pixmap = icons.glyph_pixmap(name, 48, TEXT_PRIMARY)
         assert not pixmap.isNull(), name
         assert _ink_pixels(pixmap) > 0, name
@@ -77,7 +78,7 @@ def test_the_glyphs_are_all_different_marks():
     # Icon-only controls are only as good as the marks telling each other apart.
     drawn = {
         name: icons.glyph_pixmap(name, 48, TEXT_PRIMARY).toImage()
-        for name in icons.glyph_names()
+        for name in glyph_names()
     }
     names = sorted(drawn)
     for index, first in enumerate(names):
@@ -96,7 +97,7 @@ def test_every_glyph_fills_its_canvas():
     # the box is scaled onto a 16px tree row -- the empty margin shrinks with it.
     # The long side has to carry most of the canvas; the short side is allowed to
     # be narrow, because some marks (a chevron) genuinely are.
-    for name in set(icons.glyph_names()) - _ONE_BAR:
+    for name in set(glyph_names()) - _ONE_BAR:
         left, top, right, bottom = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
         width, height = right - left, bottom - top
         assert max(width, height) >= 0.6 * 48, f"{name} is small in its box"
@@ -142,7 +143,7 @@ def test_the_hollow_plus_traces_the_solid_one():
 def test_every_glyph_sits_in_the_middle_of_its_canvas():
     # Marks are laid beside each other in a button bank, so one drawn off-center
     # reads as misaligned with its neighbors rather than as its own shape.
-    for name in icons.glyph_names():
+    for name in glyph_names():
         left, top, right, bottom = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
         assert abs((left + right) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
         assert abs((top + bottom) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
@@ -293,14 +294,14 @@ _THE_MARKS = (
 
 
 def test_the_marks_this_family_draws_are_the_ones_the_apps_ask_for():
-    assert icons.glyph_names() == _THE_MARKS
+    assert glyph_names() == _THE_MARKS
 
 
 def test_the_registry_is_what_glyph_names_reports():
     # Callers walk the names to build a bank of buttons, and the tests above walk
     # them to check every mark -- so a glyph added without a name is a glyph no
     # test ever renders.
-    names = icons.glyph_names()
+    names = glyph_names()
     assert names == tuple(sorted(names))
     for name in names:
         assert icons.glyph_pixmap(name, 24, TEXT_PRIMARY).size() == QSize(24, 24)
@@ -318,7 +319,7 @@ def test_a_mark_never_erases_the_ground_it_is_drawn_on():
     # that gap by erasing -- which works on an empty pixmap and punches a hole
     # through anything else.  Clipping is what makes the mark safe to lay over a
     # chip or a thumbnail, so the ground has to survive under every glyph.
-    for name in icons.glyph_names():
+    for name in glyph_names():
         canvas = QPixmap(48, 48)
         canvas.fill(QColor(GREEN))
         painter = QPainter(canvas)
@@ -387,3 +388,14 @@ def test_the_transport_marks_have_rounded_corners(monkeypatch):
     rounded = _ink_pixels(icons.glyph_pixmap("play", 48, TEXT_PRIMARY))
     bare = _ink_pixels(icons.glyph_pixmap("_play_with_hard_points", 48, TEXT_PRIMARY))
     assert rounded > bare
+
+
+def test_a_stroke_ends_in_a_round_cap_that_reaches_past_its_endpoint():
+    # A mark's ends are round, so a bar's ink overhangs where its line stops by
+    # about half the stroke -- what keeps a minus from reading as a chopped rule.
+    from shared_ui.icon_geometry import GLYPHS
+
+    (bar,) = GLYPHS["minus"]
+    left, _top, right, _bottom = _ink_box(icons.glyph_pixmap("minus", 48, TEXT_PRIMARY))
+    assert left <= bar.x1 - bar.width / 2 + 1
+    assert right >= bar.x2 + bar.width / 2 - 1

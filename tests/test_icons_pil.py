@@ -18,7 +18,8 @@ from pathlib import Path
 
 from PIL import Image
 
-from shared_ui import icon_geometry, icons, icons_pil
+from shared_ui import icons, icons_pil
+from shared_ui.icon_geometry import glyph_names
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 from shared_ui.colors import GREEN, RED, TEXT_PRIMARY
@@ -57,7 +58,7 @@ def _qt_ink(name: str, size: int) -> tuple[int, int, int, int, int]:
 def test_every_glyph_draws_through_pillow_too():
     # A mark the Qt side can draw and the Pillow side cannot is a mark that goes
     # missing on a HUD -- an empty button, with nothing raised.
-    for name in icons_pil.glyph_names():
+    for name in glyph_names():
         image = icons_pil.glyph_image(name, _SIZE, _INK)
         assert image.size == (_SIZE, _SIZE), name
         assert _pil_ink(image)[4] > 0, name
@@ -67,7 +68,7 @@ def test_the_two_renderers_put_the_mark_in_the_same_place():
     # The whole point. A HUD's trash can and a toolbar's are one drawing now, so
     # their ink has to occupy the same box -- within a pixel, which is what is
     # left after Pillow's inside-the-box outlines are corrected for.
-    for name in icons_pil.glyph_names():
+    for name in glyph_names():
         pillow = _pil_ink(icons_pil.glyph_image(name, _SIZE, _INK))
         qt = _qt_ink(name, _SIZE)
         for edge in range(4):
@@ -78,7 +79,7 @@ def test_the_two_renderers_lay_down_a_like_amount_of_ink():
     # Same box could still mean a hairline against a slab, so the weight has to
     # agree too. Pillow's arcs have no round caps and its resampling is not Qt's,
     # so this is a band rather than an equality.
-    for name in icons_pil.glyph_names():
+    for name in glyph_names():
         pillow = _pil_ink(icons_pil.glyph_image(name, _SIZE, _INK))[4]
         qt = _qt_ink(name, _SIZE)[4]
         assert abs(pillow - qt) / qt < 0.15, name
@@ -131,11 +132,40 @@ def test_a_pasted_mark_is_centered_in_a_box_that_is_not_at_the_origin():
     assert abs((top + bottom) / 2 - 22) <= 1
 
 
-def test_the_geometry_and_both_renderers_offer_the_same_marks():
+def test_the_geometry_is_the_one_registry_both_renderers_draw_from():
     # One registry. A glyph added for the toolbar and not reachable from a HUD is
-    # how the two sides drifted apart in the first place.
-    assert icons_pil.glyph_names() == icons.glyph_names()
-    assert icons_pil.glyph_names() == icon_geometry.glyph_names()
+    # how the two sides drifted apart in the first place -- so every name the
+    # geometry lists draws through both renderers, and the renderers list none of
+    # their own.
+    for name in glyph_names():
+        assert not icons.glyph_pixmap(name, _SIZE, TEXT_PRIMARY).isNull(), name
+        assert _pil_ink(icons_pil.glyph_image(name, _SIZE, _INK))[4] > 0, name
+    assert "glyph_names" not in icons.__all__
+    assert "glyph_names" not in icons_pil.__all__
+
+
+def test_a_translucent_ink_lands_translucent():
+    # A HUD dims a mark by handing over an alpha, and the coverage is scaled to it.
+    image = icons_pil.glyph_image("star", _SIZE, (*_INK, 128))
+    alphas = [image.getpixel((x, y))[3] for y in range(_SIZE) for x in range(_SIZE)]
+    assert 100 <= max(alphas) <= 128
+
+
+def test_a_negative_span_draws_the_same_arc_as_its_positive_twin():
+    # Qt sweeps a negative span backwards to the same arc; Pillow would take the
+    # long way round, so the renderer turns it around before converting.
+    from PIL import ImageDraw
+
+    from shared_ui.icon_geometry import Arc
+
+    def render(arc):
+        mask = Image.new("L", (_SIZE * 4, _SIZE * 4), 0)
+        icons_pil._draw(ImageDraw.Draw(mask), arc, 255, 4.0)
+        return mask.tobytes()
+
+    forward = Arc(x=8, y=8, w=32, h=32, start=0, span=90, width=5)
+    backward = Arc(x=8, y=8, w=32, h=32, start=90, span=-90, width=5)
+    assert render(forward) == render(backward)
 
 
 def test_drawing_a_hud_mark_never_drags_qt_into_a_player():
@@ -174,7 +204,7 @@ def test_a_mark_is_never_brighter_than_the_ink_it_was_drawn_in():
     # mark came out with pixels brighter than its own ink around every stroke --
     # a faint halo, and enough near-white to trip a HUD's own checks for it.
     # Drawing a coverage mask and coloring afterwards keeps the ink exact.
-    for name in icons_pil.glyph_names():
+    for name in glyph_names():
         image = icons_pil.glyph_image(name, 24, _INK)
         for y in range(24):
             for x in range(24):
