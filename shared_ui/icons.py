@@ -3,8 +3,7 @@
 The shapes are not here -- they are in :mod:`shared_ui.icon_geometry`, which
 knows nothing about any toolkit, and :mod:`shared_ui.icons_pil` renders the same
 list through Pillow for the players' HUDs.  That split is the point: a mark drawn
-here and the same mark on a HUD used to be two unrelated drawings, and they
-looked it.
+here and the same mark on a HUD are one drawing.
 
 Callers take one of three routes:
 
@@ -40,7 +39,6 @@ from shared_ui.icon_geometry import (
     Polygon,
     Polyline,
     RoundedRect,
-    glyph_names,
 )
 
 __all__ = [
@@ -48,7 +46,6 @@ __all__ = [
     "STROKE",
     "draw_glyph",
     "glyph_icon",
-    "glyph_names",
     "glyph_pixmap",
 ]
 

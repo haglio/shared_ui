@@ -2,10 +2,9 @@
 
 Same shapes as :mod:`shared_ui.icons` paints with QPainter -- both walk the list
 in :mod:`shared_ui.icon_geometry` -- so the trash can on a player's HUD is the
-trash can on Origenerator's toolbar rather than a lookalike.  It could not be
-before: an mpv overlay takes a bitmap, so the HUDs paint with Pillow and there is
-no Qt in a player process at all, which left every HUD mark either a typed font
-character or its own hand-drawn thing.
+trash can on Origenerator's toolbar rather than a lookalike.  An mpv overlay
+takes a bitmap, so the HUDs paint with Pillow and there is no Qt in a player
+process at all.
 
 This module imports Pillow and NOT Qt, which is what lets a player process use it
 without dragging PyQt6 into a video pipeline.
@@ -26,17 +25,15 @@ from PIL import Image, ImageDraw
 from shared_ui.icon_geometry import (
     CANVAS,
     GLYPHS,
-    STROKE,
     Arc,
     Ellipse,
     Line,
     Polygon,
     Polyline,
     RoundedRect,
-    glyph_names,
 )
 
-__all__ = ["CANVAS", "STROKE", "SUPERSAMPLE", "glyph_image", "glyph_names", "paste_glyph"]
+__all__ = ["CANVAS", "SUPERSAMPLE", "glyph_image", "paste_glyph"]
 
 # Pillow's draw calls are hard-edged, so a glyph is drawn this many times too big
 # and resampled down; the resampling is where the smooth edge comes from.  Four
