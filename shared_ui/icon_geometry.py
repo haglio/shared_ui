@@ -259,12 +259,11 @@ def _copy() -> tuple:
     """Two overlapping sheets -- copy this to the clipboard.
 
     The back sheet is drawn as the part of its outline the front sheet does not
-    cover, rather than as a whole rectangle with a hole punched through it.  Both
-    apps used to punch: a Clear-mode fill, which works on an empty pixmap and
-    erases whatever is underneath anywhere else, so neither copy of the mark
-    could be laid over a chip or a thumbnail.  The gap matters either way -- two
-    bare outlines at icon size read as a lattice rather than as one sheet in
-    front of another.
+    cover, rather than as a whole rectangle with a hole punched through it: a
+    punched hole (a Clear-mode fill) works on an empty pixmap and erases whatever
+    is underneath anywhere else, so the mark could not be laid over a chip or a
+    thumbnail.  The gap matters either way -- two bare outlines at icon size read
+    as a lattice rather than as one sheet in front of another.
     """
     radius = 3.5
     return (
