@@ -1,19 +1,19 @@
-"""Tests for shared_ui.colors — verify every token is a valid QColor
+"""Tests for shared_ui.colors -- verify every token is a valid QColor
 and core palette hues."""
 
 from __future__ import annotations
 
 from PyQt6.QtGui import QColor
 
-from shared_ui import colors
+from shared_ui import check_box, colors
 
 
-def _all_qcolors():
+def _all_qcolors(module=colors):
     """Yield (name, value) for every QColor constant in the module."""
-    for name in dir(colors):
-        if name.startswith("_"):
+    for name in dir(module):
+        if name.startswith("__"):
             continue
-        val = getattr(colors, name)
+        val = getattr(module, name)
         if isinstance(val, QColor):
             yield name, val
 
@@ -64,18 +64,24 @@ def test_an_active_control_sits_on_a_lighter_ground_than_a_resting_one():
     assert lightness(BG_BUTTON_ACTIVE) > lightness(BG_BUTTON)
 
 
-def test_the_timeline_ranges_are_the_familys_blue():
-    """They were a pair of muted greenish blues, carried over from Clipper's
-    original OpenCV values -- shades that lived in this palette and in no app
-    that reads it, so the timeline read as another program's chrome."""
-    from shared_ui.colors import BLUE, TIMELINE_ACTIVE, TIMELINE_LOADED
+def test_the_light_blue_is_the_familys_blue_tinted_lighter():
+    """There is one blue.  Where an app needs a lighter one beside it -- a range
+    in play against a range loaded, a progress band -- it is that blue toward
+    white, not a hue of its own."""
+    from shared_ui.colors import BLUE, BLUE_LIGHT
 
-    for color in (TIMELINE_LOADED, TIMELINE_ACTIVE):
-        assert color.blue() > color.green() > color.red(), color.name()
-        # Within a hair of BLUE's own hue, so the two ranges read as that color
-        # dark and that color light rather than as a colour of their own.
-        assert abs(color.hue() - BLUE.hue()) <= 12, color.name()
-    assert TIMELINE_ACTIVE.lightness() > TIMELINE_LOADED.lightness()
+    assert BLUE_LIGHT.blue() > BLUE_LIGHT.green() > BLUE_LIGHT.red()
+    # Within a hair of BLUE's own hue, so the two read as one color dark and
+    # light rather than as two colors.
+    assert abs(BLUE_LIGHT.hue() - BLUE.hue()) <= 12
+    assert BLUE_LIGHT.lightness() > BLUE.lightness()
+
+
+def _grays(module):
+    return {
+        name: color for name, color in _all_qcolors(module)
+        if name.isupper() and color.saturation() <= 40
+    }
 
 
 def test_the_palette_holds_as_few_grays_as_it_can():
@@ -84,29 +90,29 @@ def test_the_palette_holds_as_few_grays_as_it_can():
     shades within ten points of each other, two legend tiers within twenty, a
     status gray eight off the muted one.  A name may still say what it is FOR;
     what it must not do is introduce a shade the eye cannot tell from another."""
-    values = set()
-    for name in dir(colors):
-        if not name.isupper():
-            continue
-        color = getattr(colors, name)
-        if hasattr(color, "saturation") and color.saturation() <= 40:
-            values.add(color.name())
+    values = {color.name() for color in _grays(colors).values()}
 
     # The ladder: three backgrounds under a button, the button and its on-state,
-    # the muted gray, the standard outline, and white.
+    # the keycap between them, the muted gray, the standard outline, the two
+    # text tiers, and white.
     assert len(values) <= 11, sorted(values)
 
 
 def test_no_two_grays_sit_within_a_hair_of_each_other():
     """Which is the rule behind the count: two shades nobody can tell apart are
     one shade with two names, and they drift into different apps."""
-    lightnesses = sorted(
-        getattr(colors, name).lightness()
-        for name in dir(colors)
-        if name.isupper()
-        and hasattr(getattr(colors, name), "saturation")
-        and getattr(colors, name).saturation() <= 40
-    )
-    distinct = sorted(set(lightnesses))
+    distinct = sorted({color.lightness() for color in _grays(colors).values()})
     for first, second in zip(distinct, distinct[1:]):
         assert second - first >= 10, f"{first} and {second} are the same gray twice"
+
+
+def test_the_librarys_own_widget_paints_only_palette_colors():
+    """The checkbox used to keep two grays of its own, one of them exactly the
+    hair from two palette tiers that the rule above forbids -- and slipped under
+    that rule because it only ever looked at `colors`."""
+    palette_values = {color.name() for _, color in _all_qcolors(colors)}
+
+    strays = sorted(name for name, color in _all_qcolors(check_box)
+                    if color.name() not in palette_values)
+
+    assert not strays, strays

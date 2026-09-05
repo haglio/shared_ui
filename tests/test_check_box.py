@@ -65,6 +65,18 @@ def test_unchecked_draws_empty_box_no_tick():
     assert dark > 30      # an empty dark box
 
 
+def test_a_box_that_is_on_but_cannot_be_changed_still_shows_its_tick():
+    # Off the accent -- nothing here can be clicked -- and onto the ground a
+    # control that is on sits on, with the tick still on it.
+    cb = CheckBox("Random")
+    cb.setChecked(True)
+    cb.setEnabled(False)
+    cb.resize(140, 24)
+    blue, white, _ = _classify(cb)
+    assert blue == 0
+    assert white > 4
+
+
 def test_click_toggles_checked_state():
     cb = CheckBox("Random")
     assert cb.isChecked() is False
