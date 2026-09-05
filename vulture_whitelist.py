@@ -10,8 +10,7 @@ report, and an entry may only be added with the reason it answers one.
 
 # ruff: noqa: F821, B018 -- a whitelist is names, not statements
 # --- Qt method overrides, called by the event loop, not by us ---
-_.paintEvent  # check_box
-_.minimumSizeHint  # check_box
+_.paintEvent  # check_box, toggle_switch
 
 # --- colors: read by the apps named ---
 TEXT_LEGEND_LABEL  # clipper
