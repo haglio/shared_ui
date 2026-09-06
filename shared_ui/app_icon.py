@@ -92,8 +92,8 @@ def assert_follows_the_family_spec(path: Path | str, letter: str) -> None:
         f"{path}: the top-left corner rounds over {softening} rows")
 
     a_bar = next((x, y) for row, line in enumerate(cells) for column, cell in enumerate(line)
-                    if cell == "#"
-                    for x, y in [(int(INSET + (column + 0.5) * UNIT), int(INSET + (row + 0.5) * UNIT))])
+                 if cell == "#"
+                 for x, y in [(int(INSET + (column + 0.5) * UNIT), int(INSET + (row + 0.5) * UNIT))])
     assert pixels[a_bar][:3] == MAGENTA, f"{path}: the ink is {pixels[a_bar][:3]}, not MAGENTA"
     assert not _solid(pixels, 0, 0) and not _solid(pixels, CANVAS - 1, CANVAS - 1), (
         f"{path}: the background is not transparent")

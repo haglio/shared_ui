@@ -99,7 +99,7 @@ def test_the_palette_holds_as_few_grays_as_it_can():
 
 
 def test_no_two_grays_sit_within_a_hair_of_each_other():
-    """Which is the rule under the count: two shades nobody can tell apart are
+    """Which is the rule underlying the count: two shades nobody can tell apart are
     one shade with two names, and they drift into different apps."""
     distinct = sorted({color.lightness() for color in _grays(colors).values()})
     for first, second in zip(distinct, distinct[1:]):
