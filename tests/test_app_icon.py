@@ -10,15 +10,15 @@ import pytest
 from PIL import Image, ImageDraw
 
 from shared_ui import app_icon
-from shared_ui.app_icon import BOX, CANVAS, INSET, LETTERS, UNIT, assert_follows_the_family_spec
+from shared_ui.app_icon import CANVAS, GRID, INSET, LETTERS, UNIT, assert_follows_the_family_spec
 from shared_ui.palette import MAGENTA, WHITE
 
 
-def _draw(cells, *, inset=INSET, box=BOX, ink=MAGENTA) -> Image.Image:
+def _draw(cells, *, inset=INSET, grid=GRID, ink=MAGENTA) -> Image.Image:
     """A letter on the grid, as plain rectangles -- corners square, edges hard."""
     image = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
-    unit = box / 5
+    unit = grid / 5
     for row, line in enumerate(cells):
         for column, cell in enumerate(line):
             if cell != "#":
@@ -47,15 +47,15 @@ def test_the_wrong_letter_is_named(tmp_path):
 
 
 def test_a_letter_off_the_familys_grid_fails(tmp_path):
-    shrunk = _ico(tmp_path, _draw(LETTERS["O"], inset=INSET + 20, box=BOX - 40))
+    shrunk = _ico(tmp_path, _draw(LETTERS["O"], inset=INSET + 20, grid=GRID - 40))
 
-    with pytest.raises(AssertionError, match="glyph box starts"):
+    with pytest.raises(AssertionError, match="letter grid starts"):
         assert_follows_the_family_spec(shrunk, "O")
 
 
 def test_a_bar_wider_than_a_cell_fails(tmp_path):
     image = _draw(LETTERS["O"])
-    # Thicken the ring's top inward by half a cell: the box is still the box.
+    # Thicken the ring's top inward by half a cell: the grid is still the grid.
     ImageDraw.Draw(image).rectangle(
         (INSET + UNIT, INSET + UNIT, INSET + 4 * UNIT, INSET + 1.5 * UNIT), fill=(*MAGENTA, 255))
 
@@ -81,8 +81,8 @@ def test_a_heavily_rounded_corner_fails(tmp_path):
 
 
 def test_the_grid_is_five_cells_of_one_bar():
-    assert UNIT * 5 == BOX
-    assert INSET * 2 + BOX == CANVAS
+    assert UNIT * 5 == GRID
+    assert INSET * 2 + GRID == CANVAS
     for letter, cells in LETTERS.items():
         assert len(cells) == 5 and all(len(line) == 5 for line in cells), letter
         assert set("".join(cells)) <= {"#", "."}, letter

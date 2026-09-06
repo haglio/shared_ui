@@ -2,7 +2,7 @@
 
 Every app's icon is a single letter drawn on a 5x5 grid inset :data:`INSET`
 pixels inside a :data:`CANVAS`-pixel square, every bar exactly one grid
-cell -- a fifth of the glyph box -- thick, with near-square corners.  The
+cell -- a fifth of the letter grid -- thick, with near-square corners.  The
 grid is what makes eight icons read as one set on a taskbar; the spec was
 written down in one app's test, which named the others' letters and checked
 only its own.  Here it is checked for any of them: an app's suite calls
@@ -21,9 +21,9 @@ from PIL import Image
 from shared_ui.palette import MAGENTA
 
 CANVAS = 256  # the master frame
-INSET = 31  # the glyph box's offset inside the canvas
-BOX = CANVAS - 2 * INSET  # 194: the glyph box, five cells across
-UNIT = BOX / 5  # one cell, and one bar
+INSET = 31  # the letter grid's offset inside the canvas
+GRID = CANVAS - 2 * INSET  # 194: the letter grid, five cells across
+UNIT = GRID / 5  # one cell, and one bar
 CORNER_SOFTENING_MAX = 8  # rows a corner may round over; the family's round over three
 SOLID = 128  # the alpha above which a pixel is ink rather than an edge
 
@@ -69,9 +69,9 @@ def assert_follows_the_family_spec(path: Path | str, letter: str) -> None:
     solid = image.getchannel("A").point(lambda alpha: 255 if alpha > SOLID else 0)
     left, upper, right, lower = solid.getbbox()
     assert abs(left - INSET) <= 2 and abs(upper - INSET) <= 2, (
-        f"{path}: the glyph box starts at ({left}, {upper}), not ({INSET}, {INSET})")
-    assert abs((right - left) - BOX) <= 4 and abs((lower - upper) - BOX) <= 4, (
-        f"{path}: the glyph box is {right - left}x{lower - upper}, not {BOX}x{BOX}")
+        f"{path}: the letter grid starts at ({left}, {upper}), not ({INSET}, {INSET})")
+    assert abs((right - left) - GRID) <= 4 and abs((lower - upper) - GRID) <= 4, (
+        f"{path}: the letter grid is {right - left}x{lower - upper}, not {GRID}x{GRID}")
 
     for row, line in enumerate(cells):
         for column, cell in enumerate(line):
