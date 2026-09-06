@@ -52,7 +52,7 @@ __all__ = [
 
 def draw_glyph(painter: QPainter, name: str, color, *,
                size: float = CANVAS, x: float = 0.0, y: float = 0.0) -> None:
-    """Paint *name* through *painter*, in a *size*-square box at ``(x, y)``.
+    """Paint *name* through *painter*, in a *size*-square frame at ``(x, y)``.
 
     The painter's own pen, brush, transform and hints are left as they were --
     a caller part-way through drawing a chip must not find its brush swapped

@@ -66,8 +66,8 @@ def test_every_glyph_draws_through_pillow_too():
 
 def test_the_two_renderers_put_the_mark_in_the_same_place():
     # The whole point. A HUD's trash can and a toolbar's are one drawing now, so
-    # their ink has to occupy the same box -- within a pixel, which is what is
-    # left after Pillow's inside-the-box outlines are corrected for.
+    # their ink has to occupy the same frame -- within a pixel, which is what is
+    # left after Pillow's inside-the-frame outlines are corrected for.
     for name in glyph_names():
         pillow = _pil_ink(icons_pil.glyph_image(name, _SIZE, _INK))
         qt = _qt_ink(name, _SIZE)
@@ -76,7 +76,7 @@ def test_the_two_renderers_put_the_mark_in_the_same_place():
 
 
 def test_the_two_renderers_lay_down_a_like_amount_of_ink():
-    # Same box could still mean a hairline against a slab, so the weight has to
+    # Same frame could still mean a hairline against a slab, so the weight has to
     # agree too. Pillow's arcs have no round caps and its resampling is not Qt's,
     # so this is a band rather than an equality.
     for name in glyph_names():
@@ -107,7 +107,7 @@ def test_a_pasted_mark_sits_on_what_the_hud_already_drew():
     assert any(pixel[0] > 200 for pixel in pixels), "the mark did not land"
 
 
-def test_a_pasted_mark_is_centered_in_the_box_it_was_given():
+def test_a_pasted_mark_is_centered_in_the_frame_it_was_given():
     # HUD buttons are square-ish but not square, and a mark hugging one edge
     # reads as misaligned with the buttons beside it.
     #
@@ -121,9 +121,9 @@ def test_a_pasted_mark_is_centered_in_the_box_it_was_given():
     assert abs((upper + lower) / 2 - 12) <= 1
 
 
-def test_a_pasted_mark_is_centered_in_a_box_that_is_not_at_the_origin():
-    # The box a HUD hands over is wherever its button is, so the centring is of
-    # the box rather than of the panel -- a mark centred on the panel instead
+def test_a_pasted_mark_is_centered_in_a_frame_that_is_not_at_the_origin():
+    # The frame a HUD hands over is wherever its button is, so the centring is of
+    # the frame rather than of the panel -- a mark centred on the panel instead
     # would land right for the one button that happens to sit in the middle.
     panel = Image.new("RGBA", (64, 40), (0, 0, 0, 0))
     icons_pil.paste_glyph(panel, "plus", (36, 8, 24, 28), _INK)
