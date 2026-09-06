@@ -74,7 +74,8 @@ def test_hovering_a_menu_row_that_cannot_be_clicked_promises_nothing():
 
 
 def test_a_tooltip_has_square_corners():
-    # A rounded style-sheet tooltip on Windows paints artifact boxes around itself.
+    # A rounded style-sheet tooltip on Windows paints artifact rectangles around
+    # itself.
     rules = _rules(chrome.tooltip_rules())
 
     assert "QToolTip" in rules

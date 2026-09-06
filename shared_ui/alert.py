@@ -30,7 +30,7 @@ from shared_ui.colors import (
 from shared_ui.fonts import SIZE_BODY, make_font
 from shared_ui.spacing import GAP_DIALOG, MARGIN_DIALOG
 
-# The mark beside the message, in pixels square.  Windows' own message boxes
+# The mark beside the message, in pixels square.  Windows' own message dialogs
 # draw theirs at this size.
 MARK_SIZE = 32
 

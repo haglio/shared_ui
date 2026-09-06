@@ -47,7 +47,7 @@ def tooltip_rules() -> str:
     """A tooltip readable on a dark desktop.
 
     Square corners on purpose: a rounded style-sheet tooltip on Windows paints
-    artifact boxes around itself.
+    artifact rectangles around itself.
     """
     return f"""
     QToolTip {{

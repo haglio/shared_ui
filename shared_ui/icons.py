@@ -14,8 +14,8 @@ Callers take one of three routes:
   the route a badge takes, so the mark lands on the chip the caller just drew.
 
 The marks are drawn rather than typed as font characters because a face is not
-guaranteed to carry them (Windows draws a tofu box for the ones it lacks), and
-because a typed glyph's weight then follows whatever face happens to be
+guaranteed to carry them (Windows draws a tofu rectangle for the ones it lacks),
+and because a typed glyph's weight then follows whatever face happens to be
 installed rather than the weight of the marks beside it.
 
 What is NOT here: an app's own composition -- the chip under a badge, which
