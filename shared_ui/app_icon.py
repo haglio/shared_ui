@@ -28,7 +28,8 @@ CORNER_SOFTENING_MAX = 8  # rows a corner may round over; the family's round ove
 SOLID = 128  # the alpha above which a pixel is ink rather than an edge
 
 # The letters the family draws, as the cells they fill.  Fun Time's is its two
-# initials sharing a stem, and the VR player's is a V.
+# initials sharing a stem, and its VR session's is a V with Genau's R laid over
+# it, combined the same way -- the session carries Genau too.
 LETTERS: dict[str, tuple[str, ...]] = {
     "B": ("#####", "#...#", "#####", "#...#", "#####"),
     "C": ("#####", "#....", "#....", "#....", "#####"),
@@ -38,6 +39,7 @@ LETTERS: dict[str, tuple[str, ...]] = {
     "P": ("#####", "#...#", "#####", "#....", "#...."),
     "S": ("#####", "#....", "#####", "....#", "#####"),
     "V": ("#...#", "#...#", "##.##", ".###.", "..#.."),
+    "VR": ("#####", "#...#", "#####", "####.", "#.##."),
 }
 
 # Where inside a cell to look: a 3x3 lattice kept clear of the cell's edges, so
