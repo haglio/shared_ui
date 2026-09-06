@@ -29,7 +29,7 @@ _INK = (240, 240, 240)  # TEXT_PRIMARY, as the HUDs' palette spells it
 
 
 def _pil_ink(image: Image.Image) -> tuple[int, int, int, int, int]:
-    """``(left, top, right, bottom, count)`` of what was drawn."""
+    """``(left, upper, right, lower, count)`` of what was drawn."""
     alpha = image.split()[3].load()
     xs, ys, count = [], [], 0
     for y in range(image.height):
@@ -116,9 +116,9 @@ def test_a_pasted_mark_is_centered_in_the_box_it_was_given():
     # the centre came out the panel's centre whatever paste_glyph did with it.
     panel = Image.new("RGBA", (48, 24), (0, 0, 0, 0))
     icons_pil.paste_glyph(panel, "plus", (0, 0, 48, 24), _INK)
-    left, top, right, bottom, _count = _pil_ink(panel)
+    left, upper, right, lower, _count = _pil_ink(panel)
     assert abs((left + right) / 2 - 24) <= 1
-    assert abs((top + bottom) / 2 - 12) <= 1
+    assert abs((upper + lower) / 2 - 12) <= 1
 
 
 def test_a_pasted_mark_is_centered_in_a_box_that_is_not_at_the_origin():
@@ -127,9 +127,9 @@ def test_a_pasted_mark_is_centered_in_a_box_that_is_not_at_the_origin():
     # would land right for the one button that happens to sit in the middle.
     panel = Image.new("RGBA", (64, 40), (0, 0, 0, 0))
     icons_pil.paste_glyph(panel, "plus", (36, 8, 24, 28), _INK)
-    left, top, right, bottom, _count = _pil_ink(panel)
+    left, upper, right, lower, _count = _pil_ink(panel)
     assert abs((left + right) / 2 - 48) <= 1
-    assert abs((top + bottom) / 2 - 22) <= 1
+    assert abs((upper + lower) / 2 - 22) <= 1
 
 
 def test_the_geometry_is_the_one_registry_both_renderers_draw_from():

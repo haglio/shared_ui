@@ -36,7 +36,7 @@ def _ink(pixmap: QPixmap) -> set[tuple[int, int]]:
 
 
 def _ink_box(pixmap: QPixmap) -> tuple[int, int, int, int]:
-    """The bounding box of what was drawn: ``(left, top, right, bottom)``."""
+    """The bounding box of what was drawn: ``(left, upper, right, lower)``."""
     ink = _ink(pixmap)
     assert ink, "nothing was drawn"
     xs = [x for x, _y in ink]
@@ -98,8 +98,8 @@ def test_every_glyph_fills_its_canvas():
     # The long side has to carry most of the canvas; the short side is allowed to
     # be narrow, because some marks (a chevron) genuinely are.
     for name in set(glyph_names()) - _ONE_BAR:
-        left, top, right, bottom = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
-        width, height = right - left, bottom - top
+        left, upper, right, lower = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+        width, height = right - left, lower - upper
         assert max(width, height) >= 0.6 * 48, f"{name} is small in its box"
         assert min(width, height) >= 0.4 * 48, f"{name} is thin in its box"
 
@@ -108,7 +108,7 @@ def test_a_one_bar_mark_still_spans_its_canvas_the_long_way():
     # The exemption is for the SHORT side only. A minus that also stopped short
     # left to right would read as a hyphen dropped into an empty square.
     for name in _ONE_BAR:
-        left, _top, right, _bottom = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+        left, _upper, right, _lower = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
         assert right - left >= 0.6 * 48, f"{name} is short in its box"
 
 
@@ -144,9 +144,9 @@ def test_every_glyph_sits_in_the_middle_of_its_canvas():
     # Marks are laid beside each other in a button bank, so one drawn off-center
     # reads as misaligned with its neighbors rather than as its own shape.
     for name in glyph_names():
-        left, top, right, bottom = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+        left, upper, right, lower = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
         assert abs((left + right) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
-        assert abs((top + bottom) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
+        assert abs((upper + lower) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
 
 
 def test_a_glyph_is_drawn_in_the_color_it_is_asked_for():
@@ -173,8 +173,10 @@ def test_a_small_glyph_is_the_same_mark_rather_than_a_heavier_one():
     # wireframe -- two marks rather than one shown large and small.
     sizes = (24, 48, 96)
     boxes = [_ink_box(icons.glyph_pixmap("mic", size, TEXT_PRIMARY)) for size in sizes]
-    widths = [(right - left) / size for (left, _t, right, _b), size in zip(boxes, sizes)]
-    heights = [(bottom - top) / size for (_l, top, _r, bottom), size in zip(boxes, sizes)]
+    widths = [(right - left) / size
+              for (left, _upper, right, _lower), size in zip(boxes, sizes)]
+    heights = [(lower - upper) / size
+               for (_left, upper, _right, lower), size in zip(boxes, sizes)]
     assert max(widths) - min(widths) < 0.06
     assert max(heights) - min(heights) < 0.06
     # And the ink stays a like share of the box.  Antialiasing fattens a small
@@ -240,9 +242,9 @@ def test_a_glyph_lands_where_the_caller_placed_it():
     painter = QPainter(canvas)
     icons.draw_glyph(painter, "star", TEXT_PRIMARY, size=24, x=12, y=12)
     painter.end()
-    left, top, right, bottom = _ink_box(canvas)
+    left, upper, right, lower = _ink_box(canvas)
     assert left >= 12 and right <= 36
-    assert top >= 12 and bottom <= 36
+    assert upper >= 12 and lower <= 36
 
 
 def test_drawing_a_glyph_leaves_the_caller_s_painter_as_it_found_it():
@@ -396,6 +398,6 @@ def test_a_stroke_ends_in_a_round_cap_that_reaches_past_its_endpoint():
     from shared_ui.icon_geometry import GLYPHS
 
     (bar,) = GLYPHS["minus"]
-    left, _top, right, _bottom = _ink_box(icons.glyph_pixmap("minus", 48, TEXT_PRIMARY))
+    left, _upper, right, _lower = _ink_box(icons.glyph_pixmap("minus", 48, TEXT_PRIMARY))
     assert left <= bar.x1 - bar.width / 2 + 1
     assert right >= bar.x2 + bar.width / 2 - 1
