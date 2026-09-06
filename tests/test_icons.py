@@ -35,8 +35,8 @@ def _ink(pixmap: QPixmap) -> set[tuple[int, int]]:
     }
 
 
-def _ink_box(pixmap: QPixmap) -> tuple[int, int, int, int]:
-    """The bounding box of what was drawn: ``(left, upper, right, lower)``."""
+def _ink_rect(pixmap: QPixmap) -> tuple[int, int, int, int]:
+    """The bounding rect of what was drawn: ``(left, upper, right, lower)``."""
     ink = _ink(pixmap)
     assert ink, "nothing was drawn"
     xs = [x for x, _y in ink]
@@ -93,23 +93,23 @@ _ONE_BAR = {"minus"}
 
 
 def test_every_glyph_fills_its_canvas():
-    # A mark using only the middle of its box is a mark the eye can't find once
-    # the box is scaled onto a 16px tree row -- the empty margin shrinks with it.
+    # A mark using only the middle of its frame is a mark the eye can't find once
+    # the frame is scaled onto a 16px tree row -- the empty margin shrinks with it.
     # The long side has to carry most of the canvas; the short side is allowed to
     # be narrow, because some marks (a chevron) genuinely are.
     for name in set(glyph_names()) - _ONE_BAR:
-        left, upper, right, lower = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+        left, upper, right, lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
         width, height = right - left, lower - upper
-        assert max(width, height) >= 0.6 * 48, f"{name} is small in its box"
-        assert min(width, height) >= 0.4 * 48, f"{name} is thin in its box"
+        assert max(width, height) >= 0.6 * 48, f"{name} is small in its frame"
+        assert min(width, height) >= 0.4 * 48, f"{name} is thin in its frame"
 
 
 def test_a_one_bar_mark_still_spans_its_canvas_the_long_way():
     # The exemption is for the SHORT side only. A minus that also stopped short
     # left to right would read as a hyphen dropped into an empty square.
     for name in _ONE_BAR:
-        left, _upper, right, _lower = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
-        assert right - left >= 0.6 * 48, f"{name} is short in its box"
+        left, _upper, right, _lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+        assert right - left >= 0.6 * 48, f"{name} is short in its frame"
 
 
 def test_the_speed_pair_is_one_control_drawn_twice():
@@ -132,7 +132,7 @@ def test_the_hollow_plus_traces_the_solid_one():
     # beside it -- an outline a size out reads as two plus signs, not one.
     solid = icons.glyph_pixmap("plus", 48, TEXT_PRIMARY)
     hollow = icons.glyph_pixmap("plus_outline", 48, TEXT_PRIMARY)
-    for solid_edge, hollow_edge in zip(_ink_box(solid), _ink_box(hollow)):
+    for solid_edge, hollow_edge in zip(_ink_rect(solid), _ink_rect(hollow)):
         assert abs(solid_edge - hollow_edge) <= 2
     # And hollow means hollow: the middle of the mark is left empty, which is
     # what the solid underneath it shows through.
@@ -144,7 +144,7 @@ def test_every_glyph_sits_in_the_middle_of_its_canvas():
     # Marks are laid beside each other in a button bank, so one drawn off-center
     # reads as misaligned with its neighbors rather than as its own shape.
     for name in glyph_names():
-        left, upper, right, lower = _ink_box(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+        left, upper, right, lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
         assert abs((left + right) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
         assert abs((upper + lower) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
 
@@ -168,18 +168,18 @@ def test_a_glyph_scales_to_the_size_it_is_asked_for():
 
 def test_a_small_glyph_is_the_same_mark_rather_than_a_heavier_one():
     # The painter is scaled, not the coordinates, so the pen scales with the
-    # drawing: the mark takes up the same share of its box at every size.  A
+    # drawing: the mark takes up the same share of its frame at every size.  A
     # fixed pen width instead leaves a 16px glyph a blob and a 96px one a
     # wireframe -- two marks rather than one shown large and small.
     sizes = (24, 48, 96)
-    boxes = [_ink_box(icons.glyph_pixmap("mic", size, TEXT_PRIMARY)) for size in sizes]
+    rects = [_ink_rect(icons.glyph_pixmap("mic", size, TEXT_PRIMARY)) for size in sizes]
     widths = [(right - left) / size
-              for (left, _upper, right, _lower), size in zip(boxes, sizes)]
+              for (left, _upper, right, _lower), size in zip(rects, sizes)]
     heights = [(lower - upper) / size
-               for (_left, upper, _right, lower), size in zip(boxes, sizes)]
+               for (_left, upper, _right, lower), size in zip(rects, sizes)]
     assert max(widths) - min(widths) < 0.06
     assert max(heights) - min(heights) < 0.06
-    # And the ink stays a like share of the box.  Antialiasing fattens a small
+    # And the ink stays a like share of the frame.  Antialiasing fattens a small
     # glyph proportionally more than a large one, so this is a band, not equality.
     coverage = [
         _ink_pixels(icons.glyph_pixmap("mic", size, TEXT_PRIMARY)) / (size * size)
@@ -242,7 +242,7 @@ def test_a_glyph_lands_where_the_caller_placed_it():
     painter = QPainter(canvas)
     icons.draw_glyph(painter, "star", TEXT_PRIMARY, size=24, x=12, y=12)
     painter.end()
-    left, upper, right, lower = _ink_box(canvas)
+    left, upper, right, lower = _ink_rect(canvas)
     assert left >= 12 and right <= 36
     assert upper >= 12 and lower <= 36
 
@@ -311,7 +311,7 @@ def test_the_registry_is_what_glyph_names_reports():
 
 def test_the_canvas_and_pen_width_are_stated_in_canvas_units():
     # Both are public: a caller composing a mark into its own drawing needs the
-    # box the geometry is written against.
+    # frame the geometry is written against.
     assert icons.CANVAS == 48.0
     assert 0 < icons.PEN_WIDTH < icons.CANVAS
 
@@ -357,7 +357,7 @@ def test_quit_and_restart_are_built_from_one_power_mark():
 
 
 def test_the_enhance_filter_lays_its_funnel_over_the_plus():
-    # Two marks set apart in one box read as two crowded controls; one laid over
+    # Two marks set apart in one frame read as two crowded controls; one laid over
     # the other reads as a single sign about a single thing. So the funnel's
     # mouth has to reach back across the plus's lower arm rather than starting
     # clear of it -- which in ink is that the mark comes out in ONE piece. Set
@@ -365,7 +365,7 @@ def test_the_enhance_filter_lays_its_funnel_over_the_plus():
     mark = _ink(icons.glyph_pixmap("enhance_filter", 48, TEXT_PRIMARY))
     assert _pieces(mark) == 1
 
-    # It is still two marks in one box, though, rather than a single drawing:
+    # It is still two marks in one frame, though, rather than a single drawing:
     # the plus's arm reaches the left edge and the funnel's stem hangs to the
     # lower edge, and the piece above is what holds those two ends together.
     assert any(x <= 8 for x, _y in mark), "the plus's arm is missing"
@@ -398,6 +398,6 @@ def test_a_bar_ends_in_a_round_cap_that_reaches_past_its_endpoint():
     from shared_ui.icon_geometry import GLYPHS
 
     (bar,) = GLYPHS["minus"]
-    left, _upper, right, _lower = _ink_box(icons.glyph_pixmap("minus", 48, TEXT_PRIMARY))
+    left, _upper, right, _lower = _ink_rect(icons.glyph_pixmap("minus", 48, TEXT_PRIMARY))
     assert left <= bar.x1 - bar.width / 2 + 1
     assert right >= bar.x2 + bar.width / 2 - 1

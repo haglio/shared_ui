@@ -70,15 +70,15 @@ def glyph_image(name: str, size: int, color) -> Image.Image:
     return image
 
 
-def paste_glyph(image: Image.Image, name: str, box: tuple[int, int, int, int],
+def paste_glyph(image: Image.Image, name: str, frame: tuple[int, int, int, int],
                 color) -> None:
-    """Lay *name* over *image*, centered in ``box`` and as big as its short side.
+    """Lay *name* over *image*, centered in ``frame`` and as big as its short side.
 
     Composited rather than pasted flat, so the mark sits on whatever the HUD has
     already drawn there -- a button's fill, the panel, the video -- instead of
     stamping a transparent square over it.
     """
-    x, y, w, h = box
+    x, y, w, h = frame
     side = max(1, min(int(w), int(h)))
     glyph = glyph_image(name, side, color)
     image.alpha_composite(glyph, (int(x + (w - side) / 2), int(y + (h - side) / 2)))
@@ -112,21 +112,21 @@ def _draw(draw: ImageDraw.ImageDraw, shape, ink, scale: float) -> None:
             _draw_path(draw, (*shape.points, shape.points[0]), ink,
                          shape.width * scale, scale)
     elif isinstance(shape, RoundedRect):
-        box = _box(shape.x, shape.y, shape.x + shape.w, shape.y + shape.h, scale)
+        frame = _frame(shape.x, shape.y, shape.x + shape.w, shape.y + shape.h, scale)
         if shape.fill:
-            draw.rounded_rectangle(box, radius=shape.radius * scale, fill=ink)
+            draw.rounded_rectangle(frame, radius=shape.radius * scale, fill=ink)
         else:
-            grown = _centered(box, shape.width * scale)
+            grown = _centered(frame, shape.width * scale)
             draw.rounded_rectangle(grown, radius=shape.radius * scale + shape.width
                                    * scale / 2, outline=ink,
                                    width=max(1, round(shape.width * scale)))
     elif isinstance(shape, Ellipse):
-        box = _box(shape.cx - shape.rx, shape.cy - shape.ry,
+        frame = _frame(shape.cx - shape.rx, shape.cy - shape.ry,
                    shape.cx + shape.rx, shape.cy + shape.ry, scale)
         if shape.fill:
-            draw.ellipse(box, fill=ink)
+            draw.ellipse(frame, fill=ink)
         else:
-            draw.ellipse(_centered(box, shape.width * scale), outline=ink,
+            draw.ellipse(_centered(frame, shape.width * scale), outline=ink,
                          width=max(1, round(shape.width * scale)))
     elif isinstance(shape, Arc):
         _arc(draw, shape, ink, scale)
@@ -142,14 +142,14 @@ def _arc(draw: ImageDraw.ImageDraw, shape: Arc, ink, scale: float) -> None:
     direction, so the Qt sweep ``[start, start + span]`` is the Pillow sweep
     ``[-(start + span), -start]`` -- same arc, drawn the other way round.
     """
-    box = _centered(_box(shape.x, shape.y, shape.x + shape.w, shape.y + shape.h, scale),
+    frame = _centered(_frame(shape.x, shape.y, shape.x + shape.w, shape.y + shape.h, scale),
                     shape.width * scale)
     width = max(1, round(shape.width * scale))
     # A negative span sweeps the same arc for Qt and the long way round here, so
     # it is turned into the equivalent positive one before converting.
     start = shape.start if shape.span >= 0 else shape.start + shape.span
     span = abs(shape.span)
-    draw.arc(box, -(start + span), -start, fill=ink, width=width)
+    draw.arc(frame, -(start + span), -start, fill=ink, width=width)
     for angle in (start, start + span):
         _cap(draw, *_on_arc(shape, angle), ink, shape.width * scale, scale)
 
@@ -161,20 +161,20 @@ def _on_arc(shape: Arc, degrees: float) -> tuple[float, float]:
             shape.y + shape.h / 2 - shape.h / 2 * math.sin(radians))
 
 
-def _box(x0: float, y0: float, x1: float, y1: float, scale: float) -> list:
+def _frame(x0: float, y0: float, x1: float, y1: float, scale: float) -> list:
     return [(x0 * scale, y0 * scale), (x1 * scale, y1 * scale)]
 
 
-def _centered(box: list, width: float) -> list:
-    """*box* grown by half a pen width on every side.
+def _centered(frame: list, width: float) -> list:
+    """*frame* grown by half a pen width on every side.
 
-    Pillow draws an outline INSIDE the box it is given, where QPainter centers
+    Pillow draws an outline INSIDE the frame it is given, where QPainter centers
     the pen on the path -- so the same numbers give Pillow a mark half a pen
-    width smaller all round.  Growing the box first is what puts the two renderings on
+    width smaller all round.  Growing the frame first is what puts the two renderings on
     top of each other.
     """
     half = width / 2
-    (x0, y0), (x1, y1) = box
+    (x0, y0), (x1, y1) = frame
     return [(x0 - half, y0 - half), (x1 + half, y1 + half)]
 
 

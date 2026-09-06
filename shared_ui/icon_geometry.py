@@ -13,7 +13,7 @@ through Pillow.  Neither renderer decides anything about the shape.  This module
 imports nothing but ``math``, so a Pillow-only process never pulls in Qt and a
 Qt-only one never pulls in Pillow.
 
-Coordinates are in a :data:`CANVAS`-square box and the renderers scale from
+Coordinates are in a :data:`CANVAS`-square frame and the renderers scale from
 there, so a mark keeps its proportions and its pen weight whether it lands on
 a 14px HUD button or a 96px panel.  Angles are Qt's convention -- degrees
 counter-clockwise from 3 o'clock, given as a start and a span -- and the Pillow
@@ -26,9 +26,9 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-# Every glyph is drawn to fill this box, inset a little from its edge so a round
+# Every glyph is drawn to fill this frame, inset a little from its edge so a round
 # cap or a fat arrowhead still has room.  A mark that uses only the middle third
-# of its canvas is a mark the eye can't find once the box is scaled onto a tree
+# of its canvas is a mark the eye can't find once the frame is scaled onto a tree
 # row: the empty margin is scaled down with it.
 CANVAS = 48.0
 
@@ -239,11 +239,11 @@ def _enhance_filter() -> tuple:
     a bare funnel would not say WHAT it kept.
 
     The funnel sits down and right of the plus and crosses its lower arm rather
-    than clearing it: two marks set apart in one box read as two controls
+    than clearing it: two marks set apart in one frame read as two controls
     crowded together, where one laid over the other reads as a single sign about
     a single thing.
     """
-    plus = (16.0, 16.0)                                   # up in the box's corner
+    plus = (16.0, 16.0)                                   # up in the frame's corner
     bar, reach = 6.0, 10.0
     return (
         Line(plus[0], plus[1] - reach, plus[0], plus[1] + reach, bar),
@@ -425,7 +425,7 @@ GLYPHS: dict[str, tuple] = {
     ),
     # The play triangle's corners are rounded, like the transport marks in an icon
     # font: hard points read as a sharper, lighter mark than the ones beside it.
-    # Its ink sits right of the box's center because a triangle's weight does --
+    # Its ink sits right of the frame's center because a triangle's weight does --
     # the centroid lands on 24, which is where the eye reads middle.
     "play": (Polygon(((15, 8), (15, 40), (39, 24)), round_radius=3),),
     "pause": (                                            # two bars, rounded to match
