@@ -7,7 +7,7 @@ from PyQt6.QtGui import QImage
 from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QHBoxLayout, QWidget
 
-from shared_ui.colors import BG_PRIMARY, TOGGLE_KNOB, TOGGLE_OFF, TOGGLE_ON
+from shared_ui.colors import BG_PRIMARY, TOGGLE_HANDLE, TOGGLE_OFF, TOGGLE_ON
 from shared_ui.toggle_switch import ToggleSwitch
 
 _OFF_THE_SWITCH = 200
@@ -105,18 +105,18 @@ def test_a_layout_takes_the_switch_at_its_own_size():
     assert switch.height() == switch.sizeHint().height()
 
 
-def test_the_knob_and_track_show_which_state_it_is_in():
+def test_the_handle_and_track_show_which_state_it_is_in():
     """The paint is the only thing that tells the user the state: on is the
-    family's blue track with the knob right, off the muted track, knob left."""
+    family's blue track with the handle right, off the muted track, handle left."""
     off = _rendered(ToggleSwitch())
-    assert off.pixelColor(10, 10) == TOGGLE_KNOB       # knob left
+    assert off.pixelColor(10, 10) == TOGGLE_HANDLE     # handle left
     assert off.pixelColor(28, 10) == TOGGLE_OFF        # muted track
 
     on = ToggleSwitch()
     on.setChecked(True)
     on = _rendered(on)
     assert on.pixelColor(10, 10) == TOGGLE_ON          # blue track
-    assert on.pixelColor(28, 10) == TOGGLE_KNOB        # knob right
+    assert on.pixelColor(28, 10) == TOGGLE_HANDLE      # handle right
 
 
 def test_a_disabled_switch_dims():
