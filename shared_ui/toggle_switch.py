@@ -1,4 +1,4 @@
-"""A plain on/off switch: a pill with a knob that slides across.
+"""A plain on/off switch: a pill with a handle that slides across.
 
 Used where a setting is a standing state rather than a thing you tick as part
 of filling in a form -- a pipeline that is running or paused, an auto-enhance
@@ -22,10 +22,10 @@ from PyQt6.QtCore import QRectF, QSize, Qt
 from PyQt6.QtGui import QPainter, QPen
 from PyQt6.QtWidgets import QAbstractButton
 
-from shared_ui.colors import TEXT_SECONDARY, TOGGLE_KNOB, TOGGLE_OFF, TOGGLE_ON
+from shared_ui.colors import TEXT_SECONDARY, TOGGLE_HANDLE, TOGGLE_OFF, TOGGLE_ON
 
 _TRACK = QSize(38, 20)   # the pill
-_KNOB_INSET = 3          # gap between the knob and the track's edge
+_HANDLE_INSET = 3        # gap between the handle and the track's edge
 _GAP = 8                 # between the pill and its label
 _DISABLED_OPACITY = 0.4  # how far a switch fades when it can't be thrown
 
@@ -68,11 +68,11 @@ class ToggleSwitch(QAbstractButton):
         painter.setBrush(TOGGLE_ON if self.isChecked() else TOGGLE_OFF)
         painter.drawRoundedRect(track, track.height() / 2, track.height() / 2)
 
-        diameter = track.height() - 2 * _KNOB_INSET
-        x = (track.right() - _KNOB_INSET - diameter if self.isChecked()
-             else track.left() + _KNOB_INSET)
-        painter.setBrush(TOGGLE_KNOB)
-        painter.drawEllipse(QRectF(x, track.top() + _KNOB_INSET, diameter, diameter))
+        diameter = track.height() - 2 * _HANDLE_INSET
+        x = (track.right() - _HANDLE_INSET - diameter if self.isChecked()
+             else track.left() + _HANDLE_INSET)
+        painter.setBrush(TOGGLE_HANDLE)
+        painter.drawEllipse(QRectF(x, track.top() + _HANDLE_INSET, diameter, diameter))
 
         if self.text():
             painter.setPen(QPen(TEXT_SECONDARY))

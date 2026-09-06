@@ -60,7 +60,7 @@ WHITE: Rgb =(255, 255, 255)
 # ---------------------------------------------------------------------------
 TOGGLE_ON: Rgb =BLUE
 TOGGLE_OFF: Rgb =TEXT_MUTED  # the muted gray everything else off wears
-TOGGLE_KNOB: Rgb =WHITE
+TOGGLE_HANDLE: Rgb =WHITE
 
 
 def as_hex(rgb: Rgb) -> str:

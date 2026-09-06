@@ -51,7 +51,7 @@ WHITE = QColor(*palette.WHITE)
 # ---------------------------------------------------------------------------
 TOGGLE_ON = QColor(*palette.TOGGLE_ON)
 TOGGLE_OFF = QColor(*palette.TOGGLE_OFF)
-TOGGLE_KNOB = QColor(*palette.TOGGLE_KNOB)
+TOGGLE_HANDLE = QColor(*palette.TOGGLE_HANDLE)
 
 
 # ---------------------------------------------------------------------------
