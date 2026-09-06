@@ -16,7 +16,7 @@ _OFF_THE_SWITCH = 200
 def _rendered(switch: ToggleSwitch) -> QImage:
     """The switch on the dark ground it sits on in every app -- the widget's
     own window background left out, since under the offscreen backend that
-    is a light gray no app ever shows behind it."""
+    is a light gray no app ever shows beneath it."""
     switch.resize(switch.sizeHint())
     image = QImage(switch.size(), QImage.Format.Format_ARGB32)
     image.fill(BG_PRIMARY)

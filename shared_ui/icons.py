@@ -18,7 +18,7 @@ guaranteed to carry them (Windows draws a tofu box for the ones it lacks), and
 because a typed glyph's weight then follows whatever face happens to be
 installed rather than the weight of the marks beside it.
 
-What is NOT here: an app's own composition -- the chip behind a badge, which
+What is NOT here: an app's own composition -- the chip under a badge, which
 levels get a lettered mark, which button wears which glyph.  That is each app's
 business and it stays there.
 """

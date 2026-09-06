@@ -47,7 +47,7 @@ class _GuiThreadCall(QObject):
     Qt builds widgets on the GUI thread or not at all, and several callers here
     are background workers: evolver's pipeline stages report a failure from the
     thread the pipeline runs on.  The slot is decorated because PyQt routes an
-    undecorated Python callable through a proxy that stays behind in the
+    undecorated Python callable through a proxy that stays put in the
     connecting thread -- which delivers the work back to the very thread this
     exists to leave.
     """
