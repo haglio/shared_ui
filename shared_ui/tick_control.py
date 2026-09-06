@@ -1,11 +1,11 @@
-"""A checkbox that paints its own ticked-box indicator.
+"""A tick control that paints its own indicator.
 
 Once a Qt stylesheet touches a ``QCheckBox``, the native Windows dark
-indicator collapses to a bare chevron with no box outline, which reads as a
-down-caret rather than a ticked box.  This widget draws the indicator
-itself -- a rounded square that fills with the accent colour and shows a
-real check mark when checked -- so every styled app gets a checkbox that
-actually looks like checking a box, independent of the OS theme.
+indicator collapses to a bare chevron with no outline at all, which reads as
+a down-caret rather than as something ticked.  This widget draws the
+indicator itself -- a rounded square that fills with the accent color and
+shows a real check mark when ticked -- so every styled app gets a control
+that plainly reads as ticked or not, independent of the OS theme.
 """
 
 from __future__ import annotations
@@ -24,39 +24,40 @@ from shared_ui.colors import (
     WHITE,
 )
 
-_BOX = 16        # indicator side length (px)
-_GAP = 7         # space between the box and the label
+_INDICATOR = 16  # side length (px)
+_GAP = 7         # space between the indicator and the label
 _RADIUS = 3.0    # indicator corner rounding
 
-# The check mark as a fraction of the box: a short leg down into a long
+# The check mark as a fraction of the indicator: a short leg down into a long
 # leg up -- the classic tick, not a symmetric "v".
 _TICK_POINTS = ((0.24, 0.52), (0.42, 0.70), (0.78, 0.30))
 
 
-class CheckBox(QCheckBox):
+class TickControl(QCheckBox):
     def paintEvent(self, _event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-        box = self._indicator_rect()
+        indicator = self._indicator_rect()
         enabled = self.isEnabled()
 
         if self.isChecked():
-            # A box that is on and cannot be changed still reads as on: the
+            # One that is on and cannot be changed still reads as on: the
             # ground a control that is on sits on, in place of the accent.
             fill = BLUE if enabled else BG_BUTTON_ACTIVE
             painter.setPen(QPen(fill, 1))
             painter.setBrush(fill)
-            painter.drawRoundedRect(box, _RADIUS, _RADIUS)
-            self._draw_tick(painter, box, enabled)
+            painter.drawRoundedRect(indicator, _RADIUS, _RADIUS)
+            self._draw_tick(painter, indicator, enabled)
         else:
             painter.setPen(QPen(BORDER_SUBTLE, 1.4))
             painter.setBrush(BG_SECONDARY)
-            painter.drawRoundedRect(box.adjusted(0.7, 0.7, -0.7, -0.7), _RADIUS, _RADIUS)
+            painter.drawRoundedRect(
+                indicator.adjusted(0.7, 0.7, -0.7, -0.7), _RADIUS, _RADIUS)
 
         text = self.text()
         if text:
             painter.setPen(TEXT_SECONDARY if enabled else TEXT_MUTED)
-            left = box.right() + _GAP
+            left = indicator.right() + _GAP
             painter.drawText(
                 QRectF(left, 0, self.width() - left, self.height()),
                 Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
@@ -65,13 +66,13 @@ class CheckBox(QCheckBox):
         painter.end()
 
     def _indicator_rect(self) -> QRectF:
-        top = (self.height() - _BOX) / 2.0
-        return QRectF(1.0, top, float(_BOX), float(_BOX))
+        top = (self.height() - _INDICATOR) / 2.0
+        return QRectF(1.0, top, float(_INDICATOR), float(_INDICATOR))
 
-    def _draw_tick(self, painter: QPainter, box: QRectF, enabled: bool):
-        side = box.width()
+    def _draw_tick(self, painter: QPainter, indicator: QRectF, enabled: bool):
+        side = indicator.width()
         points = QPolygonF([
-            QPointF(box.left() + fx * side, box.top() + fy * side)
+            QPointF(indicator.left() + fx * side, indicator.top() + fy * side)
             for fx, fy in _TICK_POINTS
         ])
         pen = QPen(WHITE if enabled else TEXT_SECONDARY)
@@ -83,8 +84,8 @@ class CheckBox(QCheckBox):
         painter.drawPolyline(points)
 
     def sizeHint(self) -> QSize:
-        width = _BOX + _GAP + self.fontMetrics().horizontalAdvance(self.text())
-        height = max(_BOX + 4, self.fontMetrics().height() + 4)
+        width = _INDICATOR + _GAP + self.fontMetrics().horizontalAdvance(self.text())
+        height = max(_INDICATOR + 4, self.fontMetrics().height() + 4)
         return QSize(width, height)
 
     def minimumSizeHint(self) -> QSize:
