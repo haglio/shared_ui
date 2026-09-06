@@ -120,7 +120,7 @@ class Arc:
 # The marks
 # ---------------------------------------------------------------------------
 # The bolt and the ring it bursts out of.  The ring is centered and broken where
-# the bolt crosses it, top-right and bottom-left, so the bolt reads as passing
+# the bolt crosses it, top-right and lower-left, so the bolt reads as passing
 # THROUGH rather than as a scribble laid on top of a circle -- the gaps are what
 # make the two one mark.  Kept in canvas units here so both are stated against
 # one center: the ring's radius, and the angles its two arcs stop at.
@@ -142,13 +142,13 @@ def _bolt_ring() -> tuple:
     that tells it apart from the arcs beside it.
     """
     return (
-        # Over the top and down the left; under the bottom and up the right.
+        # Over the top and down the left; under the lower edge and up the right.
         Arc(*_BOLT_RING, 78, _BOLT_RING_ARC, _BOLT_RING_STROKE),
         Arc(*_BOLT_RING, 258, _BOLT_RING_ARC, _BOLT_RING_STROKE),
         Polygon((
             (34, 6),                              # the top point, clear of the ring
             (28.5, 22.5), (36, 22.5),             # in to the waist, out to the ledge
-            (14.5, 42),                           # the bottom point, clear of it too
+            (14.5, 42),                           # the lower point, clear of it too
             (20, 27.5), (12, 27.5),               # back up to the waist's other side
         )),
     )
@@ -156,10 +156,10 @@ def _bolt_ring() -> tuple:
 
 def _chevron(pointing_left: bool) -> tuple:
     """A left or right chevron, drawn corner to corner of the canvas."""
-    near, far, top, bottom = 15, 31, 9, 39
+    near, far, upper, lower = 15, 31, 9, 39
     if pointing_left:
-        return (Polyline(((far, top), (near, 24), (far, bottom))),)
-    return (Polyline(((near, top), (far, 24), (near, bottom))),)
+        return (Polyline(((far, upper), (near, 24), (far, lower))),)
+    return (Polyline(((near, upper), (far, 24), (near, lower))),)
 
 
 # The undo/redo arc: a ring broken across one upper quadrant, the arrowhead
@@ -272,8 +272,8 @@ def _copy() -> tuple:
         Line(19.5, 6, 36.5, 6),                        # its top edge
         Arc(33, 6, 7, 7, 0, 90),                       # its top-right corner
         Line(40, 9.5, 40, 28.5),                       # its right edge
-        Arc(33, 25, 7, 7, 270, 90),                    # its bottom-right corner
-        Line(36.5, 32, 34.5, 32),                      # what is left of its bottom
+        Arc(33, 25, 7, 7, 270, 90),                    # its lower-right corner
+        Line(36.5, 32, 34.5, 32),                      # what is left of its lower edge
         RoundedRect(8, 16, 24, 26, radius),            # the front sheet, whole
     )
 
@@ -291,7 +291,7 @@ def _loop() -> tuple:
         Arc(25, 13, 14, 14, 0, 90),                    # around the top-right corner
         Polygon(((34.5, 20), (43.5, 20), (39, 29))),   # and down into its head
         Line(36, 35, 16, 35),                          # the lower run, right to left
-        Arc(9, 21, 14, 14, 180, 90),                   # around the bottom-left corner
+        Arc(9, 21, 14, 14, 180, 90),                   # around the lower-left corner
         Polygon(((13.5, 28), (4.5, 28), (9, 19))),     # and up into its head
     )
 
