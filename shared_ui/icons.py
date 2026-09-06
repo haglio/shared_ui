@@ -100,7 +100,7 @@ def glyph_icon(name: str, *, color=None, size: int = int(CANVAS)) -> QIcon:
     return icon
 
 
-def _stroke(painter: QPainter, ink: QColor, width: float) -> None:
+def _set_pen(painter: QPainter, ink: QColor, width: float) -> None:
     """Set up an outline pen: round caps and joins, so a mark has no sharp ends."""
     pen = QPen(ink)
     pen.setWidthF(width)
@@ -117,37 +117,37 @@ def _solid(painter: QPainter, ink: QColor) -> None:
 
 def _draw(painter: QPainter, shape, ink: QColor) -> None:
     if isinstance(shape, Line):
-        _stroke(painter, ink, shape.width)
+        _set_pen(painter, ink, shape.width)
         painter.drawLine(QPointF(shape.x1, shape.y1), QPointF(shape.x2, shape.y2))
     elif isinstance(shape, Polyline):
-        _stroke(painter, ink, shape.width)
+        _set_pen(painter, ink, shape.width)
         painter.drawPolyline(*(QPointF(px, py) for px, py in shape.points))
     elif isinstance(shape, Polygon):
         if shape.fill and shape.round_radius:
-            # Filled AND stroked with its own outline: the stroke's round joins
+            # Filled AND drawn as its own outline: the outline's round joins
             # are what round the corners, and it grows the shape by the radius.
-            _stroke(painter, ink, shape.round_radius * 2)
+            _set_pen(painter, ink, shape.round_radius * 2)
             painter.setBrush(ink)
         elif shape.fill:
             _solid(painter, ink)
         else:
-            _stroke(painter, ink, shape.width)
+            _set_pen(painter, ink, shape.width)
         painter.drawPolygon(*(QPointF(px, py) for px, py in shape.points))
     elif isinstance(shape, RoundedRect):
         if shape.fill:
             _solid(painter, ink)
         else:
-            _stroke(painter, ink, shape.width)
+            _set_pen(painter, ink, shape.width)
         painter.drawRoundedRect(QRectF(shape.x, shape.y, shape.w, shape.h),
                                 shape.radius, shape.radius)
     elif isinstance(shape, Ellipse):
         if shape.fill:
             _solid(painter, ink)
         else:
-            _stroke(painter, ink, shape.width)
+            _set_pen(painter, ink, shape.width)
         painter.drawEllipse(QPointF(shape.cx, shape.cy), shape.rx, shape.ry)
     elif isinstance(shape, Arc):
-        _stroke(painter, ink, shape.width)
+        _set_pen(painter, ink, shape.width)
         # QPainter takes sixteenths of a degree, counter-clockwise from 3
         # o'clock -- which is the convention the geometry is written in.
         painter.drawArc(QRectF(shape.x, shape.y, shape.w, shape.h),
