@@ -152,5 +152,6 @@ def test_a_field_paints_its_selection_in_the_family_blue(selection_pixels):
 
 def test_the_selected_words_are_still_legible_once_painted(selection_pixels):
     """The ink as well as the ground: a selection drawn in the family's blue with
-    the desktop's black text would pass every check above and read as a hole."""
+    the desktop's black text would pass every check above and read as a dark
+    patch rather than as picked words."""
     assert selection_pixels[TEXT_PRIMARY.name()] > 20, selection_pixels.most_common(5)
