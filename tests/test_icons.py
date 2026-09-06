@@ -316,7 +316,7 @@ def test_the_canvas_and_stroke_are_stated_in_canvas_units():
 
 def test_a_mark_never_erases_the_ground_it_is_drawn_on():
     # The copy mark holds a gap between its two sheets, and the apps each cut
-    # that gap by erasing -- which works on an empty pixmap and punches a hole
+    # that gap by erasing -- which works on an empty pixmap and punches a cutout
     # through anything else.  Clipping is what makes the mark safe to lay over a
     # chip or a thumbnail, so the ground has to survive under every glyph.
     for name in glyph_names():
