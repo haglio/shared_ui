@@ -94,22 +94,22 @@ def _rgba(color) -> tuple[int, int, int, int]:
 def _draw(draw: ImageDraw.ImageDraw, shape, ink, scale: float) -> None:
     if isinstance(shape, Line):
         points = ((shape.x1, shape.y1), (shape.x2, shape.y2))
-        _stroke_path(draw, points, ink, shape.width * scale, scale)
+        _draw_path(draw, points, ink, shape.width * scale, scale)
     elif isinstance(shape, Polyline):
-        _stroke_path(draw, shape.points, ink, shape.width * scale, scale)
+        _draw_path(draw, shape.points, ink, shape.width * scale, scale)
     elif isinstance(shape, Polygon):
         if shape.fill:
             draw.polygon([(px * scale, py * scale) for px, py in shape.points], fill=ink)
             if shape.round_radius:
-                # Its own outline, stroked with round joins -- which is what
+                # Its own outline, drawn with round joins -- which is what
                 # rounds the corners, and grows the shape by the radius.
-                _stroke_path(draw, (*shape.points, shape.points[0]), ink,
+                _draw_path(draw, (*shape.points, shape.points[0]), ink,
                              shape.round_radius * 2 * scale, scale)
         else:
             # Closed as a path rather than as an outlined polygon: Pillow's
             # polygon outline is hard-cornered whatever the width, and a star's
             # points come out chipped.
-            _stroke_path(draw, (*shape.points, shape.points[0]), ink,
+            _draw_path(draw, (*shape.points, shape.points[0]), ink,
                          shape.width * scale, scale)
     elif isinstance(shape, RoundedRect):
         box = _box(shape.x, shape.y, shape.x + shape.w, shape.y + shape.h, scale)
@@ -178,7 +178,7 @@ def _centered(box: list, width: float) -> list:
     return [(x0 - half, y0 - half), (x1 + half, y1 + half)]
 
 
-def _stroke_path(draw: ImageDraw.ImageDraw, points, ink, width: float,
+def _draw_path(draw: ImageDraw.ImageDraw, points, ink, width: float,
                  scale: float) -> None:
     """A polyline in *ink*, with rounded joints and rounded ends."""
     scaled = [(px * scale, py * scale) for px, py in points]

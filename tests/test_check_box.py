@@ -59,7 +59,7 @@ def test_checked_draws_light_tick_on_filled_box():
     cb.resize(140, 24)
     blue, white, _ = _classify(cb)
     assert blue > 30      # a solid accent fill...
-    assert white > 4      # ...with a light check mark stroked over it
+    assert white > 4      # ...with a light check mark drawn over it
 
 
 def test_unchecked_draws_empty_box_no_tick():

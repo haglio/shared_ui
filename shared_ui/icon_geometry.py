@@ -41,7 +41,7 @@ PEN_WIDTH = 5.0
 # ---------------------------------------------------------------------------
 # The primitives.  Six shapes cover every mark here, and both renderers can draw
 # all six -- which is the constraint that keeps the two in step.  A shape with
-# ``fill`` set is a solid; otherwise it is stroked at ``width``.
+# ``fill`` set is a solid; otherwise it is outlined at ``width``.
 # ---------------------------------------------------------------------------
 @dataclass(frozen=True)
 class Line:
@@ -62,7 +62,7 @@ class Polyline:
 class Polygon:
     """A closed shape, solid when *fill* is set and an outline otherwise.
 
-    *round_radius* rounds a solid one's corners, by stroking its own outline at
+    *round_radius* rounds a solid one's corners, by drawing its own outline at
     twice that width with round joins before filling it.  A play triangle drawn
     with hard points reads as sharper and lighter than the marks beside it, and
     a filled polygon is the one place this family's round caps and joins did not
@@ -98,7 +98,7 @@ class Ellipse:
 
 @dataclass(frozen=True)
 class Arc:
-    """A stroked arc of the ellipse inscribed in ``(x, y, w, h)``.
+    """An outlined arc of the ellipse inscribed in ``(x, y, w, h)``.
 
     ``start`` and ``span`` are degrees counter-clockwise from 3 o'clock, the
     convention QPainter uses (in sixteenths, which the Qt renderer multiplies
@@ -214,7 +214,7 @@ def _plus_outline() -> tuple:
     softens them, and matching those caps exactly would cost an arc per arm for a
     difference under a pixel at any size a badge is drawn at.
 
-    Stroked thin, and thinner than the default: at the full weight the two arms
+    Outlined thin, and thinner than the default: at the full weight the two arms
     close up and the inside of the mark reads as a heavier bar rather than as
     empty.
     """
