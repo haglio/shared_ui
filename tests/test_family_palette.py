@@ -2,7 +2,7 @@
 
 A style sheet dresses what it names.  What it does not name stays the palette's,
 and the palette an app starts with is the desktop's -- which put the user's
-accent color, an orange, behind every selected word in these dark apps.  These
+accent color, an orange, under every selected word in these dark apps.  These
 tests hand in a fabricated desktop accent as the base and check that no role the
 family owns comes back still wearing it.
 """
