@@ -367,7 +367,7 @@ def test_the_enhance_filter_lays_its_funnel_over_the_plus():
 
     # It is still two marks in one box, though, rather than a single drawing:
     # the plus's arm reaches the left edge and the funnel's stem hangs to the
-    # bottom, and the piece above is what holds those two ends together.
+    # lower edge, and the piece above is what holds those two ends together.
     assert any(x <= 8 for x, _y in mark), "the plus's arm is missing"
     assert any(y >= 42 for _x, y in mark), "the funnel's stem is missing"
 
