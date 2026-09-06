@@ -124,7 +124,7 @@ def _draw(painter: QPainter, shape, ink: QColor) -> None:
         painter.drawPolyline(*(QPointF(px, py) for px, py in shape.points))
     elif isinstance(shape, Polygon):
         if shape.fill and shape.round_radius:
-            # Filled AND drawn as its own outline: the outline's round joins
+            # Filled AND outlined with its own outline: the outline's round joins
             # are what round the corners, and it grows the shape by the radius.
             _set_pen(painter, ink, shape.round_radius * 2)
             painter.setBrush(ink)

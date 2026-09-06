@@ -325,7 +325,7 @@ def _reset() -> tuple:
 # arrowhead.  Drawn to the weight of a toolbar icon font's power symbol, which is
 # what the apps' menus sat next to.
 _POWER_RING = (9.0, 12.0, 30.0, 30.0)  # center (24, 27), radius 15
-_POWER_PEN = Line(24, 6, 24, 24)
+_POWER_BAR = Line(24, 6, 24, 24)
 
 
 def _power() -> tuple:
@@ -334,7 +334,7 @@ def _power() -> tuple:
     Off, quit, shut down: the mark every one of these apps' quit controls wears,
     so the same act looks the same whichever window it is in.
     """
-    return (Arc(*_POWER_RING, 128, 284), _POWER_PEN)
+    return (Arc(*_POWER_RING, 128, 284), _POWER_BAR)
 
 
 def _restart() -> tuple:
@@ -352,7 +352,7 @@ def _restart() -> tuple:
         # it read as the ring simply ending.  Widening it is what makes the mark
         # say "and back on again" instead of "off, with a nick in the circle".
         Polygon(((29.1, 9.8), (41.6, 12.3), (29.4, 22.5))),
-        _POWER_PEN,
+        _POWER_BAR,
     )
 
 
