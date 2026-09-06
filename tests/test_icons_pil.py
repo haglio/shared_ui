@@ -201,7 +201,7 @@ def test_drawing_a_hud_mark_never_drags_qt_into_a_player():
 
 def test_a_mark_is_never_brighter_than_the_ink_it_was_drawn_in():
     # Lanczos overshoots at a hard edge. Drawn in color and then resampled, a
-    # mark came out with pixels brighter than its own ink around every stroke --
+    # mark came out with pixels brighter than its own ink around every edge --
     # a faint halo, and enough near-white to trip a HUD's own checks for it.
     # Drawing a coverage mask and coloring afterwards keeps the ink exact.
     for name in glyph_names():

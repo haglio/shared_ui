@@ -14,7 +14,7 @@ imports nothing but ``math``, so a Pillow-only process never pulls in Qt and a
 Qt-only one never pulls in Pillow.
 
 Coordinates are in a :data:`CANVAS`-square box and the renderers scale from
-there, so a mark keeps its proportions and its stroke weight whether it lands on
+there, so a mark keeps its proportions and its pen weight whether it lands on
 a 14px HUD button or a 96px panel.  Angles are Qt's convention -- degrees
 counter-clockwise from 3 o'clock, given as a start and a span -- and the Pillow
 renderer converts; one convention had to win, and the geometry was written
@@ -32,10 +32,10 @@ from dataclasses import dataclass
 # row: the empty margin is scaled down with it.
 CANVAS = 48.0
 
-# The default stroke, in canvas units.  Renderers scale it with the drawing, so
+# The default pen width, in canvas units.  Renderers scale it with the drawing, so
 # a glyph at 14px carries under a third of this width and reads as the same mark
 # rather than as a heavier one shrunk.
-STROKE = 5.0
+PEN_WIDTH = 5.0
 
 
 # ---------------------------------------------------------------------------
@@ -49,13 +49,13 @@ class Line:
     y1: float
     x2: float
     y2: float
-    width: float = STROKE
+    width: float = PEN_WIDTH
 
 
 @dataclass(frozen=True)
 class Polyline:
     points: tuple[tuple[float, float], ...]
-    width: float = STROKE
+    width: float = PEN_WIDTH
 
 
 @dataclass(frozen=True)
@@ -71,7 +71,7 @@ class Polygon:
 
     points: tuple[tuple[float, float], ...]
     fill: bool = True
-    width: float = STROKE
+    width: float = PEN_WIDTH
     round_radius: float = 0.0
 
 
@@ -83,7 +83,7 @@ class RoundedRect:
     h: float
     radius: float
     fill: bool = False
-    width: float = STROKE
+    width: float = PEN_WIDTH
 
 
 @dataclass(frozen=True)
@@ -93,7 +93,7 @@ class Ellipse:
     rx: float
     ry: float
     fill: bool = False
-    width: float = STROKE
+    width: float = PEN_WIDTH
 
 
 @dataclass(frozen=True)
@@ -113,7 +113,7 @@ class Arc:
     h: float
     start: float
     span: float
-    width: float = STROKE
+    width: float = PEN_WIDTH
 
 
 # ---------------------------------------------------------------------------
@@ -126,7 +126,7 @@ class Arc:
 # one center: the ring's radius, and the angles its two arcs stop at.
 _BOLT_RING = (8.5, 8.5, 31.0, 31.0)   # center (24, 24), radius 15.5
 _BOLT_RING_ARC = 148.0                # each arc's span; the two gaps take the rest
-_BOLT_RING_STROKE = 4.2               # thinner than the default: at the full weight
+_BOLT_RING_PEN = 4.2                  # thinner than the default: at the full weight
                                       # the ring closes on the bolt and the two
                                       # merge into one blob at button size
 
@@ -143,8 +143,8 @@ def _bolt_ring() -> tuple:
     """
     return (
         # Over the top and down the left; under the lower edge and up the right.
-        Arc(*_BOLT_RING, 78, _BOLT_RING_ARC, _BOLT_RING_STROKE),
-        Arc(*_BOLT_RING, 258, _BOLT_RING_ARC, _BOLT_RING_STROKE),
+        Arc(*_BOLT_RING, 78, _BOLT_RING_ARC, _BOLT_RING_PEN),
+        Arc(*_BOLT_RING, 258, _BOLT_RING_ARC, _BOLT_RING_PEN),
         Polygon((
             (34, 6),                              # the top point, clear of the ring
             (28.5, 22.5), (36, 22.5),             # in to the waist, out to the ledge
@@ -167,7 +167,7 @@ def _chevron(pointing_left: bool) -> tuple:
 # vertical center line -- hence the coordinate pairs below summing to 48 -- so
 # side by side they read as a direction each, not as two rings.  The head is
 # deliberately huge and the arc stops short of it, so it stands in open space
-# rather than merging into the stroke it caps; the small nub this replaced left
+# rather than merging into the arc it caps; the small nub this replaced left
 # the two telling apart only by which end of a circle a few pixels sat on.
 _HISTORY_RING = (11, 13, 26, 26)  # center (24, 26), radius 13
 
@@ -192,7 +192,7 @@ def _star(filled: bool) -> tuple:
         angle = -math.pi / 2 + index * math.pi / 5
         radius = outer if index % 2 == 0 else inner
         points.append((cx + radius * math.cos(angle), cy + radius * math.sin(angle)))
-    # The outline is thinner than the default stroke: at the full weight the
+    # The outline is thinner than the default pen width: at the full weight the
     # points close up and the star reads as a blob with dents.
     return (Polygon(tuple(points), fill=filled, width=3),)
 
@@ -201,7 +201,7 @@ def _star(filled: bool) -> tuple:
 # very silhouette they fill, and ``minus`` is the horizontal one of them, so all
 # three move together rather than being three hand-measured crosses.
 _PLUS_BAR = 7.0     # how wide a bar is drawn
-_PLUS_REACH = 15.0  # from the center to where a bar's stroke ends, before its cap
+_PLUS_REACH = 15.0  # from the center to where a bar's line ends, before its cap
 
 
 def _plus_outline() -> tuple:
@@ -320,21 +320,21 @@ def _reset() -> tuple:
 
 
 # The power mark's two parts, shared by quit and restart so the pair reads as one
-# family: a ring broken at the top, and the stroke standing in that break.  Quit
+# family: a ring broken at the top, and the bar standing in that break.  Quit
 # is the two of them; restart is the two of them with the ring running on into an
 # arrowhead.  Drawn to the weight of a toolbar icon font's power symbol, which is
 # what the apps' menus sat next to.
 _POWER_RING = (9.0, 12.0, 30.0, 30.0)  # center (24, 27), radius 15
-_POWER_STROKE = Line(24, 6, 24, 24)
+_POWER_PEN = Line(24, 6, 24, 24)
 
 
 def _power() -> tuple:
-    """A ring broken at the top with a stroke standing in the break -- power.
+    """A ring broken at the top with a bar standing in the break -- power.
 
     Off, quit, shut down: the mark every one of these apps' quit controls wears,
     so the same act looks the same whichever window it is in.
     """
-    return (Arc(*_POWER_RING, 128, 284), _POWER_STROKE)
+    return (Arc(*_POWER_RING, 128, 284), _POWER_PEN)
 
 
 def _restart() -> tuple:
@@ -342,17 +342,17 @@ def _restart() -> tuple:
 
     Not the plain circular arrow: that is undo's mark, and this is the control
     that takes the whole app down and brings it back.  It is built from quit's
-    own ring and stroke, so the two sit together in a menu as obvious relatives
+    own ring and bar, so the two sit together in a menu as obvious relatives
     rather than as two unrelated drawings.
     """
     return (
         Arc(*_POWER_RING, 128, 272),                          # the ring, stopping short
         # Short and wide rather than long and narrow.  A head drawn along the
-        # tangent at the stroke's own weight was barely visible at button size --
+        # tangent at the bar's own weight was barely visible at button size --
         # it read as the ring simply ending.  Widening it is what makes the mark
         # say "and back on again" instead of "off, with a nick in the circle".
         Polygon(((29.1, 9.8), (41.6, 12.3), (29.4, 22.5))),
-        _POWER_STROKE,
+        _POWER_PEN,
     )
 
 

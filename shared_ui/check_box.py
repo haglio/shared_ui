@@ -28,8 +28,8 @@ _BOX = 16        # indicator side length (px)
 _GAP = 7         # space between the box and the label
 _RADIUS = 3.0    # indicator corner rounding
 
-# The check mark as a fraction of the box: a short down-stroke into a long
-# up-stroke -- the classic tick, not a symmetric "v".
+# The check mark as a fraction of the box: a short leg down into a long
+# leg up -- the classic tick, not a symmetric "v".
 _TICK_POINTS = ((0.24, 0.52), (0.42, 0.70), (0.78, 0.30))
 
 
