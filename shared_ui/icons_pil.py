@@ -104,13 +104,13 @@ def _draw(draw: ImageDraw.ImageDraw, shape, ink, scale: float) -> None:
                 # Its own outline, drawn with round joins -- which is what
                 # rounds the corners, and grows the shape by the radius.
                 _draw_path(draw, (*shape.points, shape.points[0]), ink,
-                             shape.round_radius * 2 * scale, scale)
+                           shape.round_radius * 2 * scale, scale)
         else:
             # Closed as a path rather than as an outlined polygon: Pillow's
             # polygon outline is hard-cornered whatever the width, and a star's
             # points come out chipped.
             _draw_path(draw, (*shape.points, shape.points[0]), ink,
-                         shape.width * scale, scale)
+                       shape.width * scale, scale)
     elif isinstance(shape, RoundedRect):
         frame = _frame(shape.x, shape.y, shape.x + shape.w, shape.y + shape.h, scale)
         if shape.fill:
@@ -122,7 +122,7 @@ def _draw(draw: ImageDraw.ImageDraw, shape, ink, scale: float) -> None:
                                    width=max(1, round(shape.width * scale)))
     elif isinstance(shape, Ellipse):
         frame = _frame(shape.cx - shape.rx, shape.cy - shape.ry,
-                   shape.cx + shape.rx, shape.cy + shape.ry, scale)
+                       shape.cx + shape.rx, shape.cy + shape.ry, scale)
         if shape.fill:
             draw.ellipse(frame, fill=ink)
         else:
@@ -143,7 +143,7 @@ def _arc(draw: ImageDraw.ImageDraw, shape: Arc, ink, scale: float) -> None:
     ``[-(start + span), -start]`` -- same arc, drawn the other way round.
     """
     frame = _centered(_frame(shape.x, shape.y, shape.x + shape.w, shape.y + shape.h, scale),
-                    shape.width * scale)
+                      shape.width * scale)
     width = max(1, round(shape.width * scale))
     # A negative span sweeps the same arc for Qt and the long way round here, so
     # it is turned into the equivalent positive one before converting.
@@ -170,8 +170,8 @@ def _centered(frame: list, width: float) -> list:
 
     Pillow draws an outline INSIDE the frame it is given, where QPainter centers
     the pen on the path -- so the same numbers give Pillow a mark half a pen
-    width smaller all round.  Growing the frame first is what puts the two renderings on
-    top of each other.
+    width smaller all round.  Growing the frame first is what puts the two
+    renderings on top of each other.
     """
     half = width / 2
     (x0, y0), (x1, y1) = frame
@@ -179,7 +179,7 @@ def _centered(frame: list, width: float) -> list:
 
 
 def _draw_path(draw: ImageDraw.ImageDraw, points, ink, width: float,
-                 scale: float) -> None:
+               scale: float) -> None:
     """A polyline in *ink*, with rounded joints and rounded ends."""
     scaled = [(px * scale, py * scale) for px, py in points]
     draw.line(scaled, fill=ink, width=max(1, round(width)), joint="curve")
