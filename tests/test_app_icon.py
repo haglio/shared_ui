@@ -53,7 +53,7 @@ def test_a_letter_off_the_familys_grid_fails(tmp_path):
         assert_follows_the_family_spec(shrunk, "O")
 
 
-def test_a_stroke_wider_than_a_cell_fails(tmp_path):
+def test_a_bar_wider_than_a_cell_fails(tmp_path):
     image = _draw(LETTERS["O"])
     # Thicken the ring's top inward by half a cell: the box is still the box.
     ImageDraw.Draw(image).rectangle(
@@ -80,7 +80,7 @@ def test_a_heavily_rounded_corner_fails(tmp_path):
         assert_follows_the_family_spec(_ico(tmp_path, image), "O")
 
 
-def test_the_grid_is_five_cells_of_one_stroke():
+def test_the_grid_is_five_cells_of_one_bar():
     assert UNIT * 5 == BOX
     assert INSET * 2 + BOX == CANVAS
     for letter, cells in LETTERS.items():

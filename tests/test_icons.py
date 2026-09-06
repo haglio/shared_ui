@@ -169,7 +169,7 @@ def test_a_glyph_scales_to_the_size_it_is_asked_for():
 def test_a_small_glyph_is_the_same_mark_rather_than_a_heavier_one():
     # The painter is scaled, not the coordinates, so the pen scales with the
     # drawing: the mark takes up the same share of its box at every size.  A
-    # fixed stroke width instead leaves a 16px glyph a blob and a 96px one a
+    # fixed pen width instead leaves a 16px glyph a blob and a 96px one a
     # wireframe -- two marks rather than one shown large and small.
     sizes = (24, 48, 96)
     boxes = [_ink_box(icons.glyph_pixmap("mic", size, TEXT_PRIMARY)) for size in sizes]
@@ -309,11 +309,11 @@ def test_the_registry_is_what_glyph_names_reports():
         assert icons.glyph_pixmap(name, 24, TEXT_PRIMARY).size() == QSize(24, 24)
 
 
-def test_the_canvas_and_stroke_are_stated_in_canvas_units():
+def test_the_canvas_and_pen_width_are_stated_in_canvas_units():
     # Both are public: a caller composing a mark into its own drawing needs the
     # box the geometry is written against.
     assert icons.CANVAS == 48.0
-    assert 0 < icons.STROKE < icons.CANVAS
+    assert 0 < icons.PEN_WIDTH < icons.CANVAS
 
 
 def test_a_mark_never_erases_the_ground_it_is_drawn_on():
@@ -339,7 +339,7 @@ def test_a_mark_never_erases_the_ground_it_is_drawn_on():
 
 def test_quit_and_restart_are_built_from_one_power_mark():
     # They sit together in a menu, so they have to read as relatives rather than
-    # as two unrelated drawings. Restart IS quit's ring and stroke with the ring
+    # as two unrelated drawings. Restart IS quit's ring and bar with the ring
     # running on into an arrowhead, and in ink that is a containment: quit's mark
     # is drawn in full inside restart's, and what restart adds is the head.
     power = _ink(icons.glyph_pixmap("power", 48, TEXT_PRIMARY))
@@ -347,7 +347,7 @@ def test_quit_and_restart_are_built_from_one_power_mark():
     assert power <= restart
 
     # Below the break the two are the same drawing pixel for pixel -- the ring at
-    # the same weight around the same center, with the same stroke standing in
+    # the same weight around the same center, with the same bar standing in
     # it. Everything either of them does differently happens up at the break.
     assert {p for p in power if p[1] >= 26} == {p for p in restart if p[1] >= 26}
 
@@ -392,9 +392,9 @@ def test_the_transport_marks_have_rounded_corners(monkeypatch):
     assert rounded > bare
 
 
-def test_a_stroke_ends_in_a_round_cap_that_reaches_past_its_endpoint():
+def test_a_bar_ends_in_a_round_cap_that_reaches_past_its_endpoint():
     # A mark's ends are round, so a bar's ink overhangs where its line stops by
-    # about half the stroke -- what keeps a minus from reading as a chopped rule.
+    # about half the pen width -- what keeps a minus from reading as a chopped rule.
     from shared_ui.icon_geometry import GLYPHS
 
     (bar,) = GLYPHS["minus"]

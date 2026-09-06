@@ -11,9 +11,9 @@ without dragging PyQt6 into a video pipeline.
 
 Two things Pillow does not do that QPainter does, and how they are handled:
 antialiasing (everything is drawn at :data:`SUPERSAMPLE` scale and resampled
-down) and round line caps (a filled dot is laid at each stroke's ends).  Both
+down) and round line caps (a filled dot is laid at each line's ends).  Both
 matter at HUD size, where a mark is a dozen pixels across and a stair-stepped
-edge or a chopped-off stroke is most of what the eye sees.
+edge or a chopped-off line is most of what the eye sees.
 """
 
 from __future__ import annotations
@@ -166,11 +166,11 @@ def _box(x0: float, y0: float, x1: float, y1: float, scale: float) -> list:
 
 
 def _centered(box: list, width: float) -> list:
-    """*box* grown by half a stroke on every side.
+    """*box* grown by half a pen width on every side.
 
     Pillow draws an outline INSIDE the box it is given, where QPainter centers
-    the pen on the path -- so the same numbers give Pillow a mark half a stroke
-    smaller all round.  Growing the box first is what puts the two renderings on
+    the pen on the path -- so the same numbers give Pillow a mark half a pen
+    width smaller all round.  Growing the box first is what puts the two renderings on
     top of each other.
     """
     half = width / 2
@@ -189,7 +189,7 @@ def _stroke_path(draw: ImageDraw.ImageDraw, points, ink, width: float,
 
 def _cap(draw: ImageDraw.ImageDraw, x: float, y: float, ink, width: float,
          scale: float) -> None:
-    """The dot that stands in for a round cap on a stroke's end."""
+    """The dot that stands in for a round cap on a line's end."""
     radius = width / 2
     cx, cy = x * scale, y * scale
     draw.ellipse([(cx - radius, cy - radius), (cx + radius, cy + radius)], fill=ink)

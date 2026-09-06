@@ -32,7 +32,7 @@ from shared_ui.colors import TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import (
     CANVAS,
     GLYPHS,
-    STROKE,
+    PEN_WIDTH,
     Arc,
     Ellipse,
     Line,
@@ -43,7 +43,7 @@ from shared_ui.icon_geometry import (
 
 __all__ = [
     "CANVAS",
-    "STROKE",
+    "PEN_WIDTH",
     "draw_glyph",
     "glyph_icon",
     "glyph_pixmap",

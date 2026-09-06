@@ -1,7 +1,7 @@
 """The family's app icons: one MAGENTA block letter each, on one grid.
 
 Every app's icon is a single letter drawn on a 5x5 grid inset :data:`INSET`
-pixels inside a :data:`CANVAS`-pixel square, every stroke exactly one grid
+pixels inside a :data:`CANVAS`-pixel square, every bar exactly one grid
 cell -- a fifth of the glyph box -- thick, with near-square corners.  The
 grid is what makes eight icons read as one set on a taskbar; the spec was
 written down in one app's test, which named the others' letters and checked
@@ -23,7 +23,7 @@ from shared_ui.palette import MAGENTA
 CANVAS = 256  # the master frame
 INSET = 31  # the glyph box's offset inside the canvas
 BOX = CANVAS - 2 * INSET  # 194: the glyph box, five cells across
-UNIT = BOX / 5  # one cell, and one stroke
+UNIT = BOX / 5  # one cell, and one bar
 CORNER_SOFTENING_MAX = 8  # rows a corner may round over; the family's round over three
 SOLID = 128  # the alpha above which a pixel is ink rather than an edge
 
@@ -43,7 +43,7 @@ LETTERS: dict[str, tuple[str, ...]] = {
 }
 
 # Where inside a cell to look: a 3x3 lattice kept clear of the cell's edges, so
-# a stroke a hair wide or narrow of a cell passes and one a third off does not.
+# a bar a hair wide or narrow of a cell passes and one a third off does not.
 _CELL_MARGIN = 8
 _LATTICE = (0.0, 0.5, 1.0)
 
@@ -91,9 +91,9 @@ def assert_follows_the_family_spec(path: Path | str, letter: str) -> None:
     assert softening <= CORNER_SOFTENING_MAX, (
         f"{path}: the top-left corner rounds over {softening} rows")
 
-    a_stroke = next((x, y) for row, line in enumerate(cells) for column, cell in enumerate(line)
+    a_bar = next((x, y) for row, line in enumerate(cells) for column, cell in enumerate(line)
                     if cell == "#"
                     for x, y in [(int(INSET + (column + 0.5) * UNIT), int(INSET + (row + 0.5) * UNIT))])
-    assert pixels[a_stroke][:3] == MAGENTA, f"{path}: the ink is {pixels[a_stroke][:3]}, not MAGENTA"
+    assert pixels[a_bar][:3] == MAGENTA, f"{path}: the ink is {pixels[a_bar][:3]}, not MAGENTA"
     assert not _solid(pixels, 0, 0) and not _solid(pixels, CANVAS - 1, CANVAS - 1), (
         f"{path}: the background is not transparent")
