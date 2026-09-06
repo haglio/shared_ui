@@ -1,4 +1,4 @@
-"""The family's app icons: one PINK block letter each, on one grid.
+"""The family's app icons: one MAGENTA block letter each, on one grid.
 
 Every app's icon is a single letter drawn on a 5x5 grid inset :data:`INSET`
 pixels inside a :data:`CANVAS`-pixel square, every stroke exactly one grid
@@ -18,7 +18,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from shared_ui.palette import PINK
+from shared_ui.palette import MAGENTA
 
 CANVAS = 256  # the master frame
 INSET = 31  # the glyph box's offset inside the canvas
@@ -94,6 +94,6 @@ def assert_follows_the_family_spec(path: Path | str, letter: str) -> None:
     a_stroke = next((x, y) for row, line in enumerate(cells) for column, cell in enumerate(line)
                     if cell == "#"
                     for x, y in [(int(INSET + (column + 0.5) * UNIT), int(INSET + (row + 0.5) * UNIT))])
-    assert pixels[a_stroke][:3] == PINK, f"{path}: the ink is {pixels[a_stroke][:3]}, not PINK"
+    assert pixels[a_stroke][:3] == MAGENTA, f"{path}: the ink is {pixels[a_stroke][:3]}, not MAGENTA"
     assert not _solid(pixels, 0, 0) and not _solid(pixels, CANVAS - 1, CANVAS - 1), (
         f"{path}: the background is not transparent")
