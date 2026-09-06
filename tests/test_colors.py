@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from PyQt6.QtGui import QColor
 
-from shared_ui import check_box, colors
+from shared_ui import colors, tick_control
 
 
 def _all_qcolors(module=colors):
@@ -107,12 +107,12 @@ def test_no_two_grays_sit_within_a_hair_of_each_other():
 
 
 def test_the_librarys_own_widget_paints_only_palette_colors():
-    """The checkbox used to keep two grays of its own, one of them exactly the
+    """The tick control used to keep two grays of its own, one of them exactly the
     hair from two palette tiers that the rule above forbids -- and slipped under
     that rule because it only ever looked at `colors`."""
     palette_values = {color.name() for _, color in _all_qcolors(colors)}
 
-    strays = sorted(name for name, color in _all_qcolors(check_box)
+    strays = sorted(name for name, color in _all_qcolors(tick_control)
                     if color.name() not in palette_values)
 
     assert not strays, strays

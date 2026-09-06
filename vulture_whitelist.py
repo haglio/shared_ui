@@ -10,7 +10,7 @@ report, and an entry may only be added with the reason it answers one.
 
 # ruff: noqa: F821, B018 -- a whitelist is names, not statements
 # --- Qt method overrides, called by the event loop, not by us ---
-_.paintEvent  # check_box, toggle_switch
+_.paintEvent  # tick_control, toggle_switch
 
 # --- colors: none.  Every QColor in colors.py reads its palette twin by name, so
 #     vulture sees each token used; a palette token nobody reads shows up in
