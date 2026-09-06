@@ -31,7 +31,7 @@ class TestButtonGrouping:
 
     def test_the_group_gap_is_stated_as_a_ratio_of_the_gap_inside_one(self):
         # So that changing the gap inside a group carries the grouping with it,
-        # rather than leaving a number behind that no longer relates to it.
+        # rather than leaving a stray number that no longer relates to it.
         assert spacing.BUTTON_GROUP_GAP == spacing.BUTTON_GAP * 3
 
     def test_a_group_boundary_still_fits_inside_a_button(self):

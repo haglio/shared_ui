@@ -126,7 +126,7 @@ def test_the_dialog_wears_the_apps_own_icon(tmp_path):
 
 def test_the_alert_opens_in_front_of_whatever_the_user_is_looking_at():
     """Several of these apps are launched hidden from a shortcut, so they have
-    no claim on the foreground; an alert that opens behind the window in front
+    no claim on the foreground; an alert that opens under the window in front
     is indistinguishable from having crashed silently."""
     dlg = AlertDialog("Example App", "Nothing to do.")
 
