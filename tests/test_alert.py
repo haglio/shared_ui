@@ -6,7 +6,7 @@ import threading
 from unittest.mock import patch
 
 import pytest
-from PyQt6.QtCore import Qt, QThread, QTimer
+from PyQt6.QtCore import QMargins, Qt, QThread, QTimer
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QDialog, QLabel, QPushButton, QStyle
 
@@ -206,6 +206,6 @@ def test_the_dialog_is_spaced_by_the_familys_dialog_tokens():
     dlg = AlertDialog("Example App", "Nothing to do.")
 
     margins = dlg.layout().contentsMargins()
-    assert margins.left() == margins.top() == MARGIN_DIALOG
-    assert margins.right() == margins.bottom() == MARGIN_DIALOG
+    assert margins == QMargins(
+        MARGIN_DIALOG, MARGIN_DIALOG, MARGIN_DIALOG, MARGIN_DIALOG)
     assert dlg.layout().spacing() == GAP_DIALOG
