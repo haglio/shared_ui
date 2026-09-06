@@ -113,7 +113,7 @@ def test_a_pasted_mark_is_centered_in_the_frame_it_was_given():
     #
     # The panel is TRANSPARENT so that the ink scan sees the mark and only the
     # mark: drawn on an opaque one it measured the panel's own every pixel, so
-    # the centre came out the panel's centre whatever paste_glyph did with it.
+    # the center came out the panel's center whatever paste_glyph did with it.
     panel = Image.new("RGBA", (48, 24), (0, 0, 0, 0))
     icons_pil.paste_glyph(panel, "plus", (0, 0, 48, 24), _INK)
     left, upper, right, lower, _count = _pil_ink(panel)
@@ -122,9 +122,10 @@ def test_a_pasted_mark_is_centered_in_the_frame_it_was_given():
 
 
 def test_a_pasted_mark_is_centered_in_a_frame_that_is_not_at_the_origin():
-    # The frame a HUD hands over is wherever its button is, so the centring is of
-    # the frame rather than of the panel -- a mark centred on the panel instead
-    # would land right for the one button that happens to sit in the middle.
+    # The frame a HUD hands over is wherever its button is, so the centering is
+    # of the frame rather than of the panel -- a mark centered on the panel
+    # instead would land right for the one button that happens to sit in the
+    # middle.
     panel = Image.new("RGBA", (64, 40), (0, 0, 0, 0))
     icons_pil.paste_glyph(panel, "plus", (36, 8, 24, 28), _INK)
     left, upper, right, lower, _count = _pil_ink(panel)

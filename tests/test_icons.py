@@ -58,10 +58,10 @@ def _pieces(ink: set[tuple[int, int]]) -> int:
             x, y = stack.pop()
             for dx in (-1, 0, 1):
                 for dy in (-1, 0, 1):
-                    neighbour = (x + dx, y + dy)
-                    if neighbour in unvisited:
-                        unvisited.discard(neighbour)
-                        stack.append(neighbour)
+                    neighbor = (x + dx, y + dy)
+                    if neighbor in unvisited:
+                        unvisited.discard(neighbor)
+                        stack.append(neighbor)
     return pieces
 
 
