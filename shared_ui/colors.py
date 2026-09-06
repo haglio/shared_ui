@@ -43,7 +43,7 @@ BLUE_LIGHT = QColor(*palette.BLUE_LIGHT)  # the one blue, tinted toward white
 GREEN = QColor(*palette.GREEN)
 RED = QColor(*palette.RED)
 AMBER = QColor(*palette.AMBER)
-PINK = QColor(*palette.PINK)
+MAGENTA = QColor(*palette.MAGENTA)
 WHITE = QColor(*palette.WHITE)
 
 # ---------------------------------------------------------------------------

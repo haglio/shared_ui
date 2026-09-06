@@ -11,10 +11,10 @@ from PIL import Image, ImageDraw
 
 from shared_ui import app_icon
 from shared_ui.app_icon import BOX, CANVAS, INSET, LETTERS, UNIT, assert_follows_the_family_spec
-from shared_ui.palette import PINK, WHITE
+from shared_ui.palette import MAGENTA, WHITE
 
 
-def _draw(cells, *, inset=INSET, box=BOX, ink=PINK) -> Image.Image:
+def _draw(cells, *, inset=INSET, box=BOX, ink=MAGENTA) -> Image.Image:
     """A letter on the grid, as plain rectangles -- corners square, edges hard."""
     image = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
@@ -57,7 +57,7 @@ def test_a_stroke_wider_than_a_cell_fails(tmp_path):
     image = _draw(LETTERS["O"])
     # Thicken the ring's top inward by half a cell: the box is still the box.
     ImageDraw.Draw(image).rectangle(
-        (INSET + UNIT, INSET + UNIT, INSET + 4 * UNIT, INSET + 1.5 * UNIT), fill=(*PINK, 255))
+        (INSET + UNIT, INSET + UNIT, INSET + 4 * UNIT, INSET + 1.5 * UNIT), fill=(*MAGENTA, 255))
 
     with pytest.raises(AssertionError, match=r"cell \(1, 1\) is inked"):
         assert_follows_the_family_spec(_ico(tmp_path, image), "O")
@@ -66,7 +66,7 @@ def test_a_stroke_wider_than_a_cell_fails(tmp_path):
 def test_ink_of_another_color_fails(tmp_path):
     white = _ico(tmp_path, _draw(LETTERS["S"], ink=WHITE))
 
-    with pytest.raises(AssertionError, match="not PINK"):
+    with pytest.raises(AssertionError, match="not MAGENTA"):
         assert_follows_the_family_spec(white, "S")
 
 

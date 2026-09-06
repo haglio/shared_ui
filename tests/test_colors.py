@@ -37,8 +37,8 @@ class TestPaletteColors:
         c = colors.GREEN
         assert (c.red(), c.green(), c.blue()) == (0x30, 0xA0, 0x30)
 
-    def test_pink(self):
-        c = colors.PINK
+    def test_magenta(self):
+        c = colors.MAGENTA
         assert (c.red(), c.green(), c.blue()) == (200, 80, 160)
 
 
