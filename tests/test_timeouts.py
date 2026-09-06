@@ -1,4 +1,4 @@
-"""A hung test has to die and name itself, not hold the merge queue for six hours.
+"""A stalled test has to die and name itself, not hold the merge queue for six hours.
 
 Nothing in this suite blocks on a thread, a socket or a child process, but the
 gate it runs in is the family's, and the family has tests that do. A required
