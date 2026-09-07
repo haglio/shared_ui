@@ -5,16 +5,24 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "shared-ui"
 version = "0.1.0"
-requires-python = ">=3.10"
+# 3.12, not 3.10: every gate in the family runs 3.12 and nothing has ever
+# collected a suite on anything older, so >=3.10 was a promise no run backed.
+requires-python = ">=3.12"
 dependencies = [
-    "PyQt6",
+    "PyQt6>=6,<7",
 ]
 
 [project.optional-dependencies]
+# Every requirement carries a ceiling: without one each run installs whatever
+# PyPI served that morning, which is how this family's gates came to run a major
+# version of the imaging stack past the one the machines have. Floors are what
+# the machine holds today.
+#
 # Pillow is not a runtime dependency: shared_ui.icons_pil is imported only by
 # the players, which already have it, and nothing here imports Qt and Pillow at
 # once. The suite needs it to check the two renderers draw the same marks.
-dev = ["pytest", "pytest-timeout", "vulture", "pillow", "ruff==0.16.6"]
+dev = ["pytest>=9,<10", "pytest-timeout>=2.4,<3", "vulture>=2.16,<3", "pillow>=12,<13",
+       "ruff==0.16.6"]
 
 [tool.pytest.ini_options]
 # The content guard's enforcement check, taken from app_support rather than
@@ -38,3 +46,10 @@ testpaths = ["tests"]
 [tool.setuptools.packages.find]
 include = ["shared_ui*"]
 namespaces = false
+
+# The family checkouts this one is installed beside. They cannot go in
+# [project.dependencies] -- neither is published, so pip would look for them on
+# PyPI -- and a comment is what decayed everywhere else in the family, so this is
+# the record instead. tests/test_dependencies.py holds it against the tree.
+[tool.haglio]
+siblings = ["app_support"]
