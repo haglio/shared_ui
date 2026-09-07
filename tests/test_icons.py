@@ -289,7 +289,7 @@ def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath():
 _THE_MARKS = (
     "bolt_ring", "check", "chevron_left", "chevron_right", "clock", "clock_full",
     "clock_short", "copy", "cross", "enhance_filter", "expand_horizontal",
-    "flask", "folder", "funscript_jump", "latest", "loop", "mic", "minus",
+    "flask", "fmode", "folder", "funscript_jump", "latest", "loop", "mic", "minus",
     "park", "pause", "photo", "play", "plus", "plus_outline", "power",
     "quarter_offset", "question", "redo_arrow", "release", "reset", "restart",
     "retract", "shuffle", "slideshow", "speaker", "star", "star_outline",
