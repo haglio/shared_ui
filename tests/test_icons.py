@@ -287,13 +287,15 @@ def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath():
 # decision taken here, in the open, rather than a green run in this repo.
 # Adding a mark means adding it below; that is the point.
 _THE_MARKS = (
-    "bolt_ring", "check", "chevron_left", "chevron_right", "clock", "clock_full",
-    "clock_short", "copy", "cross", "enhance_filter", "expand_horizontal",
-    "flask", "fmode", "folder", "funscript_jump", "latest", "loop", "mic", "minus",
+    "bolt_ring", "check", "chevron_left", "chevron_right", "clip_to_scene",
+    "clock", "clock_full", "clock_short", "compilation", "copy", "cross",
+    "enhance_filter", "expand_horizontal", "flask", "flat_2d", "fmode",
+    "folder", "funscript_jump", "headset", "latest", "loop", "mic", "minus",
     "park", "pause", "photo", "play", "plus", "plus_outline", "power",
-    "quarter_offset", "question", "redo_arrow", "release", "reset", "restart",
-    "retract", "shuffle", "slideshow", "speaker", "star", "star_outline",
-    "trash", "undo_arrow", "versions", "wave",
+    "quarter_offset", "question", "redo_arrow", "release", "reset",
+    "restart", "retract", "scene_to_clip", "shuffle", "slideshow",
+    "speaker", "star", "star_outline", "trash", "undo_arrow", "versions",
+    "vr_hemisphere", "wave",
 )
 
 
