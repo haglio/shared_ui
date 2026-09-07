@@ -406,23 +406,121 @@ _FULL_SPAN = 300.0    # what "full length" keeps of the dial
 _SHORT_SPAN = 30.0    # …and what "shorts" does
 
 
-def _sector(span: float) -> tuple:
+def _sector(span: float, cx: float, cy: float, radius: float) -> tuple:
     """A filled wedge of *span* degrees, from twelve o'clock clockwise.
 
     A polygon rather than a heavy arc: an arc's ink lands differently under the
     two renderers, and this family holds them to within a tenth of each other.
     """
     steps = max(2, int(span / 6))
-    points = [(24.0, 24.0)]
+    points = [(cx, cy)]
     for index in range(steps + 1):
         angle = math.radians(90.0 - span * index / steps)
-        points.append((24.0 + (_DIAL - _DIAL_PEN / 2) * math.cos(angle),
-                       24.0 - (_DIAL - _DIAL_PEN / 2) * math.sin(angle)))
+        points.append((cx + radius * math.cos(angle), cy - radius * math.sin(angle)))
     return (Polygon(tuple(points)),)
 
 
-def _dial(span: float) -> tuple:
-    return (Ellipse(24, 24, _DIAL, _DIAL, width=_DIAL_PEN), *_sector(span))
+def _dial(span: float, cx: float = 24.0, cy: float = 24.0,
+          radius: float = _DIAL, pen: float = _DIAL_PEN) -> tuple:
+    """One length filter's dial: a rim with *span* degrees of it filled."""
+    return (Ellipse(cx, cy, radius, radius, width=pen),
+            *_sector(span, cx, cy, radius - pen / 2))
+
+
+# The pair of dials the jump between a clip and its scene is drawn from: the two
+# length marks, small, side by side, with the arrow saying which way the press
+# goes underneath them.  Underneath rather than between: at button size two dials
+# with room for an arrow between them left no dial worth reading.
+_JUMP_R = 9.5
+_JUMP_PEN = 3.0
+_JUMP_Y = 15.0
+_JUMP_LEFT, _JUMP_RIGHT = 13.0, 35.0
+_JUMP_ARROW_Y = 38.0
+
+
+def _clip_scene_jump(to_scene: bool) -> tuple:
+    """The shorts dial and the full-length dial, with an arrow saying which of
+    the two a press is going to.
+
+    Shorts on the left and full length on the right always, so only the arrow
+    moves: the dials are what the two ends ARE, and swapping them as well would
+    make one mark read as the other flipped.
+    """
+    head, tail = (36.0, 12.0) if to_scene else (12.0, 36.0)
+    return (
+        *_dial(_SHORT_SPAN, _JUMP_LEFT, _JUMP_Y, _JUMP_R, _JUMP_PEN),
+        *_dial(_FULL_SPAN, _JUMP_RIGHT, _JUMP_Y, _JUMP_R, _JUMP_PEN),
+        Line(tail, _JUMP_ARROW_Y, (head + tail) / 2, _JUMP_ARROW_Y, 4.0),
+        Polygon(((head + (6.0 if to_scene else -6.0), _JUMP_ARROW_Y),
+                 ((head + tail) / 2, _JUMP_ARROW_Y - 6.0),
+                 ((head + tail) / 2, _JUMP_ARROW_Y + 6.0))),
+    )
+
+
+def _compilation() -> tuple:
+    """A stack of pages -- the set a clip belongs to, played in its own order.
+
+    Three rather than the copy mark's two, and stepped evenly along a diagonal:
+    a stack says "several, in order", where two sheets say "this one and a copy
+    of it".
+    """
+    return tuple(
+        RoundedRect(16 - 4 * step, 5 + 5.5 * step, 24, 26, 3, width=3.2)
+        for step in range(3)
+    )
+
+
+def _headset() -> tuple:
+    """A headset seen head-on: a visor with two lenses and a strap either side.
+
+    The family's VR icon is its own letters, which say the app rather than the
+    act; a control that means "put this on" wants the thing itself.
+    """
+    return (
+        RoundedRect(6, 14, 36, 20, 8, width=3.6),
+        Ellipse(16, 24, 5, 5, fill=True),
+        Ellipse(32, 24, 5, 5, fill=True),
+        Line(1, 21, 6, 21, 3.4),
+        Line(42, 21, 47, 21, 3.4),
+    )
+
+
+def _vr_hemisphere() -> tuple:
+    """A gridded dome -- video that wraps around you rather than sitting flat."""
+    return (
+        Arc(4, 6, 40, 52, 0, 180, 3.6),      # the dome, over its equator
+        Arc(4, 22, 40, 20, 180, 180, 3.6),   # the rim, coming toward you
+        Arc(14, 6, 20, 52, 0, 180, 2.8),     # a meridian
+        Arc(9, 14, 30, 16, 180, 180, 2.8),   # and a parallel
+    )
+
+
+def _flat_2d() -> tuple:
+    """A gridded screen seen at an angle -- video that stays a rectangle.
+
+    Leaning, because square-on it is a plain rectangle, and a plain rectangle
+    beside a dome reads as a missing icon rather than as the flat one.
+    """
+    lean, top, lower = 10.0, 10.0, 38.0
+
+    def edge(y: float) -> tuple[float, float]:
+        shift = lean * (y - top) / (lower - top)
+        return 14.0 - shift, 44.0 - shift
+
+    left_top, right_top = edge(top)
+    left_low, right_low = edge(lower)
+    lines = []
+    for fraction in (1 / 3, 2 / 3):
+        y = top + (lower - top) * fraction
+        left, right = edge(y)
+        lines.append(Line(left, y, right, y, 2.6))
+        lines.append(Line(left_top + (right_top - left_top) * fraction, top,
+                          left_low + (right_low - left_low) * fraction, lower, 2.6))
+    return (
+        Polygon(((left_top, top), (right_top, top), (right_low, lower), (left_low, lower)),
+                fill=False, width=3.4),
+        *lines,
+    )
 
 
 def _versions() -> tuple:
@@ -456,50 +554,48 @@ def _funscript_jump() -> tuple:
     )
 
 
-# The three motion holds, as one drawing read three ways: the OSR2 from above --
-# its travel as a long capsule, the sleeve as a block inside it -- with the sleeve
-# at whichever end the hold settles it on.  An arrowhead points AT the sleeve for
-# the two holds (above for park, below for retract, so the pair cannot be
-# confused at a glance) and points AWAY from it, both ways, for the release that
-# lets it move again.
-_TRAVEL = RoundedRect(4, 12, 40, 24, 10, width=3.6)
-_SLEEVE_W = 13.0
-_SLEEVE = (18.0, 12.0, 6.0)   # top, height, corner radius
-_HEAD_W = 6.0                 # half an arrowhead's width
-_HEAD_H = 8.0                 # and its length
+# The three motion holds, as one drawing read three ways: the device from the
+# side -- its column on the right, the sleeve riding up and down it on the arm
+# between them -- with the sleeve at whichever end the hold settles it on.  An
+# arrow points AT the sleeve for the two holds, from above for the one that
+# settles it home and from below for the one that sends it away, and points away
+# from it both ways for the release that lets it move again.
+_COLUMN = RoundedRect(28, 8, 15, 32, 3, width=3.4)
+_SLEEVE_X, _SLEEVE_W, _SLEEVE_H = 6.0, 15.0, 13.0
+_ARROW_X = 13.5      # the arrows run up the sleeve's own centre line
+_ARROW_HALF = 7.0    # half an arrowhead's width
+_ARROW_PEN = 4.0
 
 
-def _sleeve(left: float) -> RoundedRect:
-    top, height, radius = _SLEEVE
-    return RoundedRect(left, top, _SLEEVE_W, height, radius, fill=True)
+def _sleeve(top: float) -> tuple:
+    """The sleeve at *top*, and the arm carrying it to the column."""
+    middle = top + _SLEEVE_H / 2
+    return (
+        RoundedRect(_SLEEVE_X, top, _SLEEVE_W, _SLEEVE_H, 4, width=3.4),
+        Line(_SLEEVE_X + _SLEEVE_W, middle, 28, middle, 3.0),
+    )
 
 
-def _head(cx: float, tip: float, base: float) -> Polygon:
-    return Polygon(((cx, tip), (cx - _HEAD_W, base), (cx + _HEAD_W, base)))
+def _hold_arrow(tip: float, base: float) -> tuple:
+    """An arrowhead at *tip* with its stem running back from *base*."""
+    tail = base + (base - tip) * 0.7
+    return (
+        Line(_ARROW_X, tail, _ARROW_X, base, _ARROW_PEN),
+        Polygon(((_ARROW_X, tip), (_ARROW_X - _ARROW_HALF, base),
+                 (_ARROW_X + _ARROW_HALF, base))),
+    )
 
 
 def _park() -> tuple:
-    return (_TRAVEL, _sleeve(8), _head(14.5, 10, 10 - _HEAD_H))
+    return (_COLUMN, *_sleeve(27), *_hold_arrow(23, 13))
 
 
 def _retract() -> tuple:
-    return (_TRAVEL, _sleeve(27), _head(33.5, 38, 38 + _HEAD_H))
+    return (_COLUMN, *_sleeve(8), *_hold_arrow(25, 35))
 
 
 def _release() -> tuple:
-    """The sleeve in the middle of its travel, with an arrow either side of it.
-
-    Along the rail rather than across it, because along the rail is the only
-    direction the thing can go: the two holds pin it to an end, and this says it
-    is free to move again.  Which is also what keeps the three apart at button
-    size -- one arrow above, one below, or two flanking.
-    """
-    return (
-        _TRAVEL,
-        RoundedRect(19, 18, 10, 12, 5, fill=True),
-        Polygon(((9, 24), (16, 18), (16, 30))),
-        Polygon(((39, 24), (32, 18), (32, 30))),
-    )
+    return (_COLUMN, *_sleeve(17.5), *_hold_arrow(3, 12), *_hold_arrow(45, 36))
 
 
 def _quarter_offset() -> tuple:
@@ -519,19 +615,39 @@ def _quarter_offset() -> tuple:
     )
 
 
-def _fmode() -> tuple:
-    """The letter every player marks its favourites-only filter with.
+# The letter grid every app in this family is marked on: five cells square, each
+# painted cell a solid block, adjacent ones merging into a bar.  The .ico files
+# are drawn on it (:mod:`shared_ui.app_icon`) and the players stamp F-mode's
+# letter off it, so a toolbar's copy has to be the same letter and not a
+# letter drawn some other way.
+_GRID_CELLS = 5
+_GRID_INSET = 5.0
+_GRID_UNIT = (CANVAS - 2 * _GRID_INSET) / _GRID_CELLS
 
-    Drawn rather than typed for the reason the question mark is: set in a font it
-    came out a text character among icons, visibly lighter than the marks beside
-    it.  The players' HUDs stamp the same letter off their .ico grid; this is it
-    for the toolbars, which have no such grid to stamp from.
+
+def _grid_letter(rows: tuple[str, ...]) -> tuple:
+    """The cells *rows* paints, as solid blocks on the family's letter grid."""
+    blocks = []
+    for row, line in enumerate(rows):
+        for column, painted in enumerate(line):
+            if painted != "#":
+                continue
+            x = _GRID_INSET + column * _GRID_UNIT
+            y = _GRID_INSET + row * _GRID_UNIT
+            blocks.append(Polygon((
+                (x, y), (x + _GRID_UNIT, y),
+                (x + _GRID_UNIT, y + _GRID_UNIT), (x, y + _GRID_UNIT),
+            )))
+    return tuple(blocks)
+
+
+def _fmode() -> tuple:
+    """F-mode's letter, on the grid the app icons are drawn on.
+
+    The same cells the players stamp on their HUDs, so the one on a toolbar is
+    that letter rather than one drawn some other way.
     """
-    return (
-        Line(15, 6, 15, 42, 5.0),      # the stem
-        Line(15, 6, 36, 6, 5.0),       # the top bar
-        Line(15, 22, 32, 22, 5.0),     # and the waist
-    )
+    return _grid_letter(("#####", "#....", "#####", "#....", "#...."))
 
 
 def _expand_horizontal() -> tuple:
@@ -560,8 +676,10 @@ GLYPHS: dict[str, tuple] = {
         Line(24, 24, 24, 13),
         Line(24, 24, 33, 24),
     ),
+    "clip_to_scene": _clip_scene_jump(to_scene=True),
     "clock_full": _dial(_FULL_SPAN),
     "clock_short": _dial(_SHORT_SPAN),
+    "compilation": _compilation(),
     "copy": _copy(),
     "cross": (
         Line(11, 11, 37, 37, 5.5),
@@ -569,6 +687,7 @@ GLYPHS: dict[str, tuple] = {
     ),
     "enhance_filter": _enhance_filter(),
     "expand_horizontal": _expand_horizontal(),
+    "flat_2d": _flat_2d(),
     "flask": (                                            # an Erlenmeyer, with liquid
         Polyline(((19, 8), (19, 18), (9, 38), (39, 38), (29, 18), (29, 8))),
         Line(16, 8, 32, 8),                               # the lip
@@ -578,6 +697,7 @@ GLYPHS: dict[str, tuple] = {
     "folder": (
         Polyline(((8, 39), (8, 12), (20, 12), (24, 18), (40, 18), (40, 39), (8, 39))),
     ),
+    "headset": _headset(),
     "latest": _order_arrows(crossed=False),
     "funscript_jump": _funscript_jump(),
     "loop": _loop(),
@@ -618,6 +738,7 @@ GLYPHS: dict[str, tuple] = {
     "reset": _reset(),
     "restart": _restart(),
     "retract": _retract(),
+    "scene_to_clip": _clip_scene_jump(to_scene=False),
     "shuffle": _order_arrows(crossed=True),
     "slideshow": (                                        # a play triangle in a screen
         RoundedRect(8, 11, 32, 26, 4),
@@ -639,6 +760,7 @@ GLYPHS: dict[str, tuple] = {
     ),
     "undo_arrow": _history_arrow(forward=False),
     "versions": _versions(),
+    "vr_hemisphere": _vr_hemisphere(),
     "wave": (                                             # one cycle of a sine
         Arc(6, 11, 18, 26, 0, 180),
         Arc(24, 11, 18, 26, 180, 180),
