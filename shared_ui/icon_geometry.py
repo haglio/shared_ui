@@ -370,6 +370,32 @@ def _question() -> tuple:
     )
 
 
+# The browse-order pair: two arrows running left to right, crossed for shuffle and
+# parallel for latest.  Written once with one switch, because the whole meaning of
+# the pair is the difference between them -- a reader tells the two apart by
+# whether the arrows cross, so every other thing about the marks has to be
+# identical, and two separate drawings would drift.
+_ORDER_ROWS = (13.0, 35.0)   # the heights the two arrows run at
+_ORDER_TAIL_X = 5.0          # where each arrow's line starts
+_ORDER_NECK_X = 32.0         # where the line ends and its head begins
+_ORDER_TIP_X = 43.0          # the head's point
+_ORDER_HEAD = 6.5            # half the head's height
+_ORDER_PEN = 4.5             # a shade under the default: two lines at full weight
+                             # closed the gap between them at button size
+
+
+def _order_arrows(crossed: bool) -> tuple:
+    """Two left-to-right arrows -- crossed for shuffle, parallel for latest."""
+    shapes: list = []
+    for index, start in enumerate(_ORDER_ROWS):
+        end = _ORDER_ROWS[-1 - index] if crossed else start
+        shapes.append(Line(_ORDER_TAIL_X, start, _ORDER_NECK_X, end, _ORDER_PEN))
+        shapes.append(Polygon(((_ORDER_TIP_X, end),
+                               (_ORDER_NECK_X, end - _ORDER_HEAD),
+                               (_ORDER_NECK_X, end + _ORDER_HEAD))))
+    return tuple(shapes)
+
+
 def _expand_horizontal() -> tuple:
     """A double-headed arrow lying flat -- widen this.
 
@@ -411,6 +437,7 @@ GLYPHS: dict[str, tuple] = {
     "folder": (
         Polyline(((8, 39), (8, 12), (20, 12), (24, 18), (40, 18), (40, 39), (8, 39))),
     ),
+    "latest": _order_arrows(crossed=False),
     "loop": _loop(),
     "mic": (                                              # capsule, cradle, stand
         RoundedRect(18, 6, 12, 21, 6, fill=True),
@@ -445,6 +472,7 @@ GLYPHS: dict[str, tuple] = {
     "redo_arrow": _history_arrow(forward=True),
     "reset": _reset(),
     "restart": _restart(),
+    "shuffle": _order_arrows(crossed=True),
     "slideshow": (                                        # a play triangle in a screen
         RoundedRect(8, 11, 32, 26, 4),
         Polygon(((20, 16), (20, 32), (33, 24))),
