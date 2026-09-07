@@ -519,6 +519,21 @@ def _quarter_offset() -> tuple:
     )
 
 
+def _fmode() -> tuple:
+    """The letter every player marks its favourites-only filter with.
+
+    Drawn rather than typed for the reason the question mark is: set in a font it
+    came out a text character among icons, visibly lighter than the marks beside
+    it.  The players' HUDs stamp the same letter off their .ico grid; this is it
+    for the toolbars, which have no such grid to stamp from.
+    """
+    return (
+        Line(15, 6, 15, 42, 5.0),      # the stem
+        Line(15, 6, 36, 6, 5.0),       # the top bar
+        Line(15, 22, 32, 22, 5.0),     # and the waist
+    )
+
+
 def _expand_horizontal() -> tuple:
     """A double-headed arrow lying flat -- widen this.
 
@@ -559,6 +574,7 @@ GLYPHS: dict[str, tuple] = {
         Line(16, 8, 32, 8),                               # the lip
         Polygon(((14, 29), (34, 29), (38, 36), (10, 36))),
     ),
+    "fmode": _fmode(),
     "folder": (
         Polyline(((8, 39), (8, 12), (20, 12), (24, 18), (40, 18), (40, 39), (8, 39))),
     ),
