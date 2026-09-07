@@ -396,6 +396,129 @@ def _order_arrows(crossed: bool) -> tuple:
     return tuple(shapes)
 
 
+# The two length filters, as one clock read twice: a dial with a sector filled to
+# say how much of a scene the filter keeps.  Nearly all of it for full length,
+# a sliver for shorts -- so the pair reads as "long" and "short" before either
+# tooltip does, and neither can be mistaken for the plain clock above.
+_DIAL = 15.0          # the dial's radius
+_DIAL_PEN = 4.0       # its rim
+_FULL_SPAN = 300.0    # what "full length" keeps of the dial
+_SHORT_SPAN = 30.0    # …and what "shorts" does
+
+
+def _sector(span: float) -> tuple:
+    """A filled wedge of *span* degrees, from twelve o'clock clockwise.
+
+    A polygon rather than a heavy arc: an arc's ink lands differently under the
+    two renderers, and this family holds them to within a tenth of each other.
+    """
+    steps = max(2, int(span / 6))
+    points = [(24.0, 24.0)]
+    for index in range(steps + 1):
+        angle = math.radians(90.0 - span * index / steps)
+        points.append((24.0 + (_DIAL - _DIAL_PEN / 2) * math.cos(angle),
+                       24.0 - (_DIAL - _DIAL_PEN / 2) * math.sin(angle)))
+    return (Polygon(tuple(points)),)
+
+
+def _dial(span: float) -> tuple:
+    return (Ellipse(24, 24, _DIAL, _DIAL, width=_DIAL_PEN), *_sector(span))
+
+
+def _versions() -> tuple:
+    """Two pages offset along a diagonal, with a double-headed arrow across them.
+
+    The copy mark is two sheets too, and stands square; this pair leans, and the
+    arrow between them is what says the act is swapping one for the other rather
+    than making a second.
+    """
+    return (
+        RoundedRect(22, 5, 21, 26, 3, width=3.4),      # the other cut
+        RoundedRect(5, 17, 21, 26, 3, width=3.4),      # the one on screen
+        Line(15, 33, 33, 15, 4.0),                     # the swap, along the offset
+        Polygon(((36, 12), (26, 13), (35, 22))),
+        Polygon(((12, 36), (22, 35), (13, 26))),
+    )
+
+
+def _funscript_jump() -> tuple:
+    """An arrow running into an F -- skip ahead to where the scripting starts.
+
+    The F is the letter every funscripted thing in this family is marked with,
+    and the arrow says the act is going TO it rather than switching it on.
+    """
+    return (
+        Line(4, 24, 15, 24, 4.5),
+        Polygon(((25, 24), (14, 17), (14, 31))),
+        Line(31, 8, 31, 40, 4.5),                      # the F's stem
+        Line(31, 8, 44, 8, 4.5),                       # its top bar
+        Line(31, 22, 41, 22, 4.5),                     # and its waist
+    )
+
+
+# The three motion holds, as one drawing read three ways: the OSR2 from above --
+# its travel as a long capsule, the sleeve as a block inside it -- with the sleeve
+# at whichever end the hold settles it on.  An arrowhead points AT the sleeve for
+# the two holds (above for park, below for retract, so the pair cannot be
+# confused at a glance) and points AWAY from it, both ways, for the release that
+# lets it move again.
+_TRAVEL = RoundedRect(4, 12, 40, 24, 10, width=3.6)
+_SLEEVE_W = 13.0
+_SLEEVE = (18.0, 12.0, 6.0)   # top, height, corner radius
+_HEAD_W = 6.0                 # half an arrowhead's width
+_HEAD_H = 8.0                 # and its length
+
+
+def _sleeve(left: float) -> RoundedRect:
+    top, height, radius = _SLEEVE
+    return RoundedRect(left, top, _SLEEVE_W, height, radius, fill=True)
+
+
+def _head(cx: float, tip: float, base: float) -> Polygon:
+    return Polygon(((cx, tip), (cx - _HEAD_W, base), (cx + _HEAD_W, base)))
+
+
+def _park() -> tuple:
+    return (_TRAVEL, _sleeve(8), _head(14.5, 10, 10 - _HEAD_H))
+
+
+def _retract() -> tuple:
+    return (_TRAVEL, _sleeve(27), _head(33.5, 38, 38 + _HEAD_H))
+
+
+def _release() -> tuple:
+    """The sleeve in the middle of its travel, with an arrow either side of it.
+
+    Along the rail rather than across it, because along the rail is the only
+    direction the thing can go: the two holds pin it to an end, and this says it
+    is free to move again.  Which is also what keeps the three apart at button
+    size -- one arrow above, one below, or two flanking.
+    """
+    return (
+        _TRAVEL,
+        RoundedRect(19, 18, 10, 12, 5, fill=True),
+        Polygon(((9, 24), (16, 18), (16, 30))),
+        Polygon(((39, 24), (32, 18), (32, 30))),
+    )
+
+
+def _quarter_offset() -> tuple:
+    """A stacked one-quarter with an arrow beside it -- nudge the motion's phase.
+
+    Stacked rather than the typed fraction so the mark is as tall as the ones
+    beside it and leaves room for the arrow, which is what says which way the
+    nudge goes: the phase only ever runs forward.
+    """
+    return (
+        Polyline(((8, 8), (13, 4), (13, 20)), 4.5),    # the one
+        Line(7, 19, 19, 19, 4.5),                      # standing on its foot
+        Line(4, 24, 22, 24, 4.5),                      # the vinculum
+        Polyline(((16, 28), (6, 39), (21, 39)), 4.5),  # the four
+        Line(16, 31, 16, 44, 4.5),
+        Polygon(((44, 24), (31, 15), (31, 33))),       # and which way it turns
+    )
+
+
 def _expand_horizontal() -> tuple:
     """A double-headed arrow lying flat -- widen this.
 
@@ -422,6 +545,8 @@ GLYPHS: dict[str, tuple] = {
         Line(24, 24, 24, 13),
         Line(24, 24, 33, 24),
     ),
+    "clock_full": _dial(_FULL_SPAN),
+    "clock_short": _dial(_SHORT_SPAN),
     "copy": _copy(),
     "cross": (
         Line(11, 11, 37, 37, 5.5),
@@ -438,6 +563,7 @@ GLYPHS: dict[str, tuple] = {
         Polyline(((8, 39), (8, 12), (20, 12), (24, 18), (40, 18), (40, 39), (8, 39))),
     ),
     "latest": _order_arrows(crossed=False),
+    "funscript_jump": _funscript_jump(),
     "loop": _loop(),
     "mic": (                                              # capsule, cradle, stand
         RoundedRect(18, 6, 12, 21, 6, fill=True),
@@ -445,6 +571,7 @@ GLYPHS: dict[str, tuple] = {
         Line(24, 37, 24, 42),
         Line(17, 42, 31, 42),
     ),
+    "park": _park(),
     "photo": (                                            # a sun over a mountain
         RoundedRect(8, 12, 32, 24, 4, width=3.4),
         Ellipse(17, 21, 3.2, 3.2, fill=True),
@@ -460,6 +587,7 @@ GLYPHS: dict[str, tuple] = {
         RoundedRect(26.5, 7, 8.5, 34, 3.5, fill=True),
     ),
     "power": _power(),
+    "quarter_offset": _quarter_offset(),
     # A pair: one bar and two, at one weight, so a speed-down and a speed-up
     # beside each other read as the same control twice rather than as two.
     "minus": (Line(24 - _PLUS_REACH, 24, 24 + _PLUS_REACH, 24, _PLUS_BAR),),
@@ -470,8 +598,10 @@ GLYPHS: dict[str, tuple] = {
     "plus_outline": _plus_outline(),
     "question": _question(),
     "redo_arrow": _history_arrow(forward=True),
+    "release": _release(),
     "reset": _reset(),
     "restart": _restart(),
+    "retract": _retract(),
     "shuffle": _order_arrows(crossed=True),
     "slideshow": (                                        # a play triangle in a screen
         RoundedRect(8, 11, 32, 26, 4),
@@ -492,6 +622,7 @@ GLYPHS: dict[str, tuple] = {
         Line(28, 21, 27, 36),
     ),
     "undo_arrow": _history_arrow(forward=False),
+    "versions": _versions(),
     "wave": (                                             # one cycle of a sine
         Arc(6, 11, 18, 26, 0, 180),
         Arc(24, 11, 18, 26, 180, 180),
