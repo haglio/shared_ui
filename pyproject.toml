@@ -8,21 +8,26 @@ version = "0.1.0"
 # 3.12, not 3.10: every gate in the family runs 3.12 and nothing has ever
 # collected a suite on anything older, so >=3.10 was a promise no run backed.
 requires-python = ">=3.12"
-dependencies = [
-    "PyQt6>=6,<7",
-]
+# Qt is an extra, for the reason already written below about Pillow: `spacing` is
+# plain integers and `icons_pil` draws with Pillow alone, and those two modules
+# are the whole of what player_core imports from here -- so an unconditional
+# PyQt6 put a Qt wheel in every player venv and on every runner that installs
+# one, for code that never touches it. Every consumer that uses the widgets
+# declares PyQt6 itself, and its own import gate says so.
+dependencies = []
 
 [project.optional-dependencies]
 # Every requirement carries a ceiling: without one each run installs whatever
 # PyPI served that morning, which is how this family's gates came to run a major
 # version of the imaging stack past the one the machines have. Floors are what
 # the machine holds today.
-#
+qt = ["PyQt6>=6,<7"]
 # Pillow is not a runtime dependency: shared_ui.icons_pil is imported only by
 # the players, which already have it, and nothing here imports Qt and Pillow at
-# once. The suite needs it to check the two renderers draw the same marks.
+# once. The suite needs it to check the two renderers draw the same marks -- and
+# it needs Qt, which is most of this package.
 dev = ["pytest>=9,<10", "pytest-timeout>=2.4,<3", "vulture>=2.16,<3", "pillow>=12,<13",
-       "ruff==0.16.6"]
+       "ruff==0.16.6", "PyQt6>=6,<7"]
 
 [tool.pytest.ini_options]
 # The content guard's enforcement check, taken from app_support rather than
