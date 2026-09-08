@@ -470,19 +470,24 @@ def _compilation() -> tuple:
     )
 
 
-def _headset() -> tuple:
+def _headset(crossed: bool = False) -> tuple:
     """A headset seen head-on: a visor with two lenses and a strap either side.
 
     The family's VR icon is its own letters, which say the app rather than the
-    act; a control that means "put this on" wants the thing itself.
+    act; a control that means "put this on" wants the thing itself.  *crossed*
+    rings and strikes it — the same drawing, negated, for the control that takes
+    you back out.
     """
-    return (
+    visor = (
         RoundedRect(6, 14, 36, 20, 8, width=3.6),
         Ellipse(16, 24, 5, 5, fill=True),
         Ellipse(32, 24, 5, 5, fill=True),
         Line(1, 21, 6, 21, 3.4),
         Line(42, 21, 47, 21, 3.4),
     )
+    if not crossed:
+        return visor
+    return (*visor, Ellipse(24, 24, 20, 20, width=4.0), Line(10, 10, 38, 38, 4.0))
 
 
 def _vr_hemisphere() -> tuple:
@@ -698,6 +703,7 @@ GLYPHS: dict[str, tuple] = {
         Polyline(((8, 39), (8, 12), (20, 12), (24, 18), (40, 18), (40, 39), (8, 39))),
     ),
     "headset": _headset(),
+    "headset_off": _headset(crossed=True),
     "latest": _order_arrows(crossed=False),
     "funscript_jump": _funscript_jump(),
     "loop": _loop(),
