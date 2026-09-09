@@ -63,6 +63,20 @@ TOGGLE_OFF: Rgb =TEXT_MUTED  # the muted gray everything else off wears
 TOGGLE_HANDLE: Rgb =WHITE
 
 
+# How much lighter a control sits while the pointer is over it.  One step, taken
+# from whatever ground the control already has, so a hover says "this is the one
+# you are about to press" without saying anything about what the control IS --
+# a lit control stays its own color, a shade brighter.  Lighter, never darker:
+# every other state in this family reads as lighter, and a control that dimmed
+# under the pointer read as going out of reach at the moment it was reached for.
+HOVER_LIFT = 30
+
+
+def hovered(rgb: Rgb) -> Rgb:
+    """*rgb* one step lighter -- the ground under the pointer."""
+    return tuple(min(255, channel + HOVER_LIFT) for channel in rgb)
+
+
 def as_hex(rgb: Rgb) -> str:
     """The ``#rrggbb`` spelling a style sheet or an HTML page takes."""
     red, green, blue = rgb

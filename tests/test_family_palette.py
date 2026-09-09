@@ -94,7 +94,8 @@ def test_every_role_it_restates_is_a_family_color():
     """The rule the style sheet is already held to.  A color spelled in place
     here is a near-blue nobody can find again -- and the point of this function
     is that there is one blue, not that the orange became some other orange."""
-    family = {tokens.as_hex(getattr(tokens, name)) for name in dir(tokens) if name.isupper()}
+    family = {tokens.as_hex(value) for name in dir(tokens) if name.isupper()
+              for value in [getattr(tokens, name)] if isinstance(value, tuple)}
 
     result = family_palette(_desktop_palette())
 

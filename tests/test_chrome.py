@@ -26,7 +26,8 @@ def _background(body: str) -> str:
 
 def test_every_color_on_the_sheet_is_a_palette_color():
     sheet = chrome.family_stylesheet()
-    allowed = {palette.as_hex(getattr(palette, name)) for name in dir(palette) if name.isupper()}
+    allowed = {palette.as_hex(value) for name in dir(palette) if name.isupper()
+               for value in [getattr(palette, name)] if isinstance(value, tuple)}
 
     strays = sorted({hex_ for hex_ in _HEX.findall(sheet) if hex_.lower() not in allowed})
 

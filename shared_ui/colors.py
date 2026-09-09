@@ -21,6 +21,15 @@ BG_BUTTON = QColor(*palette.BG_BUTTON)  # a control at rest
 BG_KEYCAP = QColor(*palette.BG_KEYCAP)  # keycap / legend background
 BG_BUTTON_ACTIVE = QColor(*palette.BG_BUTTON_ACTIVE)  # a control that is on
 
+
+def hovered(color: QColor) -> QColor:
+    """*color* one step lighter -- the ground under the pointer.
+
+    :func:`shared_ui.palette.hovered` for anything drawing without Qt; one step,
+    one direction, so a hovered control reads the same in every app.
+    """
+    return QColor(*palette.hovered((color.red(), color.green(), color.blue())))
+
 # ---------------------------------------------------------------------------
 # Text tiers (brightest -> dimmest)
 # ---------------------------------------------------------------------------
