@@ -23,7 +23,7 @@ SIZE_TINY  # clipper
 
 # --- spacing ---
 GAP_SMALL  # promptcrafter
-BUTTON_SIZE_HUD  # origenerator, player_core
+BUTTON_WORD_W  # fun_time's dashboard and its headset copy
 BUTTON_ICON  # clipper, evolver, fun_time, origenerator, scripture
 BUTTON_ROW_GAP  # origenerator
 BUTTON_PAD_H_TIGHT  # fun_time

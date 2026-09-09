@@ -59,6 +59,13 @@ BUTTON_GROUP_GAP = BUTTON_GAP * 3
 BUTTON_PAD_V = 4
 BUTTON_PAD_H = 16
 
+# And how big it is.  As wide as two HUD squares with the gap between them,
+# which is what a console gives its Video/Genau pair -- so a word-button is one
+# object across the family rather than whatever its own text measured in
+# whichever toolkit drew it.  The label sits at fonts.SIZE_TINY, the size those
+# consoles set theirs in.
+BUTTON_WORD_W = BUTTON_SIZE_HUD * 2 + BUTTON_GAP
+
 # The side room where a ROW of such buttons has to fit a strip of fixed width --
 # narrow, because at BUTTON_PAD_H five short words come to nearly twice the room
 # the strip has.  A narrower pad, not a different button: same height, same
