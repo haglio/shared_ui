@@ -38,3 +38,10 @@ class TestButtonGrouping:
         # Wider than a button, it reads as two separate bars rather than as two
         # groups of one.
         assert spacing.BUTTON_GROUP_GAP < spacing.BUTTON_SIZE
+
+
+class TestTheHudSquare:
+    def test_its_corner_is_the_ordinary_corner_scaled_down_to_it(self):
+        scaled = round(spacing.BUTTON_RADIUS * spacing.BUTTON_SIZE_HUD / spacing.BUTTON_SIZE)
+
+        assert scaled == spacing.BUTTON_RADIUS_HUD
