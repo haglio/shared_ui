@@ -34,8 +34,10 @@ BUTTON_SIZE_HUD = 18
 # mark is never crowded on one app's bar and lost on another's.  The HUDs' own
 # hug is theirs: they inset their marks from a button rather than sizing them.
 BUTTON_ICON = 16
+BUTTON_MARK_INSET_HUD = 2
 
 BUTTON_RADIUS = 4
+BUTTON_RADIUS_HUD = round(BUTTON_RADIUS * BUTTON_SIZE_HUD / BUTTON_SIZE)
 
 # Between buttons along a row, and between rows when a row wraps.  The row gap is
 # deliberately larger: at the same gap two wrapped rows read as one crowded block
