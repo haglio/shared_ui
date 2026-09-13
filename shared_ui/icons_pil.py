@@ -44,13 +44,13 @@ SUPERSAMPLE = 4
 
 
 def glyph_image(name: str, size: int, color) -> Image.Image:
-    """*name* as a transparent RGBA square *size* px on a side, drawn in *color*.
+    """*name* as a transparent RGBA square *size* px on an edge, drawn in *color*.
 
     *color* is an ``(r, g, b)`` or ``(r, g, b, a)`` tuple -- what the HUDs' own
     palette is in -- rather than a QColor, since nothing here knows about Qt.
     """
-    side = max(1, int(size))
-    big = side * SUPERSAMPLE
+    edge = max(1, int(size))
+    big = edge * SUPERSAMPLE
     # Drawn as a COVERAGE MASK and colored afterwards, rather than drawn in color
     # and resampled.  Lanczos overshoots at a hard edge, so resampling colored
     # ink put pixels brighter than the ink itself around every mark -- a faint
@@ -61,27 +61,27 @@ def glyph_image(name: str, size: int, color) -> Image.Image:
     scale = big / CANVAS
     for shape in GLYPHS[name]:
         _draw(draw, shape, 255, scale)
-    mask = mask.resize((side, side), Image.LANCZOS)
+    mask = mask.resize((edge, edge), Image.LANCZOS)
     red, green, blue, alpha = _rgba(color)
     if alpha != 255:
         mask = mask.point(lambda value: value * alpha // 255)
-    image = Image.new("RGBA", (side, side), (red, green, blue, 0))
+    image = Image.new("RGBA", (edge, edge), (red, green, blue, 0))
     image.putalpha(mask)
     return image
 
 
 def paste_glyph(image: Image.Image, name: str, frame: tuple[int, int, int, int],
                 color) -> None:
-    """Lay *name* over *image*, centered in ``frame`` and as big as its short side.
+    """Lay *name* over *image*, centered in ``frame`` and as big as its short edge.
 
     Composited rather than pasted flat, so the mark sits on whatever the HUD has
     already drawn there -- a button's fill, the panel, the video -- instead of
     stamping a transparent square over it.
     """
     x, y, w, h = frame
-    side = max(1, min(int(w), int(h)))
-    glyph = glyph_image(name, side, color)
-    image.alpha_composite(glyph, (int(x + (w - side) / 2), int(y + (h - side) / 2)))
+    edge = max(1, min(int(w), int(h)))
+    glyph = glyph_image(name, edge, color)
+    image.alpha_composite(glyph, (int(x + (w - edge) / 2), int(y + (h - edge) / 2)))
 
 
 def _rgba(color) -> tuple[int, int, int, int]:

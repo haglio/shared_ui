@@ -70,11 +70,11 @@ def draw_glyph(painter: QPainter, name: str, color, *,
 
 def glyph_pixmap(name: str, size: int, color) -> QPixmap:
     """*name* as a transparent *size*-square pixmap, drawn in *color*."""
-    side = max(1, int(size))
-    pixmap = QPixmap(side, side)
+    edge = max(1, int(size))
+    pixmap = QPixmap(edge, edge)
     pixmap.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pixmap)
-    draw_glyph(painter, name, color, size=side)
+    draw_glyph(painter, name, color, size=edge)
     painter.end()
     return pixmap
 
