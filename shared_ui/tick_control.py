@@ -24,7 +24,7 @@ from shared_ui.colors import (
     WHITE,
 )
 
-_INDICATOR = 16  # side length (px)
+_INDICATOR = 16  # edge length (px)
 _GAP = 7         # space between the indicator and the label
 _RADIUS = 3.0    # indicator corner rounding
 
@@ -70,9 +70,9 @@ class TickControl(QCheckBox):
         return QRectF(1.0, top, float(_INDICATOR), float(_INDICATOR))
 
     def _draw_tick(self, painter: QPainter, indicator: QRectF, enabled: bool):
-        side = indicator.width()
+        edge = indicator.width()
         points = QPolygonF([
-            QPointF(indicator.left() + fx * side, indicator.top() + fy * side)
+            QPointF(indicator.left() + fx * edge, indicator.top() + fy * edge)
             for fx, fy in _TICK_POINTS
         ])
         pen = QPen(WHITE if enabled else TEXT_SECONDARY)
