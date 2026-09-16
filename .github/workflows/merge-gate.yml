@@ -38,6 +38,16 @@ jobs:
       timeout-minutes: 6
       qt-platform: offscreen
 
+  # A version for each landing, so the repos that run this one can pin the copy
+  # they were built against. The tag is the version: pyproject reads it with
+  # setuptools-scm.
+  tag:
+    if: github.event_name == 'push'
+    needs: full-suite
+    uses: haglio/.github/.github/workflows/tag-the-landing.yml@main
+    permissions:
+      contents: write
+
   # What the machine this is developed on would say. It runs 3.14 and the gate
   # runs 3.12, and the two evaluate annotations differently (PEP 649), so a
   # branch can be green here and fail to collect there. On `push` only: never on
