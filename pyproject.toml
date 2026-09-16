@@ -1,10 +1,13 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "setuptools-scm>=8,<9"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "shared-ui"
-version = "0.1.0"
+# The version is the tag on the landing, read by setuptools-scm, so the three
+# repos that run this one can name the copy they were built against. Written
+# down it said 0.1.0 for the life of the repo.
+dynamic = ["version"]
 # 3.12, not 3.10: every gate in the family runs 3.12 and nothing has ever
 # collected a suite on anything older, so >=3.10 was a promise no run backed.
 requires-python = ">=3.12"
@@ -22,8 +25,12 @@ requires-python = ">=3.12"
 # own commit, with its own suite to answer for it. tests/test_sibling_pins.py
 # holds every declared sibling to having one.
 dependencies = [
-    "app-support @ git+https://github.com/haglio/app_support@v0.1.139",
+    "app-support @ git+https://github.com/haglio/app_support@v0.1.140",
 ]
+
+# The version is `git describe` of the checkout being built: a landing's tag
+# exactly, and that tag plus a development suffix for a checkout past one.
+[tool.setuptools_scm]
 
 [project.optional-dependencies]
 # Every requirement carries a ceiling: without one each run installs whatever
