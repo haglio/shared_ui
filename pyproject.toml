@@ -14,7 +14,16 @@ requires-python = ">=3.12"
 # PyQt6 put a Qt wheel in every player venv and on every runner that installs
 # one, for code that never touches it. Every consumer that uses the widgets
 # declares PyQt6 itself, and its own import gate says so.
-dependencies = []
+#
+# app_support is named at the tag it was built against rather than left to be
+# whatever copy sits beside this checkout. Unpinned, a change landing there
+# reached every consumer the same minute, and one whose other half had not
+# landed turned all of them red at once. Moving to a newer one is this repo's
+# own commit, with its own suite to answer for it. tests/test_sibling_pins.py
+# holds every declared sibling to having one.
+dependencies = [
+    "app-support @ git+https://github.com/haglio/app_support@v0.1.139",
+]
 
 [project.optional-dependencies]
 # Every requirement carries a ceiling: without one each run installs whatever

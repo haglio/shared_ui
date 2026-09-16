@@ -14,10 +14,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # No siblings cloned: app_support is pinned in pyproject, so pip fetches the
+  # tag this repo was built against. A clone here would install whatever main
+  # held this minute and pip would replace it with the pin anyway.
   full-suite:
     uses: haglio/.github/.github/workflows/merge-gate.yml@main
     with:
-      siblings: "app_support"
+      siblings: ""
       python-version: "3.12"
       timeout-minutes: 3
       qt-platform: offscreen
@@ -44,7 +47,7 @@ jobs:
     if: github.event_name == 'push'
     uses: haglio/.github/.github/workflows/merge-gate.yml@main
     with:
-      siblings: "app_support"
+      siblings: ""
       python-version: "3.14"
       timeout-minutes: 3
       qt-platform: offscreen
