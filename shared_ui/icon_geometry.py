@@ -569,15 +569,17 @@ def _funscript_jump() -> tuple:
     )
 
 
-# The three motion holds, as one drawing read three ways: the device from the
-# side -- its column on the right, the sleeve riding up and down it on the arm
+# The four states of OSR2 control, as one drawing read four ways: the device from
+# the side -- its column on the right, the sleeve riding up and down it on the arm
 # between them -- with the sleeve at whichever end the hold settles it on.  An
 # arrow points AT the sleeve for the two holds, from above for the one that
 # settles it home and from below for the one that sends it away, and points away
-# from it both ways for the release that lets it move again.
+# from it both ways for the release that lets it move again.  Control-off draws
+# that same free sleeve with an X where each of release's arrows was: the device
+# is not being held anywhere, it is simply not being driven.
 _COLUMN = RoundedRect(28, 8, 15, 32, 3, width=3.4)
 _SLEEVE_X, _SLEEVE_W, _SLEEVE_H = 6.0, 15.0, 13.0
-_ARROW_X = 13.5      # the arrows run up the sleeve's own centre line
+_ARROW_X = 13.5      # the arrows run up the sleeve's own center line
 _ARROW_HALF = 7.0    # half an arrowhead's width
 _ARROW_PEN = 4.0
 
@@ -611,6 +613,30 @@ def _retract() -> tuple:
 
 def _release() -> tuple:
     return (_COLUMN, *_sleeve(17.5), *_hold_arrow(3, 12), *_hold_arrow(45, 36))
+
+
+_CROSS_HALF = 6.0    # an X's arm, from its middle
+_CROSS_PEN = 3.6     # a shade finer than an arrow's, which has a solid head
+
+
+def _hold_cross(middle: float) -> tuple:
+    """An X centered at *middle* on the sleeve's own center line.
+
+    It takes the whole band between the sleeve and the frame's edge, which is
+    what keeps it legible at a HUD button's size -- and keeps it off the sleeve,
+    where an X overlapping the drawing read as a bow tie rather than as a mark
+    beside it.
+    """
+    left, right = _ARROW_X - _CROSS_HALF, _ARROW_X + _CROSS_HALF
+    upper, lower = middle - _CROSS_HALF, middle + _CROSS_HALF
+    return (
+        Line(left, upper, right, lower, _CROSS_PEN),
+        Line(left, lower, right, upper, _CROSS_PEN),
+    )
+
+
+def _control_off() -> tuple:
+    return (_COLUMN, *_sleeve(17.5), *_hold_cross(8), *_hold_cross(40))
 
 
 def _quarter_offset() -> tuple:
@@ -695,6 +721,7 @@ GLYPHS: dict[str, tuple] = {
     "clock_full": _dial(_FULL_SPAN),
     "clock_short": _dial(_SHORT_SPAN),
     "compilation": _compilation(),
+    "control_off": _control_off(),
     "copy": _copy(),
     "cross": (
         Line(11, 11, 37, 37, 5.5),
