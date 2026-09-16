@@ -15,7 +15,7 @@ from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
-from shared_ui.icon_geometry import glyph_names
+from shared_ui.icon_geometry import GLYPHS, glyph_names
 
 
 def _blank(size: int) -> QPixmap:
@@ -288,19 +288,44 @@ def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath():
 # Adding a mark means adding it below; that is the point.
 _THE_MARKS = (
     "bolt_ring", "check", "chevron_left", "chevron_right", "clip_to_scene",
-    "clock", "clock_full", "clock_short", "compilation", "copy", "cross",
-    "enhance_filter", "expand_horizontal", "flask", "flat_2d", "fmode",
-    "folder", "funscript_jump", "headset", "latest", "loop",
-    "mic", "minus", "monitor", "park", "pause", "photo", "play", "plus",
-    "plus_outline", "power", "quarter_offset", "question", "redo_arrow",
-    "release", "reset", "restart", "retract", "scene_to_clip", "shuffle",
-    "slideshow", "speaker", "star", "star_outline", "trash", "undo_arrow",
-    "versions", "vr_hemisphere", "wave",
+    "clock", "clock_full", "clock_short", "compilation", "control_off",
+    "copy", "cross", "enhance_filter", "expand_horizontal", "flask",
+    "flat_2d", "fmode", "folder", "funscript_jump", "headset", "latest",
+    "loop", "mic", "minus", "monitor", "park", "pause", "photo", "play",
+    "plus", "plus_outline", "power", "quarter_offset", "question",
+    "redo_arrow", "release", "reset", "restart", "retract", "scene_to_clip",
+    "shuffle", "slideshow", "speaker", "star", "star_outline", "trash",
+    "undo_arrow", "versions", "vr_hemisphere", "wave",
 )
 
 
 def test_the_marks_this_family_draws_are_the_ones_the_apps_ask_for():
     assert glyph_names() == _THE_MARKS
+
+
+# The four states OSR2 control can be in, in the order their buttons sit, and how
+# many primitives of each mark draw the device itself: the column, the sleeve and
+# the arm carrying one to the other.
+_OSR2_CONTROL = ("park", "retract", "release", "control_off")
+_THE_DEVICE = 3
+
+
+def test_the_four_osr2_control_marks_draw_one_device():
+    # They sit in a row as one radio group, so what tells them apart is meant to
+    # be where the sleeve rides and the marks beside it -- never a second drawing
+    # of the device. Four devices drawn four ways would read as four unrelated
+    # controls rather than one control in four states.
+    columns = {GLYPHS[name][0] for name in _OSR2_CONTROL}
+    assert len(columns) == 1
+
+
+def test_control_off_crosses_out_what_driving_points_at():
+    # Driving and control-off leave the sleeve in the same place, free in the
+    # middle of its travel; the whole difference is the pair of marks either side
+    # of it, arrows on one and X's on the other.
+    driving, off = GLYPHS["release"], GLYPHS["control_off"]
+    assert driving[:_THE_DEVICE] == off[:_THE_DEVICE]
+    assert driving[_THE_DEVICE:] != off[_THE_DEVICE:]
 
 
 def test_the_registry_is_what_glyph_names_reports():
