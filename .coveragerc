@@ -1,0 +1,11 @@
+[run]
+source =
+    shared_ui
+relative_files = true
+
+[report]
+precision = 2
+fail_under = 98.9
+exclude_also =
+    if TYPE_CHECKING:
+    if __name__ == "__main__":
