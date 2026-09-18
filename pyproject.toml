@@ -25,7 +25,7 @@ requires-python = ">=3.14"
 # own commit, with its own suite to answer for it. tests/test_sibling_pins.py
 # holds every declared sibling to having one.
 dependencies = [
-    "app-support @ git+https://github.com/haglio/app_support@v0.1.140",
+    "app-support @ git+https://github.com/haglio/app_support@v0.1.152",
 ]
 
 # The version is `git describe` of the checkout being built: a landing's tag
@@ -42,7 +42,7 @@ qt = ["PyQt6>=6,<7"]
 # the players, which already have it, and nothing here imports Qt and Pillow at
 # once. The suite needs it to check the two renderers draw the same marks -- and
 # it needs Qt, which is most of this package.
-dev = ["pytest>=9,<10", "pytest-timeout>=2.4,<3", "vulture>=2.16,<3", "pillow>=12,<13",
+dev = ["pytest>=9,<10", "pytest-cov>=7,<8", "pytest-timeout>=2.4,<3", "vulture>=2.16,<3", "pillow>=12,<13",
        "ruff==0.16.6", "PyQt6>=6,<7"]
 
 [tool.pytest.ini_options]
@@ -61,7 +61,7 @@ dev = ["pytest>=9,<10", "pytest-timeout>=2.4,<3", "vulture>=2.16,<3", "pillow>=1
 # itself: it dumps the stack of the test that stopped, which turns a stalled
 # required check into a one-line diagnosis. tests/test_timeouts.py holds all
 # three halves of it.
-addopts = "-p app_support.sanitize.pytest_plugin --timeout=60 --timeout-method=thread"
+addopts = "-p app_support.sanitize.pytest_plugin -p app_support.coverage_gate --cov --cov-report= --timeout=60 --timeout-method=thread"
 testpaths = ["tests"]
 
 [tool.setuptools.packages.find]
