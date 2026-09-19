@@ -209,3 +209,7 @@ def test_the_dialog_is_spaced_by_the_familys_dialog_tokens():
     assert margins == QMargins(
         MARGIN_DIALOG, MARGIN_DIALOG, MARGIN_DIALOG, MARGIN_DIALOG)
     assert dlg.layout().spacing() == GAP_DIALOG
+
+
+def test_the_dialog_keeps_the_title_it_was_given():
+    assert AlertDialog("Example App", "Nothing to do.").windowTitle() == "Example App"
