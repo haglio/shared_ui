@@ -25,7 +25,7 @@ requires-python = ">=3.14"
 # own commit, with its own suite to answer for it. tests/test_sibling_pins.py
 # holds every declared sibling to having one.
 dependencies = [
-    "app-support @ git+https://github.com/haglio/app_support@v0.1.155",
+    "app-support @ git+https://github.com/haglio/app_support@v0.1.156",
 ]
 
 # The version is `git describe` of the checkout being built: a landing's tag
