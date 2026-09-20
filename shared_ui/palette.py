@@ -4,9 +4,8 @@ Every color the apps share is here, once, as ``(red, green, blue)``.
 :mod:`shared_ui.colors` is the same list as QColors for the Qt chrome, and
 anything that draws without Qt reads this module instead: the players paint
 their HUDs into the video frame with Pillow, and Fun Time's help page is HTML.
-Each of those used to carry its own copy of the numbers, and a copy is a thing
-that drifts -- one of the help page's seven hex values had already moved three
-points off its source.  This module imports nothing, so a Pillow-only process
+A second copy of a number is a thing that drifts, so there is one.  This
+module imports nothing, so a Pillow-only process
 never pulls in Qt to learn what color a button is.
 """
 

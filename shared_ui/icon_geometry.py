@@ -3,9 +3,7 @@
 The apps draw with two different things.  The desktop chrome is Qt, and paints
 with QPainter; the players' HUDs are painted into the video frame with Pillow,
 because an mpv overlay takes a bitmap and there is no Qt in a player process at
-all.  While each side owned its own drawing of a mark, the two drifted -- the
-microphone came out a different shape in each app, and the trash can on a HUD
-had nothing to do with the trash can on a toolbar.
+all.  A mark drawn twice, once per side, is a mark that comes out two shapes.
 
 So the marks live here, as a list of primitives per glyph, and each side renders
 them: :mod:`shared_ui.icons` through QPainter, :mod:`shared_ui.icons_pil`
@@ -167,8 +165,8 @@ def _chevron(pointing_left: bool) -> tuple:
 # vertical center line -- hence the coordinate pairs below summing to 48 -- so
 # side by side they read as a direction each, not as two rings.  The head is
 # deliberately huge and the arc stops short of it, so it stands in open space
-# rather than merging into the arc it caps; the small nub this replaced left
-# the two telling apart only by which end of a circle a few pixels sat on.
+# rather than merging into the arc it caps -- which is what makes the two
+# tellable apart at a glance rather than by which end of a circle it sits on.
 _HISTORY_RING = (11, 13, 26, 26)  # center (24, 26), radius 13
 
 
@@ -359,9 +357,9 @@ def _restart() -> tuple:
 def _question() -> tuple:
     """A question mark -- the help control.
 
-    Drawn rather than typed, for the reason every mark here is: set in the body
-    face it came out a text character among icons, visibly lighter and smaller
-    than the marks it sat beside.
+    Drawn rather than typed, for the reason every mark here is (see
+    :mod:`shared_ui.icons`): a glyph set in the body face reads as a text
+    character among icons, lighter and smaller than the marks beside it.
     """
     return (
         Arc(14, 6, 20, 20, -25, 215),    # the hook: up the right, over, down the left
