@@ -16,10 +16,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from shared_ui import icons, icons_pil
-from shared_ui.icon_geometry import glyph_names
+from shared_ui.icon_geometry import Arc, glyph_names
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 from shared_ui.colors import GREEN, RED, TEXT_PRIMARY
@@ -155,10 +155,6 @@ def test_a_translucent_ink_lands_translucent():
 def test_a_negative_span_draws_the_same_arc_as_its_positive_twin():
     # Qt sweeps a negative span backwards to the same arc; Pillow would take the
     # long way round, so the renderer turns it around before converting.
-    from PIL import ImageDraw
-
-    from shared_ui.icon_geometry import Arc
-
     def render(arc):
         mask = Image.new("L", (_SIZE * 4, _SIZE * 4), 0)
         icons_pil._draw(ImageDraw.Draw(mask), arc, 255, 4.0)
