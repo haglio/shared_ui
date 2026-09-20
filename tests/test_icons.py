@@ -15,7 +15,7 @@ from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
-from shared_ui.icon_geometry import GLYPHS, glyph_names
+from shared_ui.icon_geometry import GLYPHS, Polygon, glyph_names
 
 
 def _blank(size: int) -> QPixmap:
@@ -402,8 +402,6 @@ def test_the_enhance_filter_lays_its_funnel_over_the_plus():
 
 
 def test_the_transport_marks_have_rounded_corners(monkeypatch):
-    from shared_ui.icon_geometry import GLYPHS, Polygon
-
     # A play triangle with hard points reads as a sharper, lighter mark than the
     # ones beside it -- and beside an icon font's transport controls it plainly
     # was not the same drawing.
@@ -424,8 +422,6 @@ def test_the_transport_marks_have_rounded_corners(monkeypatch):
 def test_a_bar_ends_in_a_round_cap_that_reaches_past_its_endpoint():
     # A mark's ends are round, so a bar's ink overhangs where its line stops by
     # about half the pen width -- what keeps a minus from reading as a chopped rule.
-    from shared_ui.icon_geometry import GLYPHS
-
     (bar,) = GLYPHS["minus"]
     left, _upper, right, _lower = _ink_rect(icons.glyph_pixmap("minus", 48, TEXT_PRIMARY))
     assert left <= bar.x1 - bar.width / 2 + 1

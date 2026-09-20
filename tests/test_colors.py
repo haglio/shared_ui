@@ -56,25 +56,21 @@ def test_an_active_control_sits_on_a_lighter_ground_than_a_resting_one():
     which is why a toggled button looked like a different kind of thing
     depending on which window it was in.
     """
-    from shared_ui.colors import BG_BUTTON, BG_BUTTON_ACTIVE
-
     def lightness(color):
         return 0.299 * color.red() + 0.587 * color.green() + 0.114 * color.blue()
 
-    assert lightness(BG_BUTTON_ACTIVE) > lightness(BG_BUTTON)
+    assert lightness(colors.BG_BUTTON_ACTIVE) > lightness(colors.BG_BUTTON)
 
 
 def test_the_light_blue_is_the_familys_blue_tinted_lighter():
     """There is one blue.  Where an app needs a lighter one beside it -- a range
     in play against a range loaded, a progress band -- it is that blue toward
     white, not a hue of its own."""
-    from shared_ui.colors import BLUE, BLUE_LIGHT
-
-    assert BLUE_LIGHT.blue() > BLUE_LIGHT.green() > BLUE_LIGHT.red()
+    assert colors.BLUE_LIGHT.blue() > colors.BLUE_LIGHT.green() > colors.BLUE_LIGHT.red()
     # Within a hair of BLUE's own hue, so the two read as one color dark and
     # light rather than as two colors.
-    assert abs(BLUE_LIGHT.hue() - BLUE.hue()) <= 12
-    assert BLUE_LIGHT.lightness() > BLUE.lightness()
+    assert abs(colors.BLUE_LIGHT.hue() - colors.BLUE.hue()) <= 12
+    assert colors.BLUE_LIGHT.lightness() > colors.BLUE.lightness()
 
 
 def _grays(module):
