@@ -56,9 +56,9 @@ def test_a_click_flips_the_state_and_announces_the_new_value():
 
 
 def test_only_the_left_button_flips_it():
-    """Where this switch is a pipeline's pause control, a right-click on it
-    used to stop the schedule -- and a right-click is what a user does looking
-    for a context menu."""
+    """Where this switch is a pipeline's pause control, a right-click that
+    flipped it would stop the schedule -- and a right-click is what someone does
+    looking for a context menu."""
     switch = ToggleSwitch()
     announced = []
     switch.clicked.connect(announced.append)

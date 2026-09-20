@@ -26,7 +26,7 @@ class TestButtonGrouping:
 
     def test_a_group_boundary_is_wider_than_the_gap_inside_a_group(self):
         # Equal, grouping would be invisible: a bank of icons would read as one
-        # undifferentiated row, which is what a rule used to be drawn to fix.
+        # undifferentiated row.
         assert spacing.BUTTON_GROUP_GAP > spacing.BUTTON_GAP
 
     def test_the_group_gap_is_stated_as_a_ratio_of_the_gap_inside_one(self):
