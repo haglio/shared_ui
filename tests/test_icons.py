@@ -290,7 +290,7 @@ _THE_MARKS = (
     "bolt_ring", "check", "chevron_left", "chevron_right", "clip_to_scene",
     "clock", "clock_full", "clock_short", "compilation", "control_off",
     "copy", "cross", "enhance_filter", "expand_horizontal", "flask",
-    "flat_2d", "fmode", "folder", "funscript_jump", "headset", "latest",
+    "flat_2d", "flip_ends", "fmode", "folder", "funscript_jump", "headset", "latest",
     "loop", "mic", "minus", "monitor", "park", "pause", "photo", "play",
     "plus", "plus_outline", "power", "quarter_offset", "question",
     "redo_arrow", "release", "reset", "restart", "retract", "scene_to_clip",

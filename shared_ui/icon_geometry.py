@@ -373,25 +373,44 @@ def _question() -> tuple:
 # the pair is the difference between them -- a reader tells the two apart by
 # whether the arrows cross, so every other thing about the marks has to be
 # identical, and two separate drawings would drift.
-_ORDER_ROWS = (13.0, 35.0)   # the heights the two arrows run at
-_ORDER_TAIL_X = 5.0          # where each arrow's line starts
-_ORDER_NECK_X = 32.0         # where the line ends and its head begins
-_ORDER_TIP_X = 43.0          # the head's point
-_ORDER_HEAD = 6.5            # half the head's height
-_ORDER_PEN = 4.5             # a shade under the default: two lines at full weight
+_PAIR_LANES = (13.0, 35.0)
+_PAIR_TAIL = 5.0
+_PAIR_NECK = 32.0
+_PAIR_TIP = 43.0
+_PAIR_HALF_HEAD = 6.5
+_PAIR_PEN = 4.5              # a shade under the default: two lines at full weight
                              # closed the gap between them at button size
 
 
 def _order_arrows(crossed: bool) -> tuple:
     """Two left-to-right arrows -- crossed for shuffle, parallel for latest."""
     shapes: list = []
-    for index, start in enumerate(_ORDER_ROWS):
-        end = _ORDER_ROWS[-1 - index] if crossed else start
-        shapes.append(Line(_ORDER_TAIL_X, start, _ORDER_NECK_X, end, _ORDER_PEN))
-        shapes.append(Polygon(((_ORDER_TIP_X, end),
-                               (_ORDER_NECK_X, end - _ORDER_HEAD),
-                               (_ORDER_NECK_X, end + _ORDER_HEAD))))
+    for index, start in enumerate(_PAIR_LANES):
+        end = _PAIR_LANES[-1 - index] if crossed else start
+        shapes.append(Line(_PAIR_TAIL, start, _PAIR_NECK, end, _PAIR_PEN))
+        shapes.append(Polygon(((_PAIR_TIP, end),
+                               (_PAIR_NECK, end - _PAIR_HALF_HEAD),
+                               (_PAIR_NECK, end + _PAIR_HALF_HEAD))))
     return tuple(shapes)
+
+
+def _upright_arrow(lane: float, *, pointing_up: bool) -> tuple:
+    def along(distance: float) -> float:
+        return CANVAS - distance if pointing_up else distance
+
+    neck = along(_PAIR_NECK)
+    return (
+        Line(lane, along(_PAIR_TAIL), lane, neck, _PAIR_PEN),
+        Polygon(((lane, along(_PAIR_TIP)),
+                 (lane - _PAIR_HALF_HEAD, neck),
+                 (lane + _PAIR_HALF_HEAD, neck))),
+    )
+
+
+def _flip_ends() -> tuple:
+    up_lane, down_lane = _PAIR_LANES
+    return (*_upright_arrow(up_lane, pointing_up=True),
+            *_upright_arrow(down_lane, pointing_up=False))
 
 
 # The two length filters, as one clock read twice: a dial with a sector filled to
@@ -728,6 +747,7 @@ GLYPHS: dict[str, tuple] = {
     "enhance_filter": _enhance_filter(),
     "expand_horizontal": _expand_horizontal(),
     "flat_2d": _flat_2d(),
+    "flip_ends": _flip_ends(),
     "flask": (                                            # an Erlenmeyer, with liquid
         Polyline(((19, 8), (19, 18), (9, 38), (39, 38), (29, 18), (29, 8))),
         Line(16, 8, 32, 8),                               # the lip
