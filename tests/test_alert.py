@@ -6,8 +6,9 @@ import threading
 from unittest.mock import patch
 
 import pytest
-from PyQt6.QtCore import QMargins, Qt, QThread, QTimer
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import QMargins, QPoint, Qt, QThread, QTimer, QUrl
+from PyQt6.QtGui import QPalette, QPixmap, QTextDocument
+from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QDialog, QLabel, QPushButton, QStyle
 
 from shared_ui.alert import (
@@ -16,6 +17,7 @@ from shared_ui.alert import (
     MESSAGE_WIDTH_MIN,
     AlertDialog,
     Level,
+    Link,
     show_alert,
 )
 from shared_ui.colors import (
@@ -26,7 +28,7 @@ from shared_ui.colors import (
     TEXT_SECONDARY,
 )
 from shared_ui.fonts import SIZE_BODY, make_font
-from shared_ui.spacing import GAP_DIALOG, MARGIN_DIALOG
+from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, MARGIN_DIALOG
 
 
 def test_the_dialog_carries_the_title_and_the_message():
@@ -36,6 +38,67 @@ def test_the_dialog_carries_the_title_and_the_message():
     assert "The scene file could not be read." in [
         label.text() for label in dlg.findChildren(QLabel)
     ]
+
+
+def _click(line: QLabel) -> None:
+    QTest.mouseClick(line, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier,
+                     QPoint(4, line.height() // 2))
+
+
+def test_a_link_under_the_message_opens_the_folder_it_names(tmp_path):
+    folder = tmp_path / "scene one & two"
+    dlg = AlertDialog("Example App", "The script matches no video.",
+                      links=[Link("Open its folder", folder)])
+    line, = [label for label in dlg.findChildren(QLabel) if "Open its folder" in label.text()]
+
+    with patch("shared_ui.alert.QDesktopServices") as desktop:
+        dlg.show()
+        QTest.qWaitForWindowExposed(dlg)
+        _click(line)
+        dlg.close()
+
+    desktop.openUrl.assert_called_once_with(QUrl.fromLocalFile(str(folder)))
+
+
+def test_a_link_reads_as_written_even_where_it_looks_like_markup(tmp_path):
+    written = "scene <one> & two.funscript"
+    dlg = AlertDialog("Example App", "Nothing to do.", links=[Link(written, tmp_path)])
+
+    line, = [label for label in dlg.findChildren(QLabel)
+             if label.textFormat() == Qt.TextFormat.RichText]
+    shown = QTextDocument()
+    shown.setHtml(line.text())
+    assert shown.toPlainText() == written
+
+
+def test_a_long_link_wraps_in_the_message_column_rather_than_widening_the_dialog(tmp_path):
+    long_name = " ".join(["a-fairly-long-file-name.funscript"] * 10)
+    dlg = AlertDialog("Example App", "Nothing to do.", links=[Link(long_name, tmp_path)])
+
+    assert dlg.sizeHint().width() <= 600
+
+
+def test_a_link_wears_the_familys_blue_in_an_app_that_never_set_the_familys_palette(tmp_path):
+    dlg = AlertDialog("Example App", "Nothing to do.", links=[Link("Open its folder", tmp_path)])
+
+    line, = [label for label in dlg.findChildren(QLabel) if "Open its folder" in label.text()]
+    assert line.palette().color(QPalette.ColorRole.Link) == BLUE
+
+
+def test_the_links_sit_a_family_gap_under_the_message(tmp_path):
+    dlg = AlertDialog("Example App", "Nothing to do.", links=[Link("Open its folder", tmp_path)])
+
+    said = dlg.layout().itemAt(0).layout()
+    column = said.itemAt(1).layout()
+    assert column.spacing() == GAP_MEDIUM
+
+
+def test_a_link_is_set_in_the_body_font_the_message_wears(tmp_path):
+    dlg = AlertDialog("Example App", "Nothing to do.",
+                      links=[Link("Open its folder", tmp_path)])
+
+    line, = [label for label in dlg.findChildren(QLabel) if "Open its folder" in label.text()]
+    assert line.font() == make_font(size=SIZE_BODY)
 
 
 def test_the_dialog_wears_the_familys_ground_and_text_colors():
@@ -135,6 +198,7 @@ def test_the_alert_opens_in_front_of_whatever_the_user_is_looking_at():
 
 def test_show_alert_opens_the_dialog_the_caller_described(tmp_path):
     icon = tmp_path / "app.png"
+    links = [Link("Open its folder", tmp_path)]
     with patch("shared_ui.alert.AlertDialog") as dialog:
         show_alert(
             "Example App",
@@ -142,10 +206,12 @@ def test_show_alert_opens_the_dialog_the_caller_described(tmp_path):
             level=Level.INFO,
             icon=icon,
             button_text="Got it",
+            links=links,
         )
 
     dialog.assert_called_once_with(
         "Example App", "Nothing to do.", level=Level.INFO, icon=icon, button_text="Got it",
+        links=links,
     )
     dialog.return_value.exec.assert_called_once_with()
 

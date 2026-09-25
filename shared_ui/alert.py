@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import html
 import threading
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
-from PyQt6.QtCore import QObject, Qt, QThread, pyqtSignal, pyqtSlot
-from PyQt6.QtGui import QIcon
+from PyQt6.QtCore import QObject, Qt, QThread, QUrl, pyqtSignal, pyqtSlot
+from PyQt6.QtGui import QDesktopServices, QIcon
 from PyQt6.QtWidgets import (
     QApplication,
     QDialog,
@@ -26,9 +28,10 @@ from shared_ui.colors import (
     BORDER_SUBTLE,
     TEXT_PRIMARY,
     TEXT_SECONDARY,
+    family_palette,
 )
 from shared_ui.fonts import SIZE_BODY, make_font
-from shared_ui.spacing import GAP_DIALOG, MARGIN_DIALOG
+from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, MARGIN_DIALOG
 
 # The mark beside the message, in pixels square.  Windows' own message dialogs
 # draw theirs at this size.
@@ -90,8 +93,28 @@ class Level(Enum):
     INFO = QStyle.StandardPixmap.SP_MessageBoxInformation
 
 
+@dataclass(frozen=True)
+class Link:
+    text: str
+    target: Path
+
+
+def _link_line(link: Link) -> QLabel:
+    url = QUrl.fromLocalFile(str(link.target)).toString(QUrl.ComponentFormattingOption.FullyEncoded)
+    line = QLabel(f'<a href="{html.escape(url)}">{html.escape(link.text)}</a>')
+    line.setTextFormat(Qt.TextFormat.RichText)
+    line.setTextInteractionFlags(
+        Qt.TextInteractionFlag.LinksAccessibleByMouse
+        | Qt.TextInteractionFlag.LinksAccessibleByKeyboard
+    )
+    line.linkActivated.connect(lambda href: QDesktopServices.openUrl(QUrl(href)))
+    line.setFont(make_font(size=SIZE_BODY))
+    line.setWordWrap(True)
+    return line
+
+
 class AlertDialog(QDialog):
-    """A modal notice: an icon, a message, and one button that dismisses it."""
+    """A modal notice: an icon, a message, any links under it, and one button that dismisses it."""
 
     def __init__(
         self,
@@ -101,6 +124,7 @@ class AlertDialog(QDialog):
         level: Level = Level.ERROR,
         icon: Path | None = None,
         button_text: str = "OK",
+        links: Sequence[Link] = (),
     ) -> None:
         super().__init__()
         self.setWindowTitle(title)
@@ -113,6 +137,7 @@ class AlertDialog(QDialog):
         )
         if icon is not None:
             self.setWindowIcon(QIcon(str(icon)))
+        self.setPalette(family_palette(self.palette()))
         self.setStyleSheet(f"""
             QDialog {{ background: {BG_TERTIARY.name()}; }}
             QLabel {{ color: {TEXT_SECONDARY.name()}; }}
@@ -136,10 +161,16 @@ class AlertDialog(QDialog):
         body.setMinimumWidth(MESSAGE_WIDTH_MIN)
         body.setMaximumWidth(MESSAGE_WIDTH_MAX)
 
+        column = QVBoxLayout()
+        column.setSpacing(GAP_MEDIUM)
+        column.addWidget(body)
+        for link in links:
+            column.addWidget(_link_line(link))
+
         said = QHBoxLayout()
         said.setSpacing(GAP_DIALOG)
         said.addWidget(mark)
-        said.addWidget(body, stretch=1)
+        said.addLayout(column, stretch=1)
 
         button = QPushButton(button_text)
         button.setFont(make_font(size=SIZE_BODY))
@@ -166,6 +197,7 @@ def show_alert(
     level: Level = Level.ERROR,
     icon: Path | None = None,
     button_text: str = "OK",
+    links: Sequence[Link] = (),
 ) -> None:
     """Put *message* on the screen under *title* and block until it is dismissed."""
     app = QApplication.instance() or QApplication([])
@@ -173,6 +205,7 @@ def show_alert(
     def open_it() -> None:
         AlertDialog(
             title, message, level=level, icon=icon, button_text=button_text,
+            links=links,
         ).exec()
 
     if QThread.currentThread() == app.thread():
