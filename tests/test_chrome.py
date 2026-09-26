@@ -39,7 +39,8 @@ def test_the_family_sheet_is_every_fragment():
     sheet = chrome.family_stylesheet()
 
     for fragment in (chrome.ground_rules(), chrome.tooltip_rules(),
-                     chrome.menu_rules(), chrome.button_rules()):
+                     chrome.menu_rules(), chrome.button_rules(),
+                     chrome.mark_button_rules()):
         assert fragment in sheet
 
 

@@ -128,6 +128,16 @@ def button_rules() -> str:
     }}"""
 
 
+MARK_BUTTON_PROPERTY = "markButton"
+
+
+def mark_button_rules() -> str:
+    return f"""
+    QAbstractButton[{MARK_BUTTON_PROPERTY}="true"] {{
+        padding: 0px;
+    }}"""
+
+
 def family_stylesheet() -> str:
     """Every rule above, for an app that dresses itself whole.
 
@@ -135,4 +145,5 @@ def family_stylesheet() -> str:
     later rule of equal specificity wins, and an id selector out-specifies
     every rule here, so a `QPushButton#generate` keeps its blue.
     """
-    return f"{ground_rules()}\n{tooltip_rules()}\n{menu_rules()}\n{button_rules()}"
+    return (f"{ground_rules()}\n{tooltip_rules()}\n{menu_rules()}\n{button_rules()}"
+            f"\n{mark_button_rules()}")

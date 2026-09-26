@@ -40,6 +40,11 @@ class TestButtonGrouping:
         assert spacing.BUTTON_GROUP_GAP < spacing.BUTTON_SIZE
 
 
+class TestMarks:
+    def test_an_icon_set_beside_a_word_is_smaller_than_a_mark_that_fills_its_square(self):
+        assert spacing.BUTTON_ICON < spacing.BUTTON_MARK
+
+
 class TestTheHudSquare:
     def test_its_corner_is_the_ordinary_corner_scaled_down_to_it(self):
         scaled = round(spacing.BUTTON_RADIUS * spacing.BUTTON_SIZE_HUD / spacing.BUTTON_SIZE)
