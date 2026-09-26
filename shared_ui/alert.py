@@ -43,6 +43,8 @@ MARK_SIZE = 32
 MESSAGE_WIDTH_MIN = 340
 MESSAGE_WIDTH_MAX = 480
 
+DISMISSED = QDialog.DialogCode.Accepted.value + 1
+
 
 class _GuiThreadCall(QObject):
     """Runs work on the GUI thread, blocking the thread that asked for it.
@@ -66,13 +68,14 @@ class _GuiThreadCall(QObject):
     def _run(self, work: Callable[[], None]) -> None:
         work()
 
-    def call(self, work: Callable[[], None]) -> None:
+    def call[T](self, work: Callable[[], T]) -> T:
         done = threading.Event()
+        outcome: list[T] = []
         failure: list[BaseException] = []
 
         def run_and_release() -> None:
             try:
-                work()
+                outcome.append(work())
             except BaseException as exc:
                 failure.append(exc)
             finally:
@@ -83,6 +86,7 @@ class _GuiThreadCall(QObject):
         done.wait()
         if failure:
             raise failure[0]
+        return outcome[0]
 
 
 class Level(Enum):
@@ -113,9 +117,14 @@ def _link_line(link: Link) -> QLabel:
     return line
 
 
-class AlertDialog(QDialog):
-    """A modal notice: an icon, a message, any links under it, and one button that dismisses it."""
+def _button(text: str, on_click: Callable[[], None]) -> QPushButton:
+    button = QPushButton(text)
+    button.setFont(make_font(size=SIZE_BODY))
+    button.clicked.connect(on_click)
+    return button
 
+
+class AlertDialog(QDialog):
     def __init__(
         self,
         title: str,
@@ -125,6 +134,7 @@ class AlertDialog(QDialog):
         icon: Path | None = None,
         button_text: str = "OK",
         links: Sequence[Link] = (),
+        dismissible: bool = False,
     ) -> None:
         super().__init__()
         self.setWindowTitle(title)
@@ -172,14 +182,14 @@ class AlertDialog(QDialog):
         said.addWidget(mark)
         said.addLayout(column, stretch=1)
 
-        button = QPushButton(button_text)
-        button.setFont(make_font(size=SIZE_BODY))
-        button.setDefault(True)
-        button.clicked.connect(self.accept)
+        ok = _button(button_text, self.accept)
+        ok.setDefault(True)
 
         buttons = QHBoxLayout()
         buttons.addStretch()
-        buttons.addWidget(button)
+        buttons.addWidget(ok)
+        if dismissible:
+            buttons.addWidget(_button("Dismiss", lambda: self.done(DISMISSED)))
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(
@@ -198,17 +208,17 @@ def show_alert(
     icon: Path | None = None,
     button_text: str = "OK",
     links: Sequence[Link] = (),
-) -> None:
-    """Put *message* on the screen under *title* and block until it is dismissed."""
+    dismissible: bool = False,
+) -> bool:
+    """Block until the alert is closed, and say whether it was closed with Dismiss."""
     app = QApplication.instance() or QApplication([])
 
-    def open_it() -> None:
-        AlertDialog(
+    def open_it() -> int:
+        return AlertDialog(
             title, message, level=level, icon=icon, button_text=button_text,
-            links=links,
+            links=links, dismissible=dismissible,
         ).exec()
 
-    if QThread.currentThread() == app.thread():
-        open_it()
-    else:
-        _GuiThreadCall(app.thread()).call(open_it)
+    on_gui_thread = QThread.currentThread() == app.thread()
+    closed_with = open_it() if on_gui_thread else _GuiThreadCall(app.thread()).call(open_it)
+    return closed_with == DISMISSED
