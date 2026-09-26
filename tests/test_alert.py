@@ -12,6 +12,7 @@ from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QDialog, QLabel, QPushButton, QStyle
 
 from shared_ui.alert import (
+    DISMISSED,
     MARK_SIZE,
     MESSAGE_WIDTH_MAX,
     MESSAGE_WIDTH_MIN,
@@ -111,7 +112,7 @@ def test_the_dialog_wears_the_familys_ground_and_text_colors():
     assert BG_BUTTON.name() in style
 
 
-def test_one_button_dismisses_the_dialog_and_says_what_the_caller_asked():
+def test_the_ok_button_closes_the_dialog_and_says_what_the_caller_asked():
     dlg = AlertDialog("Example App", "Nothing to do.", button_text="Got it")
 
     button, = dlg.findChildren(QPushButton)
@@ -126,6 +127,33 @@ def test_the_button_says_ok_when_the_caller_does_not_care():
 
     button, = dlg.findChildren(QPushButton)
     assert button.text() == "OK"
+
+
+def _buttons_left_to_right(dlg: AlertDialog) -> list[QPushButton]:
+    row = dlg.layout().itemAt(1).layout()
+    return [row.itemAt(i).widget() for i in range(row.count()) if row.itemAt(i).widget()]
+
+
+def test_a_dismissible_alert_offers_dismiss_to_the_right_of_ok():
+    dlg = AlertDialog("Example App", "The drive is nearly full.", dismissible=True)
+
+    assert [button.text() for button in _buttons_left_to_right(dlg)] == ["OK", "Dismiss"]
+
+
+def test_dismiss_closes_the_dialog_as_dismissed_rather_than_as_ok():
+    dlg = AlertDialog("Example App", "The drive is nearly full.", dismissible=True)
+    _ok, dismiss = _buttons_left_to_right(dlg)
+
+    dismiss.click()
+
+    assert dlg.result() == DISMISSED
+
+
+def test_dismiss_is_set_in_the_body_font_ok_wears():
+    dlg = AlertDialog("Example App", "The drive is nearly full.", dismissible=True)
+    ok, dismiss = _buttons_left_to_right(dlg)
+
+    assert dismiss.font() == ok.font() == make_font(size=SIZE_BODY)
 
 
 def test_the_message_and_the_button_are_set_in_the_familys_body_font():
@@ -211,9 +239,26 @@ def test_show_alert_opens_the_dialog_the_caller_described(tmp_path):
 
     dialog.assert_called_once_with(
         "Example App", "Nothing to do.", level=Level.INFO, icon=icon, button_text="Got it",
-        links=links,
+        links=links, dismissible=False,
     )
     dialog.return_value.exec.assert_called_once_with()
+
+
+@pytest.mark.parametrize(
+    "closed_with, dismissed",
+    [
+        (DISMISSED, True),
+        (QDialog.DialogCode.Accepted.value, False),
+        (QDialog.DialogCode.Rejected.value, False),
+    ],
+)
+def test_show_alert_says_whether_the_person_dismissed_it(closed_with, dismissed):
+    with patch("shared_ui.alert.AlertDialog") as dialog:
+        dialog.return_value.exec.return_value = closed_with
+        answer = show_alert("Example App", "The drive is nearly full.", dismissible=True)
+
+    assert answer is dismissed
+    assert dialog.call_args.kwargs["dismissible"] is True
 
 
 def test_show_alert_builds_a_qapplication_when_the_process_has_none():
@@ -230,22 +275,13 @@ def test_show_alert_builds_a_qapplication_when_the_process_has_none():
     application.assert_called_once_with([])
 
 
-def test_an_alert_raised_off_the_gui_thread_still_opens_on_it(qapp):
-    """Evolver's pipeline stages say what went wrong from a worker thread, and
-    Qt builds widgets on the GUI thread or not at all."""
-    opened_on = []
+def _show_alert_from_a_worker_thread(qapp, dialog_class, **kwargs) -> list[bool]:
+    answers = []
     finished = threading.Event()
-
-    class RecordingDialog:
-        def __init__(self, *_args, **_kwargs):
-            pass
-
-        def exec(self):
-            opened_on.append(threading.get_ident())
 
     def raise_it():
         try:
-            show_alert("Example App", "Nothing to do.")
+            answers.append(show_alert("Example App", "Nothing to do.", **kwargs))
         finally:
             finished.set()
 
@@ -254,7 +290,7 @@ def test_an_alert_raised_off_the_gui_thread_still_opens_on_it(qapp):
     watchdog.setInterval(20)
     watchdog.timeout.connect(lambda: finished.is_set() and qapp.quit())
 
-    with patch("shared_ui.alert.AlertDialog", RecordingDialog):
+    with patch("shared_ui.alert.AlertDialog", dialog_class):
         QTimer.singleShot(0, worker.start)
         QTimer.singleShot(10_000, qapp.quit)
         watchdog.start()
@@ -263,7 +299,38 @@ def test_an_alert_raised_off_the_gui_thread_still_opens_on_it(qapp):
         worker.join(timeout=10)
 
     assert not worker.is_alive()
+    return answers
+
+
+def test_an_alert_raised_off_the_gui_thread_still_opens_on_it(qapp):
+    """Evolver's pipeline stages say what went wrong from a worker thread, and
+    Qt builds widgets on the GUI thread or not at all."""
+    opened_on = []
+
+    class RecordingDialog:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def exec(self):
+            opened_on.append(threading.get_ident())
+            return QDialog.DialogCode.Accepted.value
+
+    _show_alert_from_a_worker_thread(qapp, RecordingDialog)
+
     assert opened_on == [threading.get_ident()]
+
+
+def test_an_alert_raised_off_the_gui_thread_says_whether_it_was_dismissed(qapp):
+    class DismissedDialog:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def exec(self):
+            return DISMISSED
+
+    answers = _show_alert_from_a_worker_thread(qapp, DismissedDialog, dismissible=True)
+
+    assert answers == [True]
 
 
 def test_the_dialog_is_spaced_by_the_familys_dialog_tokens():
