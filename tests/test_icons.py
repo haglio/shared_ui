@@ -287,7 +287,7 @@ def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath():
 # decision taken here, in the open, rather than a green run in this repo.
 # Adding a mark means adding it below; that is the point.
 _THE_MARKS = (
-    "bolt_ring", "check", "chevron_left", "chevron_right", "clip_to_scene",
+    "bolt", "check", "chevron_left", "chevron_right", "clip_to_scene",
     "clock", "clock_full", "clock_short", "compilation", "control_off",
     "copy", "cross", "enhance_filter", "expand_horizontal", "flask",
     "flat_2d", "flip_ends", "fmode", "folder", "funscript_jump", "headset", "latest",
