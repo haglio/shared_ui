@@ -811,3 +811,13 @@ def shapes_of(name: str) -> tuple:
         _named_in_the_log.add(name)
         _log.warning("shared_ui has no mark named %r, so its button shows the stand-in", name)
     return STAND_IN
+
+
+_WHY_IT_WEARS_THE_STAND_IN = ("This button's picture is missing from this version of the app.\n"
+                              "Updating the app brings it back.")
+
+
+def tooltip_for(mark: str, tooltip: str) -> str:
+    if mark in GLYPHS:
+        return tooltip
+    return "\n".join(line for line in (tooltip, _WHY_IT_WEARS_THE_STAND_IN) if line)
