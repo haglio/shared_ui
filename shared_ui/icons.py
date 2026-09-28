@@ -31,7 +31,6 @@ from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 from shared_ui.colors import TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import (
     CANVAS,
-    GLYPHS,
     PEN_WIDTH,
     Arc,
     Ellipse,
@@ -39,6 +38,7 @@ from shared_ui.icon_geometry import (
     Polygon,
     Polyline,
     RoundedRect,
+    shapes_of,
 )
 
 __all__ = [
@@ -63,7 +63,7 @@ def draw_glyph(painter: QPainter, name: str, color, *,
     painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
     painter.translate(x, y)
     painter.scale(size / CANVAS, size / CANVAS)
-    for shape in GLYPHS[name]:
+    for shape in shapes_of(name):
         _draw(painter, shape, ink)
     painter.restore()
 

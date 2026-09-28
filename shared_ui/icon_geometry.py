@@ -319,18 +319,18 @@ def _restart() -> tuple:
     )
 
 
-def _question() -> tuple:
-    """A question mark -- the help control.
+def _question(scale: float = 1.0, pen: float = PEN_WIDTH) -> tuple:
+    def toward_the_middle(value: float) -> float:
+        return 24 + (value - 24) * scale
 
-    Drawn rather than typed, for the reason every mark here is (see
-    :mod:`shared_ui.icons`): a glyph set in the body face reads as a text
-    character among icons, lighter and smaller than the marks beside it.
-    """
     return (
-        Arc(14, 6, 20, 20, -25, 215),    # the hook: up the right, over, down the left
-        Line(33.1, 20.2, 24, 31),        # the tail, sweeping in under it
-        Ellipse(24, 40, 3, 3, fill=True),
+        Arc(toward_the_middle(14), toward_the_middle(6), 20 * scale, 20 * scale, -25, 215, pen),
+        Line(toward_the_middle(33.1), toward_the_middle(20.2), 24, toward_the_middle(31), pen),
+        Ellipse(24, toward_the_middle(40), 0.6 * pen, 0.6 * pen, fill=True),
     )
+
+
+STAND_IN = (RoundedRect(4, 4, 40, 40, 9, width=3.6), *_question(scale=0.68, pen=4.0))
 
 
 # The browse-order pair: two arrows running left to right, crossed for shuffle and
@@ -799,3 +799,7 @@ GLYPHS: dict[str, tuple] = {
 def glyph_names() -> tuple[str, ...]:
     """Every mark the family can draw, sorted."""
     return tuple(sorted(GLYPHS))
+
+
+def shapes_of(name: str) -> tuple:
+    return GLYPHS.get(name, STAND_IN)
