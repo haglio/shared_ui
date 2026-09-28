@@ -10,6 +10,9 @@ hardest on the routes agreeing.
 
 from __future__ import annotations
 
+import logging
+import uuid
+
 from PyQt6.QtCore import QRectF, QSize, Qt
 from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 
@@ -422,6 +425,29 @@ def test_a_mark_this_version_does_not_have_is_drawn_as_the_stand_in(monkeypatch)
     drawn = icons.glyph_pixmap(_A_MARK_THIS_VERSION_LACKS, 48, TEXT_PRIMARY).toImage()
 
     assert drawn == stand_in
+
+
+def test_the_stand_in_wears_its_button_s_color_and_is_gray_only_when_the_button_is_disabled():
+    on_the_square_s_left_edge = (4, 24)
+    icon = icons.glyph_icon(_A_MARK_THIS_VERSION_LACKS, color=RED)
+
+    normal = icon.pixmap(QSize(48, 48), QIcon.Mode.Normal).toImage()
+    disabled = icon.pixmap(QSize(48, 48), QIcon.Mode.Disabled).toImage()
+
+    assert normal.pixelColor(*on_the_square_s_left_edge) == RED
+    assert disabled.pixelColor(*on_the_square_s_left_edge) == TEXT_MUTED
+
+
+def test_each_mark_this_version_does_not_have_is_named_in_the_log_once(caplog):
+    first, second = (f"a_mark_first_asked_for_{uuid.uuid4().hex}" for _ in range(2))
+
+    with caplog.at_level(logging.WARNING):
+        for name in (first, second, first, second, first):
+            icons.glyph_pixmap(name, 24, TEXT_PRIMARY)
+
+    for name in (first, second):
+        naming_it = [record.levelno for record in caplog.records if name in record.getMessage()]
+        assert naming_it == [logging.WARNING], name
 
 
 def test_a_bar_ends_in_a_round_cap_that_reaches_past_its_endpoint():

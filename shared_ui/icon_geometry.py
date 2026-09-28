@@ -7,9 +7,7 @@ all.  A mark drawn twice, once per side, is a mark that comes out two shapes.
 
 So the marks live here, as a list of primitives per glyph, and each side renders
 them: :mod:`shared_ui.icons` through QPainter, :mod:`shared_ui.icons_pil`
-through Pillow.  Neither renderer decides anything about the shape.  This module
-imports nothing but ``math``, so a Pillow-only process never pulls in Qt and a
-Qt-only one never pulls in Pillow.
+through Pillow.  Neither renderer decides anything about the shape.
 
 Coordinates are in a :data:`CANVAS`-square frame and the renderers scale from
 there, so a mark keeps its proportions and its pen weight whether it lands on
@@ -21,6 +19,7 @@ against this one.
 
 from __future__ import annotations
 
+import logging
 import math
 from dataclasses import dataclass
 
@@ -801,5 +800,14 @@ def glyph_names() -> tuple[str, ...]:
     return tuple(sorted(GLYPHS))
 
 
+_log = logging.getLogger(__name__)
+_named_in_the_log: set[str] = set()
+
+
 def shapes_of(name: str) -> tuple:
-    return GLYPHS.get(name, STAND_IN)
+    if name in GLYPHS:
+        return GLYPHS[name]
+    if name not in _named_in_the_log:
+        _named_in_the_log.add(name)
+        _log.warning("shared_ui has no mark named %r, so its button shows the stand-in", name)
+    return STAND_IN
