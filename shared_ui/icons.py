@@ -32,6 +32,7 @@ from shared_ui.colors import TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import (
     CANVAS,
     PEN_WIDTH,
+    STAND_IN,
     Arc,
     Ellipse,
     Line,
@@ -40,6 +41,7 @@ from shared_ui.icon_geometry import (
     RoundedRect,
     shapes_of,
 )
+from shared_ui.stand_in_tooltips import remember_the_stand_in_on
 
 __all__ = [
     "CANVAS",
@@ -63,9 +65,12 @@ def draw_glyph(painter: QPainter, name: str, color, *,
     painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
     painter.translate(x, y)
     painter.scale(size / CANVAS, size / CANVAS)
-    for shape in shapes_of(name):
+    shapes = shapes_of(name)
+    for shape in shapes:
         _draw(painter, shape, ink)
     painter.restore()
+    if shapes is STAND_IN and isinstance(painter.device(), QPixmap):
+        remember_the_stand_in_on(painter.device(), name)
 
 
 def glyph_pixmap(name: str, size: int, color) -> QPixmap:

@@ -12,6 +12,7 @@ from __future__ import annotations
 # ruff: noqa: F821, B018 -- a whitelist is names, not statements
 # --- Qt method overrides, called by the event loop, not by us ---
 _.paintEvent  # tick_control, toggle_switch
+_.eventFilter  # stand_in_tooltips
 
 # --- colors: none.  Every QColor in colors.py reads its palette twin by name, so
 #     vulture sees each token used; a palette token nobody reads shows up in
