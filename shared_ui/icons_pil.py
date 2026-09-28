@@ -24,13 +24,13 @@ from PIL import Image, ImageDraw
 
 from shared_ui.icon_geometry import (
     CANVAS,
-    GLYPHS,
     Arc,
     Ellipse,
     Line,
     Polygon,
     Polyline,
     RoundedRect,
+    shapes_of,
 )
 
 __all__ = ["CANVAS", "SUPERSAMPLE", "glyph_image", "paste_glyph"]
@@ -59,7 +59,7 @@ def glyph_image(name: str, size: int, color) -> Image.Image:
     mask = Image.new("L", (big, big), 0)
     draw = ImageDraw.Draw(mask)
     scale = big / CANVAS
-    for shape in GLYPHS[name]:
+    for shape in shapes_of(name):
         _draw(draw, shape, 255, scale)
     mask = mask.resize((edge, edge), Image.LANCZOS)
     red, green, blue, alpha = _rgba(color)

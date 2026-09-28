@@ -15,7 +15,10 @@ from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
-from shared_ui.icon_geometry import GLYPHS, Polygon, glyph_names
+from shared_ui.icon_geometry import GLYPHS, STAND_IN, Polygon, glyph_names
+
+_A_MARK_THIS_VERSION_LACKS = "a_mark_from_another_version"
+_EVERY_MARK_AND_THE_STAND_IN = (*glyph_names(), _A_MARK_THIS_VERSION_LACKS)
 
 
 def _blank(size: int) -> QPixmap:
@@ -78,7 +81,7 @@ def test_the_glyphs_are_all_different_marks():
     # Icon-only controls are only as good as the marks telling each other apart.
     drawn = {
         name: icons.glyph_pixmap(name, 48, TEXT_PRIMARY).toImage()
-        for name in glyph_names()
+        for name in _EVERY_MARK_AND_THE_STAND_IN
     }
     names = sorted(drawn)
     for index, first in enumerate(names):
@@ -97,7 +100,7 @@ def test_every_glyph_fills_its_canvas():
     # the frame is scaled onto a 16px tree row -- the empty margin shrinks with it.
     # The long side has to carry most of the canvas; the short side is allowed to
     # be narrow, because some marks (a chevron) genuinely are.
-    for name in set(glyph_names()) - _ONE_BAR:
+    for name in set(_EVERY_MARK_AND_THE_STAND_IN) - _ONE_BAR:
         left, upper, right, lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
         width, height = right - left, lower - upper
         assert max(width, height) >= 0.6 * 48, f"{name} is small in its frame"
@@ -143,7 +146,7 @@ def test_the_hollow_plus_traces_the_solid_one():
 def test_every_glyph_sits_in_the_middle_of_its_canvas():
     # Marks are laid beside each other in a button bank, so one drawn off-center
     # reads as misaligned with its neighbors rather than as its own shape.
-    for name in glyph_names():
+    for name in _EVERY_MARK_AND_THE_STAND_IN:
         left, upper, right, lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
         assert abs((left + right) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
         assert abs((upper + lower) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
@@ -279,13 +282,6 @@ def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath():
     assert image.pixelColor(0, 0).alpha() == 0        # outside the chip, still clear
 
 
-# Every name here is a string literal in at least one of the six repos that draw
-# these marks -- clipper, evolver, fun_time, origenerator, player_core and
-# promptcrafter -- and they reach for one by writing it out: GLYPHS[name] raises
-# KeyError at paint time, so a rename lands as an empty button or a traceback in
-# an app whose suite never ran. Renaming or dropping one therefore has to be a
-# decision taken here, in the open, rather than a green run in this repo.
-# Adding a mark means adding it below; that is the point.
 _THE_MARKS = (
     "bolt", "check", "chevron_left", "chevron_right", "clip_to_scene",
     "clock", "clock_full", "clock_short", "compilation", "control_off",
@@ -350,7 +346,7 @@ def test_a_mark_never_erases_the_ground_it_is_drawn_on():
     # that gap by erasing -- which works on an empty pixmap and punches a cutout
     # through anything else.  Clipping is what makes the mark safe to lay over a
     # chip or a thumbnail, so the ground has to survive under every glyph.
-    for name in glyph_names():
+    for name in _EVERY_MARK_AND_THE_STAND_IN:
         canvas = QPixmap(48, 48)
         canvas.fill(QColor(GREEN))
         painter = QPainter(canvas)
@@ -417,6 +413,15 @@ def test_the_transport_marks_have_rounded_corners(monkeypatch):
     rounded = _ink_pixels(icons.glyph_pixmap("play", 48, TEXT_PRIMARY))
     bare = _ink_pixels(icons.glyph_pixmap("_play_with_hard_points", 48, TEXT_PRIMARY))
     assert rounded > bare
+
+
+def test_a_mark_this_version_does_not_have_is_drawn_as_the_stand_in(monkeypatch):
+    monkeypatch.setitem(GLYPHS, "_the_stand_in", STAND_IN)
+    stand_in = icons.glyph_pixmap("_the_stand_in", 48, TEXT_PRIMARY).toImage()
+
+    drawn = icons.glyph_pixmap(_A_MARK_THIS_VERSION_LACKS, 48, TEXT_PRIMARY).toImage()
+
+    assert drawn == stand_in
 
 
 def test_a_bar_ends_in_a_round_cap_that_reaches_past_its_endpoint():

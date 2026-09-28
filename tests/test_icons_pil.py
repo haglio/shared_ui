@@ -19,13 +19,15 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from shared_ui import icons, icons_pil
-from shared_ui.icon_geometry import Arc, glyph_names
+from shared_ui.icon_geometry import GLYPHS, STAND_IN, Arc, glyph_names
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 from shared_ui.colors import GREEN, RED, TEXT_PRIMARY
 
 _SIZE = 48
 _INK = (240, 240, 240)  # TEXT_PRIMARY, as the HUDs' palette spells it
+_A_MARK_THIS_VERSION_LACKS = "a_mark_from_another_version"
+_EVERY_MARK_AND_THE_STAND_IN = (*glyph_names(), _A_MARK_THIS_VERSION_LACKS)
 
 
 def _pil_ink(image: Image.Image) -> tuple[int, int, int, int, int]:
@@ -58,7 +60,7 @@ def _qt_ink(name: str, size: int) -> tuple[int, int, int, int, int]:
 def test_every_glyph_draws_through_pillow_too():
     # A mark the Qt side can draw and the Pillow side cannot is a mark that goes
     # missing on a HUD -- an empty button, with nothing raised.
-    for name in glyph_names():
+    for name in _EVERY_MARK_AND_THE_STAND_IN:
         image = icons_pil.glyph_image(name, _SIZE, _INK)
         assert image.size == (_SIZE, _SIZE), name
         assert _pil_ink(image)[4] > 0, name
@@ -68,7 +70,7 @@ def test_the_two_renderers_put_the_mark_in_the_same_place():
     # The whole point. A HUD's trash can and a toolbar's are one drawing now, so
     # their ink has to occupy the same frame -- within a pixel, which is what is
     # left after Pillow's inside-the-frame outlines are corrected for.
-    for name in glyph_names():
+    for name in _EVERY_MARK_AND_THE_STAND_IN:
         pillow = _pil_ink(icons_pil.glyph_image(name, _SIZE, _INK))
         qt = _qt_ink(name, _SIZE)
         for edge in range(4):
@@ -79,10 +81,19 @@ def test_the_two_renderers_lay_down_a_like_amount_of_ink():
     # Same frame could still mean a hairline against a slab, so the weight has to
     # agree too. Pillow's arcs have no round caps and its resampling is not Qt's,
     # so this is a band rather than an equality.
-    for name in glyph_names():
+    for name in _EVERY_MARK_AND_THE_STAND_IN:
         pillow = _pil_ink(icons_pil.glyph_image(name, _SIZE, _INK))[4]
         qt = _qt_ink(name, _SIZE)[4]
         assert abs(pillow - qt) / qt < 0.15, name
+
+
+def test_a_mark_this_version_does_not_have_is_drawn_as_the_stand_in(monkeypatch):
+    monkeypatch.setitem(GLYPHS, "_the_stand_in", STAND_IN)
+    stand_in = icons_pil.glyph_image("_the_stand_in", _SIZE, _INK)
+
+    drawn = icons_pil.glyph_image(_A_MARK_THIS_VERSION_LACKS, _SIZE, _INK)
+
+    assert drawn.tobytes() == stand_in.tobytes()
 
 
 def test_a_glyph_is_drawn_in_the_color_it_is_asked_for():
@@ -201,7 +212,7 @@ def test_a_mark_is_never_brighter_than_the_ink_it_was_drawn_in():
     # mark came out with pixels brighter than its own ink around every edge --
     # a faint halo, and enough near-white to trip a HUD's own checks for it.
     # Drawing a coverage mask and coloring afterwards keeps the ink exact.
-    for name in glyph_names():
+    for name in _EVERY_MARK_AND_THE_STAND_IN:
         image = icons_pil.glyph_image(name, 24, _INK)
         for y in range(24):
             for x in range(24):
