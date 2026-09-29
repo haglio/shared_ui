@@ -58,6 +58,19 @@ def tooltip_rules() -> str:
     }}"""
 
 
+_MENU_ROW_PAD_V = 6
+_MENU_ROW_PAD_H = 20
+
+# Qt's layout, not the family's: it draws a menu row's mark against the row's
+# own edge, and starts the row's words past its padding and a column as wide as
+# the small icon size plus four.
+_QT_MENU_MARK = 16
+_ROOM_BEFORE_MENU_WORDS = _MENU_ROW_PAD_H + _QT_MENU_MARK + 4
+
+_CHECKED_GROUND_MARGIN = 4
+_MENU_MARK_BOX_LEFT = (_ROOM_BEFORE_MENU_WORDS - _QT_MENU_MARK) // 2 - _CHECKED_GROUND_MARGIN
+
+
 def menu_rules() -> str:
     """Every right-click and tray menu.
 
@@ -76,7 +89,7 @@ def menu_rules() -> str:
         padding: 4px 0;
     }}
     QMenu::item {{
-        padding: 6px 20px;
+        padding: {_MENU_ROW_PAD_V}px {_MENU_ROW_PAD_H}px;
         background-color: transparent;
     }}
     QMenu::item:selected {{
@@ -89,6 +102,14 @@ def menu_rules() -> str:
     QMenu::item:disabled:selected {{
         background-color: transparent;
         color: {as_hex(TEXT_MUTED)};
+    }}
+    QMenu::icon {{
+        left: {_MENU_MARK_BOX_LEFT}px;
+        padding: {_CHECKED_GROUND_MARGIN}px;
+    }}
+    QMenu::icon:checked {{
+        background-color: {as_hex(BG_BUTTON_ACTIVE)};
+        border-radius: {BUTTON_RADIUS}px;
     }}
     QMenu::separator {{
         height: 1px;
