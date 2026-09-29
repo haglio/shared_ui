@@ -332,11 +332,6 @@ def _question(scale: float = 1.0, pen: float = PEN_WIDTH) -> tuple:
 STAND_IN = (RoundedRect(4, 4, 40, 40, 9, width=3.6), *_question(scale=0.68, pen=4.0))
 
 
-# The browse-order pair: two arrows running left to right, crossed for shuffle and
-# parallel for latest.  Written once with one switch, because the whole meaning of
-# the pair is the difference between them -- a reader tells the two apart by
-# whether the arrows cross, so every other thing about the marks has to be
-# identical, and two separate drawings would drift.
 _PAIR_LANES = (13.0, 35.0)
 _PAIR_TAIL = 5.0
 _PAIR_NECK = 32.0
@@ -346,16 +341,24 @@ _PAIR_PEN = 4.5              # a shade under the default: two lines at full weig
                              # closed the gap between them at button size
 
 
-def _order_arrows(crossed: bool) -> tuple:
-    """Two left-to-right arrows -- crossed for shuffle, parallel for latest."""
+def _shuffle() -> tuple:
     shapes: list = []
-    for index, start in enumerate(_PAIR_LANES):
-        end = _PAIR_LANES[-1 - index] if crossed else start
+    for start, end in zip(_PAIR_LANES, reversed(_PAIR_LANES), strict=True):
         shapes.append(Line(_PAIR_TAIL, start, _PAIR_NECK, end, _PAIR_PEN))
         shapes.append(Polygon(((_PAIR_TIP, end),
                                (_PAIR_NECK, end - _PAIR_HALF_HEAD),
                                (_PAIR_NECK, end + _PAIR_HALF_HEAD))))
     return tuple(shapes)
+
+
+def _calendar() -> tuple:
+    return (
+        RoundedRect(6, 10, 36, 32, 4, width=3.6),
+        Line(6, 19.5, 42, 19.5, 3.6),
+        Line(16, 5, 16, 13, 3.6),
+        Line(32, 5, 32, 13, 3.6),
+        RoundedRect(26, 26, 9, 9, 1.5, fill=True),
+    )
 
 
 def _upright_arrow(lane: float, *, pointing_up: bool) -> tuple:
@@ -377,64 +380,32 @@ def _flip_ends() -> tuple:
             *_upright_arrow(down_lane, pointing_up=False))
 
 
-# The two length filters, as one clock read twice: a dial with a sector filled to
-# say how much of a scene the filter keeps.  Nearly all of it for full length,
-# a sliver for shorts -- so the pair reads as "long" and "short" before either
-# tooltip does, and neither can be mistaken for the plain clock above.
-_DIAL = 15.0          # the dial's radius
-_DIAL_PEN = 4.0       # its rim
-_FULL_SPAN = 300.0    # what "full length" keeps of the dial
-_SHORT_SPAN = 30.0    # …and what "shorts" does
+_TIMELINE = Line(5, 37.5, 43, 37.5, 3.4)
+_CLIP_TOP = 12.0
+_CLIP_HEIGHT = 18.0
+_SHORT_CLIP_END = 17.0
 
 
-def _sector(span: float, cx: float, cy: float, radius: float) -> tuple:
-    """A filled wedge of *span* degrees, from twelve o'clock clockwise.
-
-    A polygon rather than a heavy arc: an arc's ink lands differently under the
-    two renderers, and this family holds them to within a tenth of each other.
-    """
-    steps = max(2, int(span / 6))
-    points = [(cx, cy)]
-    for index in range(steps + 1):
-        angle = math.radians(90.0 - span * index / steps)
-        points.append((cx + radius * math.cos(angle), cy - radius * math.sin(angle)))
-    return (Polygon(tuple(points)),)
+def _clip_on_the_timeline(end: float) -> tuple:
+    return (_TIMELINE,
+            RoundedRect(_TIMELINE.x1, _CLIP_TOP, end - _TIMELINE.x1, _CLIP_HEIGHT, 3.5, fill=True))
 
 
-def _dial(span: float, cx: float = 24.0, cy: float = 24.0,
-          radius: float = _DIAL, pen: float = _DIAL_PEN) -> tuple:
-    """One length filter's dial: a rim with *span* degrees of it filled."""
-    return (Ellipse(cx, cy, radius, radius, width=pen),
-            *_sector(span, cx, cy, radius - pen / 2))
-
-
-# The pair of dials the jump between a clip and its scene is drawn from: the two
-# length marks, small, side by side, with the arrow saying which way the press
-# goes underneath them.  Underneath rather than between: at button size two dials
-# with room for an arrow between them left no dial worth reading.
-_JUMP_R = 9.5
-_JUMP_PEN = 3.0
-_JUMP_Y = 15.0
-_JUMP_LEFT, _JUMP_RIGHT = 13.0, 35.0
-_JUMP_ARROW_Y = 38.0
+_JUMP_SHORT_CLIP = RoundedRect(4, 7, 9, 15, 2.5, fill=True)
+_JUMP_LONG_CLIP = RoundedRect(18, 7, 26, 15, 2.5, fill=True)
+_JUMP_ARROW_Y = 36.0
 
 
 def _clip_scene_jump(to_scene: bool) -> tuple:
-    """The shorts dial and the full-length dial, with an arrow saying which of
-    the two a press is going to.
-
-    Shorts on the left and full length on the right always, so only the arrow
-    moves: the dials are what the two ends ARE, and swapping them as well would
-    make one mark read as the other flipped.
-    """
-    head, tail = (36.0, 12.0) if to_scene else (12.0, 36.0)
+    head, tail = (37.0, 11.0) if to_scene else (11.0, 37.0)
+    neck = (head + tail) / 2
     return (
-        *_dial(_SHORT_SPAN, _JUMP_LEFT, _JUMP_Y, _JUMP_R, _JUMP_PEN),
-        *_dial(_FULL_SPAN, _JUMP_RIGHT, _JUMP_Y, _JUMP_R, _JUMP_PEN),
-        Line(tail, _JUMP_ARROW_Y, (head + tail) / 2, _JUMP_ARROW_Y, 4.0),
+        _JUMP_SHORT_CLIP,
+        _JUMP_LONG_CLIP,
+        Line(tail, _JUMP_ARROW_Y, neck, _JUMP_ARROW_Y, 4.0),
         Polygon(((head + (6.0 if to_scene else -6.0), _JUMP_ARROW_Y),
-                 ((head + tail) / 2, _JUMP_ARROW_Y - 6.0),
-                 ((head + tail) / 2, _JUMP_ARROW_Y + 6.0))),
+                 (neck, _JUMP_ARROW_Y - 6.0),
+                 (neck, _JUMP_ARROW_Y + 6.0))),
     )
 
 
@@ -701,8 +672,6 @@ GLYPHS: dict[str, tuple] = {
         Line(24, 24, 33, 24),
     ),
     "clip_to_scene": _clip_scene_jump(to_scene=True),
-    "clock_full": _dial(_FULL_SPAN),
-    "clock_short": _dial(_SHORT_SPAN),
     "compilation": _compilation(),
     "control_off": _control_off(),
     "copy": _copy(),
@@ -723,8 +692,9 @@ GLYPHS: dict[str, tuple] = {
     "folder": (
         Polyline(((8, 39), (8, 12), (20, 12), (24, 18), (40, 18), (40, 39), (8, 39))),
     ),
+    "full_length": _clip_on_the_timeline(_TIMELINE.x2),
     "headset": _headset(),
-    "latest": _order_arrows(crossed=False),
+    "latest": _calendar(),
     "funscript_jump": _funscript_jump(),
     "log": (
         RoundedRect(10, 5, 28, 38, 4, width=3.6),
@@ -772,7 +742,8 @@ GLYPHS: dict[str, tuple] = {
     "restart": _restart(),
     "retract": _retract(),
     "scene_to_clip": _clip_scene_jump(to_scene=False),
-    "shuffle": _order_arrows(crossed=True),
+    "shorts": _clip_on_the_timeline(_SHORT_CLIP_END),
+    "shuffle": _shuffle(),
     "slideshow": (                                        # a play triangle in a screen
         RoundedRect(8, 11, 32, 26, 4),
         Polygon(((20, 16), (20, 32), (33, 24))),
@@ -799,6 +770,9 @@ GLYPHS: dict[str, tuple] = {
         Arc(24, 11, 18, 26, 180, 180),
     ),
 }
+
+RENAMED_MARKS: dict[str, str] = {"clock_full": "full_length", "clock_short": "shorts"}
+GLYPHS.update({old: GLYPHS[new] for old, new in RENAMED_MARKS.items()})
 
 
 def glyph_names() -> tuple[str, ...]:

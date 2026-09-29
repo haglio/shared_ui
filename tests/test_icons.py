@@ -18,7 +18,7 @@ from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
-from shared_ui.icon_geometry import GLYPHS, STAND_IN, Polygon, glyph_names
+from shared_ui.icon_geometry import GLYPHS, RENAMED_MARKS, STAND_IN, Polygon, glyph_names
 
 _A_MARK_THIS_VERSION_LACKS = "a_mark_from_another_version"
 _EVERY_MARK_AND_THE_STAND_IN = (*glyph_names(), _A_MARK_THIS_VERSION_LACKS)
@@ -85,6 +85,7 @@ def test_the_glyphs_are_all_different_marks():
     drawn = {
         name: icons.glyph_pixmap(name, 48, TEXT_PRIMARY).toImage()
         for name in _EVERY_MARK_AND_THE_STAND_IN
+        if name not in RENAMED_MARKS
     }
     names = sorted(drawn)
     for index, first in enumerate(names):
@@ -289,11 +290,11 @@ _THE_MARKS = (
     "bolt", "check", "chevron_left", "chevron_right", "clip_to_scene",
     "clock", "clock_full", "clock_short", "compilation", "control_off",
     "copy", "cross", "enhance_filter", "expand_horizontal", "flask",
-    "flat_2d", "flip_ends", "fmode", "folder", "funscript_jump", "headset", "latest",
-    "log", "loop", "mic", "minus", "monitor", "park", "pause", "photo", "play",
+    "flat_2d", "flip_ends", "fmode", "folder", "full_length", "funscript_jump", "headset",
+    "latest", "log", "loop", "mic", "minus", "monitor", "park", "pause", "photo", "play",
     "plus", "plus_outline", "power", "quarter_offset", "question",
     "redo_arrow", "release", "reset", "restart", "retract", "scene_to_clip",
-    "shuffle", "slideshow", "speaker", "star", "star_outline", "trash",
+    "shorts", "shuffle", "slideshow", "speaker", "star", "star_outline", "trash",
     "undo_arrow", "versions", "vr_hemisphere", "wave",
 )
 
@@ -325,6 +326,34 @@ def test_control_off_crosses_out_what_driving_points_at():
     driving, off = GLYPHS["release"], GLYPHS["control_off"]
     assert driving[:_THE_DEVICE] == off[:_THE_DEVICE]
     assert driving[_THE_DEVICE:] != off[_THE_DEVICE:]
+
+
+def test_the_length_marks_are_a_clip_along_one_timeline_the_whole_way_or_only_its_start():
+    full_timeline, full_clip = GLYPHS["full_length"]
+    shorts_timeline, shorts_clip = GLYPHS["shorts"]
+
+    assert full_timeline == shorts_timeline
+    assert full_clip.x == shorts_clip.x == full_timeline.x1
+    assert full_clip.x + full_clip.w == full_timeline.x2
+    assert shorts_clip.w < full_clip.w / 3
+
+
+def test_a_jump_between_a_clip_and_its_scene_keeps_the_short_clip_left_of_the_long_one():
+    for name in ("clip_to_scene", "scene_to_clip"):
+        short, long, *_arrow = GLYPHS[name]
+        assert short.fill and long.fill, name
+        assert short.x + short.w < long.x, name
+        assert short.w < long.w / 2, name
+    assert GLYPHS["clip_to_scene"][:2] == GLYPHS["scene_to_clip"][:2]
+
+
+def test_latest_is_its_own_drawing_rather_than_shuffle_uncrossed():
+    assert not set(GLYPHS["latest"]) & set(GLYPHS["shuffle"])
+
+
+def test_a_renamed_mark_still_draws_under_its_old_name_for_branches_not_yet_rebased():
+    assert GLYPHS["clock_full"] == GLYPHS["full_length"]
+    assert GLYPHS["clock_short"] == GLYPHS["shorts"]
 
 
 def test_the_registry_is_what_glyph_names_reports():
