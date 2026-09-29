@@ -726,6 +726,12 @@ GLYPHS: dict[str, tuple] = {
     "headset": _headset(),
     "latest": _order_arrows(crossed=False),
     "funscript_jump": _funscript_jump(),
+    "log": (
+        RoundedRect(10, 5, 28, 38, 4, width=3.6),
+        Line(17, 16, 31, 16, 3.6),
+        Line(17, 24, 31, 24, 3.6),
+        Line(17, 32, 26, 32, 3.6),
+    ),
     "loop": _loop(),
     "monitor": _monitor(),
     "mic": (                                              # capsule, cradle, stand
