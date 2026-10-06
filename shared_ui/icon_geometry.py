@@ -391,21 +391,24 @@ def _clip_on_the_timeline(end: float) -> tuple:
             RoundedRect(_TIMELINE.x1, _CLIP_TOP, end - _TIMELINE.x1, _CLIP_HEIGHT, 3.5, fill=True))
 
 
-_JUMP_SHORT_CLIP = RoundedRect(4, 7, 9, 15, 2.5, fill=True)
-_JUMP_LONG_CLIP = RoundedRect(18, 7, 26, 15, 2.5, fill=True)
-_JUMP_ARROW_Y = 36.0
+_JUMP_SHORT_CLIP = RoundedRect(8, 5, 8, 10, 2.5, fill=True)
+_JUMP_LONG_CLIP = RoundedRect(20, 5, 20, 10, 2.5, fill=True)
+_JUMP_ARROW_Y = 31.0
+_JUMP_STEM = 8.0
+_JUMP_HALF_HEAD = 11.0
 
 
 def _clip_scene_jump(to_scene: bool) -> tuple:
-    head, tail = (37.0, 11.0) if to_scene else (11.0, 37.0)
-    neck = (head + tail) / 2
+    tail, neck, tip = 16.0, 25.0, 35.0
+    if not to_scene:
+        tail, neck, tip = (CANVAS - x for x in (tail, neck, tip))
     return (
         _JUMP_SHORT_CLIP,
         _JUMP_LONG_CLIP,
-        Line(tail, _JUMP_ARROW_Y, neck, _JUMP_ARROW_Y, 4.0),
-        Polygon(((head + (6.0 if to_scene else -6.0), _JUMP_ARROW_Y),
-                 (neck, _JUMP_ARROW_Y - 6.0),
-                 (neck, _JUMP_ARROW_Y + 6.0))),
+        Line(tail, _JUMP_ARROW_Y, neck, _JUMP_ARROW_Y, _JUMP_STEM),
+        Polygon(((tip, _JUMP_ARROW_Y),
+                 (neck, _JUMP_ARROW_Y - _JUMP_HALF_HEAD),
+                 (neck, _JUMP_ARROW_Y + _JUMP_HALF_HEAD))),
     )
 
 
