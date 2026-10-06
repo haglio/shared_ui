@@ -347,6 +347,17 @@ def test_a_jump_between_a_clip_and_its_scene_keeps_the_short_clip_left_of_the_lo
     assert GLYPHS["clip_to_scene"][:2] == GLYPHS["scene_to_clip"][:2]
 
 
+def test_a_jump_s_arrow_is_short_and_thick_with_room_on_either_side():
+    for name in ("clip_to_scene", "scene_to_clip"):
+        *_clips, stem, head = GLYPHS[name]
+        xs = [stem.x1, stem.x2, *(x for x, _y in head.points)]
+        ys = [y for _x, y in head.points]
+        assert stem.width >= 8, name
+        assert max(ys) - min(ys) >= 20, name
+        assert max(xs) - min(xs) <= 24, name
+        assert min(xs) - stem.width / 2 >= 8 and max(xs) + stem.width / 2 <= 40, name
+
+
 def test_latest_is_its_own_drawing_rather_than_shuffle_uncrossed():
     assert not set(GLYPHS["latest"]) & set(GLYPHS["shuffle"])
 
