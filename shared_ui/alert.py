@@ -131,7 +131,7 @@ class AlertDialog(QDialog):
         message: str,
         *,
         level: Level = Level.ERROR,
-        icon: Path | None = None,
+        icon: Path | QIcon | None = None,
         button_text: str = "OK",
         links: Sequence[Link] = (),
         dismissible: bool = False,
@@ -146,7 +146,7 @@ class AlertDialog(QDialog):
             | Qt.WindowType.MSWindowsFixedSizeDialogHint
         )
         if icon is not None:
-            self.setWindowIcon(QIcon(str(icon)))
+            self.setWindowIcon(icon if isinstance(icon, QIcon) else QIcon(str(icon)))
         self.setPalette(family_palette(self.palette()))
         self.setStyleSheet(f"""
             QDialog {{ background: {BG_TERTIARY.name()}; }}
@@ -205,7 +205,7 @@ def show_alert(
     message: str,
     *,
     level: Level = Level.ERROR,
-    icon: Path | None = None,
+    icon: Path | QIcon | None = None,
     button_text: str = "OK",
     links: Sequence[Link] = (),
     dismissible: bool = False,
