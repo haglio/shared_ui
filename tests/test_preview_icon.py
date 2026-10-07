@@ -7,7 +7,7 @@ from shared_ui.preview import Preview
 from shared_ui.preview_icon import app_icon
 from shared_ui.preview_icon_pil import write_in_preview_ink
 
-_A_PREVIEW = Preview(checkout="scene-one", feature=None)
+_A_PREVIEW = Preview(feature=None)
 _QTS_PREMULTIPLIED_ROUNDING = 1
 
 

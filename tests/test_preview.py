@@ -36,8 +36,8 @@ def test_the_primary_checkout_is_the_live_app(tmp_path):
     assert preview_of(tmp_path) is None
 
 
-def test_a_worktree_is_a_preview_named_for_its_folder(worktree):
-    assert preview_of(worktree).checkout == "scene-one"
+def test_a_worktree_is_a_preview(worktree):
+    assert preview_of(worktree) is not None
 
 
 def test_a_preview_demos_the_feature_its_branch_describes(worktree):
@@ -77,24 +77,24 @@ def test_the_live_app_wears_its_own_name():
 
 
 def test_a_preview_is_named_for_the_feature_it_demos():
-    preview = Preview(checkout="scene-one", feature="the example stage's new pause")
+    preview = Preview(feature="the example stage's new pause")
 
     assert window_title("Example App", preview) == "Example App \u2014 preview of the example stage's new pause"
 
 
 def test_a_preview_nobody_described_is_still_named_a_preview():
-    assert window_title("Example App", Preview(checkout="scene-one", feature=None)) == "Example App \u2014 preview"
+    assert window_title("Example App", Preview(feature=None)) == "Example App \u2014 preview"
 
 
 def test_a_long_description_is_cut_at_a_word_so_a_tray_tooltip_can_hold_it_whole():
     feature = "the example stage's new pause, which waits for the scene to settle before it starts again"
-    title = window_title("Example App", Preview(checkout="scene-one", feature=feature))
+    title = window_title("Example App", Preview(feature=feature))
 
     assert title == "Example App \u2014 preview of the example stage's new pause, which waits for the scene to\u2026"
 
 
 def test_a_long_description_with_no_word_to_cut_at_is_cut_at_the_longest_that_fits():
-    title = window_title("Example App", Preview(checkout="scene-one", feature="x" * 90))
+    title = window_title("Example App", Preview(feature="x" * 90))
 
     assert title == "Example App \u2014 preview of " + "x" * 59 + "\u2026"
 
@@ -103,8 +103,7 @@ def test_the_live_app_keeps_the_taskbar_button_its_pin_carries():
     assert taskbar_identity("Example.App", None) == "Example.App"
 
 
-def test_each_preview_gets_a_taskbar_button_of_its_own():
-    first = taskbar_identity("Example.App", Preview(checkout="scene-one", feature=None))
-    second = taskbar_identity("Example.App", Preview(checkout="scene two!", feature=None))
+def test_a_preview_gets_a_taskbar_button_of_its_own_beside_the_live_apps():
+    preview = Preview(feature=None)
 
-    assert (first, second) == ("Example.App.Preview.scene-one", "Example.App.Preview.scenetwo")
+    assert taskbar_identity("Example.App", preview) == "Example.App.Preview"

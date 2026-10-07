@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 import subprocess
 from dataclasses import dataclass
 from functools import cache
@@ -14,7 +13,6 @@ _LONGEST_FEATURE = 60
 
 @dataclass(frozen=True)
 class Preview:
-    checkout: str
     feature: str | None
 
 
@@ -22,7 +20,7 @@ class Preview:
 def preview_of(checkout: Path) -> Preview | None:
     if not (checkout / ".git").is_file():
         return None
-    return Preview(checkout=checkout.name, feature=_feature_described_on_the_branch_of(checkout))
+    return Preview(feature=_feature_described_on_the_branch_of(checkout))
 
 
 def _feature_described_on_the_branch_of(checkout: Path) -> str | None:
@@ -61,4 +59,4 @@ def _cut_to_fit(feature: str) -> str:
 def taskbar_identity(live: str, preview: Preview | None) -> str:
     if preview is None:
         return live
-    return f"{live}.Preview.{re.sub(r'[^A-Za-z0-9-]', '', preview.checkout)}"
+    return f"{live}.Preview"
