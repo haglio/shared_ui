@@ -281,46 +281,39 @@ def _reset() -> tuple:
     )
 
 
-# The power mark's two parts, shared by quit and restart so the pair reads as one
-# family: a ring broken at the top, and the bar standing in that break.  Quit
-# is the two of them; restart is the two of them with the ring running on into an
-# arrowhead.  Drawn to the weight of a toolbar icon font's power symbol, which is
-# what the apps' menus sat next to.
-_POWER_RING = (9.0, 12.0, 30.0, 30.0)  # center (24, 27), radius 15
-_POWER_BAR = Line(24, 6, 24, 24)
-
-
 def _power() -> tuple:
-    """A ring broken at the top with a bar standing in the break -- power.
+    ring_broken_at_the_top = Arc(9.0, 12.0, 30.0, 30.0, 128, 284)
+    bar_standing_in_the_break = Line(24, 6, 24, 24)
+    return (ring_broken_at_the_top, bar_standing_in_the_break)
 
-    Off, quit, shut down: the mark every one of these apps' quit controls wears,
-    so the same act looks the same whichever window it is in.
-    """
-    return (Arc(*_POWER_RING, 128, 284), _POWER_BAR)
+
+def _toward_the_middle(value: float, scale: float) -> float:
+    return CANVAS / 2 + (value - CANVAS / 2) * scale
+
+
+def _shrunk_toward_the_middle(shapes: tuple, scale: float) -> tuple:
+    def shrunk(shape):
+        if isinstance(shape, Arc):
+            return Arc(_toward_the_middle(shape.x, scale), _toward_the_middle(shape.y, scale),
+                       shape.w * scale, shape.h * scale, shape.start, shape.span, shape.width * scale)
+        return Line(_toward_the_middle(shape.x1, scale), _toward_the_middle(shape.y1, scale),
+                    _toward_the_middle(shape.x2, scale), _toward_the_middle(shape.y2, scale),
+                    shape.width * scale)
+
+    return tuple(shrunk(shape) for shape in shapes)
 
 
 def _restart() -> tuple:
-    """The power mark whose ring runs on into an arrowhead -- off, then on again.
-
-    Not the plain circular arrow: that is undo's mark, and this is the control
-    that takes the whole app down and brings it back.  It is built from quit's
-    own ring and bar, so the two sit together in a menu as obvious relatives
-    rather than as two unrelated drawings.
-    """
-    return (
-        Arc(*_POWER_RING, 128, 272),                          # the ring, stopping short
-        # Short and wide rather than long and narrow.  A head drawn along the
-        # tangent at the bar's own weight was barely visible at button size --
-        # it read as the ring simply ending.  Widening it is what makes the mark
-        # say "and back on again" instead of "off, with a nick in the circle".
-        Polygon(((29.1, 9.8), (41.6, 12.3), (29.4, 22.5))),
-        _POWER_BAR,
-    )
+    quit_at_three_quarters_size = _shrunk_toward_the_middle(_power(), 0.75)
+    arrow_round_it_counterclockwise = Arc(3, 3, 42, 42, 110.8, 299.2, 3.5)
+    its_head_pointing_into_the_gap_over_the_bar = Polygon(((29.8, 1.5), (42.0, 2.6), (34.3, 11.7)))
+    return (*quit_at_three_quarters_size, arrow_round_it_counterclockwise,
+            its_head_pointing_into_the_gap_over_the_bar)
 
 
 def _question(scale: float = 1.0, pen: float = PEN_WIDTH) -> tuple:
     def toward_the_middle(value: float) -> float:
-        return 24 + (value - 24) * scale
+        return _toward_the_middle(value, scale)
 
     return (
         Arc(toward_the_middle(14), toward_the_middle(6), 20 * scale, 20 * scale, -25, 215, pen),
