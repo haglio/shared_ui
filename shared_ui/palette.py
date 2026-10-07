@@ -61,6 +61,8 @@ TOGGLE_ON: Rgb =BLUE
 TOGGLE_OFF: Rgb =TEXT_MUTED  # the muted gray everything else off wears
 TOGGLE_HANDLE: Rgb =WHITE
 
+PREVIEW_INK: Rgb = AMBER
+
 
 # How much lighter a control sits while the pointer is over it.  One step, taken
 # from whatever ground the control already has, so a hover says "this is the one
