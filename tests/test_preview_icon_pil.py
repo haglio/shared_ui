@@ -3,7 +3,7 @@ from __future__ import annotations
 from PIL import Image, ImageDraw
 
 from shared_ui.palette import MAGENTA, PREVIEW_INK
-from shared_ui.preview_icon_pil import write_in_preview_ink
+from shared_ui.preview_icon_pil import in_preview_ink, write_in_preview_ink
 
 _SIZES = [(16, 16), (32, 32), (256, 256)]
 
@@ -32,3 +32,14 @@ def test_a_preview_icon_file_carries_every_size_in_the_preview_ink(tmp_path):
         frame = _frame(written, (width, height))
         assert frame.getpixel((width // 2, height // 2)) == (*PREVIEW_INK, 255)
         assert frame.getpixel((0, 0))[3] == 0
+
+
+def test_a_letter_drawn_in_memory_takes_the_preview_ink_and_keeps_its_edges():
+    letter = Image.new("RGBA", (4, 1), (0, 0, 0, 0))
+    letter.putpixel((1, 0), (*MAGENTA, 255))
+    letter.putpixel((2, 0), (*MAGENTA, 96))
+
+    inked = in_preview_ink(letter)
+
+    assert [inked.getpixel((x, 0))[3] for x in range(4)] == [0, 255, 96, 0]
+    assert inked.getpixel((1, 0))[:3] == inked.getpixel((2, 0))[:3] == PREVIEW_INK
