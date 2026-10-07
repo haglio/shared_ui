@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import pytest
 from PyQt6.QtCore import QMargins, QPoint, Qt, QThread, QTimer, QUrl
-from PyQt6.QtGui import QPalette, QPixmap, QTextDocument
+from PyQt6.QtGui import QIcon, QPalette, QPixmap, QTextDocument
 from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QDialog, QLabel, QPushButton, QStyle
 
@@ -213,6 +213,15 @@ def test_the_dialog_wears_the_apps_own_icon(tmp_path):
     dlg = AlertDialog("Example App", "Nothing to do.", icon=icon)
 
     assert not dlg.windowIcon().isNull()
+
+
+def test_the_dialog_wears_an_icon_the_app_has_already_drawn():
+    drawn = QPixmap(16, 16)
+    drawn.fill(BLUE)
+
+    dlg = AlertDialog("Example App", "Nothing to do.", icon=QIcon(drawn))
+
+    assert dlg.windowIcon().pixmap(16, 16).toImage().pixelColor(8, 8) == BLUE
 
 
 def test_the_alert_opens_in_front_of_whatever_the_user_is_looking_at():
