@@ -62,6 +62,8 @@ TOGGLE_ON = QColor(*palette.TOGGLE_ON)
 TOGGLE_OFF = QColor(*palette.TOGGLE_OFF)
 TOGGLE_HANDLE = QColor(*palette.TOGGLE_HANDLE)
 
+PREVIEW_INK = QColor(*palette.PREVIEW_INK)
+
 
 # ---------------------------------------------------------------------------
 # The roles the desktop theme fills in
