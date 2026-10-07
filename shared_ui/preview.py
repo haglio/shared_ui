@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+from collections.abc import Callable
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
@@ -60,3 +61,14 @@ def taskbar_identity(live: str, preview: Preview | None) -> str:
     if preview is None:
         return live
     return f"{live}.Preview"
+
+
+def inked_icon_file(source: Path, preview: Preview | None, folder: Path,
+                    write_in_preview_ink: Callable[[Path, Path], None]) -> Path:
+    if preview is None:
+        return source
+    inked = folder / f"preview_{source.name}"
+    if not inked.exists() or inked.stat().st_mtime < source.stat().st_mtime:
+        folder.mkdir(parents=True, exist_ok=True)
+        write_in_preview_ink(source, inked)
+    return inked

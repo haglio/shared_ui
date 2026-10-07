@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from PIL import Image, ImageDraw
+from PyQt6.QtGui import QImage
 
 from shared_ui.palette import MAGENTA, PREVIEW_INK
 from shared_ui.preview import Preview
 from shared_ui.preview_icon import app_icon
+from shared_ui.preview_icon import icon_file as qt_icon_file
 from shared_ui.preview_icon_pil import write_in_preview_ink
 
 _A_PREVIEW = Preview(feature=None)
@@ -56,3 +58,18 @@ def test_a_preview_letter_drawn_by_qt_matches_the_one_written_for_windows_withou
         drawn = _as_seen((pixel.red(), pixel.green(), pixel.blue(), pixel.alpha()))
         written_pixel = _as_seen(on_disk.getpixel((x, y)))
         assert all(abs(a - b) <= _QTS_PREMULTIPLIED_ROUNDING for a, b in zip(drawn, written_pixel))
+
+
+def test_a_qt_app_without_pillow_still_hands_the_taskbar_its_inked_letter_as_a_file(tmp_path):
+    inked = qt_icon_file(_an_apps_icon(tmp_path), _A_PREVIEW, tmp_path / "state")
+
+    assert inked == tmp_path / "state" / "preview_icon.ico"
+    image = QImage(str(inked))
+    center = image.pixelColor(image.width() // 2, image.height() // 2)
+    assert (center.red(), center.green(), center.blue()) == PREVIEW_INK
+
+
+def test_the_live_qt_app_hands_the_taskbar_its_own_icon_file(tmp_path):
+    source = _an_apps_icon(tmp_path)
+
+    assert qt_icon_file(source, None, tmp_path / "state") == source
