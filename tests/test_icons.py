@@ -299,7 +299,7 @@ def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath():
 _THE_MARKS = (
     "bolt", "check", "chevron_left", "chevron_right", "clip_to_scene",
     "clock", "clock_full", "clock_short", "compilation", "control_off",
-    "copy", "cross", "enhance_filter", "expand_horizontal", "flask",
+    "copy", "cross", "database", "enhance_filter", "expand_horizontal", "flask",
     "flat_2d", "flip_ends", "fmode", "folder", "full_length", "funscript_jump", "headset",
     "latest", "log", "loop", "mic", "minus", "monitor", "park", "pause", "photo", "play",
     "plus", "plus_outline", "power", "quarter_offset", "question",
@@ -370,6 +370,22 @@ def test_a_jump_s_arrow_is_short_and_thick_with_room_on_either_side():
 
 def test_latest_is_its_own_drawing_rather_than_shuffle_uncrossed():
     assert not set(GLYPHS["latest"]) & set(GLYPHS["shuffle"])
+
+
+def _strokes_down_the_middle(name: str, size: int) -> list[int]:
+    image = icons.glyph_pixmap(name, size, TEXT_PRIMARY).toImage()
+    inked = [image.pixelColor(size // 2, y).alpha() > 32 for y in range(size)]
+    return [y for y in range(size) if inked[y] and (y == 0 or not inked[y - 1])]
+
+
+def test_database_is_three_short_cylinders_stacked_under_one_lid():
+    _lid_far_edge, lid_near_edge, *rims = _strokes_down_the_middle("database", 96)
+    left, _upper, right, _lower = _ink_rect(icons.glyph_pixmap("database", 96, TEXT_PRIMARY))
+    heights = [lower - upper for upper, lower in zip([lid_near_edge, *rims], rims)]
+
+    assert len(rims) == 3
+    assert max(heights) - min(heights) <= 1
+    assert max(heights) < (right - left) / 2
 
 
 def test_a_renamed_mark_still_draws_under_its_old_name_for_branches_not_yet_rebased():

@@ -354,6 +354,26 @@ def _calendar() -> tuple:
     )
 
 
+_STACK_LEFT, _STACK_RIGHT = 9.0, 39.0
+_LID_MIDDLE = 11.0
+_RIM_CURVE = 5.0
+_CYLINDER_HEIGHT = 9.0
+_CYLINDERS = 3
+_STACK_PEN = 3.6
+
+
+def _database() -> tuple:
+    radius = (_STACK_RIGHT - _STACK_LEFT) / 2
+    rim_middles = [_LID_MIDDLE + n * _CYLINDER_HEIGHT for n in range(1, _CYLINDERS + 1)]
+    return (
+        Ellipse(_STACK_LEFT + radius, _LID_MIDDLE, radius, _RIM_CURVE, width=_STACK_PEN),
+        *(Arc(_STACK_LEFT, middle - _RIM_CURVE, 2 * radius, 2 * _RIM_CURVE, 180, 180, _STACK_PEN)
+          for middle in rim_middles),
+        Line(_STACK_LEFT, _LID_MIDDLE, _STACK_LEFT, rim_middles[-1], _STACK_PEN),
+        Line(_STACK_RIGHT, _LID_MIDDLE, _STACK_RIGHT, rim_middles[-1], _STACK_PEN),
+    )
+
+
 def _upright_arrow(lane: float, *, pointing_up: bool) -> tuple:
     def along(distance: float) -> float:
         return CANVAS - distance if pointing_up else distance
@@ -675,6 +695,7 @@ GLYPHS: dict[str, tuple] = {
         Line(11, 11, 37, 37, 5.5),
         Line(37, 11, 11, 37, 5.5),
     ),
+    "database": _database(),
     "enhance_filter": _enhance_filter(),
     "expand_horizontal": _expand_horizontal(),
     "flat_2d": _flat_2d(),
