@@ -11,6 +11,7 @@ hardest on the routes agreeing.
 from __future__ import annotations
 
 import logging
+import math
 import uuid
 
 from PyQt6.QtCore import QRectF, QSize, Qt
@@ -19,6 +20,7 @@ from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import GLYPHS, RENAMED_MARKS, STAND_IN, Polygon, glyph_names
+from shared_ui.spacing import BUTTON_ICON
 
 _A_MARK_THIS_VERSION_LACKS = "a_mark_from_another_version"
 _EVERY_MARK_AND_THE_STAND_IN = (*glyph_names(), _A_MARK_THIS_VERSION_LACKS)
@@ -30,15 +32,23 @@ def _blank(size: int) -> QPixmap:
     return pixmap
 
 
-def _ink(pixmap: QPixmap) -> set[tuple[int, int]]:
+def _ink(pixmap: QPixmap, *, alpha_above: int = 32) -> set[tuple[int, int]]:
     """Every pixel of *pixmap* that was drawn on."""
     image = pixmap.toImage()
     return {
         (x, y)
         for y in range(image.height())
         for x in range(image.width())
-        if image.pixelColor(x, y).alpha() > 32
+        if image.pixelColor(x, y).alpha() > alpha_above
     }
+
+
+def _solid_ink(pixmap: QPixmap) -> set[tuple[int, int]]:
+    return _ink(pixmap, alpha_above=127)
+
+
+def _as_a_menu_row_shows(name: str) -> QPixmap:
+    return icons.glyph_icon(name).pixmap(QSize(BUTTON_ICON, BUTTON_ICON))
 
 
 def _ink_rect(pixmap: QPixmap) -> tuple[int, int, int, int]:
@@ -405,23 +415,92 @@ def test_a_mark_never_erases_the_ground_it_is_drawn_on():
         assert not cleared, f"{name} cleared {len(cleared)} px of what was under it"
 
 
-def test_quit_and_restart_are_built_from_one_power_mark():
-    # They sit together in a menu, so they have to read as relatives rather than
-    # as two unrelated drawings. Restart IS quit's ring and bar with the ring
-    # running on into an arrowhead, and in ink that is a containment: quit's mark
-    # is drawn in full inside restart's, and what restart adds is the head.
-    power = _ink(icons.glyph_pixmap("power", 48, TEXT_PRIMARY))
+def _quit_at_three_quarters_size_in_the_middle_of_the_frame() -> set[tuple[int, int]]:
+    canvas = _blank(48)
+    painter = QPainter(canvas)
+    icons.draw_glyph(painter, "power", TEXT_PRIMARY, size=36, x=6, y=6)
+    painter.end()
+    return _ink(canvas)
+
+
+def _restart_s_arrow() -> set[tuple[int, int]]:
     restart = _ink(icons.glyph_pixmap("restart", 48, TEXT_PRIMARY))
-    assert power <= restart
+    return restart - _quit_at_three_quarters_size_in_the_middle_of_the_frame()
 
-    # Below the break the two are the same drawing pixel for pixel -- the ring at
-    # the same weight around the same center, with the same bar standing in
-    # it. Everything either of them does differently happens up at the break.
-    assert {p for p in power if p[1] >= 26} == {p for p in restart if p[1] >= 26}
 
-    # And what it runs on into is a head rather than a nick: it adds ink, and
-    # enough of it to be seen at button size.
-    assert len(restart) - len(power) > 40
+def _distance_from_the_middle_of_the_frame(pixel: tuple[int, int]) -> float:
+    x, y = pixel
+    return math.hypot(x + 0.5 - 24, y + 0.5 - 24)
+
+
+_DEGREES_A_SECTOR = 5
+
+
+def _sector_counterclockwise_from_three_o_clock(pixel: tuple[int, int]) -> int:
+    x, y = pixel
+    bearing = math.degrees(math.atan2(24 - y - 0.5, x + 0.5 - 24)) % 360
+    return int(bearing // _DEGREES_A_SECTOR)
+
+
+def _depth_in_each_sector(ink: set[tuple[int, int]]) -> dict[int, float]:
+    nearest: dict[int, float] = {}
+    farthest: dict[int, float] = {}
+    for pixel in ink:
+        sector = _sector_counterclockwise_from_three_o_clock(pixel)
+        distance = _distance_from_the_middle_of_the_frame(pixel)
+        nearest[sector] = min(nearest.get(sector, distance), distance)
+        farthest[sector] = max(farthest.get(sector, distance), distance)
+    return {sector: farthest[sector] - nearest[sector] for sector in farthest}
+
+
+def _empty_sectors(ink: set[tuple[int, int]]) -> list[int]:
+    inked = {_sector_counterclockwise_from_three_o_clock(pixel) for pixel in ink}
+    return [sector for sector in range(360 // _DEGREES_A_SECTOR) if sector not in inked]
+
+
+def test_restart_carries_quit_at_three_quarters_size_in_its_middle():
+    restart = _ink(icons.glyph_pixmap("restart", 48, TEXT_PRIMARY))
+
+    assert _quit_at_three_quarters_size_in_the_middle_of_the_frame() <= restart
+
+
+def test_restart_s_arrow_runs_wholly_outside_the_quit_in_its_middle():
+    small_quit = _quit_at_three_quarters_size_in_the_middle_of_the_frame()
+
+    nearest_of_the_arrow = min(map(_distance_from_the_middle_of_the_frame, _restart_s_arrow()))
+    farthest_of_the_quit = max(map(_distance_from_the_middle_of_the_frame, small_quit))
+    assert nearest_of_the_arrow > farthest_of_the_quit
+
+
+def test_restart_s_arrow_is_more_than_twice_as_deep_at_its_head_as_along_its_ring():
+    depths = sorted(_depth_in_each_sector(_restart_s_arrow()).values())
+
+    along_the_ring = depths[len(depths) // 2]
+    assert depths[-1] > 2 * along_the_ring
+
+
+def test_restart_s_arrow_leaves_its_gap_straight_over_the_bar_of_the_quit_inside():
+    gap = _empty_sectors(_restart_s_arrow())
+
+    assert gap == list(range(gap[0], gap[-1] + 1))
+    middle_of_the_gap = (gap[0] + gap[-1] + 1) / 2 * _DEGREES_A_SECTOR
+    assert abs(middle_of_the_gap - 90) <= _DEGREES_A_SECTOR
+
+
+def test_restart_s_arrow_runs_counterclockwise_into_its_head_on_the_right_of_the_gap():
+    arrow = _restart_s_arrow()
+    depths = _depth_in_each_sector(arrow)
+    gap = _empty_sectors(arrow)
+
+    head = max(depths, key=depths.get)
+    assert gap[0] - 60 // _DEGREES_A_SECTOR <= head < gap[0]
+
+
+def test_a_menu_row_s_restart_keeps_its_arrow_apart_from_the_quit_inside_it():
+    quit_mark = _solid_ink(_as_a_menu_row_shows("power"))
+    restart = _solid_ink(_as_a_menu_row_shows("restart"))
+
+    assert _pieces(restart) == _pieces(quit_mark) + 1
 
 
 def test_the_enhance_filter_lays_its_funnel_over_the_plus():
