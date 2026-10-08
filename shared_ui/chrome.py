@@ -159,6 +159,13 @@ def mark_button_rules() -> str:
     }}"""
 
 
+def item_view_rules() -> str:
+    return """
+    QAbstractItemView {
+        outline: 0;
+    }"""
+
+
 def family_stylesheet() -> str:
     """Every rule above, for an app that dresses itself whole.
 
@@ -167,4 +174,4 @@ def family_stylesheet() -> str:
     every rule here, so a `QPushButton#generate` keeps its blue.
     """
     return (f"{ground_rules()}\n{tooltip_rules()}\n{menu_rules()}\n{button_rules()}"
-            f"\n{mark_button_rules()}")
+            f"\n{mark_button_rules()}\n{item_view_rules()}")

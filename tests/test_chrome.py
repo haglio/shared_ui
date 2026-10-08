@@ -7,7 +7,7 @@ import re
 
 from PyQt6.QtCore import QRect
 from PyQt6.QtGui import QAction, QColor, QIcon, QImage, QPixmap
-from PyQt6.QtWidgets import QMenu
+from PyQt6.QtWidgets import QApplication, QMenu, QTreeWidget, QTreeWidgetItem
 
 from shared_ui import chrome, palette
 
@@ -43,7 +43,7 @@ def test_the_family_sheet_is_every_fragment():
 
     for fragment in (chrome.ground_rules(), chrome.tooltip_rules(),
                      chrome.menu_rules(), chrome.button_rules(),
-                     chrome.mark_button_rules()):
+                     chrome.mark_button_rules(), chrome.item_view_rules()):
         assert fragment in sheet
 
 
@@ -145,3 +145,33 @@ def test_a_tooltip_has_square_corners():
 
     assert "QToolTip" in rules
     assert "border-radius" not in rules["QToolTip"]
+
+
+def test_a_picked_row_the_keyboard_is_on_wears_no_focus_frame():
+    # Windows 11 draws a white frame round the row the keyboard is on, and keeps
+    # it there only while the list has the focus: on a picked row it is a second
+    # mark beside the blue, saying nothing the blue does not.
+    blue = palette.as_hex(palette.BLUE)
+    view = QTreeWidget()
+    view.setHeaderHidden(True)
+    view.setStyleSheet(chrome.family_stylesheet()
+                       + f"QTreeView::item:selected {{ background-color: {blue}; }}")
+    for _ in range(2):
+        view.addTopLevelItem(QTreeWidgetItem([""]))
+    view.resize(200, 80)
+    view.show()
+    view.activateWindow()
+    view.setFocus()
+    view.setCurrentItem(view.topLevelItem(0))
+    QApplication.processEvents()
+
+    focused = view.hasFocus()
+    image = view.viewport().grab().toImage()
+    row = view.visualItemRect(view.topLevelItem(0))
+    colors = {image.pixelColor(x, y).name()
+              for y in range(row.top(), row.top() + row.height())
+              for x in range(row.left(), row.left() + row.width())}
+    view.close()
+
+    assert focused
+    assert colors == {blue}
