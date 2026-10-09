@@ -31,7 +31,13 @@ from shared_ui.palette import (
     TEXT_PRIMARY,
     as_hex,
 )
-from shared_ui.spacing import BUTTON_PAD_H, BUTTON_PAD_V, BUTTON_RADIUS
+from shared_ui.spacing import (
+    BUTTON_GAP,
+    BUTTON_PAD_H,
+    BUTTON_PAD_H_TIGHT,
+    BUTTON_PAD_V,
+    BUTTON_RADIUS,
+)
 
 
 def ground_rules() -> str:
@@ -147,6 +153,38 @@ def button_rules() -> str:
         color: {as_hex(TEXT_MUTED)};
         border: 1px solid {as_hex(BORDER_SUBTLE)};
     }}"""
+
+
+def toolbar_rules() -> str:
+    """A toolbar's buttons as the family's buttons, for the toolbar it is set on.
+
+    Not part of the family sheet: Qt draws a toolbar's buttons faint and
+    edge to edge, and an app opts its toolbar into these by setting them on it.
+    """
+    return f"""
+    QToolBar {{
+        spacing: {BUTTON_GAP}px;
+    }}
+    QToolButton {{
+        background-color: {as_hex(BG_BUTTON)};
+        border: 1px solid {as_hex(BORDER_SUBTLE)};
+        border-radius: {BUTTON_RADIUS}px;
+        {toolbar_padding(right=BUTTON_PAD_H_TIGHT)}
+    }}
+    QToolButton:hover {{
+        background-color: {as_hex(BG_TERTIARY)};
+    }}
+    QToolButton:pressed {{
+        background-color: {as_hex(BLUE)};
+    }}
+    QToolButton:disabled {{
+        background-color: {as_hex(BG_SECONDARY)};
+        color: {as_hex(TEXT_MUTED)};
+    }}"""
+
+
+def toolbar_padding(*, right: int) -> str:
+    return f"padding: {BUTTON_PAD_V}px {right}px {BUTTON_PAD_V}px {BUTTON_PAD_H_TIGHT}px;"
 
 
 MARK_BUTTON_PROPERTY = "markButton"

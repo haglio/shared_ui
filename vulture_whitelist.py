@@ -26,4 +26,3 @@ SIZE_TINY  # clipper
 GAP_SMALL  # promptcrafter
 BUTTON_WORD_W  # fun_time's dashboard and its headset copy
 BUTTON_ROW_GAP  # origenerator
-BUTTON_PAD_H_TIGHT  # fun_time

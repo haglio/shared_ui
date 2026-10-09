@@ -7,9 +7,16 @@ import re
 
 from PyQt6.QtCore import QRect
 from PyQt6.QtGui import QAction, QColor, QIcon, QImage, QPixmap
-from PyQt6.QtWidgets import QApplication, QMenu, QTreeWidget, QTreeWidgetItem
+from PyQt6.QtWidgets import (
+    QApplication,
+    QMenu,
+    QToolBar,
+    QToolButton,
+    QTreeWidget,
+    QTreeWidgetItem,
+)
 
-from shared_ui import chrome, palette
+from shared_ui import chrome, palette, spacing
 
 _HEX = re.compile(r"#[0-9a-fA-F]{3,6}\b")
 _RULE = re.compile(r"(?P<selector>[^{}]+?)\s*\{(?P<body>[^{}]*)\}")
@@ -28,7 +35,7 @@ def _background(body: str) -> str:
 
 
 def test_every_color_on_the_sheet_is_a_palette_color():
-    sheet = chrome.family_stylesheet()
+    sheet = chrome.family_stylesheet() + chrome.toolbar_rules()
     allowed = {palette.as_hex(value) for name in dir(palette) if name.isupper()
                for value in [getattr(palette, name)] if isinstance(value, tuple)}
 
@@ -136,6 +143,57 @@ def test_a_checked_row_s_mark_sits_on_the_lighter_ground_of_a_control_that_is_on
     beside_the_mark = (mark_left - 2, rect.center().y())
     assert off.pixelColor(*beside_the_mark) == QColor(*palette.BG_TERTIARY)
     assert on.pixelColor(*beside_the_mark).lightness() > QColor(*palette.BG_TERTIARY).lightness()
+
+
+def _shown_away_from_the_pointer(toolbar: QToolBar) -> None:
+    toolbar.resize(toolbar.sizeHint())
+    toolbar.move(QApplication.primaryScreen().geometry().center())
+    toolbar.show()
+    QApplication.processEvents()
+
+
+def _toolbar_button(padding: str = "") -> tuple[QToolBar, QToolButton]:
+    toolbar = QToolBar()
+    toolbar.setStyleSheet(chrome.toolbar_rules())
+    toolbar.addAction(QAction("Heading", toolbar))
+    [button] = [widget for widget in map(toolbar.widgetForAction, toolbar.actions())
+                if isinstance(widget, QToolButton)]
+    button.setStyleSheet(padding)
+    _shown_away_from_the_pointer(toolbar)
+    return toolbar, button
+
+
+def test_a_toolbar_button_wears_the_family_button_s_border_round_its_ground():
+    toolbar, button = _toolbar_button()
+    drawn = button.grab().toImage()
+    toolbar.close()
+
+    middle = drawn.height() // 2
+    assert drawn.pixelColor(0, middle) == QColor(*palette.BORDER_SUBTLE)
+    assert drawn.pixelColor(3, middle) == QColor(*palette.BG_BUTTON)
+
+
+def test_a_toolbar_s_buttons_stand_the_family_s_button_gap_apart():
+    toolbar = QToolBar()
+    toolbar.setStyleSheet(chrome.toolbar_rules())
+    toolbar.addActions([QAction("One", toolbar), QAction("Two", toolbar)])
+    _shown_away_from_the_pointer(toolbar)
+    first, second = (toolbar.widgetForAction(action) for action in toolbar.actions())
+    gap = second.geometry().left() - first.geometry().right() - 1
+    toolbar.close()
+
+    assert gap == spacing.BUTTON_GAP
+
+
+def test_a_toolbar_button_given_more_room_on_its_right_grows_by_that_much():
+    toolbar, button = _toolbar_button()
+    ordinary = button.sizeHint().width()
+    toolbar.close()
+    toolbar, button = _toolbar_button(chrome.toolbar_padding(right=40))
+    roomier = button.sizeHint().width()
+    toolbar.close()
+
+    assert roomier - ordinary == 40 - spacing.BUTTON_PAD_H_TIGHT
 
 
 def test_a_tooltip_has_square_corners():
