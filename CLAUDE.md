@@ -24,6 +24,18 @@ use. The near miss that still counts: taking a real filename and
 changing a character or two — it is still that clip, still that performer. Make
 it up from scratch, don't lightly edit a real one.
 
+## No pane's contents touch its edges — every pane takes the standard inner margin
+
+Every pane an app builds with this package gets the family's standard inner
+margin, and that margin comes from the one shared constant,
+`shared_ui.spacing.MARGIN_STANDARD` — never a number typed in at the call site,
+which drifts from every other pane the first time either changes. Content flush
+against a splitter handle or a window edge reads as cut off. A splitter adds no
+margin of its own, so a scroll area or a panel handed straight to one lands hard
+against the handle although no line of code ever set a margin of zero: apply the
+margin wherever the app makes its panes, in every app that draws panes with this
+package.
+
 ## Landing — GitHub merge queue, not local ff-merge
 
 This repo is public at `github.com/haglio/shared_ui` with a merge-queue ruleset on
