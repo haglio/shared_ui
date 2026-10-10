@@ -13,6 +13,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout
 
+from shared_ui.foreground import bring_to_front
 from shared_ui.loading_panel import LoadingPanel, icon_image, render
 from shared_ui.palette import LOADING_ACCENT, PREVIEW_INK
 from shared_ui.preview import Preview
@@ -56,6 +57,11 @@ class LoadingWindow(QDialog):
     @property
     def panel(self) -> LoadingPanel:
         return self._panel
+
+    def setVisible(self, visible: bool) -> None:  # noqa: N802 - Qt's name
+        super().setVisible(visible)
+        if visible:
+            bring_to_front(self)
 
     def say(self, step: str) -> None:
         if self._canceling:
