@@ -19,8 +19,8 @@ _.eventFilter  # stand_in_tooltips
 #     colors.py's own tests instead. ---
 
 # --- fonts ---
-SIZE_SMALL  # clipper, fun_time, scripture
-SIZE_TINY  # clipper
+SIZE_SMALL  # genaumacher, fun_time, scripture
+SIZE_TINY  # genaumacher
 
 # --- spacing ---
 GAP_SMALL  # promptcrafter
