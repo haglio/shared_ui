@@ -56,6 +56,15 @@ MAGENTA = QColor(*palette.MAGENTA)
 WHITE = QColor(*palette.WHITE)
 
 # ---------------------------------------------------------------------------
+# The loading screen every app shows while it starts
+# ---------------------------------------------------------------------------
+LOADING_GROUND = QColor(*palette.LOADING_GROUND)
+LOADING_ACCENT = QColor(*palette.LOADING_ACCENT)
+LOADING_TROUGH = QColor(*palette.LOADING_TROUGH)
+LOADING_STATUS = QColor(*palette.LOADING_STATUS)
+LOADING_HINT = QColor(*palette.LOADING_HINT)
+
+# ---------------------------------------------------------------------------
 # Toggle switch
 # ---------------------------------------------------------------------------
 TOGGLE_ON = QColor(*palette.TOGGLE_ON)
