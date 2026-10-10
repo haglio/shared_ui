@@ -305,7 +305,8 @@ _THE_MARKS = (
     "plus", "plus_outline", "power", "quarter_offset", "question",
     "redo_arrow", "release", "reset", "restart", "retract", "scene_to_clip",
     "shorts", "shuffle", "slideshow", "speaker", "star", "star_outline", "trash",
-    "undo_arrow", "versions", "vr_hemisphere", "wave",
+    "undo_arrow", "versions", "vr_hemisphere", "wave", "wave_sawtooth", "wave_square",
+    "wave_triangle",
 )
 
 
@@ -336,6 +337,24 @@ def test_control_off_crosses_out_what_driving_points_at():
     driving, off = GLYPHS["release"], GLYPHS["control_off"]
     assert driving[:_THE_DEVICE] == off[:_THE_DEVICE]
     assert driving[_THE_DEVICE:] != off[_THE_DEVICE:]
+
+
+_WAVEFORMS = ("wave", "wave_triangle", "wave_square", "wave_sawtooth")
+
+
+def test_each_waveform_is_drawn_in_the_frame_the_sine_fills():
+    sine, *others = (_ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY)) for name in _WAVEFORMS)
+    for name, frame in zip(_WAVEFORMS[1:], others):
+        assert all(abs(edge - sines) <= 1 for edge, sines in zip(frame, sine)), name
+
+
+def test_the_sawtooth_climbs_at_once_and_falls_slowly_as_the_motion_does():
+    (saw,) = GLYPHS["wave_sawtooth"]
+    segments = list(zip(saw.points, saw.points[1:]))
+    climbs = [abs(x2 - x1) for (x1, y1), (x2, y2) in segments if y2 < y1]
+    falls = [abs(x2 - x1) for (x1, y1), (x2, y2) in segments if y2 > y1]
+    assert climbs and falls
+    assert max(climbs) < min(falls)
 
 
 def test_the_length_marks_are_a_clip_along_one_timeline_the_whole_way_or_only_its_start():
