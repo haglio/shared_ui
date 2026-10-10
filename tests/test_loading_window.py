@@ -9,6 +9,7 @@ import pytest
 from PyQt6.QtCore import Qt
 from PyQt6.QtTest import QTest
 
+from shared_ui import loading_window
 from shared_ui.loading_panel import render
 from shared_ui.loading_window import Loading, LoadingCanceled, LoadingWindow
 
@@ -28,6 +29,21 @@ class TestTheWindow:
         assert window.windowTitle() == "Scripture Loading"
         assert window.windowFlags() & Qt.WindowType.FramelessWindowHint
         assert (window.width(), window.height()) == render(window.panel).size
+
+
+    def test_it_comes_up_in_front_with_the_keyboard_whoever_started_its_process(
+            self, qapp, monkeypatch):
+        # Started from a launcher link, an app's process is one Windows will not
+        # let take the foreground: the screen opened under the window the user
+        # clicked in, and Esc went to that window.
+        brought: list = []
+        monkeypatch.setattr(loading_window, "bring_to_front", brought.append)
+        window = _window()
+
+        window.show()
+
+        assert brought == [window]
+        window.close()
 
 
 class TestWhatItSays:
