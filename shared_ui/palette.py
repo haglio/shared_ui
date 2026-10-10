@@ -55,6 +55,15 @@ MAGENTA: Rgb = (200, 80, 160)
 WHITE: Rgb = (255, 255, 255)
 
 # ---------------------------------------------------------------------------
+# The loading screen every app shows while it starts
+# ---------------------------------------------------------------------------
+LOADING_GROUND: Rgb = (26, 26, 46)  # the panel's own navy, under everything on it
+LOADING_ACCENT: Rgb = (233, 69, 96)  # the app's name, and the bar's fill
+LOADING_TROUGH: Rgb = (22, 33, 62)  # the bar's track
+LOADING_STATUS: Rgb = BORDER_DEFAULT  # the line saying what is happening: the ladder's standard gray
+LOADING_HINT: Rgb = (122, 122, 149)  # the line under the bar, subtler than the status
+
+# ---------------------------------------------------------------------------
 # Toggle switch
 # ---------------------------------------------------------------------------
 TOGGLE_ON: Rgb = BLUE
