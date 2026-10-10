@@ -297,10 +297,10 @@ def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath():
 
 
 _THE_MARKS = (
-    "bolt", "check", "chevron_left", "chevron_right", "clip_to_scene",
+    "bolt", "check", "chevron_left", "chevron_right", "clip_to_scene", "clips",
     "clock", "clock_full", "clock_short", "compilation", "control_off",
     "copy", "cross", "database", "enhance_filter", "expand_horizontal", "flask",
-    "flat_2d", "flip_ends", "fmode", "folder", "full_length", "funscript_jump", "headset",
+    "flat_2d", "flip_ends", "fmode", "folder", "full", "full_length", "funscript_jump", "headset",
     "latest", "log", "loop", "mic", "minus", "monitor", "park", "pause", "photo", "play",
     "plus", "plus_outline", "power", "quarter_offset", "question",
     "redo_arrow", "release", "reset", "restart", "retract", "scene_to_clip",
@@ -339,13 +339,13 @@ def test_control_off_crosses_out_what_driving_points_at():
 
 
 def test_the_length_marks_are_a_clip_along_one_timeline_the_whole_way_or_only_its_start():
-    full_timeline, full_clip = GLYPHS["full_length"]
-    shorts_timeline, shorts_clip = GLYPHS["shorts"]
+    full_timeline, full_clip = GLYPHS["full"]
+    clips_timeline, clips_clip = GLYPHS["clips"]
 
-    assert full_timeline == shorts_timeline
-    assert full_clip.x == shorts_clip.x == full_timeline.x1
+    assert full_timeline == clips_timeline
+    assert full_clip.x == clips_clip.x == full_timeline.x1
     assert full_clip.x + full_clip.w == full_timeline.x2
-    assert shorts_clip.w < full_clip.w / 3
+    assert clips_clip.w < full_clip.w / 3
 
 
 def test_a_jump_between_a_clip_and_its_scene_keeps_the_short_clip_left_of_the_long_one():
@@ -389,8 +389,8 @@ def test_database_is_three_short_cylinders_stacked_under_one_lid():
 
 
 def test_a_renamed_mark_still_draws_under_its_old_name_for_branches_not_yet_rebased():
-    assert GLYPHS["clock_full"] == GLYPHS["full_length"]
-    assert GLYPHS["clock_short"] == GLYPHS["shorts"]
+    assert GLYPHS["clock_full"] == GLYPHS["full_length"] == GLYPHS["full"]
+    assert GLYPHS["clock_short"] == GLYPHS["shorts"] == GLYPHS["clips"]
 
 
 def test_the_registry_is_what_glyph_names_reports():
