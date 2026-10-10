@@ -6,6 +6,7 @@ pygame surface and a headset all show the same picture."""
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from PIL import Image, ImageDraw
 
@@ -50,6 +51,16 @@ class LoadingPanel:
     hint: str = ""
     ink: Rgb = LOADING_ACCENT
     icon: Image.Image | None = None
+
+
+def icon_image(path: Path | None) -> Image.Image | None:
+    """An app's icon file as the panel takes it, or None for a panel without one."""
+    if path is None:
+        return None
+    try:
+        return Image.open(path).convert("RGBA")
+    except (OSError, ValueError):
+        return None
 
 
 def render(panel: LoadingPanel, metrics: Metrics = DESKTOP) -> Image.Image:

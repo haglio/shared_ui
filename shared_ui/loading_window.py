@@ -13,7 +13,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout
 
-from shared_ui.loading_panel import LoadingPanel, render
+from shared_ui.loading_panel import LoadingPanel, icon_image, render
 from shared_ui.palette import LOADING_ACCENT, PREVIEW_INK
 from shared_ui.preview import Preview
 from shared_ui.preview_icon_pil import in_preview_ink
@@ -45,7 +45,7 @@ class LoadingWindow(QDialog):
             fraction=0.0,
             hint=cancel_hint,
             ink=LOADING_ACCENT if preview is None else PREVIEW_INK,
-            icon=_icon_image(icon, preview),
+            icon=_inked(icon_image(icon), preview),
         )
         self._picture = QLabel(self)
         layout = QVBoxLayout(self)
@@ -120,14 +120,8 @@ class Loading:
             self._app.processEvents()
 
 
-def _icon_image(icon: Path | None, preview: Preview | None) -> Image.Image | None:
-    if icon is None:
-        return None
-    try:
-        image = Image.open(icon).convert("RGBA")
-    except (OSError, ValueError):
-        return None
-    return image if preview is None else in_preview_ink(image)
+def _inked(icon: Image.Image | None, preview: Preview | None) -> Image.Image | None:
+    return icon if icon is None or preview is None else in_preview_ink(icon)
 
 
 def _work_done_before_each(steps: Sequence[str | tuple[str, float]]) -> dict[str, float]:

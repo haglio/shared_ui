@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from PIL import Image
 
-from shared_ui.loading_panel import DESKTOP, LoadingPanel, render
+from shared_ui.loading_panel import DESKTOP, LoadingPanel, icon_image, render
 from shared_ui.palette import (
     LOADING_ACCENT,
     LOADING_GROUND,
@@ -124,3 +124,21 @@ class TestTheIcon:
         image = render(_panel(icon=None))
 
         assert image.getpixel((image.width // 2, DESKTOP.padding + DESKTOP.icon // 2)) == LOADING_GROUND
+
+
+class TestTheIconFile:
+    def test_an_icon_on_disk_is_read_for_the_panel(self, tmp_path):
+        path = tmp_path / "app.png"
+        Image.new("RGBA", (16, 16), (10, 200, 30, 255)).save(path)
+
+        icon = icon_image(path)
+
+        assert icon is not None and icon.mode == "RGBA"
+        assert icon.getpixel((8, 8)) == (10, 200, 30, 255)
+
+    def test_no_file_or_an_unreadable_one_means_a_panel_without_an_icon(self, tmp_path):
+        (tmp_path / "not-an-image.ico").write_text("nothing an image reader can open", encoding="utf-8")
+
+        assert icon_image(None) is None
+        assert icon_image(tmp_path / "missing.ico") is None
+        assert icon_image(tmp_path / "not-an-image.ico") is None
