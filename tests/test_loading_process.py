@@ -123,6 +123,22 @@ class TestTheWholeWay:
             }, io.StringIO("Loading..." + chr(10)), told, qapp)
 
         assert code == 0
-        (hwnd, app_id), _ = dress.call_args
-        assert app_id == "Example.App.Preview"
+        (hwnd, app_id, taskbar), _ = dress.call_args
+        assert (app_id, taskbar) == ("Example.App.Preview", None)
         assert told.getvalue().splitlines() == [f"shown {hwnd}"]
+
+    def test_a_preview_window_wears_the_name_and_icon_its_taskbar_button_carries(self, qapp, tmp_path):
+        with patch("app_support.win32.dress_window") as dress:
+            run({
+                "caption": "Scripture Loading", "wordmark": "Scripture", "icon": None,
+                "preview": "the scene list", "is_preview": True, "steps": ["Loading..."],
+                "cancel_hint": "", "app_id": "Example.App.Preview",
+                "taskbar": {"name": "Scripture - preview of the scene list",
+                            "icon": str(tmp_path / "preview.ico"),
+                            "relaunch": "example relaunch command"},
+            }, io.StringIO(""), io.StringIO(), qapp)
+
+        (_hwnd, _app_id, taskbar), _ = dress.call_args
+        assert (taskbar.name, taskbar.icon, taskbar.relaunch) == (
+            "Scripture - preview of the scene list", tmp_path / "preview.ico",
+            "example relaunch command")

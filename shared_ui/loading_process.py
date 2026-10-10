@@ -16,12 +16,15 @@ import sys
 import threading
 from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import IO
+from typing import IO, TYPE_CHECKING
 
 from PyQt6.QtCore import QObject, pyqtSignal
 
 from shared_ui.loading_window import LoadingWindow
 from shared_ui.preview import Preview
+
+if TYPE_CHECKING:
+    from app_support.win32 import TaskbarApp
 
 CANCEL = "cancel"
 SHOWN = "shown"
@@ -40,13 +43,15 @@ class LoadingProcess(QObject):
     @classmethod
     def open(cls, *, caption: str, wordmark: str, icon: Path | None, preview: Preview | None,
              steps: Sequence[str | tuple[str, float]], cancel_hint: str = "",
-             app_id: str | None = None) -> LoadingProcess:
+             app_id: str | None = None, taskbar: TaskbarApp | None = None) -> LoadingProcess:
         spec = {
             "caption": caption, "wordmark": wordmark,
             "icon": None if icon is None else str(icon),
             "preview": None if preview is None else preview.feature,
             "is_preview": preview is not None,
             "steps": list(steps), "cancel_hint": cancel_hint, "app_id": app_id,
+            "taskbar": None if taskbar is None else {
+                "name": taskbar.name, "icon": str(taskbar.icon), "relaunch": taskbar.relaunch},
         }
         return cls(subprocess.Popen(
             [sys.executable, "-m", "shared_ui.loading_process", json.dumps(spec)],
@@ -124,9 +129,11 @@ def run(spec: dict, lines_in: IO[str], lines_out: IO[str], app) -> int:
         steps=[step if isinstance(step, str) else tuple(step) for step in spec["steps"]],
         cancel_hint=spec["cancel_hint"])
     if spec["app_id"]:
-        from app_support.win32 import dress_window  # noqa: PLC0415
+        from app_support.win32 import TaskbarApp, dress_window  # noqa: PLC0415
 
-        dress_window(int(window.winId()), spec["app_id"])
+        taskbar = spec.get("taskbar")
+        dress_window(int(window.winId()), spec["app_id"], None if taskbar is None else
+                     TaskbarApp(taskbar["name"], Path(taskbar["icon"]), taskbar["relaunch"]))
     window.show()
     _tell(lines_out, f"{SHOWN} {int(window.winId())}")
     serve(window, lines_in, lines_out, app.quit)
