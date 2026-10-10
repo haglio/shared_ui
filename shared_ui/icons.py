@@ -2,7 +2,7 @@
 
 The shapes are not here -- they are in :mod:`shared_ui.icon_geometry`, which
 knows nothing about any toolkit, and :mod:`shared_ui.icons_pil` renders the same
-list through Pillow for the players' HUDs.  That split is the point: a mark drawn
+list through Pillow for the Funestras' HUDs.  That split is the point: a mark drawn
 here and the same mark on a HUD are one drawing.
 
 Callers take one of three routes:

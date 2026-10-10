@@ -1,7 +1,7 @@
 """The Pillow renderer: that it draws, and that it draws what Qt draws.
 
-The players paint their HUDs into the video frame with Pillow, and there is no Qt
-in a player process, so a HUD mark could never be the same object as a toolbar
+The Funestras paint their HUDs into the video frame with Pillow, and there is no Qt
+in a Funestra process, so a HUD mark could never be the same object as a toolbar
 mark.  It can be the same *geometry*, which is what this checks: both renderers
 walk :mod:`shared_ui.icon_geometry`, and the two renderings have to land on top
 of each other.  Not pixel for pixel -- Pillow has no antialiasing of its own and
@@ -177,7 +177,7 @@ def test_a_negative_span_draws_the_same_arc_as_its_positive_twin():
 
 
 def test_drawing_a_hud_mark_never_drags_qt_into_a_player():
-    # The players are mpv and Pillow and nothing else; PyQt6 in that process
+    # The Funestras are mpv and Pillow and nothing else; PyQt6 in that process
     # would be a GUI toolkit loaded into a video pipeline for the sake of a
     # dozen-pixel icon. The geometry module is what makes that avoidable, so
     # neither it nor the Pillow renderer may reach for Qt -- nor may the palette

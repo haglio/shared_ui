@@ -2,7 +2,7 @@
 
 Every color the apps share is here, once, as ``(red, green, blue)``.
 :mod:`shared_ui.colors` is the same list as QColors for the Qt chrome, and
-anything that draws without Qt reads this module instead: the players paint
+anything that draws without Qt reads this module instead: the Funestras paint
 their HUDs into the video frame with Pillow, and Fun Time's help page is HTML.
 A second copy of a number is a thing that drifts, so there is one.  This
 module imports nothing, so a Pillow-only process
