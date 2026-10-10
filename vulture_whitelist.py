@@ -13,7 +13,6 @@ from __future__ import annotations
 # --- Qt method overrides, called by the event loop, not by us ---
 _.paintEvent  # tick_control, toggle_switch
 _.eventFilter  # stand_in_tooltips
-_.reject  # loading_window: Qt calls it for Esc and for the window being closed
 
 # --- colors: none.  Every QColor in colors.py reads its palette twin by name, so
 #     vulture sees each token used; a palette token nobody reads shows up in
