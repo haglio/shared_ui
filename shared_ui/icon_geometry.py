@@ -396,7 +396,7 @@ def _flip_ends() -> tuple:
 _TIMELINE = Line(5, 37.5, 43, 37.5, 3.4)
 _CLIP_TOP = 12.0
 _CLIP_HEIGHT = 18.0
-_SHORT_CLIP_END = 17.0
+_CLIPS_END = 17.0
 
 
 def _clip_on_the_timeline(end: float) -> tuple:
@@ -709,7 +709,7 @@ GLYPHS: dict[str, tuple] = {
     "folder": (
         Polyline(((8, 39), (8, 12), (20, 12), (24, 18), (40, 18), (40, 39), (8, 39))),
     ),
-    "full_length": _clip_on_the_timeline(_TIMELINE.x2),
+    "full": _clip_on_the_timeline(_TIMELINE.x2),
     "headset": _headset(),
     "latest": _calendar(),
     "funscript_jump": _funscript_jump(),
@@ -759,7 +759,7 @@ GLYPHS: dict[str, tuple] = {
     "restart": _restart(),
     "retract": _retract(),
     "scene_to_clip": _clip_scene_jump(to_scene=False),
-    "shorts": _clip_on_the_timeline(_SHORT_CLIP_END),
+    "clips": _clip_on_the_timeline(_CLIPS_END),
     "shuffle": _shuffle(),
     "slideshow": (                                        # a play triangle in a screen
         RoundedRect(8, 11, 32, 26, 4),
@@ -788,7 +788,9 @@ GLYPHS: dict[str, tuple] = {
     ),
 }
 
-RENAMED_MARKS: dict[str, str] = {"clock_full": "full_length", "clock_short": "shorts"}
+RENAMED_MARKS: dict[str, str] = {
+    "clock_full": "full", "clock_short": "clips", "full_length": "full", "shorts": "clips",
+}
 GLYPHS.update({old: GLYPHS[new] for old, new in RENAMED_MARKS.items()})
 
 
