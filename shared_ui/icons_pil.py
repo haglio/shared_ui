@@ -1,12 +1,12 @@
-"""The family's icon glyphs, drawn with Pillow for the players' HUDs.
+"""The family's icon glyphs, drawn with Pillow for the Funestras' HUDs.
 
 Same shapes as :mod:`shared_ui.icons` paints with QPainter -- both walk the list
-in :mod:`shared_ui.icon_geometry` -- so the trash can on a player's HUD is the
+in :mod:`shared_ui.icon_geometry` -- so the trash can on a Funestra's HUD is the
 trash can on Origenerator's toolbar rather than a lookalike.  An mpv overlay
-takes a bitmap, so the HUDs paint with Pillow and there is no Qt in a player
+takes a bitmap, so the HUDs paint with Pillow and there is no Qt in a Funestra
 process at all.
 
-This module imports Pillow and NOT Qt, which is what lets a player process use it
+This module imports Pillow and NOT Qt, which is what lets a Funestra process use it
 without dragging PyQt6 into a video pipeline.
 
 Two things Pillow does not do that QPainter does, and how they are handled:

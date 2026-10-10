@@ -1,8 +1,8 @@
 """Every icon in the family, as geometry -- no toolkit, no colors, no pixels.
 
 The apps draw with two different things.  The desktop chrome is Qt, and paints
-with QPainter; the players' HUDs are painted into the video frame with Pillow,
-because an mpv overlay takes a bitmap and there is no Qt in a player process at
+with QPainter; the Funestras' HUDs are painted into the video frame with Pillow,
+because an mpv overlay takes a bitmap and there is no Qt in a Funestra process at
 all.  A mark drawn twice, once per side, is a mark that comes out two shapes.
 
 So the marks live here, as a list of primitives per glyph, and each side renders
@@ -626,7 +626,7 @@ def _quarter_offset() -> tuple:
 
 # The letter grid every app in this family is marked on: five cells square, each
 # painted cell a solid block, adjacent ones merging into a bar.  The .ico files
-# are drawn on it (:mod:`shared_ui.app_icon`) and the players stamp F-mode's
+# are drawn on it (:mod:`shared_ui.app_icon`) and the Funestras stamp F-mode's
 # letter off it, so a toolbar's copy has to be the same letter and not a
 # letter drawn some other way.
 _GRID_CELLS = 5
@@ -653,7 +653,7 @@ def _grid_letter(rows: tuple[str, ...]) -> tuple:
 def _fmode() -> tuple:
     """F-mode's letter, on the grid the app icons are drawn on.
 
-    The same cells the players stamp on their HUDs, so the one on a toolbar is
+    The same cells the Funestras stamp on their HUDs, so the one on a toolbar is
     that letter rather than one drawn some other way.
     """
     return _grid_letter(("#####", "#....", "#####", "#....", "#...."))

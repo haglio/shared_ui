@@ -24,7 +24,7 @@ GAP_DIALOG = GAP_MEDIUM * 2
 # Buttons
 # ---------------------------------------------------------------------------
 # There are exactly TWO button sizes in this family: the ordinary one, and the
-# smaller one the players' HUDs use because room over video is precious.  Every
+# smaller one the Funestras' HUDs use because room over video is precious.  Every
 # icon button is one square or the other and sits the same distance from its
 # neighbor.
 BUTTON_SIZE = 28
