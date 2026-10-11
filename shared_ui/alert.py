@@ -21,9 +21,9 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
+from shared_ui import palette
+from shared_ui.chrome import control_ground
 from shared_ui.colors import (
-    BG_BUTTON,
-    BG_KEYCAP,
     BG_TERTIARY,
     BORDER_SUBTLE,
     TEXT_PRIMARY,
@@ -153,12 +153,10 @@ class AlertDialog(QDialog):
             QLabel {{ color: {TEXT_SECONDARY.name()}; }}
             QPushButton {{
                 color: {TEXT_PRIMARY.name()};
-                background: {BG_BUTTON.name()};
                 border: 1px solid {BORDER_SUBTLE.name()};
                 padding: 4px 10px;
                 border-radius: 3px;
-            }}
-            QPushButton:hover {{ background: {BG_KEYCAP.name()}; }}
+            }}{control_ground(palette.BG_BUTTON, "QPushButton")}
             QPushButton:pressed {{ background: {BG_TERTIARY.name()}; }}
         """)
         mark = QLabel()
