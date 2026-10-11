@@ -30,6 +30,7 @@ from shared_ui.palette import (
     TEXT_MUTED,
     TEXT_PRIMARY,
     as_hex,
+    hovered,
 )
 from shared_ui.spacing import (
     BUTTON_GAP,
@@ -151,6 +152,45 @@ def button_rules() -> str:
     QPushButton:disabled {{
         background-color: {as_hex(BG_SECONDARY)};
         color: {as_hex(TEXT_MUTED)};
+        border: 1px solid {as_hex(BORDER_SUBTLE)};
+    }}"""
+
+
+def field_rules() -> str:
+    return f"""
+    QPlainTextEdit, QLineEdit, QSpinBox, QDoubleSpinBox {{
+        background-color: {as_hex(BG_SECONDARY)};
+        color: {as_hex(TEXT_PRIMARY)};
+        border: 1px solid {as_hex(BORDER_SUBTLE)};
+        border-radius: 3px;
+        padding: 4px;
+    }}
+    QPlainTextEdit:focus, QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus {{
+        border: 1px solid {as_hex(BLUE)};
+    }}"""
+
+
+def tool_button_rules() -> str:
+    return f"""
+    QToolButton {{
+        background-color: {as_hex(BG_BUTTON)};
+        color: {as_hex(TEXT_PRIMARY)};
+        border: 1px solid {as_hex(BORDER_SUBTLE)};
+        border-radius: {BUTTON_RADIUS}px;
+        padding: 2px 10px;
+        font-weight: bold;
+    }}
+    QToolButton:hover {{
+        background-color: {as_hex(hovered(BG_BUTTON))};
+    }}
+    QToolButton:checked {{
+        background-color: {as_hex(BG_BUTTON_ACTIVE)};
+    }}
+    QToolButton:checked:hover {{
+        background-color: {as_hex(hovered(BG_BUTTON_ACTIVE))};
+    }}
+    QToolButton:disabled {{
+        background-color: {as_hex(BG_SECONDARY)};
         border: 1px solid {as_hex(BORDER_SUBTLE)};
     }}"""
 
