@@ -1,15 +1,6 @@
-"""The family's app icons: one MAGENTA block letter each, on one grid.
+"""The family's app icons: one MAGENTA block letter each, on one 5x5 grid.
 
-Every app's icon is a single letter drawn on a 5x5 grid inset :data:`INSET`
-pixels inside a :data:`CANVAS`-pixel square, every bar exactly one grid
-cell -- a fifth of the letter grid -- thick, with near-square corners.  The
-grid is what makes eight icons read as one set on a taskbar; the spec was
-written down in one app's test, which named the others' letters and checked
-only its own.  Here it is checked for any of them: an app's suite calls
-:func:`assert_follows_the_family_spec` on its own ``.ico``.
-
-Pillow only, so a test can check an icon without a Qt application.  How an
-icon was drawn is its own business -- what it must come out as is this.
+Pillow only, so a test can check an icon without a Qt application.
 """
 
 from __future__ import annotations
@@ -27,15 +18,13 @@ UNIT = GRID / 5  # one cell, and one bar
 CORNER_SOFTENING_MAX = 8  # rows a corner may round over; the family's round over three
 SOLID = 128  # the alpha above which a pixel is ink rather than an edge
 
-# The letters the family draws, as the cells they fill.  Fun Time's is its two
-# initials sharing a stem, and its VR session's is a V with Genau's R laid over
-# it, combined the same way -- the session carries Genau too.
 LETTERS: dict[str, tuple[str, ...]] = {
     "B": ("#####", "#...#", "#####", "#...#", "#####"),
     "C": ("#####", "#....", "#....", "#....", "#####"),
     "E": ("#####", "#....", "#####", "#....", "#####"),
     "FT": ("#####", "#.#..", "#####", "#.#..", "#.#.."),
     "G": ("#####", "#....", "#.###", "#...#", "#####"),
+    "L": ("#....", "#....", "#....", "#....", "#####"),
     "O": ("#####", "#...#", "#...#", "#...#", "#####"),
     "P": ("#####", "#...#", "#####", "#....", "#...."),
     "S": ("#####", "#....", "#####", "....#", "#####"),
