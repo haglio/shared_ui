@@ -29,6 +29,7 @@ from shared_ui.palette import (
     BORDER_SUBTLE,
     TEXT_MUTED,
     TEXT_PRIMARY,
+    Rgb,
     as_hex,
     hovered,
 )
@@ -125,6 +126,16 @@ def menu_rules() -> str:
     }}"""
 
 
+def control_ground(color: Rgb, *controls: str) -> str:
+    return f"""
+    {", ".join(controls)} {{
+        background-color: {as_hex(color)};
+    }}
+    {", ".join(f"{control}:hover" for control in controls)} {{
+        background-color: {as_hex(hovered(color))};
+    }}"""
+
+
 def button_rules() -> str:
     """A push button at rest, hovered, on, pressed and disabled.
 
@@ -134,21 +145,11 @@ def button_rules() -> str:
     """
     return f"""
     QPushButton {{
-        background-color: {as_hex(BG_BUTTON)};
         color: {as_hex(TEXT_PRIMARY)};
         border: 1px solid {as_hex(BORDER_SUBTLE)};
         border-radius: {BUTTON_RADIUS}px;
         padding: {BUTTON_PAD_V}px {BUTTON_PAD_H}px;
-    }}
-    QPushButton:hover {{
-        background-color: {as_hex(hovered(BG_BUTTON))};
-    }}
-    QPushButton:checked {{
-        background-color: {as_hex(BG_BUTTON_ACTIVE)};
-    }}
-    QPushButton:checked:hover {{
-        background-color: {as_hex(hovered(BG_BUTTON_ACTIVE))};
-    }}
+    }}{control_ground(BG_BUTTON, "QPushButton")}{control_ground(BG_BUTTON_ACTIVE, "QPushButton:checked")}
     QPushButton:pressed, QPushButton:checked:pressed {{
         background-color: {as_hex(BLUE)};
     }}
@@ -176,22 +177,12 @@ def field_rules() -> str:
 def tool_button_rules() -> str:
     return f"""
     QToolButton {{
-        background-color: {as_hex(BG_BUTTON)};
         color: {as_hex(TEXT_PRIMARY)};
         border: 1px solid {as_hex(BORDER_SUBTLE)};
         border-radius: {BUTTON_RADIUS}px;
         padding: 2px 10px;
         font-weight: bold;
-    }}
-    QToolButton:hover {{
-        background-color: {as_hex(hovered(BG_BUTTON))};
-    }}
-    QToolButton:checked {{
-        background-color: {as_hex(BG_BUTTON_ACTIVE)};
-    }}
-    QToolButton:checked:hover {{
-        background-color: {as_hex(hovered(BG_BUTTON_ACTIVE))};
-    }}
+    }}{control_ground(BG_BUTTON, "QToolButton")}{control_ground(BG_BUTTON_ACTIVE, "QToolButton:checked")}
     QToolButton:disabled {{
         background-color: {as_hex(BG_SECONDARY)};
         border: 1px solid {as_hex(BORDER_SUBTLE)};
