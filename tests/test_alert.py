@@ -7,9 +7,9 @@ from unittest.mock import patch
 
 import pytest
 from PyQt6.QtCore import QMargins, QPoint, Qt, QThread, QTimer, QUrl
-from PyQt6.QtGui import QIcon, QPalette, QPixmap, QTextDocument
+from PyQt6.QtGui import QColor, QIcon, QPalette, QPixmap, QTextDocument
 from PyQt6.QtTest import QTest
-from PyQt6.QtWidgets import QDialog, QLabel, QPushButton, QStyle
+from PyQt6.QtWidgets import QApplication, QDialog, QLabel, QPushButton, QStyle
 
 from shared_ui.alert import (
     DISMISSED,
@@ -27,6 +27,7 @@ from shared_ui.colors import (
     BLUE,
     TEXT_PRIMARY,
     TEXT_SECONDARY,
+    hovered,
 )
 from shared_ui.fonts import SIZE_BODY, make_font
 from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, MARGIN_DIALOG
@@ -110,6 +111,20 @@ def test_the_dialog_wears_the_familys_ground_and_text_colors():
     assert TEXT_SECONDARY.name() in style
     assert TEXT_PRIMARY.name() in style
     assert BG_BUTTON.name() in style
+
+
+def test_a_button_under_the_pointer_sits_one_step_lighter_than_at_rest(put_the_pointer_on, ground_of):
+    dlg = AlertDialog("Example App", "Nothing to do.")
+    dlg.move(QApplication.primaryScreen().geometry().center())
+    dlg.show()
+    QApplication.processEvents()
+    button, = dlg.findChildren(QPushButton)
+    at_rest = ground_of(button)
+    put_the_pointer_on(button)
+    under_the_pointer = ground_of(button)
+    dlg.close()
+
+    assert under_the_pointer == hovered(QColor(at_rest)).name()
 
 
 def test_the_ok_button_closes_the_dialog_and_says_what_the_caller_asked():
