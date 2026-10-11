@@ -37,10 +37,12 @@ def _background(body: str) -> str:
     return match.group("value").strip()
 
 
-def test_every_color_on_the_sheet_is_a_palette_color():
-    sheet = chrome.family_stylesheet() + chrome.toolbar_rules()
-    allowed = {palette.as_hex(value) for name in dir(palette) if name.isupper()
+def test_every_color_on_the_sheet_is_a_palette_color_or_one_a_hover_lifted():
+    sheet = chrome.family_stylesheet() + chrome.toolbar_rules() + chrome.tool_button_rules()
+    grounds = {value for name in dir(palette) if name.isupper()
                for value in [getattr(palette, name)] if isinstance(value, tuple)}
+    allowed = {palette.as_hex(color) for ground in grounds
+               for color in (ground, palette.hovered(ground))}
 
     strays = sorted({hex_ for hex_ in _HEX.findall(sheet) if hex_.lower() not in allowed})
 
@@ -82,8 +84,10 @@ def put_the_pointer_on():
     QApplication.processEvents()
 
 
-def _shown_button(sheet: str) -> QPushButton:
+def _shown_button(sheet: str, *, lit: bool = False) -> QPushButton:
     button = QPushButton("Edit")
+    button.setCheckable(lit)
+    button.setChecked(lit)
     button.setStyleSheet(sheet)
     _shown_away_from_the_pointer(button)
     return button
@@ -106,6 +110,27 @@ def test_a_button_under_the_pointer_sits_one_step_lighter_than_at_rest(put_the_p
     button.close()
 
     assert under_the_pointer == _one_step_lighter(at_rest)
+
+
+def test_a_lit_button_under_the_pointer_stays_its_own_color_a_shade_brighter(put_the_pointer_on):
+    button = _shown_button(chrome.button_rules(), lit=True)
+    lit = _ground(button)
+    put_the_pointer_on(button)
+    under_the_pointer = _ground(button)
+    button.close()
+
+    assert under_the_pointer == _one_step_lighter(lit)
+
+
+@pytest.mark.parametrize("lit", [False, True], ids=["at rest", "lit"])
+def test_a_press_flashes_the_blue_over_the_hover(put_the_pointer_on, lit):
+    button = _shown_button(chrome.button_rules(), lit=lit)
+    put_the_pointer_on(button)
+    button.setDown(True)
+    pressed = _ground(button)
+    button.close()
+
+    assert pressed == palette.as_hex(palette.BLUE)
 
 
 def test_a_disabled_button_reads_as_disabled_in_text_and_ground():
