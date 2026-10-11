@@ -48,7 +48,7 @@ BUTTON_ROW_GAP = 8
 # drawn there -- stated as that ratio rather than as a number of its own, so a
 # change to the gap inside a group carries the grouping with it.
 #
-# Imported by player_core (both HUD painters: the mode pair and the minimize
+# Imported by funestra (both HUD painters: the mode pair and the minimize
 # beside it) and by origenerator (the browser's button bank, the combine
 # panel), so the same two groups sit the same distance apart whichever app
 # draws them.
