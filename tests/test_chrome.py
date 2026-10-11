@@ -9,6 +9,7 @@ import pytest
 from PyQt6.QtCore import QRect
 from PyQt6.QtGui import QAction, QColor, QCursor, QIcon, QImage, QPixmap
 from PyQt6.QtWidgets import (
+    QAbstractButton,
     QApplication,
     QMenu,
     QPushButton,
@@ -59,18 +60,6 @@ def test_the_family_sheet_is_every_fragment():
         assert fragment in sheet
 
 
-def test_a_button_that_is_on_sits_on_a_lighter_ground_than_one_at_rest():
-    """One rule across the family, so a toggled button reads the same whichever
-    app it is in.  Compared rather than name-matched, so it survives a palette
-    change and still fails an inversion."""
-    rules = _rules(chrome.button_rules())
-
-    at_rest = QColor(_background(rules["QPushButton"]))
-    on = QColor(_background(rules["QPushButton:checked"]))
-
-    assert on.lightness() > at_rest.lightness()
-
-
 @pytest.fixture
 def put_the_pointer_on():
     resting = QCursor.pos()
@@ -84,11 +73,13 @@ def put_the_pointer_on():
     QApplication.processEvents()
 
 
-def _shown_button(sheet: str, *, lit: bool = False) -> QPushButton:
-    button = QPushButton("Edit")
+def _shown_button(rules: str, kind: type[QAbstractButton] = QPushButton, *,
+                  lit: bool = False) -> QAbstractButton:
+    button = kind()
+    button.setText("Edit")
     button.setCheckable(lit)
     button.setChecked(lit)
-    button.setStyleSheet(sheet)
+    button.setStyleSheet(rules)
     _shown_away_from_the_pointer(button)
     return button
 
@@ -98,28 +89,42 @@ def _ground(widget: QWidget) -> str:
     return drawn.pixelColor(3, drawn.height() // 2).name()
 
 
+def _drawn_ground(rules: str, *, lit: bool = False, enabled: bool = True) -> QColor:
+    button = _shown_button(rules, lit=lit)
+    button.setEnabled(enabled)
+    ground = QColor(_ground(button))
+    button.close()
+    return ground
+
+
 def _one_step_lighter(ground: str) -> str:
     return colors.hovered(QColor(ground)).name()
 
 
-def test_a_button_under_the_pointer_sits_one_step_lighter_than_at_rest(put_the_pointer_on):
-    button = _shown_button(chrome.button_rules())
-    at_rest = _ground(button)
+def test_a_button_that_is_on_sits_on_a_lighter_ground_than_one_at_rest():
+    """One rule across the family, so a toggled button reads the same whichever
+    app it is in.  Compared rather than name-matched, so it survives a palette
+    change and still fails an inversion."""
+    at_rest = _drawn_ground(chrome.button_rules())
+    on = _drawn_ground(chrome.button_rules(), lit=True)
+
+    assert on.lightness() > at_rest.lightness()
+
+
+@pytest.mark.parametrize("lit", [False, True], ids=["at rest", "lit"])
+@pytest.mark.parametrize(("rules", "kind"), [
+    (chrome.button_rules, QPushButton),
+    (chrome.tool_button_rules, QToolButton),
+], ids=["push button", "tool button"])
+def test_a_button_under_the_pointer_sits_one_step_lighter_than_its_own_ground(
+        put_the_pointer_on, rules, kind, lit):
+    button = _shown_button(rules(), kind, lit=lit)
+    ground = _ground(button)
     put_the_pointer_on(button)
     under_the_pointer = _ground(button)
     button.close()
 
-    assert under_the_pointer == _one_step_lighter(at_rest)
-
-
-def test_a_lit_button_under_the_pointer_stays_its_own_color_a_shade_brighter(put_the_pointer_on):
-    button = _shown_button(chrome.button_rules(), lit=True)
-    lit = _ground(button)
-    put_the_pointer_on(button)
-    under_the_pointer = _ground(button)
-    button.close()
-
-    assert under_the_pointer == _one_step_lighter(lit)
+    assert under_the_pointer == _one_step_lighter(ground)
 
 
 @pytest.mark.parametrize("lit", [False, True], ids=["at rest", "lit"])
@@ -139,7 +144,8 @@ def test_a_disabled_button_reads_as_disabled_in_text_and_ground():
     disabled = rules["QPushButton:disabled"]
 
     assert palette.as_hex(palette.TEXT_MUTED) in disabled
-    assert QColor(_background(disabled)).lightness() < QColor(_background(rules["QPushButton"])).lightness()
+    assert (_drawn_ground(chrome.button_rules(), enabled=False).lightness()
+            < _drawn_ground(chrome.button_rules()).lightness())
 
 
 def test_hovering_a_menu_row_that_cannot_be_clicked_promises_nothing():
