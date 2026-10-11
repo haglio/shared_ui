@@ -13,7 +13,7 @@ dynamic = ["version"]
 requires-python = ">=3.14"
 # Qt is an extra, for the reason already written below about Pillow: `spacing` is
 # plain integers and `icons_pil` draws with Pillow alone, and those two modules
-# are the whole of what player_core imports from here -- so an unconditional
+# are the whole of what funestra imports from here -- so an unconditional
 # PyQt6 put a Qt wheel in every Funestra venv and on every runner that installs
 # one, for code that never touches it. Every consumer that uses the widgets
 # declares PyQt6 itself, and its own import gate says so.
@@ -25,7 +25,7 @@ requires-python = ">=3.14"
 # own commit, with its own suite to answer for it. tests/test_sibling_pins.py
 # holds every declared sibling to having one.
 dependencies = [
-    "app-support @ git+https://github.com/haglio/app_support@v0.1.192",
+    "app-support @ git+https://github.com/haglio/app_support@v0.1.193",
 ]
 
 # The version is `git describe` of the checkout being built: a landing's tag
