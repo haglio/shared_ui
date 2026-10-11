@@ -146,7 +146,10 @@ def button_rules() -> str:
     QPushButton:checked {{
         background-color: {as_hex(BG_BUTTON_ACTIVE)};
     }}
-    QPushButton:pressed {{
+    QPushButton:checked:hover {{
+        background-color: {as_hex(hovered(BG_BUTTON_ACTIVE))};
+    }}
+    QPushButton:pressed, QPushButton:checked:pressed {{
         background-color: {as_hex(BLUE)};
     }}
     QPushButton:disabled {{
