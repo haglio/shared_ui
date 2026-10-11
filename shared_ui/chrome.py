@@ -141,7 +141,7 @@ def button_rules() -> str:
         padding: {BUTTON_PAD_V}px {BUTTON_PAD_H}px;
     }}
     QPushButton:hover {{
-        background-color: {as_hex(BG_TERTIARY)};
+        background-color: {as_hex(hovered(BG_BUTTON))};
     }}
     QPushButton:checked {{
         background-color: {as_hex(BG_BUTTON_ACTIVE)};

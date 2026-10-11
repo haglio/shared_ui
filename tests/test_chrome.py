@@ -5,18 +5,21 @@ from __future__ import annotations
 
 import re
 
+import pytest
 from PyQt6.QtCore import QRect
-from PyQt6.QtGui import QAction, QColor, QIcon, QImage, QPixmap
+from PyQt6.QtGui import QAction, QColor, QCursor, QIcon, QImage, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
     QMenu,
+    QPushButton,
     QToolBar,
     QToolButton,
     QTreeWidget,
     QTreeWidgetItem,
+    QWidget,
 )
 
-from shared_ui import chrome, palette, spacing
+from shared_ui import chrome, colors, palette, spacing
 
 _HEX = re.compile(r"#[0-9a-fA-F]{3,6}\b")
 _RULE = re.compile(r"(?P<selector>[^{}]+?)\s*\{(?P<body>[^{}]*)\}")
@@ -64,6 +67,45 @@ def test_a_button_that_is_on_sits_on_a_lighter_ground_than_one_at_rest():
     on = QColor(_background(rules["QPushButton:checked"]))
 
     assert on.lightness() > at_rest.lightness()
+
+
+@pytest.fixture
+def put_the_pointer_on():
+    resting = QCursor.pos()
+
+    def put_it_on(widget: QWidget) -> None:
+        QCursor.setPos(widget.mapToGlobal(widget.rect().center()))
+        QApplication.processEvents()
+
+    yield put_it_on
+    QCursor.setPos(resting)
+    QApplication.processEvents()
+
+
+def _shown_button(sheet: str) -> QPushButton:
+    button = QPushButton("Edit")
+    button.setStyleSheet(sheet)
+    _shown_away_from_the_pointer(button)
+    return button
+
+
+def _ground(widget: QWidget) -> str:
+    drawn = widget.grab().toImage()
+    return drawn.pixelColor(3, drawn.height() // 2).name()
+
+
+def _one_step_lighter(ground: str) -> str:
+    return colors.hovered(QColor(ground)).name()
+
+
+def test_a_button_under_the_pointer_sits_one_step_lighter_than_at_rest(put_the_pointer_on):
+    button = _shown_button(chrome.button_rules())
+    at_rest = _ground(button)
+    put_the_pointer_on(button)
+    under_the_pointer = _ground(button)
+    button.close()
+
+    assert under_the_pointer == _one_step_lighter(at_rest)
 
 
 def test_a_disabled_button_reads_as_disabled_in_text_and_ground():
@@ -145,10 +187,10 @@ def test_a_checked_row_s_mark_sits_on_the_lighter_ground_of_a_control_that_is_on
     assert on.pixelColor(*beside_the_mark).lightness() > QColor(*palette.BG_TERTIARY).lightness()
 
 
-def _shown_away_from_the_pointer(toolbar: QToolBar) -> None:
-    toolbar.resize(toolbar.sizeHint())
-    toolbar.move(QApplication.primaryScreen().geometry().center())
-    toolbar.show()
+def _shown_away_from_the_pointer(widget: QWidget) -> None:
+    widget.resize(widget.sizeHint())
+    widget.move(QApplication.primaryScreen().geometry().center())
+    widget.show()
     QApplication.processEvents()
 
 
