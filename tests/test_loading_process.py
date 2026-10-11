@@ -100,19 +100,18 @@ class TestTheStartsSide:
 
 
 class TestTheWholeWay:
-    def test_a_window_process_shows_itself_and_goes_when_the_start_is_done(self, qapp):
+    def test_a_window_process_opens_and_goes_when_the_start_is_done(self, qapp):
         window = LoadingProcess.open(
             caption="Scripture Loading", wordmark="Scripture", icon=None, preview=None,
             steps=("Checking the tracker...", "Loading..."),
             cancel_hint="Press Esc to cancel opening Scripture")
-        shown = []
-        window.shown.connect(shown.append)
 
-        assert _until(qapp, lambda: bool(shown), seconds=60)
         window.say("Loading...")
+
         assert window.accept() == 0
 
-    def test_a_preview_window_wears_the_apps_taskbar_identity_and_says_where_it_is(self, qapp):
+    def test_a_preview_window_wears_the_apps_taskbar_identity_and_tells_the_start_nothing(
+            self, qapp):
         told = io.StringIO()
         with patch("app_support.win32.dress_window") as dress:
             code = run({
@@ -123,9 +122,9 @@ class TestTheWholeWay:
             }, io.StringIO("Loading..." + chr(10)), told, qapp)
 
         assert code == 0
-        (hwnd, app_id, taskbar), _ = dress.call_args
+        (_hwnd, app_id, taskbar), _ = dress.call_args
         assert (app_id, taskbar) == ("Example.App.Preview", None)
-        assert told.getvalue().splitlines() == [f"shown {hwnd}"]
+        assert told.getvalue() == ""
 
     def test_a_preview_window_wears_the_name_and_icon_its_taskbar_button_carries(self, qapp, tmp_path):
         with patch("app_support.win32.dress_window") as dress:
