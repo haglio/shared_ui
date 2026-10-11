@@ -246,6 +246,16 @@ def test_a_toolbar_button_wears_the_family_button_s_border_round_its_ground():
     assert drawn.pixelColor(3, middle) == QColor(*palette.BG_BUTTON)
 
 
+def test_a_toolbar_button_under_the_pointer_sits_one_step_lighter_than_at_rest(put_the_pointer_on):
+    toolbar, button = _toolbar_button()
+    at_rest = _ground(button)
+    put_the_pointer_on(button)
+    under_the_pointer = _ground(button)
+    toolbar.close()
+
+    assert under_the_pointer == _one_step_lighter(at_rest)
+
+
 def test_a_toolbar_s_buttons_stand_the_family_s_button_gap_apart():
     toolbar = QToolBar()
     toolbar.setStyleSheet(chrome.toolbar_rules())

@@ -200,14 +200,10 @@ def toolbar_rules() -> str:
         spacing: {BUTTON_GAP}px;
     }}
     QToolButton {{
-        background-color: {as_hex(BG_BUTTON)};
         border: 1px solid {as_hex(BORDER_SUBTLE)};
         border-radius: {BUTTON_RADIUS}px;
         {toolbar_padding(right=BUTTON_PAD_H_TIGHT)}
-    }}
-    QToolButton:hover {{
-        background-color: {as_hex(BG_TERTIARY)};
-    }}
+    }}{control_ground(BG_BUTTON, "QToolButton")}
     QToolButton:pressed {{
         background-color: {as_hex(BLUE)};
     }}
