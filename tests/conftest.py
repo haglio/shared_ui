@@ -16,8 +16,9 @@ import pytest
 # something on a real display.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PyQt6.QtGui import QCursor
-from PyQt6.QtWidgets import QApplication, QWidget
+from PyQt6.QtWidgets import QApplication
+
+from shared_ui.testing import Pointer
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -30,22 +31,7 @@ def qapp():
 
 
 @pytest.fixture
-def put_the_pointer_on():
-    resting = QCursor.pos()
-
-    def put_it_on(widget: QWidget) -> None:
-        QCursor.setPos(widget.mapToGlobal(widget.rect().center()))
-        QApplication.processEvents()
-
-    yield put_it_on
-    QCursor.setPos(resting)
-    QApplication.processEvents()
-
-
-@pytest.fixture
-def ground_of():
-    def ground(widget: QWidget) -> str:
-        drawn = widget.grab().toImage()
-        return drawn.pixelColor(3, drawn.height() // 2).name()
-
-    return ground
+def pointer():
+    pointer = Pointer()
+    yield pointer
+    pointer.put_back()

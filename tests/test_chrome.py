@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import (
 )
 
 from shared_ui import chrome, colors, palette, spacing
+from shared_ui.testing import ground
 
 _HEX = re.compile(r"#[0-9a-fA-F]{3,6}\b")
 _RULE = re.compile(r"(?P<selector>[^{}]+?)\s*\{(?P<body>[^{}]*)\}")
@@ -71,20 +72,20 @@ def _shown_button(rules: str, kind: type[QAbstractButton] = QPushButton, *,
     return button
 
 
-def _button_ground(ground_of, rules: str, *, lit: bool = False, enabled: bool = True) -> QColor:
+def _button_ground(rules: str, *, lit: bool = False, enabled: bool = True) -> QColor:
     button = _shown_button(rules, lit=lit)
     button.setEnabled(enabled)
-    ground = QColor(ground_of(button))
+    drawn = QColor(ground(button))
     button.close()
-    return ground
+    return drawn
 
 
-def test_a_button_that_is_on_sits_on_a_lighter_ground_than_one_at_rest(ground_of):
+def test_a_button_that_is_on_sits_on_a_lighter_ground_than_one_at_rest():
     """One rule across the family, so a toggled button reads the same whichever
     app it is in.  Compared rather than name-matched, so it survives a palette
     change and still fails an inversion."""
-    at_rest = _button_ground(ground_of, chrome.button_rules())
-    on = _button_ground(ground_of, chrome.button_rules(), lit=True)
+    at_rest = _button_ground(chrome.button_rules())
+    on = _button_ground(chrome.button_rules(), lit=True)
 
     assert on.lightness() > at_rest.lightness()
 
@@ -95,35 +96,37 @@ def test_a_button_that_is_on_sits_on_a_lighter_ground_than_one_at_rest(ground_of
     (chrome.tool_button_rules, QToolButton),
 ], ids=["push button", "tool button"])
 def test_a_button_under_the_pointer_sits_one_step_lighter_than_its_own_ground(
-        put_the_pointer_on, ground_of, rules, kind, lit):
+        pointer, rules, kind, lit):
     button = _shown_button(rules(), kind, lit=lit)
-    ground = ground_of(button)
-    put_the_pointer_on(button)
-    under_the_pointer = ground_of(button)
+    pointer.off(button)
+    at_rest = ground(button)
+    pointer.on(button)
+    under_the_pointer = ground(button)
     button.close()
 
-    assert under_the_pointer == colors.hovered(QColor(ground)).name()
+    assert under_the_pointer == colors.hovered(QColor(at_rest)).name()
 
 
 @pytest.mark.parametrize("lit", [False, True], ids=["at rest", "lit"])
-def test_a_press_flashes_the_blue_over_the_hover(put_the_pointer_on, ground_of, lit):
+def test_a_press_flashes_the_blue_over_the_hover(pointer, lit):
     button = _shown_button(chrome.button_rules(), lit=lit)
-    put_the_pointer_on(button)
+    pointer.off(button)
+    pointer.on(button)
     button.setDown(True)
-    pressed = ground_of(button)
+    pressed = ground(button)
     button.close()
 
     assert pressed == palette.as_hex(palette.BLUE)
 
 
-def test_a_disabled_button_reads_as_disabled_in_text_and_ground(ground_of):
+def test_a_disabled_button_reads_as_disabled_in_text_and_ground():
     rules = _rules(chrome.button_rules())
 
     disabled = rules["QPushButton:disabled"]
 
     assert palette.as_hex(palette.TEXT_MUTED) in disabled
-    assert (_button_ground(ground_of, chrome.button_rules(), enabled=False).lightness()
-            < _button_ground(ground_of, chrome.button_rules()).lightness())
+    assert (_button_ground(chrome.button_rules(), enabled=False).lightness()
+            < _button_ground(chrome.button_rules()).lightness())
 
 
 def test_hovering_a_menu_row_that_cannot_be_clicked_promises_nothing():
@@ -225,11 +228,12 @@ def test_a_toolbar_button_wears_the_family_button_s_border_round_its_ground():
 
 
 def test_a_toolbar_button_under_the_pointer_sits_one_step_lighter_than_at_rest(
-        put_the_pointer_on, ground_of):
+        pointer):
     toolbar, button = _toolbar_button()
-    at_rest = ground_of(button)
-    put_the_pointer_on(button)
-    under_the_pointer = ground_of(button)
+    pointer.off(button)
+    at_rest = ground(button)
+    pointer.on(button)
+    under_the_pointer = ground(button)
     toolbar.close()
 
     assert under_the_pointer == colors.hovered(QColor(at_rest)).name()
