@@ -3,12 +3,15 @@
 Offscreen, the screen hands a point to the window that was shown there first,
 so a window an earlier test left up takes the pointer from one shown under it:
 a widget is moved clear of every other window before the pointer goes to it.
+And a press an earlier test never let go of keeps the pointer's own moves from
+reaching any widget, while a push button lights only on a move: the widget
+under the pointer is handed one directly.
 """
 
 from __future__ import annotations
 
-from PyQt6.QtCore import QPoint, QRect
-from PyQt6.QtGui import QCursor
+from PyQt6.QtCore import QEvent, QPoint, QPointF, QRect, Qt
+from PyQt6.QtGui import QCursor, QMouseEvent
 from PyQt6.QtWidgets import QApplication, QWidget
 
 
@@ -31,7 +34,13 @@ class Pointer:
         _put_the_pointer_at(past_it if spot.contains(corner) else corner)
 
     def on(self, widget: QWidget, at: QPoint | None = None) -> None:
-        _put_the_pointer_at(widget.mapToGlobal(at if at is not None else widget.rect().center()))
+        at = at if at is not None else widget.rect().center()
+        _put_the_pointer_at(widget.mapToGlobal(at))
+        under = widget.childAt(at) or widget
+        QApplication.sendEvent(under, QMouseEvent(
+            QEvent.Type.MouseMove, QPointF(under.mapFrom(widget, at)), QPointF(widget.mapToGlobal(at)),
+            Qt.MouseButton.NoButton, Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier))
+        QApplication.processEvents()
 
     def put_back(self) -> None:
         _put_the_pointer_at(self._resting)
