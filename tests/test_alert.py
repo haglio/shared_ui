@@ -31,6 +31,7 @@ from shared_ui.colors import (
 )
 from shared_ui.fonts import SIZE_BODY, make_font
 from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, MARGIN_DIALOG
+from shared_ui.testing import ground
 
 
 def test_the_dialog_carries_the_title_and_the_message():
@@ -113,15 +114,16 @@ def test_the_dialog_wears_the_familys_ground_and_text_colors():
     assert BG_BUTTON.name() in style
 
 
-def test_a_button_under_the_pointer_sits_one_step_lighter_than_at_rest(put_the_pointer_on, ground_of):
+def test_a_button_under_the_pointer_sits_one_step_lighter_than_at_rest(pointer):
     dlg = AlertDialog("Example App", "Nothing to do.")
     dlg.move(QApplication.primaryScreen().geometry().center())
     dlg.show()
     QApplication.processEvents()
     button, = dlg.findChildren(QPushButton)
-    at_rest = ground_of(button)
-    put_the_pointer_on(button)
-    under_the_pointer = ground_of(button)
+    pointer.off(button)
+    at_rest = ground(button)
+    pointer.on(button)
+    under_the_pointer = ground(button)
     dlg.close()
 
     assert under_the_pointer == hovered(QColor(at_rest)).name()
