@@ -27,11 +27,13 @@ if TYPE_CHECKING:
     from app_support.win32 import TaskbarApp
 
 CANCEL = "cancel"
+SHOWN = "shown"
 GONE_WITHIN_S = 5.0
 
 
 class LoadingProcess(QObject):
     canceled = pyqtSignal()
+    shown = pyqtSignal(int)
 
     def __init__(self, process: subprocess.Popen) -> None:
         super().__init__()
@@ -71,8 +73,11 @@ class LoadingProcess(QObject):
 
     def _listen(self) -> None:
         for line in self._process.stdout:
-            if line.strip() == CANCEL:
+            word, _, rest = line.strip().partition(" ")
+            if word == CANCEL:
                 self.canceled.emit()
+            elif word == SHOWN:
+                self.shown.emit(int(rest))
 
 
 class _Lines(QObject):
@@ -130,6 +135,7 @@ def run(spec: dict, lines_in: IO[str], lines_out: IO[str], app) -> int:
         dress_window(int(window.winId()), spec["app_id"], None if taskbar is None else
                      TaskbarApp(taskbar["name"], Path(taskbar["icon"]), taskbar["relaunch"]))
     window.show()
+    _tell(lines_out, f"{SHOWN} {int(window.winId())}")
     serve(window, lines_in, lines_out, app.quit)
     return app.exec()
 
