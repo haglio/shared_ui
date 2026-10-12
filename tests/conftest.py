@@ -18,7 +18,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PyQt6.QtWidgets import QApplication
 
-from shared_ui.testing import Pointer
+pytest_plugins = ("shared_ui.testing",)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -28,10 +28,3 @@ def qapp():
     if app is None:
         app = QApplication(sys.argv)
     return app
-
-
-@pytest.fixture
-def pointer():
-    pointer = Pointer()
-    yield pointer
-    pointer.put_back()
