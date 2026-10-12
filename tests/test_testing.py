@@ -21,35 +21,33 @@ def _shown_button(at: QPoint | None = None) -> QPushButton:
     return button
 
 
-def _lifts_under_the_pointer(button: QPushButton) -> bool:
-    pointer = Pointer()
+def _lifts_under_the_pointer(pointer: Pointer, button: QPushButton) -> bool:
     try:
         pointer.off(button)
         at_rest = ground(button)
         pointer.on(button)
         return ground(button) == colors.hovered(QColor(at_rest)).name()
     finally:
-        pointer.put_back()
         button.close()
 
 
-def test_a_widget_shown_under_a_window_left_up_still_gets_the_pointer():
+def test_a_widget_shown_under_a_window_left_up_still_gets_the_pointer(pointer):
     left_up = QWidget()
     left_up.setGeometry(QApplication.primaryScreen().geometry().adjusted(0, 0, -40, -40))
     left_up.show()
     try:
-        assert _lifts_under_the_pointer(_shown_button(left_up.geometry().center()))
+        assert _lifts_under_the_pointer(pointer, _shown_button(left_up.geometry().center()))
     finally:
         left_up.close()
 
 
-def test_a_widget_still_gets_the_pointer_after_a_press_nobody_let_go_of():
+def test_a_widget_still_gets_the_pointer_after_a_press_nobody_let_go_of(pointer):
     pressed = QWidget()
     pressed.resize(60, 30)
     pressed.show()
     QTest.mousePress(pressed, Qt.MouseButton.LeftButton)
     pressed.close()
     try:
-        assert _lifts_under_the_pointer(_shown_button())
+        assert _lifts_under_the_pointer(pointer, _shown_button())
     finally:
         QTest.mouseRelease(pressed, Qt.MouseButton.LeftButton)

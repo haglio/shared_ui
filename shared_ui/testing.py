@@ -10,6 +10,9 @@ under the pointer is handed one directly.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+
+import pytest
 from PyQt6.QtCore import QEvent, QPoint, QPointF, QRect, Qt
 from PyQt6.QtGui import QCursor, QMouseEvent
 from PyQt6.QtWidgets import QApplication, QWidget
@@ -44,6 +47,13 @@ class Pointer:
 
     def put_back(self) -> None:
         _put_the_pointer_at(self._resting)
+
+
+@pytest.fixture
+def pointer() -> Iterator[Pointer]:
+    pointer = Pointer()
+    yield pointer
+    pointer.put_back()
 
 
 def _put_the_pointer_at(point: QPoint) -> None:
