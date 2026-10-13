@@ -34,6 +34,12 @@ def _ico(tmp_path: Path, image: Image.Image) -> Path:
     return path
 
 
+def test_the_b_has_no_right_hand_corners_so_it_reads_as_a_b_not_an_8():
+    first_row, *_, last_row = LETTERS["B"]
+
+    assert (first_row[-1], last_row[-1]) == (".", ".")
+
+
 @pytest.mark.parametrize("letter", sorted(LETTERS))
 def test_every_letter_drawn_to_the_grid_passes(tmp_path, letter):
     assert_follows_the_family_spec(_ico(tmp_path, _draw(LETTERS[letter])), letter)
@@ -42,7 +48,7 @@ def test_every_letter_drawn_to_the_grid_passes(tmp_path, letter):
 def test_the_wrong_letter_is_named(tmp_path):
     path = _ico(tmp_path, _draw(LETTERS["E"]))
 
-    with pytest.raises(AssertionError, match=r"cell \(1, 4\).*'B' has it inked"):
+    with pytest.raises(AssertionError, match=r"cell \(0, 4\).*'B' has it clear"):
         assert_follows_the_family_spec(path, "B")
 
 

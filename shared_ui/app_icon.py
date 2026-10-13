@@ -19,7 +19,7 @@ CORNER_SOFTENING_MAX = 8  # rows a corner may round over; the family's round ove
 SOLID = 128  # the alpha above which a pixel is ink rather than an edge
 
 LETTERS: dict[str, tuple[str, ...]] = {
-    "B": ("#####", "#...#", "#####", "#...#", "#####"),
+    "B": ("####.", "#...#", "#####", "#...#", "####."),
     "C": ("#####", "#....", "#....", "#....", "#####"),
     "E": ("#####", "#....", "#####", "#....", "#####"),
     "FT": ("#####", "#.#..", "#####", "#.#..", "#.#.."),
