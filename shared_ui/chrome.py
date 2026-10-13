@@ -78,6 +78,9 @@ _ROOM_BEFORE_MENU_WORDS = _MENU_ROW_PAD_H + _QT_MENU_MARK + 4
 _CHECKED_GROUND_MARGIN = 4
 _MENU_MARK_BOX_LEFT = (_ROOM_BEFORE_MENU_WORDS - _QT_MENU_MARK) // 2 - _CHECKED_GROUND_MARGIN
 
+_MENU_ARROW = 9
+_MENU_ARROW_RIGHT = (_MENU_ROW_PAD_H - _MENU_ARROW) // 2
+
 
 def menu_rules() -> str:
     """Every right-click and tray menu.
@@ -118,6 +121,13 @@ def menu_rules() -> str:
     QMenu::icon:checked {{
         background-color: {as_hex(BG_BUTTON_ACTIVE)};
         border-radius: {BUTTON_RADIUS}px;
+    }}
+    QMenu::right-arrow {{
+        subcontrol-origin: padding;
+        subcontrol-position: center right;
+        right: {_MENU_ARROW_RIGHT}px;
+        width: {_MENU_ARROW}px;
+        height: {_MENU_ARROW}px;
     }}
     QMenu::separator {{
         height: 1px;

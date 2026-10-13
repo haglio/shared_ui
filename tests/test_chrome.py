@@ -183,6 +183,27 @@ def test_a_menu_row_s_mark_sits_midway_between_the_menu_s_edge_and_its_words():
     assert abs(before_the_mark - after_the_mark) <= 2, (before_the_mark, after_the_mark)
 
 
+def test_a_row_that_opens_a_menu_draws_its_arrow_midway_across_the_padding_past_its_words():
+    """Qt starts a sub-menu's arrow where the row's words may end, so a word
+    that fills its room runs into it; the arrow belongs in the middle of the
+    padding beyond."""
+    menu = QMenu()
+    menu.setStyleSheet(chrome.menu_rules())
+    row = menu.addMenu("Add to folder")
+    row.addAction("Keepers")
+    menu.resize(menu.sizeHint())
+    rect = menu.actionGeometry(row.menuAction())
+    padding = int(re.search(r"padding:\s*\d+px\s+(\d+)px",
+                            _rules(chrome.menu_rules())["QMenu::item"]).group(1))
+
+    *_, (arrow_left, arrow_right) = _inked_runs(menu.grab().toImage(), rect)
+
+    past_the_words = arrow_left - (rect.right() + 1 - padding)
+    before_the_edge = rect.right() - arrow_right
+    assert past_the_words > 0
+    assert abs(past_the_words - before_the_edge) <= 2, (past_the_words, before_the_edge)
+
+
 def test_a_checked_row_s_mark_sits_on_the_lighter_ground_of_a_control_that_is_on():
     """A row that carries a mark shows its check through the mark alone, so
     without this a toggle in a menu looks the same on as off."""
