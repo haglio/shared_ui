@@ -301,7 +301,7 @@ _THE_MARKS = (
     "clock", "clock_full", "clock_short", "compilation", "control_off",
     "copy", "cross", "database", "enhance_filter", "expand_horizontal", "flask",
     "flat_2d", "flip_ends", "fmode", "folder", "full", "full_length", "funscript_jump", "headset",
-    "latest", "log", "loop", "mic", "minus", "monitor", "park", "pause", "photo", "play",
+    "human", "latest", "log", "loop", "mic", "minus", "monitor", "park", "pause", "photo", "play",
     "plus", "plus_outline", "power", "quarter_offset", "question",
     "redo_arrow", "release", "reset", "restart", "retract", "scene_to_clip",
     "shorts", "shuffle", "slideshow", "speaker", "star", "star_outline", "trash",
