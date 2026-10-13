@@ -711,6 +711,12 @@ GLYPHS: dict[str, tuple] = {
     ),
     "full": _clip_on_the_timeline(_TIMELINE.x2),
     "headset": _headset(),
+    "human": (                                            # a stick figure
+        Ellipse(24, 10, 5.5, 5.5, fill=True),
+        Line(24, 17, 24, 30),
+        Polyline(((13, 26), (24, 20), (35, 26))),
+        Polyline(((15, 42), (24, 30), (33, 42))),
+    ),
     "latest": _calendar(),
     "funscript_jump": _funscript_jump(),
     "log": (
