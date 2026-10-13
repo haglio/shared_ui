@@ -23,9 +23,8 @@ from PyQt6.QtGui import QPainter, QPen
 from PyQt6.QtWidgets import QAbstractButton
 
 from shared_ui.colors import TEXT_SECONDARY, TOGGLE_HANDLE, TOGGLE_OFF, TOGGLE_ON
+from shared_ui.toggle_geometry import HANDLE_INSET, TRACK, handle
 
-_TRACK = QSize(38, 20)   # the pill
-_HANDLE_INSET = 3        # gap between the handle and the track's edge
 _GAP = 8                 # between the pill and its label
 _DISABLED_OPACITY = 0.4  # how far a switch fades when it can't be thrown
 
@@ -46,10 +45,10 @@ class ToggleSwitch(QAbstractButton):
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
     def sizeHint(self) -> QSize:
-        width = _TRACK.width()
+        width = TRACK[0]
         if self.text():
             width += _GAP + self.fontMetrics().horizontalAdvance(self.text())
-        return QSize(width, max(_TRACK.height(), self.fontMetrics().height()))
+        return QSize(width, max(TRACK[1], self.fontMetrics().height()))
 
     def minimumSizeHint(self) -> QSize:
         return self.sizeHint()
@@ -62,17 +61,16 @@ class ToggleSwitch(QAbstractButton):
             # a disabled switch drawn at full strength reads as a live one, and
             # the panel it powers goes dark around a switch that still looks on.
             painter.setOpacity(_DISABLED_OPACITY)
-        top = (self.height() - _TRACK.height()) / 2
-        track = QRectF(0, top, _TRACK.width(), _TRACK.height())
+        top = (self.height() - TRACK[1]) / 2
+        track = QRectF(0, top, *TRACK)
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(TOGGLE_ON if self.isChecked() else TOGGLE_OFF)
         painter.drawRoundedRect(track, track.height() / 2, track.height() / 2)
 
-        diameter = track.height() - 2 * _HANDLE_INSET
-        x = (track.right() - _HANDLE_INSET - diameter if self.isChecked()
-             else track.left() + _HANDLE_INSET)
+        x, y, diameter = handle((track.left(), track.top(), track.width(), track.height()),
+                                on=self.isChecked(), inset=HANDLE_INSET)
         painter.setBrush(TOGGLE_HANDLE)
-        painter.drawEllipse(QRectF(x, track.top() + _HANDLE_INSET, diameter, diameter))
+        painter.drawEllipse(QRectF(x, y, diameter, diameter))
 
         if self.text():
             painter.setPen(QPen(TEXT_SECONDARY))
