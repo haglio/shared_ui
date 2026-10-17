@@ -4,10 +4,12 @@ the panel alone, borderless, under a caption of the app's choosing."""
 from __future__ import annotations
 
 import logging
-from collections.abc import Sequence
+import os
+from collections.abc import Callable, Sequence
 from dataclasses import replace
 from pathlib import Path
 
+from app_support import loading_screen
 from PIL import Image
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
@@ -114,6 +116,12 @@ class Loading:
         self._canceled = False
         if window is not None:
             window.canceled.connect(self._cancel)
+
+    @classmethod
+    def at_the_click(cls, app: QApplication, logger: logging.Logger,
+                     open_window: Callable[[], LoadingWindow]) -> Loading:
+        clicked = loading_screen.meeting_place(os.environ) is not None
+        return cls(app, logger, open_window() if clicked else None)
 
     def _cancel(self) -> None:
         self._canceled = True

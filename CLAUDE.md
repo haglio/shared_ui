@@ -45,7 +45,11 @@ is a step on it with the bar moving: an update the launcher waits out, a hosted
 app's boot, a check before the first window. A wait with nothing on screen reads
 as a click that did nothing, and gets clicked again. The near miss that still
 counts: a note or message box of the launcher's own for the wait, which says
-apart from the loading screen what the loading screen is for.
+apart from the loading screen what the loading screen is for. And only a click
+gets one: an app the machine starts by itself -- at sign-in, from another app,
+again to take an update -- shows none, which is why an app opens its own with
+`Loading.at_the_click`, and why a launcher something other than his click runs
+carries no `loading-screen`.
 
 ## Landing — GitHub merge queue, not local ff-merge
 
