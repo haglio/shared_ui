@@ -11,7 +11,7 @@ dynamic = ["version"]
 # The version every gate runs, and the one the family's machine runs: a floor
 # lower than what a run proves is a promise nothing backs.
 requires-python = ">=3.14"
-# Qt is an extra, for the reason already written below about Pillow: `spacing` is
+# Qt is an extra: `spacing` is
 # plain integers and `icons_pil` draws with Pillow alone, and those two modules
 # are the whole of what funestra imports from here -- so an unconditional
 # PyQt6 put a Qt wheel in every Funestra venv and on every runner that installs
@@ -26,6 +26,9 @@ requires-python = ">=3.14"
 # holds every declared sibling to having one.
 dependencies = [
     "app-support @ git+https://github.com/haglio/app_support@v0.1.235",
+    # The loading screen draws its panel with it, in the app's process and in the
+    # loading window's own.
+    "pillow>=12,<13",
 ]
 
 # The version is `git describe` of the checkout being built: a landing's tag
@@ -38,11 +41,8 @@ dependencies = [
 # version of the imaging stack past the one the machines have. Floors are what
 # the machine holds today.
 qt = ["PyQt6>=6,<7"]
-# Pillow is not a runtime dependency: shared_ui.icons_pil is imported only by
-# the Funestras, which already have it, and nothing here imports Qt and Pillow at
-# once. The suite needs it to check the two renderers draw the same marks -- and
-# it needs Qt, which is most of this package.
-dev = ["pytest>=9,<10", "pytest-cov>=7,<8", "pytest-timeout>=2.4,<3", "vulture>=2.16,<3", "pillow>=12,<13",
+# The suite needs Qt, which is most of this package.
+dev = ["pytest>=9,<10", "pytest-cov>=7,<8", "pytest-timeout>=2.4,<3", "vulture>=2.16,<3",
        "ruff==0.16.6", "PyQt6>=6,<7"]
 
 [tool.pytest.ini_options]
