@@ -96,6 +96,27 @@ class TestTheLoading:
 
         assert "Boot: Opening the image library..." in caplog.text
 
+    def test_a_start_from_a_launcher_with_a_loading_screen_opens_its_window(self, qapp, monkeypatch, tmp_path):
+        monkeypatch.setenv(loading_screen.FOLDER, str(tmp_path / "screen"))
+        monkeypatch.setenv(loading_screen.LINES, '["Updating Scripture..."]')
+        window = _window()
+
+        loading = Loading.at_the_click(qapp, logging.getLogger("test.boot"), lambda: window)
+        loading.say("Loading...")
+
+        assert window.panel.status == "Loading..."
+
+    def test_any_other_start_opens_none_and_says_each_step_to_the_log(self, qapp, monkeypatch, caplog):
+        monkeypatch.delenv(loading_screen.FOLDER, raising=False)
+        opened = []
+
+        loading = Loading.at_the_click(qapp, logging.getLogger("test.boot"), lambda: opened.append(_window()))
+        with caplog.at_level(logging.INFO, logger="test.boot"):
+            loading.say("Loading...")
+
+        assert opened == []
+        assert "Boot: Loading..." in caplog.text
+
     def test_a_cancel_stops_the_start_at_its_next_step(self, qapp):
         window = _window(cancel_hint="Press Esc to cancel opening Scripture")
         loading = Loading(qapp, logging.getLogger("test.boot"), window)
