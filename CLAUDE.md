@@ -36,6 +36,17 @@ against the handle although no line of code ever set a margin of zero: apply the
 margin wherever the app makes its panes, in every app that draws panes with this
 package.
 
+## The loading screen answers the click — every wait before an app is up is a step on it
+
+The loading screen exists so that a click on a launcher is answered at once with
+what is happening and how far along it is. So it comes up the moment the
+launcher is clicked, and everything the launch waits on before the app is usable
+is a step on it with the bar moving: an update the launcher waits out, a hosted
+app's boot, a check before the first window. A wait with nothing on screen reads
+as a click that did nothing, and gets clicked again. The near miss that still
+counts: a note or message box of the launcher's own for the wait, which says
+apart from the loading screen what the loading screen is for.
+
 ## Landing — GitHub merge queue, not local ff-merge
 
 This repo is public at `github.com/haglio/shared_ui` with a merge-queue ruleset on
