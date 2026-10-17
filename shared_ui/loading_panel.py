@@ -64,32 +64,43 @@ def icon_image(path: Path | None) -> Image.Image | None:
 
 
 def render(panel: LoadingPanel, metrics: Metrics = DESKTOP) -> Image.Image:
-    wordmark_font = load_font(metrics.wordmark_px, WORDMARK_FACE)
-    status_font = load_font(metrics.status_px, REGULAR_FACE)
-    hint_font = load_font(metrics.hint_px, REGULAR_FACE)
-    rows = (
-        metrics.icon,
-        _line_height(wordmark_font),
-        _line_height(status_font),
-        metrics.bar[1],
-        _line_height(hint_font),
-    )
-    image = Image.new("RGB", (metrics.width, sum(rows) + sum(metrics.gaps) + 2 * metrics.padding), LOADING_GROUND)
+    wordmark_font, status_font, hint_font = _fonts(metrics)
+    icon_top, wordmark_top, status_top, bar_top, hint_top, _height = _tops(metrics)
+    image = Image.new("RGB", size(metrics), LOADING_GROUND)
     draw = ImageDraw.Draw(image)
     center = metrics.width // 2
-    top = metrics.padding
     if panel.icon is not None:
         icon = panel.icon.convert("RGBA").resize((metrics.icon, metrics.icon), Image.LANCZOS)
-        image.paste(icon, (center - metrics.icon // 2, top), icon)
-    top += rows[0] + metrics.gaps[0]
-    _centered(draw, center, top, panel.wordmark, wordmark_font, panel.ink, metrics.bar[0])
-    top += rows[1] + metrics.gaps[1]
-    _centered(draw, center, top, panel.status, status_font, LOADING_STATUS, metrics.bar[0])
-    top += rows[2] + metrics.gaps[2]
-    _bar(draw, metrics, top, panel.fraction)
-    top += rows[3] + metrics.gaps[3]
-    _centered(draw, center, top, panel.hint, hint_font, LOADING_HINT, metrics.bar[0])
+        image.paste(icon, (center - metrics.icon // 2, icon_top), icon)
+    _centered(draw, center, wordmark_top, panel.wordmark, wordmark_font, panel.ink, metrics.bar[0])
+    _centered(draw, center, status_top, panel.status, status_font, LOADING_STATUS, metrics.bar[0])
+    _bar(draw, metrics, bar_top, panel.fraction)
+    _centered(draw, center, hint_top, panel.hint, hint_font, LOADING_HINT, metrics.bar[0])
     return image
+
+
+def bar_box(metrics: Metrics = DESKTOP) -> tuple[int, int, int, int]:
+    return (metrics.padding, _tops(metrics)[3], *metrics.bar)
+
+
+def size(metrics: Metrics = DESKTOP) -> tuple[int, int]:
+    return metrics.width, _tops(metrics)[-1]
+
+
+def _fonts(metrics: Metrics):
+    return (load_font(metrics.wordmark_px, WORDMARK_FACE), load_font(metrics.status_px, REGULAR_FACE),
+            load_font(metrics.hint_px, REGULAR_FACE))
+
+
+def _tops(metrics: Metrics) -> tuple[int, ...]:
+    wordmark_font, status_font, hint_font = _fonts(metrics)
+    rows = (metrics.icon, _line_height(wordmark_font), _line_height(status_font), metrics.bar[1],
+            _line_height(hint_font))
+    tops, top = [], metrics.padding
+    for row, gap in zip(rows, (*metrics.gaps, metrics.padding), strict=True):
+        tops.append(top)
+        top += row + gap
+    return (*tops, top)
 
 
 def _centered(draw: ImageDraw.ImageDraw, center: int, top: int, text: str, font, ink: Rgb,

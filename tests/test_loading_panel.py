@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from PIL import Image
 
-from shared_ui.loading_panel import DESKTOP, LoadingPanel, icon_image, render
+from shared_ui.loading_panel import DESKTOP, LoadingPanel, bar_box, icon_image, render, size
 from shared_ui.palette import (
     LOADING_ACCENT,
     LOADING_GROUND,
@@ -21,6 +21,9 @@ def _panel(**changes) -> LoadingPanel:
 
 
 class TestTheGround:
+    def test_every_panel_is_the_size_a_screen_showing_one_makes_room_for(self):
+        assert render(_panel()).size == render(_panel(hint="Press Esc to cancel", fraction=0.5)).size == size()
+
     def test_the_panel_is_the_bar_wide_plus_its_padding_on_the_loading_ground(self):
         image = render(_panel())
 
@@ -40,6 +43,11 @@ def _box_of(image, color) -> tuple[int, int, int, int]:
 
 
 class TestTheBar:
+    def test_the_track_stands_where_the_panel_says_its_bar_is(self):
+        left, top, right, lower = _box_of(render(_panel(fraction=None)), LOADING_TROUGH)
+
+        assert bar_box() == (left, top, right - left + 1, lower - top + 1)
+
     def test_the_fill_spans_the_fraction_of_the_track(self):
         left, top, right, lower = _box_of(render(_panel(fraction=None)), LOADING_TROUGH)
         assert (right - left + 1, lower - top + 1) == DESKTOP.bar
