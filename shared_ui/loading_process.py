@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import os
 import subprocess
 import sys
 import threading
@@ -18,6 +19,7 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import IO, TYPE_CHECKING
 
+from app_support import loading_screen
 from PyQt6.QtCore import QObject, pyqtSignal
 
 from shared_ui.loading_window import LoadingWindow
@@ -53,9 +55,11 @@ class LoadingProcess(QObject):
             "taskbar": None if taskbar is None else {
                 "name": taskbar.name, "icon": str(taskbar.icon), "relaunch": taskbar.relaunch},
         }
+        handed = loading_screen.handed_over(os.environ)
         return cls(subprocess.Popen(
             [sys.executable, "-m", "shared_ui.loading_process", json.dumps(spec)],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding="utf-8",
+            env={**os.environ, **handed},
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)))
 
     def say(self, step: str) -> None:

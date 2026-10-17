@@ -6,6 +6,7 @@ from __future__ import annotations
 import logging
 
 import pytest
+from app_support import loading_screen
 from PyQt6.QtCore import Qt
 from PyQt6.QtTest import QTest
 
@@ -115,3 +116,36 @@ class TestTheLoading:
 
         assert not window.isVisible()
         assert window.result() == LoadingWindow.DialogCode.Accepted.value
+
+
+class TestTakingOverFromTheLaunchersScreen:
+    @pytest.fixture
+    def place(self, tmp_path, monkeypatch, qapp):
+        monkeypatch.setenv(loading_screen.FOLDER, str(tmp_path / "screen"))
+        monkeypatch.setenv(loading_screen.LINES, '["Updating Scripture..."]')
+        monkeypatch.setattr(loading_window, "bring_to_front", lambda window: None)
+        return loading_screen.meeting_place({loading_screen.FOLDER: str(tmp_path / "screen"),
+                                             loading_screen.LINES: '["Updating Scripture..."]'})
+
+    def test_it_opens_where_the_launchers_screen_stood_with_its_bar_carried_on(self, place):
+        place.stand(loading_screen.Shown(left=10, top=20, fraction=0.4))
+
+        window = _window()
+        opened_at = (window.pos().x(), window.pos().y(), window.panel.fraction)
+        window.say("Loading...")
+
+        assert opened_at == (10, 20, 0.4)
+        assert window.panel.fraction == pytest.approx(0.4 + 0.6 / 3)
+
+    def test_once_up_it_tells_the_launchers_screen_to_go_and_leaves_its_pictures(self, place):
+        place.stand(loading_screen.Shown(left=10, top=20, fraction=0.4))
+        window = _window()
+
+        window.show()
+        QTest.qWait(50)
+        window.close()
+
+        assert place.taken
+        pictures = place.pictures()
+        assert not pictures.covers_every_monitor
+        assert pictures.updating("Updating Scripture...") is not None

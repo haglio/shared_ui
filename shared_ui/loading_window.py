@@ -9,11 +9,12 @@ from dataclasses import replace
 from pathlib import Path
 
 from PIL import Image
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout
 
 from shared_ui.foreground import bring_to_front
+from shared_ui.loading_handover import TakingOver
 from shared_ui.loading_panel import LoadingPanel, icon_image, render
 from shared_ui.palette import LOADING_ACCENT, PREVIEW_INK
 from shared_ui.preview import Preview
@@ -40,7 +41,8 @@ class LoadingWindow(QDialog):
         self.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.FramelessWindowHint)
         self._done_before = _work_done_before_each(steps)
         self._canceling = False
-        self._panel = LoadingPanel(
+        self._taking_over = TakingOver.from_the_launcher()
+        self._opening = LoadingPanel(
             wordmark=wordmark,
             status=next(iter(self._done_before)),
             fraction=0.0,
@@ -48,11 +50,14 @@ class LoadingWindow(QDialog):
             ink=LOADING_ACCENT if preview is None else PREVIEW_INK,
             icon=_inked(icon_image(icon), preview),
         )
+        self._panel = replace(self._opening, fraction=self._taking_over.carried(0.0))
         self._picture = QLabel(self)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._picture)
         self._show_the_panel()
+        if (at := self._taking_over.panel_at) is not None:
+            self.move(*at)
 
     @property
     def panel(self) -> LoadingPanel:
@@ -62,15 +67,20 @@ class LoadingWindow(QDialog):
         super().setVisible(visible)
         if visible:
             bring_to_front(self)
+            QTimer.singleShot(0, self._up)
 
     def say(self, step: str) -> None:
         if self._canceling:
             return
+        done_before = self._done_before.get(step)
         self._panel = replace(
             self._panel, status=step,
-            fraction=self._done_before.get(step, self._panel.fraction),
+            fraction=self._panel.fraction if done_before is None else self._taking_over.carried(done_before),
         )
         self._show_the_panel()
+
+    def _up(self) -> None:
+        self._taking_over.done(self._opening, covers_every_monitor=False)
 
     def reject(self) -> None:
         self._canceling = True
