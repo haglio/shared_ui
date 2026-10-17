@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import io
+import os
 import subprocess
 import sys
 import time
 from unittest.mock import patch
+
+from app_support import loading_screen
 
 from shared_ui.loading_process import LoadingProcess, run, serve
 from shared_ui.loading_window import LoadingWindow
@@ -100,6 +103,17 @@ class TestTheStartsSide:
 
 
 class TestTheWholeWay:
+    def test_the_launchers_word_goes_to_the_loading_window_alone(self, qapp, monkeypatch, tmp_path):
+        monkeypatch.setenv(loading_screen.FOLDER, str(tmp_path / "screen"))
+        monkeypatch.setenv(loading_screen.LINES, "[]")
+
+        with patch("shared_ui.loading_process.subprocess.Popen") as started:
+            LoadingProcess.open(caption="Scripture Loading", wordmark="Scripture", icon=None, preview=None,
+                                steps=("Loading...",))
+
+        assert started.call_args.kwargs["env"][loading_screen.FOLDER] == str(tmp_path / "screen")
+        assert loading_screen.FOLDER not in os.environ
+
     def test_a_window_process_shows_itself_and_goes_when_the_start_is_done(self, qapp):
         window = LoadingProcess.open(
             caption="Scripture Loading", wordmark="Scripture", icon=None, preview=None,
