@@ -117,12 +117,13 @@ def _tell(lines_out: IO[str], line: str) -> None:
 
 
 def main(argv: Sequence[str] | None = None) -> int:  # pragma: no cover -- the window's own process, which coverage does not follow
-    from PyQt6.QtWidgets import QApplication  # noqa: PLC0415
+    from shared_ui.application import application  # noqa: PLC0415
 
     sys.stdin.reconfigure(encoding="utf-8")
     sys.stdout.reconfigure(encoding="utf-8")
-    app = QApplication(sys.argv[:1])
-    return run(json.loads((sys.argv[1:] if argv is None else argv)[0]), sys.stdin, sys.stdout, app)
+    with application(sys.argv[:1]) as app:
+        return run(json.loads((sys.argv[1:] if argv is None else argv)[0]), sys.stdin, sys.stdout,
+                   app)
 
 
 def run(spec: dict, lines_in: IO[str], lines_out: IO[str], app) -> int:
