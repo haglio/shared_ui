@@ -25,7 +25,7 @@ requires-python = ">=3.14"
 # own commit, with its own suite to answer for it. tests/test_sibling_pins.py
 # holds every declared sibling to having one.
 dependencies = [
-    "app-support @ git+https://github.com/haglio/app_support@v0.1.242",
+    "app-support @ git+https://github.com/haglio/app_support@v0.1.246",
     # The loading screen draws its panel with it, in the app's process and in the
     # loading window's own.
     "pillow>=12,<13",
