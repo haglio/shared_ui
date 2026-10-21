@@ -14,13 +14,15 @@ import logging
 import math
 import uuid
 
+import pytest
 from PyQt6.QtCore import QRectF, QSize, Qt
 from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import GLYPHS, RENAMED_MARKS, STAND_IN, Polygon, glyph_names
-from shared_ui.spacing import BUTTON_ICON
+from shared_ui.orientation import LANDSCAPE, PORTRAIT
+from shared_ui.spacing import BUTTON_ICON, BUTTON_MARK
 
 _A_MARK_THIS_VERSION_LACKS = "a_mark_from_another_version"
 _EVERY_MARK_AND_THE_STAND_IN = (*glyph_names(), _A_MARK_THIS_VERSION_LACKS)
@@ -301,8 +303,9 @@ _THE_MARKS = (
     "clock", "clock_full", "clock_short", "compilation", "control_off",
     "copy", "cross", "database", "enhance_filter", "expand_horizontal", "flask",
     "flat_2d", "flip_ends", "fmode", "folder", "full", "full_length", "funscript_jump", "headset",
-    "human", "latest", "log", "loop", "mic", "minus", "monitor", "park", "pause", "photo", "play",
-    "plus", "plus_outline", "power", "quarter_offset", "question",
+    "human", "landscape", "latest", "log", "loop", "mic", "minus", "monitor", "park", "pause",
+    "photo", "play", "plus", "plus_outline", "portrait", "portrait_and_landscape",
+    "portrait_beside_landscape", "power", "quarter_offset", "question",
     "redo_arrow", "release", "reset", "restart", "retract", "scene_to_clip",
     "shorts", "shuffle", "slideshow", "speaker", "star", "star_outline", "trash",
     "undo_arrow", "versions", "vr_hemisphere", "wave", "wave_sawtooth", "wave_square",
@@ -405,6 +408,45 @@ def test_database_is_three_short_cylinders_stacked_under_one_lid():
     assert len(rims) == 3
     assert max(heights) - min(heights) <= 1
     assert max(heights) < (right - left) / 2
+
+
+def _ink_size(name: str) -> tuple[int, int]:
+    left, upper, right, lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+    return right - left, lower - upper
+
+
+def test_portrait_and_landscape_are_one_frame_and_its_quarter_turn():
+    tall, wide = _ink_size(PORTRAIT), _ink_size(LANDSCAPE)
+
+    assert tall[1] > tall[0]
+    assert tall == wide[::-1]
+
+
+def test_an_orientation_is_drawn_as_a_frame_rather_than_a_filled_block():
+    for name in (PORTRAIT, LANDSCAPE, "portrait_and_landscape"):
+        image = icons.glyph_pixmap(name, 48, TEXT_PRIMARY).toImage()
+        assert image.pixelColor(24, 24).alpha() == 0, name
+
+
+def test_portrait_and_landscape_is_the_two_frames_crossed():
+    assert GLYPHS["portrait_and_landscape"] == (*GLYPHS[PORTRAIT], *GLYPHS[LANDSCAPE])
+
+
+def test_portrait_beside_landscape_is_the_same_two_frames_side_by_side():
+    upright, lying_down = GLYPHS["portrait_beside_landscape"]
+    (portrait,) = GLYPHS[PORTRAIT]
+
+    assert upright.h / upright.w == pytest.approx(portrait.h / portrait.w)
+    assert (lying_down.w, lying_down.h) == (upright.h, upright.w)
+    assert upright.x + upright.w < lying_down.x
+
+
+def test_portrait_beside_landscape_fits_the_square_of_a_button():
+    left, upper, right, lower = _ink_rect(
+        icons.glyph_pixmap("portrait_beside_landscape", BUTTON_MARK, TEXT_PRIMARY))
+
+    assert min(left, upper) > 0
+    assert max(right, lower) < BUTTON_MARK - 1
 
 
 def test_a_renamed_mark_still_draws_under_its_old_name_for_branches_not_yet_rebased():
