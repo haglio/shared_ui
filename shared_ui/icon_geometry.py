@@ -23,6 +23,8 @@ import logging
 import math
 from dataclasses import dataclass
 
+from shared_ui.orientation import LANDSCAPE, PORTRAIT
+
 # Every glyph is drawn to fill this frame, inset a little from its edge so a round
 # cap or a fat arrowhead still has room.  A mark that uses only the middle third
 # of its canvas is a mark the eye can't find once the frame is scaled onto a tree
@@ -673,6 +675,32 @@ def _expand_horizontal() -> tuple:
     )
 
 
+_FRAME_SHORT = 28.0
+_FRAME_LONG = 42.0
+_FRAME_RADIUS = 5.0
+_FRAMES_GAP = 4.0
+
+
+def _frame(left: float, width: float, height: float) -> RoundedRect:
+    return RoundedRect(left, (CANVAS - height) / 2, width, height, _FRAME_RADIUS)
+
+
+def _centered_frame(width: float, height: float) -> RoundedRect:
+    return _frame((CANVAS - width) / 2, width, height)
+
+
+_UPRIGHT_FRAME = _centered_frame(_FRAME_SHORT, _FRAME_LONG)
+_LYING_DOWN_FRAME = _centered_frame(_FRAME_LONG, _FRAME_SHORT)
+
+
+def _upright_beside_lying_down() -> tuple:
+    short_and_long_together = CANVAS - 2 * PEN_WIDTH - _FRAMES_GAP
+    short = short_and_long_together / (1 + _FRAME_LONG / _FRAME_SHORT)
+    long = short * _FRAME_LONG / _FRAME_SHORT
+    left = (CANVAS - (short + _FRAMES_GAP + long)) / 2
+    return (_frame(left, short, long), _frame(left + short + _FRAMES_GAP, long, short))
+
+
 GLYPHS: dict[str, tuple] = {
     "bolt": (
         Polygon(((34, 6), (28.5, 22.5), (36, 22.5), (14.5, 42), (20, 27.5), (12, 27.5))),
@@ -717,6 +745,7 @@ GLYPHS: dict[str, tuple] = {
         Polyline(((13, 26), (24, 20), (35, 26))),
         Polyline(((15, 42), (24, 30), (33, 42))),
     ),
+    LANDSCAPE: (_LYING_DOWN_FRAME,),
     "latest": _calendar(),
     "funscript_jump": _funscript_jump(),
     "log": (
@@ -758,6 +787,9 @@ GLYPHS: dict[str, tuple] = {
         Line(24 - _PLUS_REACH, 24, 24 + _PLUS_REACH, 24, _PLUS_BAR),
     ),
     "plus_outline": _plus_outline(),
+    PORTRAIT: (_UPRIGHT_FRAME,),
+    "portrait_and_landscape": (_UPRIGHT_FRAME, _LYING_DOWN_FRAME),
+    "portrait_beside_landscape": _upright_beside_lying_down(),
     "question": _question(),
     "redo_arrow": _history_arrow(forward=True),
     "release": _release(),
