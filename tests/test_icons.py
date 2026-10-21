@@ -307,7 +307,7 @@ _THE_MARKS = (
     "photo", "play", "plus", "plus_outline", "portrait", "portrait_and_landscape",
     "portrait_beside_landscape", "power", "question",
     "redo_arrow", "release", "reset", "restart", "retract", "scene_to_clip",
-    "shorts", "shuffle", "slideshow", "speaker", "star", "star_outline", "trash",
+    "shield", "shorts", "shuffle", "slideshow", "speaker", "star", "star_outline", "trash",
     "undo_arrow", "versions", "vr_hemisphere", "wave", "wave_sawtooth", "wave_square",
     "wave_triangle",
 )
