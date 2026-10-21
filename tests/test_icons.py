@@ -305,7 +305,7 @@ _THE_MARKS = (
     "flat_2d", "flip_ends", "fmode", "folder", "full", "full_length", "funscript_jump", "headset",
     "human", "landscape", "latest", "log", "loop", "mic", "minus", "monitor", "park", "pause",
     "photo", "play", "plus", "plus_outline", "portrait", "portrait_and_landscape",
-    "portrait_beside_landscape", "power", "quarter_offset", "question",
+    "portrait_beside_landscape", "power", "question",
     "redo_arrow", "release", "reset", "restart", "retract", "scene_to_clip",
     "shorts", "shuffle", "slideshow", "speaker", "star", "star_outline", "trash",
     "undo_arrow", "versions", "vr_hemisphere", "wave", "wave_sawtooth", "wave_square",
