@@ -609,23 +609,6 @@ def _control_off() -> tuple:
     return (_COLUMN, *_sleeve(17.5), *_hold_cross(8), *_hold_cross(40))
 
 
-def _quarter_offset() -> tuple:
-    """A stacked one-quarter with an arrow beside it -- nudge the motion's phase.
-
-    Stacked rather than the typed fraction so the mark is as tall as the ones
-    beside it and leaves room for the arrow, which is what says which way the
-    nudge goes: the phase only ever runs forward.
-    """
-    return (
-        Polyline(((8, 8), (13, 4), (13, 20)), 4.5),    # the one
-        Line(7, 19, 19, 19, 4.5),                      # standing on its foot
-        Line(4, 24, 22, 24, 4.5),                      # the vinculum
-        Polyline(((16, 28), (6, 39), (21, 39)), 4.5),  # the four
-        Line(16, 31, 16, 44, 4.5),
-        Polygon(((44, 24), (31, 15), (31, 33))),       # and which way it turns
-    )
-
-
 # The letter grid every app in this family is marked on: five cells square, each
 # painted cell a solid block, adjacent ones merging into a bar.  The .ico files
 # are drawn on it (:mod:`shared_ui.app_icon`) and the Funestras stamp F-mode's
@@ -778,7 +761,6 @@ GLYPHS: dict[str, tuple] = {
         RoundedRect(26.5, 7, 8.5, 34, 3.5, fill=True),
     ),
     "power": _power(),
-    "quarter_offset": _quarter_offset(),
     # A pair: one bar and two, at one weight, so a speed-down and a speed-up
     # beside each other read as the same control twice rather than as two.
     "minus": (Line(24 - _PLUS_REACH, 24, 24 + _PLUS_REACH, 24, _PLUS_BAR),),
