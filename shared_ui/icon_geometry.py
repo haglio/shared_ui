@@ -161,6 +161,21 @@ def _star(filled: bool) -> tuple:
     return (Polygon(tuple(points), fill=filled, width=3),)
 
 
+def _shield() -> tuple:
+    """A heater shield, outlined: flat across the top, straight down the sides,
+    then curving in to a point at the foot."""
+    left, right, top, shoulder, bow, foot = 10.0, 38.0, 6.0, 20.0, 33.0, 43.0
+
+    def down_to_the_point(side: float) -> list[tuple[float, float]]:
+        return [(side + (24 - side) * t * t,
+                 (1 - t) ** 2 * shoulder + 2 * (1 - t) * t * bow + t * t * foot)
+                for t in (step / 8 for step in range(9))]
+
+    up_from_the_point = down_to_the_point(left)[::-1][1:]
+    return (Polygon(((left, top), (right, top), *down_to_the_point(right),
+                     *up_from_the_point), fill=False),)
+
+
 # The two bars ``plus`` is drawn as, in one place: the outline below traces the
 # very silhouette they fill, and ``minus`` is the horizontal one of them, so all
 # three move together rather than being three hand-measured crosses.
@@ -779,6 +794,7 @@ GLYPHS: dict[str, tuple] = {
     "restart": _restart(),
     "retract": _retract(),
     "scene_to_clip": _clip_scene_jump(to_scene=False),
+    "shield": _shield(),
     "clips": _clip_on_the_timeline(_CLIPS_END),
     "shuffle": _shuffle(),
     "slideshow": (                                        # a play triangle in a screen
