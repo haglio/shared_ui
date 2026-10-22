@@ -20,7 +20,7 @@ from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
-from shared_ui.icon_geometry import GLYPHS, RENAMED_MARKS, STAND_IN, Polygon, glyph_names
+from shared_ui.icon_geometry import GLYPHS, RENAMED_MARKS, STAND_IN, Path, Polygon, glyph_names
 from shared_ui.orientation import LANDSCAPE, PORTRAIT
 from shared_ui.spacing import BUTTON_ICON, BUTTON_MARK
 
@@ -109,6 +109,9 @@ def test_the_glyphs_are_all_different_marks():
 # try: a minus stretched to be tall is a rectangle, not a minus. Named here one by
 # one, so widening the exemption takes a decision rather than a shrug.
 _ONE_BAR = {"minus"}
+# A mark laid into the corner of another one, which the other mark leaves free
+# for it: spread over the canvas, it would cover what it is laid on.
+_IN_A_CORNER = {"regenerate_corner"}
 
 
 def test_every_glyph_fills_its_canvas():
@@ -116,7 +119,7 @@ def test_every_glyph_fills_its_canvas():
     # the frame is scaled onto a 16px tree row -- the empty margin shrinks with it.
     # The long side has to carry most of the canvas; the short side is allowed to
     # be narrow, because some marks (a chevron) genuinely are.
-    for name in set(_EVERY_MARK_AND_THE_STAND_IN) - _ONE_BAR:
+    for name in set(_EVERY_MARK_AND_THE_STAND_IN) - _ONE_BAR - _IN_A_CORNER:
         left, upper, right, lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
         width, height = right - left, lower - upper
         assert max(width, height) >= 0.6 * 48, f"{name} is small in its frame"
@@ -162,7 +165,7 @@ def test_the_hollow_plus_traces_the_solid_one():
 def test_every_glyph_sits_in_the_middle_of_its_canvas():
     # Marks are laid beside each other in a button bank, so one drawn off-center
     # reads as misaligned with its neighbors rather than as its own shape.
-    for name in _EVERY_MARK_AND_THE_STAND_IN:
+    for name in set(_EVERY_MARK_AND_THE_STAND_IN) - _IN_A_CORNER:
         left, upper, right, lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
         assert abs((left + right) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
         assert abs((upper + lower) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
@@ -301,14 +304,14 @@ def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath():
 _THE_MARKS = (
     "bolt", "check", "chevron_left", "chevron_right", "clip_to_scene", "clips",
     "clock", "clock_full", "clock_short", "compilation", "control_off",
-    "copy", "cross", "database", "enhance_filter", "expand_horizontal", "flask",
+    "copy", "cross", "database", "disc", "enhance_filter", "expand_horizontal", "flask",
     "flat_2d", "flip_ends", "fmode", "folder", "full", "full_length", "funscript_jump", "headset",
     "human", "landscape", "latest", "log", "loop", "mic", "minus", "monitor", "park", "pause",
     "photo", "play", "plus", "plus_outline", "portrait", "portrait_and_landscape",
     "portrait_beside_landscape", "power", "question",
-    "redo_arrow", "release", "reset", "restart", "retract", "scene_to_clip",
-    "shield", "shorts", "shuffle", "slideshow", "speaker", "star", "star_outline", "trash",
-    "undo_arrow", "versions", "vr_hemisphere", "wave", "wave_sawtooth", "wave_square",
+    "redo_arrow", "regenerate_corner", "release", "reset", "restart", "retract", "scene_to_clip",
+    "shield", "shorts", "shuffle", "slideshow", "speaker", "star", "star_outline", "star_ring",
+    "thumbs_up", "trash", "undo_arrow", "versions", "vr_hemisphere", "wave", "wave_sawtooth", "wave_square",
     "wave_triangle",
 )
 
@@ -653,3 +656,18 @@ def test_a_bar_ends_in_a_round_cap_that_reaches_past_its_endpoint():
     left, _upper, right, _lower = _ink_rect(icons.glyph_pixmap("minus", 48, TEXT_PRIMARY))
     assert left <= bar.x1 - bar.width / 2 + 1
     assert right >= bar.x2 + bar.width / 2 - 1
+
+
+def test_a_path_written_in_a_frame_of_its_own_fills_the_canvas_that_frame_stands_for(monkeypatch):
+    square = Path((("M", 0, 0), ("L", 24, 0), ("L", 24, 24), ("L", 0, 24), ("Z",)), frame=24.0)
+    monkeypatch.setitem(GLYPHS, "_a_square_in_a_frame_of_24", (square,))
+
+    drawn = icons.glyph_pixmap("_a_square_in_a_frame_of_24", 48, TEXT_PRIMARY)
+
+    assert _ink_rect(drawn) == (0, 0, 47, 47)
+
+
+def test_a_corner_mark_keeps_to_the_corner_its_mark_leaves_free():
+    for name in _IN_A_CORNER:
+        left, upper, _right, _lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+        assert left >= 24 and upper >= 24, f"{name} reaches out of the lower right"

@@ -26,7 +26,7 @@ business and it stays there.
 from __future__ import annotations
 
 from PyQt6.QtCore import QPointF, QRectF, Qt
-from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
+from PyQt6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap
 
 from shared_ui.colors import TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import (
@@ -36,6 +36,7 @@ from shared_ui.icon_geometry import (
     Arc,
     Ellipse,
     Line,
+    Path,
     Polygon,
     Polyline,
     RoundedRect,
@@ -157,5 +158,28 @@ def _draw(painter: QPainter, shape, ink: QColor) -> None:
         # o'clock -- which is the convention the geometry is written in.
         painter.drawArc(QRectF(shape.x, shape.y, shape.w, shape.h),
                         round(shape.start * 16), round(shape.span * 16))
+    elif isinstance(shape, Path):
+        painter.save()
+        painter.scale(CANVAS / shape.frame, CANVAS / shape.frame)
+        _solid(painter, ink)
+        painter.drawPath(_painter_path(shape))
+        painter.restore()
     else:  # pragma: no cover -- a shape added to the geometry and not to a renderer
         raise TypeError(f"no Qt rendering for {type(shape).__name__}")
+
+
+def _painter_path(shape: Path) -> QPainterPath:
+    path = QPainterPath()
+    for command, *numbers in shape.commands:
+        if command == "M":
+            path.moveTo(*numbers)
+        elif command == "L":
+            path.lineTo(*numbers)
+        elif command == "Q":
+            path.quadTo(*numbers)
+        elif command == "Z":
+            path.closeSubpath()
+        elif command == "R":
+            x, y, w, h, radius = numbers
+            path.addRoundedRect(QRectF(x, y, w, h), radius, radius)
+    return path

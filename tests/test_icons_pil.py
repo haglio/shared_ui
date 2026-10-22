@@ -20,6 +20,7 @@ from PIL import Image, ImageDraw
 
 from shared_ui import icons, icons_pil
 from shared_ui.icon_geometry import GLYPHS, STAND_IN, Arc, glyph_names
+from shared_ui.icon_geometry import Path as Outline
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 from shared_ui.colors import GREEN, RED, TEXT_PRIMARY
@@ -218,3 +219,12 @@ def test_a_mark_is_never_brighter_than_the_ink_it_was_drawn_in():
             for x in range(24):
                 red, green, blue, _alpha = image.getpixel((x, y))
                 assert (red, green, blue) == _INK, f"{name} at {x},{y}"
+
+
+def test_a_path_written_in_a_frame_of_its_own_fills_the_canvas_that_frame_stands_for(monkeypatch):
+    square = Outline((("M", 0, 0), ("L", 24, 0), ("L", 24, 24), ("L", 0, 24), ("Z",)), frame=24.0)
+    monkeypatch.setitem(GLYPHS, "_a_square_in_a_frame_of_24", (square,))
+
+    drawn = icons_pil.glyph_image("_a_square_in_a_frame_of_24", _SIZE, _INK)
+
+    assert _pil_ink(drawn)[:4] == (0, 0, _SIZE - 1, _SIZE - 1)

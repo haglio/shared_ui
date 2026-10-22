@@ -27,6 +27,7 @@ from shared_ui.icon_geometry import (
     Arc,
     Ellipse,
     Line,
+    Path,
     Polygon,
     Polyline,
     RoundedRect,
@@ -130,8 +131,33 @@ def _draw(draw: ImageDraw.ImageDraw, shape, ink, scale: float) -> None:
                          width=max(1, round(shape.width * scale)))
     elif isinstance(shape, Arc):
         _arc(draw, shape, ink, scale)
+    elif isinstance(shape, Path):
+        _path(draw, shape, ink, scale * CANVAS / shape.frame)
     else:  # pragma: no cover -- a shape added to the geometry and not to a renderer
         raise TypeError(f"no Pillow rendering for {type(shape).__name__}")
+
+
+_CURVE_STEPS = 8
+
+
+def _path(draw: ImageDraw.ImageDraw, shape: Path, ink, scale: float) -> None:
+    """Each run of *shape* as a filled polygon, its curves cut into short lines."""
+    runs: list[list[tuple[float, float]]] = []
+    for command, *numbers in shape.commands:
+        if command == "M":
+            runs.append([tuple(numbers)])
+        elif command == "L":
+            runs[-1].append(tuple(numbers))
+        elif command == "Q":
+            (x0, y0), (cx, cy, x1, y1) = runs[-1][-1], numbers
+            runs[-1].extend(((1 - t) ** 2 * x0 + 2 * (1 - t) * t * cx + t * t * x1,
+                             (1 - t) ** 2 * y0 + 2 * (1 - t) * t * cy + t * t * y1)
+                            for t in (step / _CURVE_STEPS for step in range(1, _CURVE_STEPS + 1)))
+        elif command == "R":
+            x, y, w, h, radius = numbers
+            draw.rounded_rectangle(_frame(x, y, x + w, y + h, scale), radius=radius * scale, fill=ink)
+    for run in runs:
+        draw.polygon([(px * scale, py * scale) for px, py in run], fill=ink)
 
 
 def _arc(draw: ImageDraw.ImageDraw, shape: Arc, ink, scale: float) -> None:
