@@ -20,28 +20,28 @@ def _git(checkout: Path, *args: str) -> None:
 def app(tmp_path):
     """A checkout holding one package, every file handed to it tracked."""
     checkout = tmp_path / "an_app"
-    (checkout / "parlour").mkdir(parents=True)
+    (checkout / "parlor").mkdir(parents=True)
     _git(checkout, "init", "-q")
 
     def track(files: dict[str, str]) -> Path:
         for name, text in files.items():
-            path = checkout / "parlour" / name
+            path = checkout / "parlor" / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text, encoding="utf-8")
-        _git(checkout, "add", "--", *(f"parlour/{name}" for name in files))
+        _git(checkout, "add", "--", *(f"parlor/{name}" for name in files))
         return checkout
 
     return track
 
 
 def _found(checkout: Path) -> list[str]:
-    return looks_of_its_own(checkout, [checkout / "parlour"])
+    return looks_of_its_own(checkout, [checkout / "parlor"])
 
 
 def test_a_color_in_a_style_sheet_is_named_with_its_place(app):
     checkout = app({"tiles.py": 'SHEET = "QLabel { color: #7a7a7a; }"\n'})
 
-    assert _found(checkout) == ["parlour/tiles.py:1: color #7a7a7a"]
+    assert _found(checkout) == ["parlor/tiles.py:1: color #7a7a7a"]
 
 
 @pytest.mark.parametrize("line", [
@@ -69,7 +69,7 @@ def test_a_color_spelled_any_other_way_is_named_too(app, line):
     found = _found(checkout)
 
     assert found, line
-    assert all(finding.startswith("parlour/tiles.py:1: color ") for finding in found), found
+    assert all(finding.startswith("parlor/tiles.py:1: color ") for finding in found), found
 
 
 @pytest.mark.parametrize("line", [
@@ -101,7 +101,7 @@ def test_a_color_taken_from_shared_ui_or_no_color_at_all_passes(app, line):
 def test_one_color_is_named_once(app, line, named):
     checkout = app({"tiles.py": f"{line}\n"})
 
-    assert _found(checkout) == [f"parlour/tiles.py:1: {named}"]
+    assert _found(checkout) == [f"parlor/tiles.py:1: {named}"]
 
 
 def test_a_typed_glyph_is_named_and_typography_is_not(app):
@@ -112,8 +112,8 @@ def test_a_typed_glyph_is_named_and_typography_is_not(app):
     )})
 
     assert _found(checkout) == [
-        "parlour/tiles.py:1: glyph \U0001F451 (U+1F451 CROWN)",
-        "parlour/tiles.py:2: glyph − (U+2212 MINUS SIGN)",
+        "parlor/tiles.py:1: glyph \U0001F451 (U+1F451 CROWN)",
+        "parlor/tiles.py:2: glyph − (U+2212 MINUS SIGN)",
     ]
 
 
@@ -137,24 +137,24 @@ def test_an_icon_from_outside_shared_ui_is_named(app):
     )})
 
     assert _found(checkout) == [
-        "parlour/tiles.py:1: icon qtawesome",
-        "parlour/tiles.py:2: icon QApplication.style().standardIcon",
-        "parlour/tiles.py:2: icon QStyle.StandardPixmap.SP_MessageBoxWarning",
-        "parlour/tiles.py:3: icon QStyle.PrimitiveElement.PE_IndicatorTabClose",
-        "parlour/tiles.py:4: icon QIcon.fromTheme",
-        "parlour/tiles.py:5: icon qtawesome",
+        "parlor/tiles.py:1: icon qtawesome",
+        "parlor/tiles.py:2: icon QApplication.style().standardIcon",
+        "parlor/tiles.py:2: icon QStyle.StandardPixmap.SP_MessageBoxWarning",
+        "parlor/tiles.py:3: icon QStyle.PrimitiveElement.PE_IndicatorTabClose",
+        "parlor/tiles.py:4: icon QIcon.fromTheme",
+        "parlor/tiles.py:5: icon qtawesome",
     ]
 
 
 def test_a_page_the_app_serves_is_read_for_its_colors_too(app):
     checkout = app({"static/page.html": "<style>\n  body { background: #1e1e2e; }\n</style>\n"})
 
-    assert _found(checkout) == ["parlour/static/page.html:2: color #1e1e2e"]
+    assert _found(checkout) == ["parlor/static/page.html:2: color #1e1e2e"]
 
 
 def test_only_what_the_checkout_tracks_is_read(app):
     checkout = app({"tiles.py": "WIDTH = 4\n"})
-    (checkout / "parlour" / "private.js").write_text("note.style.color = '#00ff00';\n", encoding="utf-8")
+    (checkout / "parlor" / "private.js").write_text("note.style.color = '#00ff00';\n", encoding="utf-8")
 
     assert _found(checkout) == []
 
@@ -170,15 +170,15 @@ def test_the_failure_says_where_each_one_is_and_where_it_belongs(app):
     checkout = app({"tiles.py": "_TRACK = (56, 56, 62)\nPENCIL = '✎'\n"})
 
     with pytest.raises(AssertionError) as failure:
-        assert_the_look_is_shared_uis(checkout, [checkout / "parlour"])
+        assert_the_look_is_shared_uis(checkout, [checkout / "parlor"])
 
-    assert "parlour/tiles.py:1: color _TRACK = (56, 56, 62)" in str(failure.value)
-    assert "parlour/tiles.py:2: glyph ✎ (U+270E LOWER RIGHT PENCIL)" in str(failure.value)
+    assert "parlor/tiles.py:1: color _TRACK = (56, 56, 62)" in str(failure.value)
+    assert "parlor/tiles.py:2: glyph ✎ (U+270E LOWER RIGHT PENCIL)" in str(failure.value)
     assert "shared_ui" in str(failure.value)
 
 
 def test_an_allowance_takes_out_what_it_names_wherever_the_line_moves(app):
     checkout = app({"aim.py": "\n\ncanvas = Image.new('RGB', size, (114, 114, 114))\n"})
 
-    assert_the_look_is_shared_uis(checkout, [checkout / "parlour"],
-                                  allowing=("parlour/aim.py: color (114, 114, 114)",))
+    assert_the_look_is_shared_uis(checkout, [checkout / "parlor"],
+                                  allowing=("parlor/aim.py: color (114, 114, 114)",))
