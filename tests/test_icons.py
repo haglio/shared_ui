@@ -306,7 +306,7 @@ _THE_MARKS = (
     "bolt", "cells_in_circle", "chart", "check", "chevron_down", "chevron_left",
     "chevron_right", "chevron_up", "chevrons_left", "chevrons_right", "circle",
     "clip_to_scene", "clips", "clock", "clock_full", "clock_short", "compilation",
-    "control_off", "copy", "cross", "crown", "database", "disc", "enhance_filter", "error",
+    "control_off", "copy", "cross", "crown", "database", "disc", "enhance_filter", "enlarge", "error",
     "expand_horizontal", "export", "external_link", "filter", "flask", "flat_2d", "flip_ends",
     "fmode", "folder", "full", "full_length", "funscript_jump", "grid", "headset", "human",
     "info", "jigsaw", "landscape", "latest", "lock", "log", "loop", "mic", "minus", "monitor",
@@ -695,6 +695,14 @@ def test_a_line_of_text_can_lead_with_a_mark_drawn_in_its_ink():
     marked = reds(_rendered_label(icons.marked_text("mic", "heard it", color=RED, size=16)))
 
     assert marked and max(marked) < 20, "the mark leads the line"
+
+
+@pytest.mark.usefixtures("qapp")
+def test_a_mark_set_among_the_words_is_the_lines_own_mark_alone():
+    mark = icons.inline_mark("check", color=RED, size=16)
+
+    assert mark.startswith("<img") and icons.marked_text("check", "x", color=RED, size=16) == (
+        mark + "&nbsp;x")
 
 
 @pytest.mark.usefixtures("qapp")
