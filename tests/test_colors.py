@@ -94,6 +94,19 @@ def test_the_palette_holds_as_few_grays_as_it_can():
     assert len(values) <= 11, sorted(values)
 
 
+def test_the_palette_holds_as_few_hues_as_it_can():
+    """The point of this package: the apps choose their colors from a short list,
+    so they look like one family.  An app's own shade is what it exists to take
+    away, never a reason to grow the list; a hue joins it only as a step every
+    app may use, by changing this count on purpose."""
+    hues = {color.name() for name, color in _all_qcolors(colors)
+            if name.isupper() and color.saturation() > 40}
+
+    # The one blue and its lighter step, green, red, amber, magenta, and the
+    # loading screen's four.
+    assert len(hues) <= 10, sorted(hues)
+
+
 def test_no_two_grays_sit_within_a_hair_of_each_other():
     """Which is the rule underlying the count: two shades nobody can tell apart are
     one shade with two names, and they drift into different apps."""

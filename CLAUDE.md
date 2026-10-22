@@ -1,4 +1,17 @@
 
+## This package is the family's small set, never a store of each app's look
+
+Every color, mark, glyph, font, size and spacing an app draws with comes from
+what is here, chosen from a deliberately short list so the apps read as one
+family. An app that needs something this package lacks takes the nearest thing
+it has; bringing an app's look here replaces the app's own values with these,
+and never copies them in to keep them as they were, under names of their own or
+any other way. A new value is added only as a step every app may use, and the
+palette's tests cap how many grays and hues it holds, so a new one is a
+deliberate change to the cap rather than a slip. Each app's suite runs
+`shared_ui.look_guard` over its own source, so a color or a typed symbol it
+spells itself turns that suite red.
+
 ## Test fixtures must be fabricated, never copied from the real library
 
 Every fixture value that stands in for library data — a video title, a filename,
