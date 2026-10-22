@@ -54,6 +54,7 @@ RED = QColor(*palette.RED)
 AMBER = QColor(*palette.AMBER)
 MAGENTA = QColor(*palette.MAGENTA)
 WHITE = QColor(*palette.WHITE)
+BLACK = QColor(*palette.BLACK)
 
 # ---------------------------------------------------------------------------
 # The loading screen every app shows while it starts

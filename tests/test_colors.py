@@ -90,8 +90,8 @@ def test_the_palette_holds_as_few_grays_as_it_can():
 
     # The ladder: three backgrounds under a button, the button and its on-state,
     # the keycap between them, the muted gray, the standard outline, the two
-    # text tiers, and white.
-    assert len(values) <= 11, sorted(values)
+    # text tiers, white, and the black a video plays on.
+    assert len(values) <= 12, sorted(values)
 
 
 def test_the_palette_holds_as_few_hues_as_it_can():
