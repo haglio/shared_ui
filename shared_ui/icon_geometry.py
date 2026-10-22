@@ -115,6 +115,21 @@ class Arc:
     width: float = PEN_WIDTH
 
 
+@dataclass(frozen=True)
+class Path:
+    """A filled outline of straight runs and curves, written in a *frame*-square
+    of its own and drawn at that frame's scale, so its curves come out exactly
+    as they were first drawn.
+
+    Each command is ``("M", x, y)`` to start a run, ``("L", x, y)`` a straight
+    line, ``("Q", cx, cy, x, y)`` a curve bent toward ``(cx, cy)``, ``("Z",)``
+    to close the run, or ``("R", x, y, w, h, radius)`` a rounded rectangle.
+    """
+
+    commands: tuple[tuple, ...]
+    frame: float = CANVAS
+
+
 # ---------------------------------------------------------------------------
 # The marks
 # ---------------------------------------------------------------------------
@@ -699,6 +714,30 @@ def _upright_beside_lying_down() -> tuple:
     return (_frame(left, short, long), _frame(left + short + _FRAMES_GAP, long, short))
 
 
+def _star_ring() -> tuple:
+    """The star grown all round by a ring of its own color, which is what a
+    favorited star is drawn over to show it picked."""
+    (star,) = _star(filled=True)
+    return (Polygon(star.points, fill=True, round_radius=3.0),)
+
+
+# A thumb raised from a fist, in the 24-square it was first drawn in, so its
+# curves come out as they always have.
+_THUMBS_UP = Path((
+    ("R", 1.5, 10, 4, 12, 0.8),
+    ("M", 7, 11), ("L", 11.2, 3.2), ("Q", 12.2, 1.6, 13.6, 2.4), ("Q", 15, 3.4, 14.5, 5.5),
+    ("L", 13.4, 9.5), ("L", 20, 9.5), ("Q", 22.4, 9.6, 22.2, 12), ("L", 20.6, 19.8),
+    ("Q", 20.1, 22, 17.8, 22), ("L", 9, 22), ("Q", 7, 22, 7, 20), ("Z",),
+), frame=24.0)
+
+# A small arrow curling round in the lower right corner, laid over another mark
+# to say "make this again".
+_REGENERATE_CORNER = (
+    Arc(29, 29, 15, 15, 35, 250, 3.4),
+    Polygon(((45, 33), (39, 31), (41, 38))),
+)
+
+
 GLYPHS: dict[str, tuple] = {
     "bolt": (
         Polygon(((34, 6), (28.5, 22.5), (36, 22.5), (14.5, 42), (20, 27.5), (12, 27.5))),
@@ -722,6 +761,7 @@ GLYPHS: dict[str, tuple] = {
         Line(37, 11, 11, 37, 5.5),
     ),
     "database": _database(),
+    "disc": (Ellipse(24, 24, 21, 21, fill=True),),
     "enhance_filter": _enhance_filter(),
     "expand_horizontal": _expand_horizontal(),
     "flat_2d": _flat_2d(),
@@ -789,6 +829,7 @@ GLYPHS: dict[str, tuple] = {
     "portrait_beside_landscape": _upright_beside_lying_down(),
     "question": _question(),
     "redo_arrow": _history_arrow(forward=True),
+    "regenerate_corner": _REGENERATE_CORNER,
     "release": _release(),
     "reset": _reset(),
     "restart": _restart(),
@@ -808,6 +849,8 @@ GLYPHS: dict[str, tuple] = {
     ),
     "star": _star(filled=True),
     "star_outline": _star(filled=False),
+    "star_ring": _star_ring(),
+    "thumbs_up": (_THUMBS_UP,),
     "trash": (                                            # lid, handle, body, ridges
         Line(9, 15, 39, 15),
         Polyline(((18, 15), (18, 9), (30, 9), (30, 15))),
