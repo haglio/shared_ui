@@ -1,0 +1,184 @@
+"""shared_ui.look_guard: what an app spells of its own look, found in its source."""
+
+from __future__ import annotations
+
+import os
+import subprocess
+from pathlib import Path
+
+import pytest
+
+from shared_ui.look_guard import LookNotRead, assert_the_look_is_shared_uis, looks_of_its_own
+
+
+def _git(checkout: Path, *args: str) -> None:
+    quiet = {name: value for name, value in os.environ.items() if not name.startswith("GIT_")}
+    subprocess.run(["git", "-C", str(checkout), *args], check=True, capture_output=True, env=quiet)
+
+
+@pytest.fixture
+def app(tmp_path):
+    """A checkout holding one package, every file handed to it tracked."""
+    checkout = tmp_path / "an_app"
+    (checkout / "parlour").mkdir(parents=True)
+    _git(checkout, "init", "-q")
+
+    def track(files: dict[str, str]) -> Path:
+        for name, text in files.items():
+            path = checkout / "parlour" / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+        _git(checkout, "add", "--", *(f"parlour/{name}" for name in files))
+        return checkout
+
+    return track
+
+
+def _found(checkout: Path) -> list[str]:
+    return looks_of_its_own(checkout, [checkout / "parlour"])
+
+
+def test_a_color_in_a_style_sheet_is_named_with_its_place(app):
+    checkout = app({"tiles.py": 'SHEET = "QLabel { color: #7a7a7a; }"\n'})
+
+    assert _found(checkout) == ["parlour/tiles.py:1: color #7a7a7a"]
+
+
+@pytest.mark.parametrize("line", [
+    "SHEET = 'background: rgba(0, 0, 0, 0.55);'",
+    "SHEET = 'QWidget { color: white; }'",
+    "INK = QColor(255, 255, 255)",
+    "INK = QColor('#1f4d2a')",
+    "INK = QColor.fromRgbF(0.2, 0.4, 0.6)",
+    "_TRACK = (56, 56, 62)",
+    "HANDLE_COLOR = (0.85, 0.85, 0.9, 0.35)",
+    "draw.line(points, fill=(200, 70, 70))",
+    "draw.text(where, words, fill='white')",
+    "image = Image.new('RGB', size, (64, 64, 64))",
+    "painter.fillRect(rect, Qt.GlobalColor.black)",
+    "STAGE = ('upscale', (0xED, 0xC9, 0x48))",
+    "GRADIENT = [(0.0, (10, 14, 30)), (100.0, (30, 70, 230))]",
+    "GL.glClearColor(0.1, 0.1, 0.1, 1.0)",
+    "painter.setPen(QColor(0x80, 0x80, 0x80))",
+    "draw.rectangle(box, fill=(0, 0, 0))",
+    "self._ground_color = (10, 10, 10)",
+])
+def test_a_color_spelled_any_other_way_is_named_too(app, line):
+    checkout = app({"tiles.py": f"{line}\n"})
+
+    found = _found(checkout)
+
+    assert found, line
+    assert all(finding.startswith("parlour/tiles.py:1: color ") for finding in found), found
+
+
+@pytest.mark.parametrize("line", [
+    "INK = QColor(*palette.BLUE)",
+    "SHEET = f'QLabel {{ color: {as_hex(TEXT_MUTED)}; }}'",
+    "draw.line(points, fill=(*RED, 255))",
+    "image = Image.new('RGBA', size, (0, 0, 0, 0))",
+    "probe = Image.new('L', size, 0)",
+    "SHEET = 'QWidget { background: transparent; }'",
+    "pixmap.fill(Qt.GlobalColor.transparent)",
+    "MARGINS = (4, 4, 4, 4)",
+    "SHEET = 'QPushButton#add { padding: 2px; }'",
+    "LINK = 'page.html#fade'",
+    "SEEN = 'a #123 in a sentence'",
+    "IMAGE_ICON, LR_LOADFROMFILE, WM_SETICON = 1, 0x10, 0x80",
+    "CLIP = ['-f', 'lavfi', '-i', 'color=c=gray:s=576x384:r=30']",
+])
+def test_a_color_taken_from_shared_ui_or_no_color_at_all_passes(app, line):
+    checkout = app({"tiles.py": f"{line}\n"})
+
+    assert _found(checkout) == []
+
+
+@pytest.mark.parametrize(("line", "named"), [
+    ("CARD_BORDER = '#3f3f3f'", "color #3f3f3f"),
+    ("INK = QColor('#1f4d2a')", "color #1f4d2a"),
+    ("INK = QColor('black')", "color QColor('black')"),
+])
+def test_one_color_is_named_once(app, line, named):
+    checkout = app({"tiles.py": f"{line}\n"})
+
+    assert _found(checkout) == [f"parlour/tiles.py:1: {named}"]
+
+
+def test_a_typed_glyph_is_named_and_typography_is_not(app):
+    checkout = app({"tiles.py": (
+        'CROWN = "\U0001F451"\n'
+        'MINUS = "−"\n'
+        'TITLE = "Unlocked · Shuffle — waiting… → next, at 90°"\n'
+    )})
+
+    assert _found(checkout) == [
+        "parlour/tiles.py:1: glyph \U0001F451 (U+1F451 CROWN)",
+        "parlour/tiles.py:2: glyph − (U+2212 MINUS SIGN)",
+    ]
+
+
+def test_a_docstring_may_name_a_glyph_or_a_color(app):
+    checkout = app({"tiles.py": (
+        '"""Draws the ✕ in the white #ffffff would."""\n'
+        "def close():\n"
+        '    """The ✕ closes it."""\n'
+    )})
+
+    assert _found(checkout) == []
+
+
+def test_an_icon_from_outside_shared_ui_is_named(app):
+    checkout = app({"tiles.py": (
+        "import qtawesome as qta\n"
+        "mark = QApplication.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxWarning)\n"
+        "style.drawPrimitive(QStyle.PrimitiveElement.PE_IndicatorTabClose, option, painter)\n"
+        "folder = QIcon.fromTheme('folder')\n"
+        "from qtawesome import icon\n"
+    )})
+
+    assert _found(checkout) == [
+        "parlour/tiles.py:1: icon qtawesome",
+        "parlour/tiles.py:2: icon QApplication.style().standardIcon",
+        "parlour/tiles.py:2: icon QStyle.StandardPixmap.SP_MessageBoxWarning",
+        "parlour/tiles.py:3: icon QStyle.PrimitiveElement.PE_IndicatorTabClose",
+        "parlour/tiles.py:4: icon QIcon.fromTheme",
+        "parlour/tiles.py:5: icon qtawesome",
+    ]
+
+
+def test_a_page_the_app_serves_is_read_for_its_colors_too(app):
+    checkout = app({"static/page.html": "<style>\n  body { background: #1e1e2e; }\n</style>\n"})
+
+    assert _found(checkout) == ["parlour/static/page.html:2: color #1e1e2e"]
+
+
+def test_only_what_the_checkout_tracks_is_read(app):
+    checkout = app({"tiles.py": "WIDTH = 4\n"})
+    (checkout / "parlour" / "private.js").write_text("note.style.color = '#00ff00';\n", encoding="utf-8")
+
+    assert _found(checkout) == []
+
+
+def test_a_package_that_tracks_nothing_is_refused_rather_than_passed(app):
+    checkout = app({"tiles.py": "WIDTH = 4\n"})
+
+    with pytest.raises(LookNotRead, match="drawing_room"):
+        looks_of_its_own(checkout, [checkout / "drawing_room"])
+
+
+def test_the_failure_says_where_each_one_is_and_where_it_belongs(app):
+    checkout = app({"tiles.py": "_TRACK = (56, 56, 62)\nPENCIL = '✎'\n"})
+
+    with pytest.raises(AssertionError) as failure:
+        assert_the_look_is_shared_uis(checkout, [checkout / "parlour"])
+
+    assert "parlour/tiles.py:1: color _TRACK = (56, 56, 62)" in str(failure.value)
+    assert "parlour/tiles.py:2: glyph ✎ (U+270E LOWER RIGHT PENCIL)" in str(failure.value)
+    assert "shared_ui" in str(failure.value)
+
+
+def test_an_allowance_takes_out_what_it_names_wherever_the_line_moves(app):
+    checkout = app({"aim.py": "\n\ncanvas = Image.new('RGB', size, (114, 114, 114))\n"})
+
+    assert_the_look_is_shared_uis(checkout, [checkout / "parlour"],
+                                  allowing=("parlour/aim.py: color (114, 114, 114)",))
