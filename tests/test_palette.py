@@ -51,6 +51,12 @@ def test_the_fraction_spelling_is_what_a_headset_draws_with():
     assert palette.as_fractions((51, 102, 0)) == (0.2, 0.4, 0.0, 1.0)
 
 
+def test_a_color_from_outside_the_code_is_drawn_as_the_familys_nearest():
+    assert palette.nearest((250, 70, 70)) == palette.RED
+    assert palette.nearest((1, 2, 3)) == palette.BLACK
+    assert palette.nearest(palette.GREEN) == palette.GREEN
+
+
 def test_a_page_names_its_colors_and_gets_the_palettes_spelling_of_each():
     page = "body { background: __PALETTE_BG_PRIMARY__; color: __PALETTE_TEXT_PRIMARY__; }"
 
