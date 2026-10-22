@@ -122,8 +122,9 @@ class Path:
     as they were first drawn.
 
     Each command is ``("M", x, y)`` to start a run, ``("L", x, y)`` a straight
-    line, ``("Q", cx, cy, x, y)`` a curve bent toward ``(cx, cy)``, ``("Z",)``
-    to close the run, or ``("R", x, y, w, h, radius)`` a rounded rectangle.
+    line, ``("Q", cx, cy, x, y)`` a curve bent toward ``(cx, cy)``,
+    ``("C", x1, y1, x2, y2, x, y)`` one bent toward two points, ``("Z",)`` to
+    close the run, or ``("R", x, y, w, h, radius)`` a rounded rectangle.
     """
 
     commands: tuple[tuple, ...]
@@ -738,13 +739,150 @@ _REGENERATE_CORNER = (
 )
 
 
+def _chevron_pointing(direction: str) -> tuple:
+    """A chevron pointing up or down, the left and right ones turned a quarter."""
+    near, far, upper, lower = 15, 31, 9, 39
+    if direction == "down":
+        return (Polyline(((upper, near), (24, far), (lower, near))),)
+    return (Polyline(((upper, far), (24, near), (lower, far))),)
+
+
+def _double_chevron(pointing_left: bool) -> tuple:
+    """Two chevrons in a row: a step further than one, back or forward."""
+    first, second, tip = (7.0, 25.0, 14.0) if not pointing_left else (41.0, 23.0, -14.0)
+    return tuple(Polyline(((x, 10), (x + tip, 24), (x, 38))) for x in (first, second))
+
+
+def _lock(*, open_: bool) -> tuple:
+    body = RoundedRect(10, 21, 28, 21, 4, width=4)
+    keyhole = Ellipse(24, 31, 2.8, 2.8, fill=True)
+    if open_:
+        shackle = (Line(32, 21, 32, 13, 4), Arc(16, 5, 16, 16, 0, 180, 4), Line(16, 13, 16, 15, 4))
+    else:
+        shackle = (Line(32, 21, 32, 15, 4), Arc(16, 7, 16, 16, 0, 180, 4), Line(16, 15, 16, 21, 4))
+    return (body, *shackle, keyhole)
+
+
+def _crescent() -> tuple:
+    """A new moon: the part of one disc another, up and to its right, leaves."""
+    (ox, oy, outer), (ix, iy, inner) = (22.0, 25.0, 17.0), (31.0, 17.0, 13.0)
+    distance = math.dist((ox, oy), (ix, iy))
+    along = (outer ** 2 - inner ** 2 + distance ** 2) / (2 * distance)
+    across = math.sqrt(outer ** 2 - along ** 2)
+    ux, uy = (ix - ox) / distance, (iy - oy) / distance
+    tips = [(ox + along * ux - across * uy * side, oy + along * uy + across * ux * side)
+            for side in (1, -1)]
+
+    def angle(cx, cy, point):
+        return math.atan2(point[1] - cy, point[0] - cx)
+
+    def run(cx, cy, radius, start, end, steps):
+        return [(cx + radius * math.cos(start + (end - start) * k / steps),
+                 cy + radius * math.sin(start + (end - start) * k / steps)) for k in range(steps + 1)]
+
+    o0, o1 = angle(ox, oy, tips[0]), angle(ox, oy, tips[1])
+    if o1 < o0:
+        o1 += 2 * math.pi
+    i0, i1 = angle(ix, iy, tips[1]), angle(ix, iy, tips[0])
+    if i1 > i0:
+        i1 -= 2 * math.pi
+    rim = run(ox, oy, outer, o0, o1, 24) + run(ix, iy, inner, i0, i1, 16)[1:-1]
+    return (Polygon(tuple(rim), fill=False, width=4),)
+
+
+def _cog() -> tuple:
+    hub = Ellipse(24, 24, 9.5, 9.5, width=5)
+    teeth = tuple(Line(24 + 15 * math.cos(math.radians(a)), 24 + 15 * math.sin(math.radians(a)),
+                       24 + 19 * math.cos(math.radians(a)), 24 + 19 * math.sin(math.radians(a)), 6)
+                  for a in range(0, 360, 45))
+    return (hub, *teeth)
+
+
+# Line's run-kind icons, drawn in the 26-square they were made in and moved onto
+# the canvas a little in from its edges.
+_KIND_SQUARE = 26.0
+_KIND_SCALE = (CANVAS - 6) / _KIND_SQUARE
+
+
+def _kind(value: float) -> float:
+    return 3 + value * _KIND_SCALE
+
+
+def _kind_frame() -> RoundedRect:
+    return RoundedRect(_kind(1), _kind(1), 24 * _KIND_SCALE, 24 * _KIND_SCALE, 3 * _KIND_SCALE,
+                       width=2 * _KIND_SCALE)
+
+
+def _kind_ring() -> Ellipse:
+    return Ellipse(24, 24, 11.4 * _KIND_SCALE, 11.4 * _KIND_SCALE, width=2.5 * _KIND_SCALE)
+
+
+def _kind_cells(columns_by_row: list[list[int]], across: int, size: float, gap: float) -> tuple:
+    width = across * (size + gap) - gap
+    height = len(columns_by_row) * (size + gap) - gap
+    left, top = (_KIND_SQUARE - width) / 2, (_KIND_SQUARE - height) / 2
+    return tuple(RoundedRect(_kind(left + column * (size + gap)), _kind(top + row * (size + gap)),
+                             size * _KIND_SCALE, size * _KIND_SCALE, size / 5 * _KIND_SCALE, fill=True)
+                 for row, columns in enumerate(columns_by_row) for column in columns)
+
+
+def _jigsaw_piece() -> Path:
+    """A jigsaw piece, two of its sides a tab and two a blank, inside the frame."""
+    middle, side, tab = (13.0, 13.0), 11.0, 0.13
+    half = side / 2
+    corners = [(middle[0] - half, middle[1] - half), (middle[0] + half, middle[1] - half),
+               (middle[0] + half, middle[1] + half), (middle[0] - half, middle[1] + half)]
+    one_side = [(0.2, 0), (0.5, -tab), (0.5 - tab, tab), (0.5 - 2 * tab, 3 * tab),
+                (0.5 + 2 * tab, 3 * tab), (0.5 + tab, tab), (0.5, -tab), (0.8, 0), (1, 0)]
+    commands: list[tuple] = [("M", _kind(corners[0][0]) - 3, _kind(corners[0][1]) - 3)]
+    for start, end, facing in zip(corners, corners[1:] + corners[:1], (-1, 1, -1, 1), strict=True):
+        along = ((end[0] - start[0]) / side, (end[1] - start[1]) / side)
+        out = (along[1] * facing, -along[0] * facing)
+        handles = [(start[0] + (u * along[0] + v * out[0]) * side,
+                    start[1] + (u * along[1] + v * out[1]) * side) for u, v in one_side]
+        for a, b, c in zip(handles[::3], handles[1::3], handles[2::3], strict=True):
+            commands.append(("C", *(_kind(value) - 3 for value in (*a, *b, *c))))
+    commands.append(("Z",))
+    return Path(tuple((command, *(value + 3 for value in numbers)) if command != "Z" else (command,)
+                      for command, *numbers in commands))
+
+
+def _snowflake_struck_out() -> tuple:
+    """A snowflake in a ring with a slash across it: no flakes here."""
+    ring = _kind_ring()
+    arm, fork_at, branch, branch_angle = 7.4, 5.0, 2.9, 40
+    pen = 1.5 * _KIND_SCALE
+
+    def point(degrees: float, reach: float, start=(13.0, 13.0)):
+        return (start[0] + math.cos(math.radians(degrees)) * reach,
+                start[1] + math.sin(math.radians(degrees)) * reach)
+
+    def stick(start, end, width=pen):
+        return Line(_kind(start[0]), _kind(start[1]), _kind(end[0]), _kind(end[1]), width)
+
+    arms = [stick(point(degrees + 180, arm), point(degrees, arm)) for degrees in (90, 30, 150)]
+    for degrees in range(90, 450, 60):
+        fork = point(degrees, fork_at)
+        arms += [stick(fork, point(degrees + side * branch_angle, branch, fork)) for side in (-1, 1)]
+    radius = 11.4
+    slash = stick(point(225, radius), point(45, radius), 2.5 * _KIND_SCALE)
+    return (ring, *arms, slash)
+
+
 GLYPHS: dict[str, tuple] = {
     "bolt": (
         Polygon(((34, 6), (28.5, 22.5), (36, 22.5), (14.5, 42), (20, 27.5), (12, 27.5))),
     ),
+    "chart": (                                            # three bars on a baseline
+        RoundedRect(10, 26, 7, 12, 2, fill=True),
+        RoundedRect(20.5, 11, 7, 27, 2, fill=True),
+        RoundedRect(31, 19, 7, 19, 2, fill=True),
+        Line(7, 42, 41, 42, 3.4),
+    ),
     "check": (
         Polyline(((10, 25), (19, 35), (38, 13)), 5.5),
     ),
+    "chevron_down": _chevron_pointing("down"),
     "chevron_left": _chevron(pointing_left=True),
     "chevron_right": _chevron(pointing_left=False),
     "clock": (                                            # hands at 12 and 3
@@ -752,10 +890,19 @@ GLYPHS: dict[str, tuple] = {
         Line(24, 24, 24, 13),
         Line(24, 24, 33, 24),
     ),
+    "chevron_up": _chevron_pointing("up"),
+    "chevrons_left": _double_chevron(pointing_left=True),
+    "chevrons_right": _double_chevron(pointing_left=False),
+    "circle": (Ellipse(24, 24, 17, 17),),
     "clip_to_scene": _clip_scene_jump(to_scene=True),
     "compilation": _compilation(),
     "control_off": _control_off(),
     "copy": _copy(),
+    "crown": (                                            # five points over a band
+        Polygon(((9, 33), (6, 13), (16, 22), (24, 8), (32, 22), (42, 13), (39, 33)),
+                fill=False, width=4),
+        Line(9, 40, 39, 40, 4),
+    ),
     "cross": (
         Line(11, 11, 37, 37, 5.5),
         Line(37, 11, 11, 37, 5.5),
@@ -763,8 +910,21 @@ GLYPHS: dict[str, tuple] = {
     "database": _database(),
     "disc": (Ellipse(24, 24, 21, 21, fill=True),),
     "enhance_filter": _enhance_filter(),
+    "error": (Ellipse(24, 24, 18, 18, width=4), Line(18, 18, 30, 30, 4.5), Line(30, 18, 18, 30, 4.5)),
     "expand_horizontal": _expand_horizontal(),
+    "export": (                                           # out of a tray
+        Polyline(((9, 27), (9, 39), (39, 39), (39, 27)), 4),
+        Line(24, 31, 24, 9, 4.5),
+        Polyline(((15, 17), (24, 8), (33, 17)), 4.5),
+    ),
+    "external_link": (                                    # out of a box's corner
+        Polyline(((20, 10), (10, 10), (10, 38), (38, 38), (38, 28)), 3.6),
+        Line(23, 25, 37, 11, 3.6),
+        Polyline(((27, 10), (38, 10), (38, 21)), 3.6),
+    ),
     "flat_2d": _flat_2d(),
+    "filter": (Polygon(((8, 10), (40, 10), (28, 25), (28, 38), (20, 42), (20, 25)),
+                       fill=False, width=4),),
     "flip_ends": _flip_ends(),
     "flask": (                                            # an Erlenmeyer, with liquid
         Polyline(((19, 8), (19, 18), (9, 38), (39, 38), (29, 18), (29, 8))),
@@ -776,6 +936,7 @@ GLYPHS: dict[str, tuple] = {
         Polyline(((8, 39), (8, 12), (20, 12), (24, 18), (40, 18), (40, 39), (8, 39))),
     ),
     "full": _clip_on_the_timeline(_TIMELINE.x2),
+    "grid": (_kind_frame(), *_kind_cells([[0, 1, 2, 3]] * 4, 4, 3.2, 1.4)),
     "headset": _headset(),
     "human": (                                            # a stick figure
         Ellipse(24, 10, 5.5, 5.5, fill=True),
@@ -783,6 +944,8 @@ GLYPHS: dict[str, tuple] = {
         Polyline(((13, 26), (24, 20), (35, 26))),
         Polyline(((15, 42), (24, 30), (33, 42))),
     ),
+    "info": (Ellipse(24, 24, 18, 18, width=4), Line(24, 22, 24, 33, 5), Ellipse(24, 15.5, 2.8, 2.8, fill=True)),
+    "jigsaw": (_kind_frame(), _jigsaw_piece()),
     LANDSCAPE: (_LYING_DOWN_FRAME,),
     "latest": _calendar(),
     "funscript_jump": _funscript_jump(),
@@ -792,14 +955,19 @@ GLYPHS: dict[str, tuple] = {
         Line(17, 24, 31, 24, 3.6),
         Line(17, 32, 26, 32, 3.6),
     ),
+    "lock": _lock(open_=False),
     "loop": _loop(),
     "monitor": _monitor(),
+    "moon": _crescent(),
+    "more": (Ellipse(10, 24, 4.5, 4.5, fill=True), Ellipse(24, 24, 4.5, 4.5, fill=True),
+             Ellipse(38, 24, 4.5, 4.5, fill=True)),
     "mic": (                                              # capsule, cradle, stand
         RoundedRect(18, 6, 12, 21, 6, fill=True),
         Arc(11, 11, 26, 26, 200, 140),
         Line(24, 37, 24, 42),
         Line(17, 42, 31, 42),
     ),
+    "pair_in_circle": (_kind_ring(), *_kind_cells([[1, 3]], 5, 3, 0.6)),
     "park": _park(),
     "photo": (                                            # a sun over a mountain
         RoundedRect(8, 12, 32, 24, 4, width=3.4),
@@ -811,11 +979,16 @@ GLYPHS: dict[str, tuple] = {
     # Its ink sits right of the frame's center because a triangle's weight does --
     # the centroid lands on 24, which is where the eye reads middle.
     "play": (Polygon(((15, 8), (15, 40), (39, 24)), round_radius=3),),
+    "pencil": (
+        Polygon(((8, 40), (12, 29), (31, 10), (38, 17), (19, 36)), fill=False, width=4),
+        Line(27, 14, 34, 21, 4),
+    ),
     "pause": (                                            # two bars, rounded to match
         RoundedRect(13, 7, 8.5, 34, 3.5, fill=True),
         RoundedRect(26.5, 7, 8.5, 34, 3.5, fill=True),
     ),
     "power": _power(),
+    "cells_in_circle": (_kind_ring(), *_kind_cells([[1, 3], [0, 1, 2, 3, 4], [1, 3]], 5, 3, 0.6)),
     # A pair: one bar and two, at one weight, so a speed-down and a speed-up
     # beside each other read as the same control twice rather than as two.
     "minus": (Line(24 - _PLUS_REACH, 24, 24 + _PLUS_REACH, 24, _PLUS_BAR),),
@@ -834,22 +1007,37 @@ GLYPHS: dict[str, tuple] = {
     "reset": _reset(),
     "restart": _restart(),
     "retract": _retract(),
+    "save": (                                             # a floppy disk
+        Polygon(((8, 8), (33, 8), (40, 15), (40, 40), (8, 40)), fill=False, width=4),
+        Polyline(((16, 8), (16, 17), (30, 17), (30, 8)), 3.6),
+        RoundedRect(14, 25, 20, 15, 2, width=3.6),
+    ),
     "scene_to_clip": _clip_scene_jump(to_scene=False),
     "shield": _shield(),
     "clips": _clip_on_the_timeline(_CLIPS_END),
+    "settings": _cog(),
     "shuffle": _shuffle(),
     "slideshow": (                                        # a play triangle in a screen
         RoundedRect(8, 11, 32, 26, 4),
         Polygon(((20, 16), (20, 32), (33, 24))),
     ),
+    "snowflake_struck_out": _snowflake_struck_out(),
     "speaker": (                                          # a cone and two waves
         Polygon(((7, 18), (14, 18), (22, 9), (22, 39), (14, 30), (7, 30))),
         Arc(23, 16, 12, 16, -70, 140, 4.5),
         Arc(25, 8, 18, 32, -70, 140, 4.5),
     ),
+    "speaker_off": (                                      # the cone, crossed out
+        Polygon(((7, 18), (14, 18), (22, 9), (22, 39), (14, 30), (7, 30))),
+        Line(29, 19, 39, 29, 4.5),
+        Line(39, 19, 29, 29, 4.5),
+    ),
     "star": _star(filled=True),
     "star_outline": _star(filled=False),
     "star_ring": _star_ring(),
+    "stop": (RoundedRect(9, 9, 30, 30, 4, fill=True),),
+    "tag": (Polygon(((9, 9), (25, 9), (41, 25), (25, 41), (9, 25)), fill=False, width=4),
+            Ellipse(17, 17, 3, 3, fill=True)),
     "thumbs_up": (_THUMBS_UP,),
     "trash": (                                            # lid, handle, body, ridges
         Line(9, 15, 39, 15),
@@ -859,8 +1047,11 @@ GLYPHS: dict[str, tuple] = {
         Line(28, 21, 27, 36),
     ),
     "undo_arrow": _history_arrow(forward=False),
+    "unlock": _lock(open_=True),
     "versions": _versions(),
     "vr_hemisphere": _vr_hemisphere(),
+    "warning": (Polygon(((24, 7), (43, 40), (5, 40)), fill=False, width=4.5),
+                Line(24, 18, 24, 28, 5), Ellipse(24, 34.5, 2.8, 2.8, fill=True)),
     "wave": (                                             # one cycle of a sine
         Arc(6, 11, 18, 26, 0, 180),
         Arc(24, 11, 18, 26, 180, 180),

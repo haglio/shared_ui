@@ -105,10 +105,10 @@ def test_the_glyphs_are_all_different_marks():
             assert drawn[first] != drawn[second], f"{first} and {second} draw alike"
 
 
-# A mark whose whole identity is a single bar cannot fill a square and should not
-# try: a minus stretched to be tall is a rectangle, not a minus. Named here one by
+# A mark whose whole identity is a single row -- a bar, three dots -- cannot fill a
+# square and should not try: a minus stretched to be tall is a rectangle, not a minus. Named here one by
 # one, so widening the exemption takes a decision rather than a shrug.
-_ONE_BAR = {"minus"}
+_ONE_BAR = {"minus", "more"}
 # A mark laid into the corner of another one, which the other mark leaves free
 # for it: spread over the canvas, it would cover what it is laid on.
 _IN_A_CORNER = {"regenerate_corner"}
@@ -302,17 +302,20 @@ def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath():
 
 
 _THE_MARKS = (
-    "bolt", "check", "chevron_left", "chevron_right", "clip_to_scene", "clips",
-    "clock", "clock_full", "clock_short", "compilation", "control_off",
-    "copy", "cross", "database", "disc", "enhance_filter", "expand_horizontal", "flask",
-    "flat_2d", "flip_ends", "fmode", "folder", "full", "full_length", "funscript_jump", "headset",
-    "human", "landscape", "latest", "log", "loop", "mic", "minus", "monitor", "park", "pause",
-    "photo", "play", "plus", "plus_outline", "portrait", "portrait_and_landscape",
-    "portrait_beside_landscape", "power", "question",
-    "redo_arrow", "regenerate_corner", "release", "reset", "restart", "retract", "scene_to_clip",
-    "shield", "shorts", "shuffle", "slideshow", "speaker", "star", "star_outline", "star_ring",
-    "thumbs_up", "trash", "undo_arrow", "versions", "vr_hemisphere", "wave", "wave_sawtooth", "wave_square",
-    "wave_triangle",
+    "bolt", "cells_in_circle", "chart", "check", "chevron_down", "chevron_left",
+    "chevron_right", "chevron_up", "chevrons_left", "chevrons_right", "circle",
+    "clip_to_scene", "clips", "clock", "clock_full", "clock_short", "compilation",
+    "control_off", "copy", "cross", "crown", "database", "disc", "enhance_filter", "error",
+    "expand_horizontal", "export", "external_link", "filter", "flask", "flat_2d", "flip_ends",
+    "fmode", "folder", "full", "full_length", "funscript_jump", "grid", "headset", "human",
+    "info", "jigsaw", "landscape", "latest", "lock", "log", "loop", "mic", "minus", "monitor",
+    "moon", "more", "pair_in_circle", "park", "pause", "pencil", "photo", "play", "plus",
+    "plus_outline", "portrait", "portrait_and_landscape", "portrait_beside_landscape", "power",
+    "question", "redo_arrow", "regenerate_corner", "release", "reset", "restart", "retract",
+    "save", "scene_to_clip", "settings", "shield", "shorts", "shuffle", "slideshow",
+    "snowflake_struck_out", "speaker", "speaker_off", "star", "star_outline", "star_ring",
+    "stop", "tag", "thumbs_up", "trash", "undo_arrow", "unlock", "versions", "vr_hemisphere",
+    "warning", "wave", "wave_sawtooth", "wave_square", "wave_triangle",
 )
 
 

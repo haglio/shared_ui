@@ -177,6 +177,8 @@ def _painter_path(shape: Path) -> QPainterPath:
             path.lineTo(*numbers)
         elif command == "Q":
             path.quadTo(*numbers)
+        elif command == "C":
+            path.cubicTo(*numbers)
         elif command == "Z":
             path.closeSubpath()
         elif command == "R":

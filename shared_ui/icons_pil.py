@@ -153,6 +153,12 @@ def _path(draw: ImageDraw.ImageDraw, shape: Path, ink, scale: float) -> None:
             runs[-1].extend(((1 - t) ** 2 * x0 + 2 * (1 - t) * t * cx + t * t * x1,
                              (1 - t) ** 2 * y0 + 2 * (1 - t) * t * cy + t * t * y1)
                             for t in (step / _CURVE_STEPS for step in range(1, _CURVE_STEPS + 1)))
+        elif command == "C":
+            (x0, y0), (x1, y1, x2, y2, x3, y3) = runs[-1][-1], numbers
+            runs[-1].extend((
+                (1 - t) ** 3 * x0 + 3 * (1 - t) ** 2 * t * x1 + 3 * (1 - t) * t * t * x2 + t ** 3 * x3,
+                (1 - t) ** 3 * y0 + 3 * (1 - t) ** 2 * t * y1 + 3 * (1 - t) * t * t * y2 + t ** 3 * y3)
+                for t in (step / _CURVE_STEPS for step in range(1, _CURVE_STEPS + 1)))
         elif command == "R":
             x, y, w, h, radius = numbers
             draw.rounded_rectangle(_frame(x, y, x + w, y + h, scale), radius=radius * scale, fill=ink)
