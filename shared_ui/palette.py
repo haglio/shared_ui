@@ -96,6 +96,12 @@ def as_hex(rgb: Rgb) -> str:
     return f"#{red:02x}{green:02x}{blue:02x}"
 
 
+def as_fractions(rgb: Rgb, alpha: float = 1.0) -> tuple[float, float, float, float]:
+    """The ``(red, green, blue, alpha)`` in 0-1 an OpenGL headset scene draws with."""
+    red, green, blue = rgb
+    return (red / 255, green / 255, blue / 255, alpha)
+
+
 _NAMED_IN_A_PAGE = re.compile(r"__PALETTE_([A-Z_]+?)__")
 
 

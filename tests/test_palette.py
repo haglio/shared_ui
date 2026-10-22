@@ -41,6 +41,11 @@ def test_the_hex_spelling_is_the_style_sheets():
     assert QColor(palette.as_hex(palette.AMBER)) == QColor(*palette.AMBER)
 
 
+def test_the_fraction_spelling_is_what_a_headset_draws_with():
+    assert palette.as_fractions(palette.WHITE, 0.5) == (1.0, 1.0, 1.0, 0.5)
+    assert palette.as_fractions((51, 102, 0)) == (0.2, 0.4, 0.0, 1.0)
+
+
 def test_a_page_names_its_colors_and_gets_the_palettes_spelling_of_each():
     page = "body { background: __PALETTE_BG_PRIMARY__; color: __PALETTE_TEXT_PRIMARY__; }"
 
