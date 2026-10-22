@@ -105,10 +105,10 @@ def test_the_glyphs_are_all_different_marks():
             assert drawn[first] != drawn[second], f"{first} and {second} draw alike"
 
 
-# A mark whose whole identity is a single row -- a bar, three dots -- cannot fill a
-# square and should not try: a minus stretched to be tall is a rectangle, not a minus. Named here one by
+# A mark whose whole identity is a single row or column -- a bar, three dots -- cannot
+# fill a square and should not try: a minus stretched to be tall is a rectangle, not a minus. Named here one by
 # one, so widening the exemption takes a decision rather than a shrug.
-_ONE_BAR = {"minus", "more"}
+_ONE_BAR = {"minus", "more", "more_vertical"}
 # A mark laid into the corner of another one, which the other mark leaves free
 # for it: spread over the canvas, it would cover what it is laid on.
 _IN_A_CORNER = {"regenerate_corner"}
@@ -130,8 +130,8 @@ def test_a_one_bar_mark_still_spans_its_canvas_the_long_way():
     # The exemption is for the SHORT side only. A minus that also stopped short
     # left to right would read as a hyphen dropped into an empty square.
     for name in _ONE_BAR:
-        left, _upper, right, _lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
-        assert right - left >= 0.6 * 48, f"{name} is short in its frame"
+        left, upper, right, lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+        assert max(right - left, lower - upper) >= 0.6 * 48, f"{name} is short in its frame"
 
 
 def test_the_speed_pair_is_one_control_drawn_twice():
@@ -309,7 +309,7 @@ _THE_MARKS = (
     "expand_horizontal", "export", "external_link", "filter", "flask", "flat_2d", "flip_ends",
     "fmode", "folder", "full", "full_length", "funscript_jump", "grid", "headset", "human",
     "info", "jigsaw", "landscape", "latest", "lock", "log", "loop", "mic", "minus", "monitor",
-    "moon", "more", "pair_in_circle", "park", "pause", "pencil", "photo", "play", "plus",
+    "moon", "more", "more_vertical", "pair_in_circle", "park", "pause", "pencil", "photo", "play", "plus",
     "plus_outline", "portrait", "portrait_and_landscape", "portrait_beside_landscape", "power",
     "question", "redo_arrow", "regenerate_corner", "release", "reset", "restart", "retract",
     "save", "scene_to_clip", "settings", "shield", "shorts", "shuffle", "slideshow",

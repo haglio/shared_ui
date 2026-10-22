@@ -961,6 +961,8 @@ GLYPHS: dict[str, tuple] = {
     "moon": _crescent(),
     "more": (Ellipse(10, 24, 4.5, 4.5, fill=True), Ellipse(24, 24, 4.5, 4.5, fill=True),
              Ellipse(38, 24, 4.5, 4.5, fill=True)),
+    "more_vertical": (Ellipse(24, 10, 4.5, 4.5, fill=True), Ellipse(24, 24, 4.5, 4.5, fill=True),
+                      Ellipse(24, 38, 4.5, 4.5, fill=True)),
     "mic": (                                              # capsule, cradle, stand
         RoundedRect(18, 6, 12, 21, 6, fill=True),
         Arc(11, 11, 26, 26, 200, 140),
