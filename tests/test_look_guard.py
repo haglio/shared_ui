@@ -74,6 +74,7 @@ def test_a_color_spelled_any_other_way_is_named_too(app, line):
 
 @pytest.mark.parametrize("line", [
     "INK = QColor(*palette.BLUE)",
+    "CHIP = QColor(*palette.BLACK, 160)",
     "SHEET = f'QLabel {{ color: {as_hex(TEXT_MUTED)}; }}'",
     "draw.line(points, fill=(*RED, 255))",
     "image = Image.new('RGBA', size, (0, 0, 0, 0))",
