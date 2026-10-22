@@ -21,7 +21,17 @@ from PyQt6.QtWidgets import QLabel
 
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
-from shared_ui.icon_geometry import GLYPHS, RENAMED_MARKS, STAND_IN, Path, Polygon, glyph_names
+from shared_ui.icon_geometry import (
+    GLYPHS,
+    RENAMED_MARKS,
+    STAND_IN,
+    Ellipse,
+    Line,
+    Path,
+    Polygon,
+    RoundedRect,
+    glyph_names,
+)
 from shared_ui.orientation import LANDSCAPE, PORTRAIT
 from shared_ui.spacing import BUTTON_ICON, BUTTON_MARK
 
@@ -710,3 +720,128 @@ def test_a_marked_line_shows_its_words_as_they_were_written():
     line = icons.marked_text("mic", "1 < 2 & <b>bold</b>", color=RED, size=16)
 
     assert "1 &lt; 2 &amp; &lt;b&gt;bold&lt;/b&gt;" in line
+
+
+
+# --- the marks Line's runs wear for the kind of run they are --------------------
+
+def _of(name: str, kind: type) -> list:
+    return [shape for shape in GLYPHS[name] if isinstance(shape, kind)]
+
+
+def _cells(name: str) -> list:
+    return [shape for shape in _of(name, RoundedRect) if shape.fill]
+
+
+def _rows(cells) -> list[int]:
+    by_row: dict[float, int] = {}
+    for cell in cells:
+        by_row[round(cell.y, 3)] = by_row.get(round(cell.y, 3), 0) + 1
+    return [by_row[top] for top in sorted(by_row)]
+
+
+def test_the_grid_is_a_frame_packed_with_rows_of_little_squares():
+    [frame] = [shape for shape in _of("grid", RoundedRect) if not shape.fill]
+    cells = _cells("grid")
+    edge = frame.width / 2
+
+    rows = _rows(cells)
+    assert len(rows) >= 3
+    assert rows == [len(rows)] * len(rows)
+    assert all(frame.x + edge < cell.x and cell.x + cell.w < frame.x + frame.w - edge
+               and frame.y + edge < cell.y and cell.y + cell.h < frame.y + frame.h - edge for cell in cells)
+
+
+def _inside_the_ring(cell, ring) -> bool:
+    corners = [(cell.x + dx, cell.y + dy) for dx in (0, cell.w) for dy in (0, cell.h)]
+    return all(math.dist(corner, (ring.cx, ring.cy)) < ring.rx - ring.width / 2 for corner in corners)
+
+
+def test_the_cells_in_a_circle_are_a_puzzle_piece_of_little_squares_in_the_no_flakes_ring():
+    [ring] = _of("cells_in_circle", Ellipse)
+    [no_flakes] = _of("snowflake_struck_out", Ellipse)
+    cells = _cells("cells_in_circle")
+
+    assert (ring.cx, ring.cy, ring.rx) == (no_flakes.cx, no_flakes.cy, no_flakes.rx)
+    assert _rows(cells) == [2, 5, 2]
+    assert all(_inside_the_ring(cell, ring) for cell in cells)
+
+
+def test_the_pair_in_a_circle_is_two_little_squares_side_by_side_in_that_ring():
+    [ring] = _of("pair_in_circle", Ellipse)
+    [no_flakes] = _of("snowflake_struck_out", Ellipse)
+    cells = _cells("pair_in_circle")
+
+    assert (ring.cx, ring.cy, ring.rx) == (no_flakes.cx, no_flakes.cy, no_flakes.rx)
+    assert _rows(cells) == [2]
+    assert all(_inside_the_ring(cell, ring) for cell in cells)
+    assert cells[1].x - cells[0].x > cells[0].w
+
+
+def test_the_struck_out_snowflake_is_a_six_armed_flake_in_a_ring_with_a_slash_across_it():
+    [ring] = _of("snowflake_struck_out", Ellipse)
+    lines = _of("snowflake_struck_out", Line)
+    slash = max(lines, key=lambda line: line.width)
+    arms = [line for line in lines if line is not slash]
+    a_snowflakes_arms = 6
+
+    assert slash.x1 < ring.cx < slash.x2
+    assert slash.y1 < ring.cy < slash.y2
+    assert len(arms) >= a_snowflakes_arms
+    assert all(math.dist(end, (ring.cx, ring.cy)) < ring.rx
+               for arm in arms for end in ((arm.x1, arm.y1), (arm.x2, arm.y2)))
+
+
+def _outline(piece: Path) -> list[tuple[float, float]]:
+    scale = icons.CANVAS / piece.frame
+    here, points = None, []
+    for command, *numbers in piece.commands:
+        if command == "M":
+            here = (numbers[0] * scale, numbers[1] * scale)
+        elif command == "C":
+            handles = [(numbers[n] * scale, numbers[n + 1] * scale) for n in (0, 2, 4)]
+            points += [tuple((1 - s) ** 3 * p0 + 3 * (1 - s) ** 2 * s * p1 + 3 * (1 - s) * s ** 2 * p2
+                             + s ** 3 * p3 for p0, p1, p2, p3 in zip(here, *handles, strict=True))
+                       for s in (step / 200 for step in range(201))]
+            here = handles[-1]
+    return points
+
+
+def _height_across(points, x: float, half_a_slice: float = 0.2) -> float:
+    near = [py for px, py in points if abs(px - x) < half_a_slice]
+    return max(near) - min(near)
+
+
+def test_the_jigsaw_is_a_piece_tabbed_left_and_right_and_blanked_above_and_below_in_the_grids_frame():
+    [frame] = _of("jigsaw", RoundedRect)
+    [piece] = _of("jigsaw", Path)
+    outline = _outline(piece)
+    xs, ys = [x for x, _ in outline], [y for _, y in outline]
+    middle = icons.CANVAS / 2
+    side = 11 * (icons.CANVAS - 6) / 26
+    half = side / 2
+
+    assert frame == next(shape for shape in _of("grid", RoundedRect) if not shape.fill)
+    assert frame.x + frame.width / 2 < min(xs) < max(xs) < frame.x + frame.w - frame.width / 2
+    assert frame.y + frame.width / 2 < min(ys) < max(ys) < frame.y + frame.h - frame.width / 2
+    for tip, outward in ((min(outline), -1), (max(outline), 1)):
+        assert abs(tip[1] - middle) < side / 10
+        assert abs(tip[0] - middle) - half > side / 4
+        tab = [(x, y) for x, y in outline if outward * (x - middle) > half]
+        neck = _height_across(tab, middle + outward * (half + side / 40))
+        head = max(_height_across(tab, middle + outward * (half + side * n / 40)) for n in range(2, 10))
+        assert head > neck * 1.3
+    across_the_middle = [y for x, y in outline if abs(x - middle) < side / 20]
+    assert min(across_the_middle) - (middle - half) > side / 4
+    assert (middle + half) - max(across_the_middle) > side / 4
+
+
+def test_the_warning_is_a_bar_and_a_dot_under_a_raised_triangles_point():
+    [triangle] = _of("warning", Polygon)
+    [bar] = _of("warning", Line)
+    [dot] = _of("warning", Ellipse)
+    point, right, left = triangle.points
+
+    assert point[1] < left[1] == right[1]
+    assert bar.x1 == bar.x2 == dot.cx == point[0]
+    assert point[1] < bar.y1 < bar.y2 < dot.cy < left[1]
