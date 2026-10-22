@@ -845,3 +845,16 @@ def test_the_warning_is_a_bar_and_a_dot_under_a_raised_triangles_point():
     assert point[1] < left[1] == right[1]
     assert bar.x1 == bar.x2 == dot.cx == point[0]
     assert point[1] < bar.y1 < bar.y2 < dot.cy < left[1]
+
+
+def test_a_mark_drawn_to_fill_a_box_reaches_it_along_one_side_and_sits_in_its_middle():
+    canvas = QPixmap(120, 60)
+    canvas.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(canvas)
+    icons.draw_glyph_filling(painter, "question", TEXT_PRIMARY, QRectF(0, 0, 120, 60))
+    painter.end()
+
+    left, top, right, bottom = _ink_rect(canvas)
+    assert bottom - top >= 56
+    assert abs((left + right) / 2 - 60) <= 1.5
+    assert abs((top + bottom) / 2 - 30) <= 1.5

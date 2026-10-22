@@ -26,6 +26,7 @@ business and it stays there.
 from __future__ import annotations
 
 import html
+from functools import cache
 
 from PyQt6.QtCore import QBuffer, QByteArray, QIODevice, QPointF, QRectF, Qt
 from PyQt6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap
@@ -74,6 +75,30 @@ def draw_glyph(painter: QPainter, name: str, color, *,
     painter.restore()
     if shapes is STAND_IN and isinstance(painter.device(), QPixmap):
         remember_the_stand_in_on(painter.device(), name)
+
+
+_INK_PROBE = 2 * int(CANVAS)
+_VISIBLE_ALPHA = 32
+
+
+@cache
+def _ink_box(name: str) -> QRectF:
+    image = glyph_pixmap(name, _INK_PROBE, TEXT_PRIMARY).toImage()
+    inked = [(x, y) for y in range(image.height()) for x in range(image.width())
+             if image.pixelColor(x, y).alpha() >= _VISIBLE_ALPHA]
+    xs, ys = [x for x, _y in inked], [y for _x, y in inked]
+    unit = CANVAS / _INK_PROBE
+    return QRectF(min(xs) * unit, min(ys) * unit,
+                  (max(xs) + 1 - min(xs)) * unit, (max(ys) + 1 - min(ys)) * unit)
+
+
+def draw_glyph_filling(painter: QPainter, name: str, color, box: QRectF) -> None:
+    """Paint *name* as large as its ink fits in *box*, centered there."""
+    ink = _ink_box(name)
+    scale = min(box.width() / ink.width(), box.height() / ink.height())
+    draw_glyph(painter, name, color, size=CANVAS * scale,
+               x=box.center().x() - ink.center().x() * scale,
+               y=box.center().y() - ink.center().y() * scale)
 
 
 def glyph_pixmap(name: str, size: int, color) -> QPixmap:
