@@ -108,6 +108,13 @@ def as_fractions(rgb: Rgb, alpha: float = 1.0) -> tuple[float, float, float, flo
     return (red / 255, green / 255, blue / 255, alpha)
 
 
+def nearest(rgb: Rgb) -> Rgb:
+    """The family's color closest to *rgb*, for one that reaches an app from outside its code."""
+    family = {value for name, value in globals().items()
+              if name.isupper() and isinstance(value, tuple) and len(value) == 3}
+    return min(family, key=lambda color: sum((a - b) ** 2 for a, b in zip(color, rgb, strict=True)))
+
+
 _NAMED_IN_A_PAGE = re.compile(r"__PALETTE_([A-Z_]+?)__")
 
 
