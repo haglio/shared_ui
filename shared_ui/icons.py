@@ -108,8 +108,9 @@ def glyph_icon(name: str, *, color=None, size: int = int(CANVAS)) -> QIcon:
     return icon
 
 
-def marked_text(name: str, text: str, *, color, size: int) -> str:
-    """*text* as a label's rich text, led by *name* drawn *size* across in *color*.
+def inline_mark(name: str, *, color, size: int) -> str:
+    """*name* as an image a label's rich text can set among its words, *size*
+    across in *color*.
 
     Drawn at twice that and scaled down, so the mark stays crisp on a screen
     that scales the label up.
@@ -119,8 +120,12 @@ def marked_text(name: str, text: str, *, color, size: int) -> str:
     buffer.open(QIODevice.OpenModeFlag.WriteOnly)
     glyph_pixmap(name, 2 * size, color).save(buffer, "PNG")
     source = "data:image/png;base64," + bytes(png.toBase64()).decode("ascii")
-    return (f'<img src="{source}" width="{size}" height="{size}" style="vertical-align: middle">'
-            f"&nbsp;{html.escape(text, quote=False)}")
+    return f'<img src="{source}" width="{size}" height="{size}" style="vertical-align: middle">'
+
+
+def marked_text(name: str, text: str, *, color, size: int) -> str:
+    """*text* as a label's rich text, led by *name* drawn *size* across in *color*."""
+    return f"{inline_mark(name, color=color, size=size)}&nbsp;{html.escape(text, quote=False)}"
 
 
 def _set_pen(painter: QPainter, ink: QColor, width: float) -> None:

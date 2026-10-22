@@ -910,6 +910,10 @@ GLYPHS: dict[str, tuple] = {
     "database": _database(),
     "disc": (Ellipse(24, 24, 21, 21, fill=True),),
     "enhance_filter": _enhance_filter(),
+    "enlarge": (                                          # four corners pushed outward
+        Polyline(((8, 19), (8, 8), (19, 8))), Polyline(((29, 8), (40, 8), (40, 19))),
+        Polyline(((40, 29), (40, 40), (29, 40))), Polyline(((19, 40), (8, 40), (8, 29))),
+    ),
     "error": (Ellipse(24, 24, 18, 18, width=4), Line(18, 18, 30, 30, 4.5), Line(30, 18, 18, 30, 4.5)),
     "expand_horizontal": _expand_horizontal(),
     "export": (                                           # out of a tray
