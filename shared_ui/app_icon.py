@@ -39,6 +39,20 @@ _CELL_MARGIN = 8
 _LATTICE = (0.0, 0.5, 1.0)
 
 
+def draw_letter(draw, rect: tuple[int, int, int, int], letter: str) -> None:
+    """*letter*'s cells centered in *rect*, the blank ones left alone so what is
+    under the mark shows through its counters as the .ico's transparent cells
+    let the desktop through."""
+    x, y, w, h = rect
+    cell = max(1, min(w, h) // 7)
+    left, top = x + (w - 5 * cell) / 2, y + (h - 5 * cell) / 2
+    for row, line in enumerate(LETTERS[letter]):
+        for column, painted in enumerate(line):
+            if painted == "#":
+                cx, cy = left + column * cell, top + row * cell
+                draw.rectangle([cx, cy, cx + cell - 1, cy + cell - 1], fill=(*MAGENTA, 255))
+
+
 def _master(path: Path) -> Image.Image:
     image = Image.open(path)
     if image.size != (CANVAS, CANVAS):

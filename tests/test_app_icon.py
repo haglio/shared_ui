@@ -93,3 +93,15 @@ def test_the_grid_is_five_cells_of_one_bar():
         assert len(cells) == 5 and all(len(line) == 5 for line in cells), letter
         assert set("".join(cells)) <= {"#", "."}, letter
     assert app_icon.CORNER_SOFTENING_MAX < UNIT / 4
+
+
+def test_a_hud_draws_an_app_s_letter_as_its_cells_in_magenta_leaving_the_rest_alone():
+    image = Image.new("RGBA", (35, 35), (10, 20, 30, 255))
+
+    app_icon.draw_letter(ImageDraw.Draw(image), (0, 0, 35, 35), "L")
+
+    cell = 35 // 7
+    magenta = [point for point in ((x, y) for y in range(35) for x in range(35))
+               if image.getpixel(point) == (*MAGENTA, 255)]
+    assert len(magenta) == sum(row.count("#") for row in LETTERS["L"]) * cell * cell
+    assert image.getpixel((0, 0)) == (10, 20, 30, 255)
