@@ -53,6 +53,7 @@ RED: Rgb = (255, 60, 60)
 AMBER: Rgb = (255, 200, 120)
 MAGENTA: Rgb = (200, 80, 160)
 WHITE: Rgb = (255, 255, 255)
+BLACK: Rgb = (0, 0, 0)  # the ground a video plays on, as every Funestra's mpv draws it
 
 # ---------------------------------------------------------------------------
 # The loading screen every app shows while it starts
