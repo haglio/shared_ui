@@ -16,7 +16,8 @@ import uuid
 
 import pytest
 from PyQt6.QtCore import QRectF, QSize, Qt
-from PyQt6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
+from PyQt6.QtGui import QColor, QIcon, QImage, QPainter, QPen, QPixmap
+from PyQt6.QtWidgets import QLabel
 
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
@@ -674,3 +675,30 @@ def test_a_corner_mark_keeps_to_the_corner_its_mark_leaves_free():
     for name in _IN_A_CORNER:
         left, upper, _right, _lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
         assert left >= 24 and upper >= 24, f"{name} reaches out of the lower right"
+
+
+
+def _rendered_label(text: str) -> QImage:
+    label = QLabel()
+    label.setStyleSheet("background: black; color: white;")
+    label.setText(text)
+    label.resize(200, 30)
+    return label.grab().toImage()
+
+
+@pytest.mark.usefixtures("qapp")
+def test_a_line_of_text_can_lead_with_a_mark_drawn_in_its_ink():
+    def reds(image) -> list[int]:
+        return [x for y in range(image.height()) for x in range(image.width())
+                if image.pixelColor(x, y).red() > 150 and image.pixelColor(x, y).green() < 120]
+
+    marked = reds(_rendered_label(icons.marked_text("mic", "heard it", color=RED, size=16)))
+
+    assert marked and max(marked) < 20, "the mark leads the line"
+
+
+@pytest.mark.usefixtures("qapp")
+def test_a_marked_line_shows_its_words_as_they_were_written():
+    line = icons.marked_text("mic", "1 < 2 & <b>bold</b>", color=RED, size=16)
+
+    assert "1 &lt; 2 &amp; &lt;b&gt;bold&lt;/b&gt;" in line

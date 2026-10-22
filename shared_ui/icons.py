@@ -25,7 +25,9 @@ business and it stays there.
 
 from __future__ import annotations
 
-from PyQt6.QtCore import QPointF, QRectF, Qt
+import html
+
+from PyQt6.QtCore import QBuffer, QByteArray, QIODevice, QPointF, QRectF, Qt
 from PyQt6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap
 
 from shared_ui.colors import TEXT_MUTED, TEXT_PRIMARY
@@ -104,6 +106,21 @@ def glyph_icon(name: str, *, color=None, size: int = int(CANVAS)) -> QIcon:
     )
     icon.addPixmap(glyph_pixmap(name, size, TEXT_MUTED), QIcon.Mode.Disabled)
     return icon
+
+
+def marked_text(name: str, text: str, *, color, size: int) -> str:
+    """*text* as a label's rich text, led by *name* drawn *size* across in *color*.
+
+    Drawn at twice that and scaled down, so the mark stays crisp on a screen
+    that scales the label up.
+    """
+    png = QByteArray()
+    buffer = QBuffer(png)
+    buffer.open(QIODevice.OpenModeFlag.WriteOnly)
+    glyph_pixmap(name, 2 * size, color).save(buffer, "PNG")
+    source = "data:image/png;base64," + bytes(png.toBase64()).decode("ascii")
+    return (f'<img src="{source}" width="{size}" height="{size}" style="vertical-align: middle">'
+            f"&nbsp;{html.escape(text, quote=False)}")
 
 
 def _set_pen(painter: QPainter, ink: QColor, width: float) -> None:
