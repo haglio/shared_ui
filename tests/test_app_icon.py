@@ -105,3 +105,23 @@ def test_a_hud_draws_an_app_s_letter_as_its_cells_in_magenta_leaving_the_rest_al
                if image.getpixel(point) == (*MAGENTA, 255)]
     assert len(magenta) == sum(row.count("#") for row in LETTERS["L"]) * cell * cell
     assert image.getpixel((0, 0)) == (10, 20, 30, 255)
+
+
+@pytest.mark.parametrize("letter", ["B", "F"])
+def test_a_hud_s_letter_lands_on_the_pixels_as_its_own_grid(letter):
+    """The .ico files live in the apps' own repos, so a HUD draws the mark from the
+    grid instead of loading another repo's file -- which works only if what lands
+    on the pixels is that grid."""
+    image = Image.new("RGBA", (18, 18), (0, 0, 0, 0))
+
+    app_icon.draw_letter(ImageDraw.Draw(image), (0, 0, 18, 18), letter)
+
+    painted = [[image.getpixel((x, y))[3] > 0 for x in range(18)] for y in range(18)]
+    columns = [x for x in range(18) if any(row[x] for row in painted)]
+    rows = [y for y in range(18) if any(painted[y])]
+    cell = (columns[-1] - columns[0] + 1) / 5
+    assert [
+        "".join("#" if painted[int(rows[0] + (r + 0.5) * cell)][int(columns[0] + (c + 0.5) * cell)]
+                else "." for c in range(5))
+        for r in range(5)
+    ] == list(LETTERS[letter])
