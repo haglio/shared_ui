@@ -5,11 +5,13 @@ Every color the apps share is here, once, as ``(red, green, blue)``.
 anything that draws without Qt reads this module instead: the Funestras paint
 their HUDs into the video frame with Pillow, and Fun Time's help page is HTML.
 A second copy of a number is a thing that drifts, so there is one.  This
-module imports nothing, so a Pillow-only process
+module imports nothing outside the standard library, so a Pillow-only process
 never pulls in Qt to learn what color a button is.
 """
 
 from __future__ import annotations
+
+import re
 
 Rgb = tuple[int, int, int]
 
@@ -92,3 +94,12 @@ def as_hex(rgb: Rgb) -> str:
     """The ``#rrggbb`` spelling a style sheet or an HTML page takes."""
     red, green, blue = rgb
     return f"#{red:02x}{green:02x}{blue:02x}"
+
+
+_NAMED_IN_A_PAGE = re.compile(r"__PALETTE_([A-Z_]+?)__")
+
+
+def with_palette(page: str) -> str:
+    """*page* with each ``__PALETTE_<NAME>__`` it names spelled as that color's
+    ``#rrggbb``, so an HTML page or a style sheet takes the family's colors by name."""
+    return _NAMED_IN_A_PAGE.sub(lambda named: as_hex(globals()[named.group(1)]), page)
