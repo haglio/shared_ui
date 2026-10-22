@@ -19,6 +19,7 @@ from PyQt6.QtWidgets import (
 from shared_ui.chrome import family_stylesheet
 from shared_ui.colors import BG_BUTTON, BG_SECONDARY, BLUE, TEXT_MUTED
 from shared_ui.find_bar import FindBar
+from shared_ui.icons import glyph_icon
 
 
 @pytest.fixture
@@ -262,3 +263,14 @@ def test_the_strip_dresses_itself_in_a_window_with_only_the_family_sheet(bar, fi
     assert picture.pixelColor(query.center().x(), query.y() + query.height() - 3) == BG_SECONDARY
     assert picture.pixelColor(close.left() + 2, close.top() + 2) == BG_BUTTON
     assert bar.findChild(QLabel, "findCount").palette().color(QPalette.ColorRole.WindowText) == TEXT_MUTED
+
+
+@pytest.mark.parametrize(("tooltip_start", "drawn"), [
+    ("Previous match", "chevron_up"), ("Next match", "chevron_down"), ("Close", "cross"),
+])
+def test_each_button_wears_the_family_s_mark_rather_than_a_typed_one(bar, tooltip_start, drawn):
+    button = _button(bar, tooltip_start)
+
+    assert button.text() == ""
+    assert (button.icon().pixmap(48, 48).toImage()
+            == glyph_icon(drawn, size=48).pixmap(48, 48).toImage())
