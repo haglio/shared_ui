@@ -10,14 +10,13 @@ from enum import Enum
 from pathlib import Path
 
 from PyQt6.QtCore import QObject, Qt, QThread, QUrl, pyqtSignal, pyqtSlot
-from PyQt6.QtGui import QDesktopServices, QIcon
+from PyQt6.QtGui import QColor, QDesktopServices, QIcon, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
     QDialog,
     QHBoxLayout,
     QLabel,
     QPushButton,
-    QStyle,
     QVBoxLayout,
 )
 
@@ -31,6 +30,7 @@ from shared_ui.colors import (
     family_palette,
 )
 from shared_ui.fonts import SIZE_BODY, make_font
+from shared_ui.icons import glyph_pixmap
 from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, MARGIN_DIALOG
 
 # The mark beside the message, in pixels square.  Windows' own message dialogs
@@ -90,11 +90,23 @@ class _GuiThreadCall(QObject):
 
 
 class Level(Enum):
-    """How bad the news is, in the mark the dialog draws beside it."""
+    """How bad the news is, in the family mark the dialog draws beside it."""
 
-    ERROR = QStyle.StandardPixmap.SP_MessageBoxCritical
-    WARNING = QStyle.StandardPixmap.SP_MessageBoxWarning
-    INFO = QStyle.StandardPixmap.SP_MessageBoxInformation
+    ERROR = ("error", palette.RED)
+    WARNING = ("warning", palette.AMBER)
+    INFO = ("info", palette.BLUE)
+
+    @property
+    def mark(self) -> str:
+        return self.value[0]
+
+    @property
+    def ink(self) -> palette.Rgb:
+        return self.value[1]
+
+
+def mark_pixmap(level: Level, size: int) -> QPixmap:
+    return glyph_pixmap(level.mark, size, QColor(*level.ink))
 
 
 @dataclass(frozen=True)
@@ -160,7 +172,7 @@ class AlertDialog(QDialog):
             QPushButton:pressed {{ background: {BG_TERTIARY.name()}; }}
         """)
         mark = QLabel()
-        mark.setPixmap(self.style().standardIcon(level.value).pixmap(MARK_SIZE, MARK_SIZE))
+        mark.setPixmap(mark_pixmap(level, MARK_SIZE))
         mark.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         body = QLabel(message)

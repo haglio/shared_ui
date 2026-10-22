@@ -9,7 +9,7 @@ import pytest
 from PyQt6.QtCore import QMargins, QPoint, Qt, QThread, QTimer, QUrl
 from PyQt6.QtGui import QColor, QIcon, QPalette, QPixmap, QTextDocument
 from PyQt6.QtTest import QTest
-from PyQt6.QtWidgets import QApplication, QDialog, QLabel, QPushButton, QStyle
+from PyQt6.QtWidgets import QApplication, QDialog, QLabel, QPushButton
 
 from shared_ui.alert import (
     DISMISSED,
@@ -19,17 +19,21 @@ from shared_ui.alert import (
     AlertDialog,
     Level,
     Link,
+    mark_pixmap,
     show_alert,
 )
 from shared_ui.colors import (
+    AMBER,
     BG_BUTTON,
     BG_TERTIARY,
     BLUE,
+    RED,
     TEXT_PRIMARY,
     TEXT_SECONDARY,
     hovered,
 )
 from shared_ui.fonts import SIZE_BODY, make_font
+from shared_ui.icons import glyph_pixmap
 from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, MARGIN_DIALOG
 from shared_ui.testing import ground
 
@@ -204,19 +208,19 @@ def test_the_message_column_has_a_floor_as_well_as_a_ceiling():
 
 
 @pytest.mark.parametrize(
-    "level, standard",
+    "level, drawn, ink",
     [
-        (Level.ERROR, QStyle.StandardPixmap.SP_MessageBoxCritical),
-        (Level.WARNING, QStyle.StandardPixmap.SP_MessageBoxWarning),
-        (Level.INFO, QStyle.StandardPixmap.SP_MessageBoxInformation),
+        (Level.ERROR, "error", RED),
+        (Level.WARNING, "warning", AMBER),
+        (Level.INFO, "info", BLUE),
     ],
 )
-def test_the_level_picks_the_mark_beside_the_message(level, standard):
+def test_the_level_picks_the_family_mark_beside_the_message(level, drawn, ink):
     dlg = AlertDialog("Example App", "Nothing to do.", level=level)
 
     mark, = [lbl for lbl in dlg.findChildren(QLabel) if not lbl.text()]
-    expected = dlg.style().standardIcon(standard).pixmap(MARK_SIZE, MARK_SIZE)
-    assert mark.pixmap().toImage() == expected.toImage()
+    assert mark.pixmap().toImage() == glyph_pixmap(drawn, MARK_SIZE, ink).toImage()
+    assert mark_pixmap(level, MARK_SIZE).toImage() == mark.pixmap().toImage()
 
 
 def test_the_dialog_wears_the_apps_own_icon(tmp_path):
