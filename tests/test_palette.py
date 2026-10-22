@@ -41,6 +41,11 @@ def test_the_hex_spelling_is_the_style_sheets():
     assert QColor(palette.as_hex(palette.AMBER)) == QColor(*palette.AMBER)
 
 
+def test_the_see_through_spelling_is_the_style_sheets_rgba():
+    assert palette.as_rgba(palette.BLACK, 0.55) == "rgba(0, 0, 0, 0.55)"
+    assert palette.as_rgba(palette.BLUE, 1) == "rgba(48, 128, 224, 1)"
+
+
 def test_the_fraction_spelling_is_what_a_headset_draws_with():
     assert palette.as_fractions(palette.WHITE, 0.5) == (1.0, 1.0, 1.0, 0.5)
     assert palette.as_fractions((51, 102, 0)) == (0.2, 0.4, 0.0, 1.0)
