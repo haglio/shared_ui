@@ -132,7 +132,8 @@ def _spelled(node: ast.AST, source: str) -> str:
 
 def _in_call(call: ast.Call, source: str) -> list[str]:
     name = call.func.attr if isinstance(call.func, ast.Attribute) else getattr(call.func, "id", "")
-    if (name == "QColor" or name in _QCOLOR_FROM) and any(
+    spreads_a_family_color = bool(call.args) and isinstance(call.args[0], ast.Starred)
+    if (name == "QColor" or name in _QCOLOR_FROM) and not spreads_a_family_color and any(
             _number(arg) is not None or _a_named_color(arg) for arg in call.args):
         return [f"color {_spelled(call, source)}"]
     if name in _GL_COLORS and sum(_number(arg) is not None for arg in call.args) >= 3:
