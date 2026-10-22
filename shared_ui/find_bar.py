@@ -17,6 +17,7 @@ from PyQt6.QtWidgets import (
 )
 
 from shared_ui.chrome import field_rules, tool_button_rules
+from shared_ui.icons import glyph_icon
 from shared_ui.palette import TEXT_MUTED, as_hex
 from shared_ui.text_find import TextFind
 
@@ -62,21 +63,21 @@ class FindBar(QWidget):
         self._count = QLabel("")
         self._count.setObjectName("findCount")
         row.addWidget(self._count)
-        self._prev_btn = self._step_button("▲", "Previous match (Shift+Enter)", -1)
-        self._next_btn = self._step_button("▼", "Next match (Enter)", 1)
+        self._prev_btn = self._step_button("chevron_up", "Previous match (Shift+Enter)", -1)
+        self._next_btn = self._step_button("chevron_down", "Next match (Enter)", 1)
         row.addWidget(self._prev_btn)
         row.addWidget(self._next_btn)
         close = QToolButton()
-        close.setText("✕")
+        close.setIcon(glyph_icon("cross"))
         close.setToolTip(f"Close the find ({dismiss_key})" if dismiss_key else "Close the find")
         close.clicked.connect(self.close_find)
         row.addWidget(close)
         self.setStyleSheet(_look())
         self.hide()
 
-    def _step_button(self, text: str, tooltip: str, delta: int) -> QToolButton:
+    def _step_button(self, mark: str, tooltip: str, delta: int) -> QToolButton:
         button = QToolButton()
-        button.setText(text)
+        button.setIcon(glyph_icon(mark))
         button.setToolTip(tooltip)
         button.clicked.connect(lambda _checked=False, d=delta: self._step(d))
         button.setEnabled(False)
