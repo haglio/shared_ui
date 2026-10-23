@@ -45,6 +45,7 @@ _SPACING_IN_TEXT = re.compile(r"\b(?:padding|margin|border-radius|gap|spacing)(?
 _WHAT_TEXT_IS_SIZED_BY = {"FONT", "TEXT", "TITLE", "ROW", "READING", "LABEL", "HEADING", "WORDMARK",
                           "STATUS", "HINT", "CAPTION", "SMALL", "BODY", "TINY"}
 _WHAT_A_SHAPE_IS_SIZED_BY = {"WIDTH", "HEIGHT", "SIDE", "GAP", "PAD", "INSET", "CAP", "MARGIN", "RADIUS"}
+_WHAT_SPACES = {"MARGIN", "GAP", "PAD", "PADDING", "SPACING", "INSET", "RADIUS"}
 _TEXT_SIZE_CALLS = {"setPointSize", "setPointSizeF", "setPixelSize"}
 _SIZED_AT = {"QFont": 1, "make_font": 1, "truetype": 1, "load_font": 0}
 _SIZE_KEYWORDS = {"size", "pointSize", "px"}
@@ -209,6 +210,15 @@ def _names_a_text_size(name: str) -> bool:
             and not words & _WHAT_A_SHAPE_IS_SIZED_BY)
 
 
+def _names_a_spacing(name: str) -> bool:
+    if not name.isupper():
+        return False
+    words = name.strip("_").split("_")
+    if words[-1] == "PX":
+        words = words[:-1]
+    return bool(words) and words[-1] in _WHAT_SPACES
+
+
 def _in_assignment(assignment: ast.Assign | ast.AnnAssign, source: str) -> list[str]:
     value = assignment.value
     targets = assignment.targets if isinstance(assignment, ast.Assign) else [assignment.target]
@@ -219,6 +229,8 @@ def _in_assignment(assignment: ast.Assign | ast.AnnAssign, source: str) -> list[
         return [f"color {names[0]} = {_spelled(value, source)}"]
     if any(_names_a_text_size(name) for name in names) and _number(value) is not None:
         return [f"text size {names[0]} = {_spelled(value, source)}"]
+    if any(_names_a_spacing(name) for name in names) and _number(value) not in (None, 0):
+        return [f"spacing {names[0]} = {_spelled(value, source)}"]
     return []
 
 
