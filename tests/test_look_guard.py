@@ -82,7 +82,7 @@ def test_a_color_spelled_any_other_way_is_named_too(app, line):
     "SHEET = 'QWidget { background: transparent; }'",
     "pixmap.fill(Qt.GlobalColor.transparent)",
     "MARGINS = (4, 4, 4, 4)",
-    "SHEET = 'QPushButton#add { padding: 2px; }'",
+    "SHEET = 'QPushButton#add { padding: 0; }'",
     "LINK = 'page.html#fade'",
     "SEEN = 'a #123 in a sentence'",
     "IMAGE_ICON, LR_LOADFROMFILE, WM_SETICON = 1, 0x10, 0x80",
@@ -183,3 +183,69 @@ def test_an_allowance_takes_out_what_it_names_wherever_the_line_moves(app):
 
     assert_the_look_is_shared_uis(checkout, [checkout / "parlor"],
                                   allowing=("parlor/aim.py: color (114, 114, 114)",))
+
+
+@pytest.mark.parametrize("line", [
+    "SHEET = 'QLabel { font-size: 15px; }'",
+    "SHEET = 'body { font: 14px/1.45 sans-serif; }'",
+    "SHEET = 'code { font-family: Consolas, monospace; }'",
+    "font.setPointSize(8)",
+    "font.setPixelSize(30)",
+    "font = QFont('Arial')",
+    "font = QFont(FONT_UI, 12)",
+    "font = make_font(size=12)",
+    "font = ImageFont.truetype('arial.ttf', 13)",
+    "_TITLE_PT = 17",
+    "BANNER_FONT_PX = 44",
+])
+def test_a_face_or_a_text_size_of_its_own_is_named(app, line):
+    assert _found(app({"tiles.py": line + "\n"}))
+
+
+def test_a_text_size_a_record_carries_is_named(app):
+    checkout = app({"tiles.py": "class Metrics:\n    wordmark_px: int = 24\n"})
+
+    assert _found(checkout) == ["parlor/tiles.py:2: text size wordmark_px = 24"]
+
+
+@pytest.mark.parametrize("line", [
+    "SHEET = 'QLabel { padding: 2px 6px; }'",
+    "SHEET = 'QFrame { border-radius: 6px; }'",
+    "SHEET = '.row { margin-top: 3px; gap: 14px; }'",
+    "layout.setContentsMargins(6, 6, 6, 6)",
+    "layout.setSpacing(10)",
+    "layout.addSpacing(12)",
+])
+def test_a_spacing_of_its_own_is_named(app, line):
+    assert _found(app({"tiles.py": line + "\n"}))
+
+
+@pytest.mark.parametrize("line", [
+    "SHEET = f\"QLabel {{ font-size: {SIZE_SMALL}pt; font-family: '{FONT_UI}'; }}\"",
+    "SHEET = f'QLabel {{ padding: {GAP_SMALL}px {GAP_MEDIUM}px; border-radius: {BUTTON_RADIUS}px; }}'",
+    "SHEET = 'QLabel { padding: 0; margin: 0px; font: inherit; }'",
+    "font.setPointSize(SIZE_BODY)",
+    "font = make_font(size=SIZE_HEADING, bold=True)",
+    "layout.setContentsMargins(0, 0, 0, 0)",
+    "layout.setSpacing(GAP_SMALL)",
+    "_MARK_PX = 48",
+])
+def test_the_familys_own_type_and_spacing_or_none_at_all_passes(app, line):
+    assert _found(app({"tiles.py": line + "\n"})) == []
+
+
+def test_a_face_and_a_text_size_are_named_as_they_are_written(app):
+    checkout = app({"tiles.py": "SHEET = 'QLabel { font-size: 10px; font-family: Consolas, monospace; }'\n"})
+
+    assert _found(checkout) == ["parlor/tiles.py:1: face font-family: Consolas, monospace",
+                                "parlor/tiles.py:1: text size font-size: 10px"]
+
+
+@pytest.mark.parametrize(("line", "named"), [
+    ("_SMALL_PX = 11", ["parlor/tiles.py:1: text size _SMALL_PX = 11"]),
+    ("_ROW_PX = 12", ["parlor/tiles.py:1: text size _ROW_PX = 12"]),
+    ("BANNER_MAX_WIDTH_PX = 1600", []),
+    ("_MARK_SIDE_PX = 12", []),
+])
+def test_a_size_is_a_text_size_by_what_its_name_says_it_sizes(app, line, named):
+    assert _found(app({"tiles.py": line + "\n"})) == named
