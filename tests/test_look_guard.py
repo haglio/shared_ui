@@ -197,9 +197,22 @@ def test_an_allowance_takes_out_what_it_names_wherever_the_line_moves(app):
     "font = ImageFont.truetype('arial.ttf', 13)",
     "_TITLE_PT = 17",
     "BANNER_FONT_PX = 44",
+    "font.setPointSize(font.pointSize() + 1)",
+    "font = make_font(size=max(SIZE_TINY, round(height * 0.03)))",
 ])
 def test_a_face_or_a_text_size_of_its_own_is_named(app, line):
     assert _found(app({"tiles.py": line + "\n"}))
+
+
+@pytest.mark.parametrize(("line", "named"), [
+    ("SHEET = \"code { font-family: 'Courier New', monospace; }\"",
+     ["parlor/tiles.py:1: face font-family: 'Courier New', monospace"]),
+    ("SHEET = 'p { font: __TYPE_SIZE_SMALL__/1.4 monospace; }'",
+     ["parlor/tiles.py:1: face font: __TYPE_SIZE_SMALL__/1.4 monospace"]),
+    ("PAGE = \"p { font-family: '__TYPE_FONT_UI__'; font: __TYPE_SIZE_SMALL__/1.4 '__TYPE_FONT_UI__'; }\"", []),
+])
+def test_a_face_is_named_in_quotes_and_in_the_font_shorthand(app, line, named):
+    assert _found(app({"tiles.py": line + "\n"})) == named
 
 
 def test_a_text_size_a_record_carries_is_named(app):
@@ -215,6 +228,8 @@ def test_a_text_size_a_record_carries_is_named(app):
     "layout.setContentsMargins(6, 6, 6, 6)",
     "layout.setSpacing(10)",
     "layout.addSpacing(12)",
+    "SHEET = '.hint { margin: 1em 0; }'",
+    "SHEET = '.dest { margin-top: 0.8em; }'",
 ])
 def test_a_spacing_of_its_own_is_named(app, line):
     assert _found(app({"tiles.py": line + "\n"}))
@@ -229,6 +244,9 @@ def test_a_spacing_of_its_own_is_named(app, line):
     "layout.setContentsMargins(0, 0, 0, 0)",
     "layout.setSpacing(GAP_SMALL)",
     "_MARK_PX = 48",
+    "SHEET = '#clip { margin: 0 auto; padding: 0em; }'",
+    "font.setPixelSize(in_pixels(SIZE_BODY))",
+    "font = QFont(FONT_UI, -1)",
 ])
 def test_the_familys_own_type_and_spacing_or_none_at_all_passes(app, line):
     assert _found(app({"tiles.py": line + "\n"})) == []
@@ -246,6 +264,7 @@ def test_a_face_and_a_text_size_are_named_as_they_are_written(app):
     ("_ROW_PX = 12", ["parlor/tiles.py:1: text size _ROW_PX = 12"]),
     ("BANNER_MAX_WIDTH_PX = 1600", []),
     ("_MARK_SIDE_PX = 12", []),
+    ("_LEGEND_POINT_SIZE = 8", ["parlor/tiles.py:1: text size _LEGEND_POINT_SIZE = 8"]),
 ])
 def test_a_size_is_a_text_size_by_what_its_name_says_it_sizes(app, line, named):
     assert _found(app({"tiles.py": line + "\n"})) == named

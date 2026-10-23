@@ -35,9 +35,13 @@ _TYPOGRAPHY = set("°©®™")
 _MINUS_SIGN = "−"
 _UNIT = r"\d[\d.]*\s*(?:px|pt|em|rem|%)?"
 _TEXT_SIZE_IN_TEXT = re.compile(rf"\bfont-size\s*:\s*{_UNIT}|\bfont\s*:\s*(?:[a-z-]+\s+)*{_UNIT}", re.IGNORECASE)
-_FACE_IN_TEXT = re.compile(r"\bfont-family\s*:\s*(?!__)[^\s;'\"{}][^;'\"{}]*", re.IGNORECASE)
+_A_FACE = r"(?!['\"]?__)['\"]?[^\s;'\"{}][^;{}\"\n]*"
+_FACE_IN_TEXT = re.compile(rf"\bfont-family\s*:\s*{_A_FACE}"
+                           rf"|\bfont\s*:\s*(?:[a-z-]+\s+)*(?:\d\S*|__TYPE_[A-Z_]+?__\S*)\s+{_A_FACE}",
+                           re.IGNORECASE)
 _SPACING_IN_TEXT = re.compile(r"\b(?:padding|margin|border-radius|gap|spacing)(?:-[a-z]+)*\s*:[^;{}'\"]*?"
-                              r"(?<![\w.])[1-9]\d*(?:\.\d+)?\s*px", re.IGNORECASE)
+                              r"(?<![\w.])(?:[1-9]\d*(?:\.\d+)?|0?\.\d*[1-9]\d*)\s*(?:px|pt|em|rem)",
+                              re.IGNORECASE)
 _WHAT_TEXT_IS_SIZED_BY = {"FONT", "TEXT", "TITLE", "ROW", "READING", "LABEL", "HEADING", "WORDMARK",
                           "STATUS", "HINT", "CAPTION", "SMALL", "BODY", "TINY"}
 _WHAT_A_SHAPE_IS_SIZED_BY = {"WIDTH", "HEIGHT", "SIDE", "GAP", "PAD", "INSET", "CAP", "MARGIN", "RADIUS"}
@@ -158,13 +162,18 @@ def _the_size_given(call: ast.Call, name: str) -> ast.AST | None:
     return next((keyword.value for keyword in call.keywords if keyword.arg in _SIZE_KEYWORDS), None)
 
 
+def _a_size_of_its_own(size: ast.AST) -> bool:
+    return _number(size) is not None or (isinstance(size, (ast.BinOp, ast.Call)) and any(
+        _number(inner) is not None for inner in ast.walk(size)))
+
+
 def _in_type_or_spacing_call(call: ast.Call, name: str, source: str) -> list[str]:
     found = []
-    if name in _TEXT_SIZE_CALLS and call.args and _number(call.args[0]) is not None:
+    if name in _TEXT_SIZE_CALLS and call.args and _a_size_of_its_own(call.args[0]):
         found.append(f"text size {_spelled(call, source)}")
     if name in _SIZED_AT:
         size = _the_size_given(call, name)
-        if size is not None and _number(size) is not None:
+        if size is not None and _a_size_of_its_own(size):
             found.append(f"text size {_spelled(call, source)}")
     if name in _FACE_CALLS and call.args and _a_typed_string(call.args[0]):
         found.append(f"face {_spelled(call, source)}")
@@ -194,7 +203,7 @@ def _in_call(call: ast.Call, source: str) -> list[str]:
 
 def _names_a_text_size(name: str) -> bool:
     words = set(name.upper().strip("_").split("_"))
-    if name.upper().endswith("_PT"):
+    if name.upper().endswith(("_PT", "POINT_SIZE", "FONT_SIZE")):
         return True
     return (name.upper().endswith("_PX") and bool(words & _WHAT_TEXT_IS_SIZED_BY)
             and not words & _WHAT_A_SHAPE_IS_SIZED_BY)
