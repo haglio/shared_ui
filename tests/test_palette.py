@@ -3,7 +3,6 @@ as the same numbers spelled for Qt."""
 
 from __future__ import annotations
 
-import pytest
 from PyQt6.QtGui import QColor
 
 from shared_ui import colors, palette
@@ -55,19 +54,6 @@ def test_a_color_from_outside_the_code_is_drawn_as_the_familys_nearest():
     assert palette.nearest((250, 70, 70)) == palette.RED
     assert palette.nearest((1, 2, 3)) == palette.BLACK
     assert palette.nearest(palette.GREEN) == palette.GREEN
-
-
-def test_a_page_names_its_colors_and_gets_the_palettes_spelling_of_each():
-    page = "body { background: __PALETTE_BG_PRIMARY__; color: __PALETTE_TEXT_PRIMARY__; }"
-
-    assert palette.with_palette(page) == (
-        f"body {{ background: {palette.as_hex(palette.BG_PRIMARY)}; "
-        f"color: {palette.as_hex(palette.TEXT_PRIMARY)}; }}")
-
-
-def test_a_page_naming_a_color_the_palette_lacks_is_refused():
-    with pytest.raises(KeyError, match="TEAL"):
-        palette.with_palette("a { color: __PALETTE_TEAL__; }")
 
 
 def test_the_qt_spelling_is_the_palette_and_nothing_more():

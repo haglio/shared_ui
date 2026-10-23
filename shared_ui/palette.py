@@ -11,8 +11,6 @@ never pulls in Qt to learn what color a button is.
 
 from __future__ import annotations
 
-import re
-
 Rgb = tuple[int, int, int]
 
 # ---------------------------------------------------------------------------
@@ -113,12 +111,3 @@ def nearest(rgb: Rgb) -> Rgb:
     family = {value for name, value in globals().items()
               if name.isupper() and isinstance(value, tuple) and len(value) == 3}
     return min(family, key=lambda color: sum((a - b) ** 2 for a, b in zip(color, rgb, strict=True)))
-
-
-_NAMED_IN_A_PAGE = re.compile(r"__PALETTE_([A-Z_]+?)__")
-
-
-def with_palette(page: str) -> str:
-    """*page* with each ``__PALETTE_<NAME>__`` it names spelled as that color's
-    ``#rrggbb``, so an HTML page or a style sheet takes the family's colors by name."""
-    return _NAMED_IN_A_PAGE.sub(lambda named: as_hex(globals()[named.group(1)]), page)
