@@ -21,10 +21,6 @@ pytest_plugins  # tests/conftest.py loads the pointer fixture from shared_ui.tes
 #     vulture sees each token used; a palette token nobody reads shows up in
 #     colors.py's own tests instead. ---
 
-# --- fonts ---
-SIZE_SMALL  # genaumacher, fun_time, scripture
-SIZE_TINY  # genaumacher
-
 # --- spacing ---
 GAP_SMALL  # promptcrafter
 BUTTON_WORD_W  # fun_time's dashboard and its headset copy

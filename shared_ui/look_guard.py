@@ -1,5 +1,6 @@
-"""What an app spells of its own look: a color, a typed glyph or an icon that
-does not come from shared_ui, found in the source it tracks."""
+"""What an app spells of its own look: a color, a typed glyph, an icon, a face,
+a text size or a spacing that does not come from shared_ui, found in the source
+it tracks."""
 
 from __future__ import annotations
 
@@ -32,6 +33,19 @@ _GL_COLORS = {"glClearColor", "glColor3f", "glColor4f", "glUniform3f", "glUnifor
 _MASK_MODES = {"1", "L", "I", "F"}
 _TYPOGRAPHY = set("°©®™")
 _MINUS_SIGN = "−"
+_UNIT = r"\d[\d.]*\s*(?:px|pt|em|rem|%)?"
+_TEXT_SIZE_IN_TEXT = re.compile(rf"\bfont-size\s*:\s*{_UNIT}|\bfont\s*:\s*(?:[a-z-]+\s+)*{_UNIT}", re.IGNORECASE)
+_FACE_IN_TEXT = re.compile(r"\bfont-family\s*:\s*(?!__)[^\s;'\"{}][^;'\"{}]*", re.IGNORECASE)
+_SPACING_IN_TEXT = re.compile(r"\b(?:padding|margin|border-radius|gap|spacing)(?:-[a-z]+)*\s*:[^;{}'\"]*?"
+                              r"(?<![\w.])[1-9]\d*(?:\.\d+)?\s*px", re.IGNORECASE)
+_WHAT_TEXT_IS_SIZED_BY = {"FONT", "TEXT", "TITLE", "ROW", "READING", "LABEL", "HEADING", "WORDMARK",
+                          "STATUS", "HINT", "CAPTION", "SMALL", "BODY", "TINY"}
+_WHAT_A_SHAPE_IS_SIZED_BY = {"WIDTH", "HEIGHT", "SIDE", "GAP", "PAD", "INSET", "CAP", "MARGIN", "RADIUS"}
+_TEXT_SIZE_CALLS = {"setPointSize", "setPointSizeF", "setPixelSize"}
+_SIZED_AT = {"QFont": 1, "make_font": 1, "truetype": 1, "load_font": 0}
+_SIZE_KEYWORDS = {"size", "pointSize", "px"}
+_FACE_CALLS = {"QFont", "setFamily", "truetype"}
+_SPACING_CALLS = {"setContentsMargins", "setSpacing", "setHorizontalSpacing", "setVerticalSpacing", "addSpacing"}
 
 
 class LookNotRead(Exception):
@@ -64,6 +78,9 @@ def _in_text(text: str) -> list[str]:
     found += [f"color '{match.group(0)}'" for match in _CSS_NAMED.finditer(text)]
     found += [f"glyph {character} (U+{ord(character):04X} {unicodedata.name(character, '?')})"
               for character in dict.fromkeys(text) if _a_glyph(character)]
+    found += [f"text size {match.group(0)}" for match in _TEXT_SIZE_IN_TEXT.finditer(text)]
+    found += [f"face {match.group(0).rstrip()}" for match in _FACE_IN_TEXT.finditer(text)]
+    found += [f"spacing {match.group(0)}" for match in _SPACING_IN_TEXT.finditer(text)]
     return found
 
 
@@ -130,16 +147,43 @@ def _spelled(node: ast.AST, source: str) -> str:
     return ast.get_source_segment(source, node) or ast.unparse(node)
 
 
+def _a_typed_string(node: ast.AST) -> bool:
+    return isinstance(node, ast.Constant) and isinstance(node.value, str)
+
+
+def _the_size_given(call: ast.Call, name: str) -> ast.AST | None:
+    position = _SIZED_AT[name]
+    if len(call.args) > position:
+        return call.args[position]
+    return next((keyword.value for keyword in call.keywords if keyword.arg in _SIZE_KEYWORDS), None)
+
+
+def _in_type_or_spacing_call(call: ast.Call, name: str, source: str) -> list[str]:
+    found = []
+    if name in _TEXT_SIZE_CALLS and call.args and _number(call.args[0]) is not None:
+        found.append(f"text size {_spelled(call, source)}")
+    if name in _SIZED_AT:
+        size = _the_size_given(call, name)
+        if size is not None and _number(size) is not None:
+            found.append(f"text size {_spelled(call, source)}")
+    if name in _FACE_CALLS and call.args and _a_typed_string(call.args[0]):
+        found.append(f"face {_spelled(call, source)}")
+    if name in _SPACING_CALLS and any(_number(arg) not in (None, 0) for arg in call.args):
+        found.append(f"spacing {_spelled(call, source)}")
+    return found
+
+
 def _in_call(call: ast.Call, source: str) -> list[str]:
     name = call.func.attr if isinstance(call.func, ast.Attribute) else getattr(call.func, "id", "")
+    found = _in_type_or_spacing_call(call, name, source)
     spreads_a_family_color = bool(call.args) and isinstance(call.args[0], ast.Starred)
     if (name == "QColor" or name in _QCOLOR_FROM) and not spreads_a_family_color and any(
             _number(arg) is not None or _a_named_color(arg) for arg in call.args):
-        return [f"color {_spelled(call, source)}"]
+        return [*found, f"color {_spelled(call, source)}"]
     if name in _GL_COLORS and sum(_number(arg) is not None for arg in call.args) >= 3:
-        return [f"color {_spelled(call, source)}"]
-    found = [f"color {keyword.arg}={_spelled(keyword.value, source)}" for keyword in call.keywords
-             if keyword.arg in _COLOR_KEYWORDS and _a_color(keyword.value)]
+        return [*found, f"color {_spelled(call, source)}"]
+    found += [f"color {keyword.arg}={_spelled(keyword.value, source)}" for keyword in call.keywords
+              if keyword.arg in _COLOR_KEYWORDS and _a_color(keyword.value)]
     if name == "new" and _dotted(call.func).endswith("Image.new") and len(call.args) >= 3:
         mode, color = call.args[0], call.args[2]
         masked = isinstance(mode, ast.Constant) and mode.value in _MASK_MODES
@@ -148,14 +192,24 @@ def _in_call(call: ast.Call, source: str) -> list[str]:
     return found
 
 
+def _names_a_text_size(name: str) -> bool:
+    words = set(name.upper().strip("_").split("_"))
+    if name.upper().endswith("_PT"):
+        return True
+    return (name.upper().endswith("_PX") and bool(words & _WHAT_TEXT_IS_SIZED_BY)
+            and not words & _WHAT_A_SHAPE_IS_SIZED_BY)
+
+
 def _in_assignment(assignment: ast.Assign | ast.AnnAssign, source: str) -> list[str]:
     value = assignment.value
     targets = assignment.targets if isinstance(assignment, ast.Assign) else [assignment.target]
     names = [name for target in targets for name in _names(target)]
-    if value is None or not any(_COLOR_NAME.search(name) for name in names):
+    if value is None:
         return []
-    if _channels(value) or _a_named_color(value):
+    if any(_COLOR_NAME.search(name) for name in names) and (_channels(value) or _a_named_color(value)):
         return [f"color {names[0]} = {_spelled(value, source)}"]
+    if any(_names_a_text_size(name) for name in names) and _number(value) is not None:
+        return [f"text size {names[0]} = {_spelled(value, source)}"]
     return []
 
 
@@ -244,5 +298,6 @@ def assert_the_look_is_shared_uis(root: Path, packages: Iterable[Path], *,
     allowed = set(allowing)
     found = [finding for finding in looks_of_its_own(root, packages)
              if _without_its_line(finding) not in allowed]
-    assert not found, ("These draw a color, a glyph or an icon of their own; take each from "
-                       "shared_ui (its palette, its glyphs, its marks) instead:\n" + "\n".join(found))
+    assert not found, ("These draw a color, a glyph, an icon, a face, a text size or a spacing of their "
+                       "own; take each from shared_ui (its palette, its marks, its type scale, its "
+                       "spacing) instead:\n" + "\n".join(found))

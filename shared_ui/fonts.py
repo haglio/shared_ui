@@ -6,18 +6,16 @@ from functools import lru_cache
 
 from PyQt6.QtGui import QFont
 
-# ---------------------------------------------------------------------------
-# Font families
-# ---------------------------------------------------------------------------
-FONT_UI = "Segoe UI"
+from shared_ui.type_scale import (
+    FONT_UI,
+    SIZE_BODY,
+    SIZE_HEADING,
+    SIZE_SMALL,
+    SIZE_TINY,
+)
 
-# ---------------------------------------------------------------------------
-# Size tiers (points)
-# ---------------------------------------------------------------------------
-SIZE_HEADING = 14
-SIZE_BODY = 11
-SIZE_SMALL = 9
-SIZE_TINY = 8
+__all__ = ["FONT_UI", "SIZE_BODY", "SIZE_HEADING", "SIZE_SMALL", "SIZE_TINY", "make_font"]
+
 
 # ---------------------------------------------------------------------------
 # Helpers
