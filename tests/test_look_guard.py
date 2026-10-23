@@ -252,6 +252,19 @@ def test_the_familys_own_type_and_spacing_or_none_at_all_passes(app, line):
     assert _found(app({"tiles.py": line + "\n"})) == []
 
 
+@pytest.mark.parametrize(("line", "named"), [
+    ("NOTICE_TOP_MARGIN = 28", ["parlor/tiles.py:1: spacing NOTICE_TOP_MARGIN = 28"]),
+    ("_ROW_GAP_PX = 6", ["parlor/tiles.py:1: spacing _ROW_GAP_PX = 6"]),
+    ("_EDGE_MARGIN = 0", []),
+    ("_TOP_MARGIN = MARGIN_DIALOG", []),
+    ("_SLAT_GAP_DEG = 2.0", []),
+    ("roi_padding: int = 20", []),
+    ("min_gap = 10", []),
+])
+def test_a_spacing_is_named_by_what_its_name_says_it_spaces(app, line, named):
+    assert _found(app({"tiles.py": line + "\n"})) == named
+
+
 def test_a_face_and_a_text_size_are_named_as_they_are_written(app):
     checkout = app({"tiles.py": "SHEET = 'QLabel { font-size: 10px; font-family: Consolas, monospace; }'\n"})
 
