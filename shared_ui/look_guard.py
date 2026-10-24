@@ -50,7 +50,8 @@ _TEXT_SIZE_CALLS = {"setPointSize", "setPointSizeF", "setPixelSize"}
 _SIZED_AT = {"QFont": 1, "make_font": 1, "truetype": 1, "load_font": 0}
 _SIZE_KEYWORDS = {"size", "pointSize", "px"}
 _FACE_CALLS = {"QFont", "setFamily", "truetype"}
-_SPACING_CALLS = {"setContentsMargins", "setSpacing", "setHorizontalSpacing", "setVerticalSpacing", "addSpacing"}
+_SPACING_CALLS = {"setContentsMargins", "setSpacing", "setHorizontalSpacing", "setVerticalSpacing", "addSpacing",
+                  "QMargins", "QMarginsF"}
 
 
 class LookNotRead(Exception):
