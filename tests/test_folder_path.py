@@ -6,8 +6,9 @@ from PyQt6.QtCore import QEvent, QPointF, Qt
 from PyQt6.QtGui import QColor, QMouseEvent, QPixmap, QTextDocumentFragment
 from PyQt6.QtWidgets import QWidget
 
-from shared_ui.colors import BG_PRIMARY, BLUE_LIGHT
+from shared_ui.colors import BG_PRIMARY, BLUE_LIGHT, TEXT_PRIMARY
 from shared_ui.folder_path import FolderPath
+from shared_ui.icons import marked_text
 
 
 def _links(path: FolderPath) -> list[tuple[str, str]]:
@@ -83,6 +84,17 @@ def test_words_can_lead_the_path_without_being_a_step_of_it():
     assert path.plain_text() == "Search: “cats & dogs” in Landscape  ›  All"
     assert QTextDocumentFragment.fromHtml(path.text()).toPlainText() == path.plain_text()
     assert _links(path) == [("1", "All")]
+
+
+def test_a_step_can_wear_one_of_the_familys_marks_ahead_of_its_name():
+    path = FolderPath("  ›  ")
+
+    path.set_path(["All", "Favorites"], marks={1: "star"})
+
+    assert marked_text("star", "Favorites", color=TEXT_PRIMARY,
+                       size=path.fontMetrics().height()) in path.text()
+    assert _links(path) == [("0", "All")]
+    assert path.plain_text() == "All  ›  Favorites"
 
 
 def _light_blue_ink(path: FolderPath) -> int:
