@@ -25,3 +25,11 @@ pytest_plugins  # tests/conftest.py loads the pointer fixture from shared_ui.tes
 GAP_SMALL  # promptcrafter
 BUTTON_WORD_W  # fun_time's dashboard and its headset copy
 BUTTON_ROW_GAP  # origenerator
+HAIRLINE  # fun_time, origenerator
+
+# --- the notice's shape, drawn by fun_time (desktop and headset) and origenerator ---
+NOTICE_TYPE_SIZE  # fun_time, origenerator
+NOTICE_PAD_V  # fun_time, origenerator
+NOTICE_PAD_H  # fun_time, origenerator
+NOTICE_RADIUS  # fun_time, origenerator
+NOTICE_TOP_MARGIN  # fun_time, origenerator
