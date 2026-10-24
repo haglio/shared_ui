@@ -19,6 +19,7 @@ from PyQt6.QtWidgets import (
 from shared_ui.chrome import field_rules, tool_button_rules
 from shared_ui.icons import glyph_icon
 from shared_ui.palette import TEXT_MUTED, as_hex
+from shared_ui.spacing import GAP_MEDIUM, GAP_SMALL
 from shared_ui.text_find import TextFind
 
 __all__ = ["FindBar"]
@@ -27,7 +28,7 @@ __all__ = ["FindBar"]
 def _look() -> str:
     return f"""{field_rules()}{tool_button_rules()}
     QToolButton {{
-        padding: 4px;
+        padding: {GAP_SMALL}px;
     }}
     QLabel#findCount {{
         color: {as_hex(TEXT_MUTED)};
@@ -50,8 +51,8 @@ class FindBar(QWidget):
         super().__init__(parent)
         self._find = TextFind(reveal)
         row = QHBoxLayout(self)
-        row.setContentsMargins(0, 4, 0, 0)
-        row.setSpacing(6)
+        row.setContentsMargins(0, GAP_SMALL, 0, 0)
+        row.setSpacing(GAP_MEDIUM)
         row.addWidget(QLabel(label))
         self._query = _QueryField()
         self._query.pressed.connect(self.typing_invited)

@@ -19,19 +19,21 @@ from shared_ui.palette import (
     LOADING_TROUGH,
     Rgb,
 )
+from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, MARGIN_DIALOG
+from shared_ui.type_scale import SIZE_HEADING, SIZE_SMALL, SIZE_TINY, in_pixels
 
 
 @dataclass(frozen=True)
 class Metrics:
     """The panel's sizes, in pixels."""
 
-    padding: int = 24
+    padding: int = MARGIN_DIALOG
     icon: int = 128
-    wordmark_px: int = 24
-    status_px: int = 13
-    hint_px: int = 11
+    wordmark_px: int = in_pixels(SIZE_HEADING)
+    status_px: int = in_pixels(SIZE_SMALL)
+    hint_px: int = in_pixels(SIZE_TINY)
     bar: tuple[int, int] = (360, 18)
-    gaps: tuple[int, int, int, int] = (12, 10, 10, 8)
+    gaps: tuple[int, int, int, int] = (GAP_DIALOG, GAP_MEDIUM, GAP_MEDIUM, GAP_MEDIUM)
 
     @property
     def width(self) -> int:

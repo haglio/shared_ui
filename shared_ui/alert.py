@@ -21,11 +21,9 @@ from PyQt6.QtWidgets import (
 )
 
 from shared_ui import palette
-from shared_ui.chrome import control_ground
+from shared_ui.chrome import button_rules
 from shared_ui.colors import (
     BG_TERTIARY,
-    BORDER_SUBTLE,
-    TEXT_PRIMARY,
     TEXT_SECONDARY,
     family_palette,
 )
@@ -163,13 +161,7 @@ class AlertDialog(QDialog):
         self.setStyleSheet(f"""
             QDialog {{ background: {BG_TERTIARY.name()}; }}
             QLabel {{ color: {TEXT_SECONDARY.name()}; }}
-            QPushButton {{
-                color: {TEXT_PRIMARY.name()};
-                border: 1px solid {BORDER_SUBTLE.name()};
-                padding: 4px 10px;
-                border-radius: 3px;
-            }}{control_ground(palette.BG_BUTTON, "QPushButton")}
-            QPushButton:pressed {{ background: {BG_TERTIARY.name()}; }}
+            {button_rules()}
         """)
         mark = QLabel()
         mark.setPixmap(mark_pixmap(level, MARK_SIZE))
