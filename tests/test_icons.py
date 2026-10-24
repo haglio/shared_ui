@@ -326,12 +326,21 @@ _THE_MARKS = (
     "save", "scene_to_clip", "settings", "shield", "shorts", "shuffle", "slideshow",
     "snowflake_struck_out", "speaker", "speaker_off", "star", "star_outline", "star_ring",
     "stop", "tag", "thumbs_up", "trash", "undo_arrow", "unlock", "versions", "vr_hemisphere",
-    "warning", "wave", "wave_sawtooth", "wave_square", "wave_triangle",
+    "warning", "wave", "wave_sawtooth", "wave_square", "wave_triangle", "working",
 )
 
 
 def test_the_marks_this_family_draws_are_the_ones_the_apps_ask_for():
     assert glyph_names() == _THE_MARKS
+
+
+def test_the_working_mark_is_the_circle_with_a_quarter_left_out():
+    (ring,) = GLYPHS["circle"]
+    (arc,) = GLYPHS["working"]
+
+    assert (arc.x + arc.w / 2, arc.y + arc.h / 2) == (ring.cx, ring.cy)
+    assert (arc.w / 2, arc.h / 2) == (ring.rx, ring.ry)
+    assert arc.span == 270
 
 
 # The four states OSR2 control can be in, in the order their buttons sit, and how

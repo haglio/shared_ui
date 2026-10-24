@@ -1065,6 +1065,7 @@ GLYPHS: dict[str, tuple] = {
     "wave_sawtooth": (Polyline(((6, 37), (6, 11), (24, 37), (24, 11), (42, 37))),),
     "wave_square": (Polyline(((6, 24), (6, 11), (24, 11), (24, 37), (42, 37), (42, 24))),),
     "wave_triangle": (Polyline(((6, 24), (15, 11), (33, 37), (42, 24))),),
+    "working": (Arc(7, 7, 34, 34, 90, 270),),
 }
 
 RENAMED_MARKS: dict[str, str] = {
