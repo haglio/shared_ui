@@ -230,6 +230,7 @@ def test_a_text_size_a_record_carries_is_named(app):
     "layout.addSpacing(12)",
     "SHEET = '.hint { margin: 1em 0; }'",
     "SHEET = '.dest { margin-top: 0.8em; }'",
+    "_ROW_INSET = QMargins(3, 3, 3, 3)",
 ])
 def test_a_spacing_of_its_own_is_named(app, line):
     assert _found(app({"tiles.py": line + "\n"}))
