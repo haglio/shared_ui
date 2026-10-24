@@ -25,6 +25,9 @@ pytest_plugins  # tests/conftest.py loads the pointer fixture from shared_ui.tes
 BUTTON_WORD_W  # fun_time's dashboard and its headset copy
 BUTTON_ROW_GAP  # origenerator
 
+# --- type ---
+SIZES  # funestra: a satellite's title steps down through them to fit
+
 # --- the notice's shape, drawn by fun_time (desktop and headset) and origenerator ---
 NOTICE_TYPE_SIZE  # fun_time, origenerator
 NOTICE_PAD_V  # fun_time, origenerator
