@@ -181,6 +181,8 @@ def _in_type_or_spacing_call(call: ast.Call, name: str, source: str) -> list[str
         found.append(f"face {_spelled(call, source)}")
     if name in _SPACING_CALLS and any(_number(arg) not in (None, 0) for arg in call.args):
         found.append(f"spacing {_spelled(call, source)}")
+    found += [f"text size {keyword.arg}={_spelled(keyword.value, source)}" for keyword in call.keywords
+              if keyword.arg and _names_a_text_size(keyword.arg) and _a_size_of_its_own(keyword.value)]
     return found
 
 

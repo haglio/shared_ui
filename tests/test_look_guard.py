@@ -199,6 +199,7 @@ def test_an_allowance_takes_out_what_it_names_wherever_the_line_moves(app):
     "BANNER_FONT_PX = 44",
     "font.setPointSize(font.pointSize() + 1)",
     "font = make_font(size=max(SIZE_TINY, round(height * 0.03)))",
+    "HEADSET = Metrics(icon=96, wordmark_px=30, status_px=17)",
 ])
 def test_a_face_or_a_text_size_of_its_own_is_named(app, line):
     assert _found(app({"tiles.py": line + "\n"}))
@@ -248,6 +249,7 @@ def test_a_spacing_of_its_own_is_named(app, line):
     "SHEET = '#clip { margin: 0 auto; padding: 0em; }'",
     "font.setPixelSize(in_pixels(SIZE_BODY))",
     "font = QFont(FONT_UI, -1)",
+    "HEADSET = Metrics(icon=96, wordmark_px=in_pixels(SIZE_HEADING))",
 ])
 def test_the_familys_own_type_and_spacing_or_none_at_all_passes(app, line):
     assert _found(app({"tiles.py": line + "\n"})) == []
