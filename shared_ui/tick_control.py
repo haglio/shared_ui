@@ -23,10 +23,11 @@ from shared_ui.colors import (
     TEXT_SECONDARY,
     WHITE,
 )
+from shared_ui.spacing import BUTTON_RADIUS_HUD, GAP_MEDIUM
 
 _INDICATOR = 16  # edge length (px)
-_GAP = 7         # space between the indicator and the label
-_RADIUS = 3.0    # indicator corner rounding
+_GAP = GAP_MEDIUM  # space between the indicator and the label
+_RADIUS = BUTTON_RADIUS_HUD  # indicator corner rounding
 
 # The check mark as a fraction of the indicator: a short leg down into a long
 # leg up -- the classic tick, not a symmetric "v".

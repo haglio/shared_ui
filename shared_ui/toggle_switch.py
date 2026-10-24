@@ -23,9 +23,10 @@ from PyQt6.QtGui import QPainter, QPen
 from PyQt6.QtWidgets import QAbstractButton
 
 from shared_ui.colors import TEXT_SECONDARY, TOGGLE_HANDLE, TOGGLE_OFF, TOGGLE_ON
+from shared_ui.spacing import GAP_MEDIUM
 from shared_ui.toggle_geometry import HANDLE_INSET, TRACK, handle
 
-_GAP = 8                 # between the pill and its label
+_GAP = GAP_MEDIUM        # between the pill and its label
 _DISABLED_OPACITY = 0.4  # how far a switch fades when it can't be thrown
 
 

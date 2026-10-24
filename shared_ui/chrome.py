@@ -35,10 +35,14 @@ from shared_ui.palette import (
 )
 from shared_ui.spacing import (
     BUTTON_GAP,
+    BUTTON_MARK_INSET,
     BUTTON_PAD_H,
     BUTTON_PAD_H_TIGHT,
     BUTTON_PAD_V,
     BUTTON_RADIUS,
+    GAP_MEDIUM,
+    GAP_SMALL,
+    HAIRLINE,
 )
 
 
@@ -62,12 +66,12 @@ def tooltip_rules() -> str:
         background-color: {as_hex(BG_TERTIARY)};
         color: {as_hex(TEXT_PRIMARY)};
         border: 1px solid {as_hex(BORDER_SUBTLE)};
-        padding: 4px 6px;
+        padding: {BUTTON_PAD_V}px {BUTTON_PAD_H_TIGHT}px;
     }}"""
 
 
-_MENU_ROW_PAD_V = 6
-_MENU_ROW_PAD_H = 20
+_MENU_ROW_PAD_V = BUTTON_PAD_V
+_MENU_ROW_PAD_H = BUTTON_PAD_H
 
 # Qt's layout, not the family's: it draws a menu row's mark against the row's
 # own edge, and starts the row's words past its padding and a column as wide as
@@ -75,7 +79,7 @@ _MENU_ROW_PAD_H = 20
 _QT_MENU_MARK = 16
 _ROOM_BEFORE_MENU_WORDS = _MENU_ROW_PAD_H + _QT_MENU_MARK + 4
 
-_CHECKED_GROUND_MARGIN = 4
+_CHECKED_GROUND_MARGIN = GAP_SMALL
 _MENU_MARK_BOX_LEFT = (_ROOM_BEFORE_MENU_WORDS - _QT_MENU_MARK) // 2 - _CHECKED_GROUND_MARGIN
 
 _MENU_ARROW = 9
@@ -97,7 +101,7 @@ def menu_rules() -> str:
         background-color: {as_hex(BG_TERTIARY)};
         color: {as_hex(TEXT_PRIMARY)};
         border: 1px solid {as_hex(BORDER_SUBTLE)};
-        padding: 4px 0;
+        padding: {GAP_SMALL}px 0;
     }}
     QMenu::item {{
         padding: {_MENU_ROW_PAD_V}px {_MENU_ROW_PAD_H}px;
@@ -130,9 +134,9 @@ def menu_rules() -> str:
         height: {_MENU_ARROW}px;
     }}
     QMenu::separator {{
-        height: 1px;
+        height: {HAIRLINE}px;
         background-color: {as_hex(BORDER_SUBTLE)};
-        margin: 4px 0;
+        margin: {GAP_SMALL}px 0;
     }}"""
 
 
@@ -176,8 +180,8 @@ def field_rules() -> str:
         background-color: {as_hex(BG_SECONDARY)};
         color: {as_hex(TEXT_PRIMARY)};
         border: 1px solid {as_hex(BORDER_SUBTLE)};
-        border-radius: 3px;
-        padding: 4px;
+        border-radius: {BUTTON_RADIUS}px;
+        padding: {GAP_SMALL}px;
     }}
     QPlainTextEdit:focus, QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus {{
         border: 1px solid {as_hex(BLUE)};
@@ -190,7 +194,7 @@ def tool_button_rules() -> str:
         color: {as_hex(TEXT_PRIMARY)};
         border: 1px solid {as_hex(BORDER_SUBTLE)};
         border-radius: {BUTTON_RADIUS}px;
-        padding: 2px 10px;
+        padding: {BUTTON_MARK_INSET}px {GAP_MEDIUM}px;
         font-weight: bold;
     }}{control_ground(BG_BUTTON, "QToolButton")}{control_ground(BG_BUTTON_ACTIVE, "QToolButton:checked")}
     QToolButton:disabled {{
