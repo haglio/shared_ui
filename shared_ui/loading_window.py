@@ -58,7 +58,7 @@ class LoadingWindow(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._picture)
         self._show_the_panel()
-        if (at := self._taking_over.panel_at) is not None:
+        if (at := self._taking_over.panel_for((self.width(), self.height()))) is not None:
             self.move(*at)
 
     @property
