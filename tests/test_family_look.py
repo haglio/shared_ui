@@ -3,7 +3,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from shared_ui.look_guard import assert_the_look_is_shared_uis
+
+pytestmark = pytest.mark.repo_check
 
 _CHECKOUT = Path(__file__).resolve().parents[1]
 _WHERE_THE_LOOK_IS_DEFINED = {"palette.py", "spacing.py", "type_scale.py", "fonts.py", "icon_geometry.py",
