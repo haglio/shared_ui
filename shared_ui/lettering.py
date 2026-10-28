@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from functools import cache
 
 from PIL import ImageFont
@@ -23,18 +24,27 @@ def fit_text(font, text: str, width: int) -> str:
     if font.getlength(text) <= width or not text:
         return text
     kept = text
-    while kept and font.getlength(kept + "…") > width:
+    while font.getlength(kept + "…") > width:
+        if not kept:
+            return ""
         kept = kept[:-1]
     return kept + "…"
 
 
-def wrap_text(font, text: str, width: int, *, max_lines: int) -> list[str]:
-    lines: list[str] = []
-    for word in text.split():
-        if lines and font.getlength(f"{lines[-1]} {word}") <= width:
-            lines[-1] = f"{lines[-1]} {word}"
-        else:
-            lines.append(word)
-    if len(lines) > max_lines:
+def wrap_text(font, text: str, width: int, *, max_lines: int | None = None) -> list[str]:
+    if not text.strip():
+        return []
+    lines = [line for paragraph in text.split("\n")
+             for line in _wrapped(font, paragraph, width)]
+    if max_lines is not None and len(lines) > max_lines:
         lines[max_lines - 1:] = [" ".join(lines[max_lines - 1:])]
-    return [fit_text(font, line, width) for line in lines]
+    return lines
+
+
+def _wrapped(font, paragraph: str, width: int) -> list[str]:
+    lines = [paragraph[:len(paragraph) - len(paragraph.lstrip())]]
+    for word in re.findall(r"\S+\s*", paragraph):
+        if lines[-1].strip() and font.getlength(lines[-1] + word.rstrip()) > width:
+            lines.append("")
+        lines[-1] += word
+    return [line.rstrip() for line in lines]
