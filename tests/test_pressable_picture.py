@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from PyQt6.QtCore import QEvent, QPoint, Qt
+from PyQt6.QtCore import QEvent, QPoint, QPointF, Qt
+from PyQt6.QtGui import QMouseEvent
 from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QApplication
 
@@ -29,6 +30,13 @@ class _Pointer:
 RED = (200, 30, 30, 255)
 
 
+def _move(widget, x: int, y: int) -> None:
+    at = QPointF(x, y)
+    QApplication.sendEvent(widget, QMouseEvent(
+        QEvent.Type.MouseMove, at, widget.mapToGlobal(at), Qt.MouseButton.NoButton,
+        Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier))
+
+
 class _Picture(PressablePicture):
     size_painted = (20, 10)
 
@@ -52,9 +60,9 @@ def test_the_pointer_moving_is_handed_on_where_it_is():
     widget = _Picture(pointer)
     widget.resize(40, 30)
 
-    QTest.mouseMove(widget, QPoint(12, 3))
+    _move(widget, 12, 3)
 
-    assert ("move", 12, 3) in pointer.calls
+    assert pointer.calls == [("move", 12, 3)]
 
 
 def test_the_button_coming_up_is_handed_on():
@@ -109,7 +117,7 @@ def test_it_repaints_after_a_press_a_move_and_a_leave_since_each_can_change_the_
     widget.resize(40, 30)
 
     QTest.mousePress(widget, Qt.MouseButton.LeftButton, pos=QPoint(5, 7))
-    QTest.mouseMove(widget, QPoint(12, 3))
+    _move(widget, 12, 3)
     QApplication.sendEvent(widget, QEvent(QEvent.Type.Leave))
 
     assert widget.updates == 3
