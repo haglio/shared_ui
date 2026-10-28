@@ -14,8 +14,9 @@ from __future__ import annotations
 _.paintEvent  # tick_control, toggle_switch
 _.eventFilter  # stand_in_tooltips
 
-# --- pytest reads these off a conftest ---
+# --- pytest reads these off a conftest or a test module ---
 pytest_plugins  # tests/conftest.py loads the pointer fixture from shared_ui.testing
+pytestmark  # this repo's checks of itself, which app_support.repo_checks runs first
 
 # --- colors: none.  Every QColor in colors.py reads its palette twin by name, so
 #     vulture sees each token used; a palette token nobody reads shows up in
