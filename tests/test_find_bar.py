@@ -256,12 +256,12 @@ def test_the_strip_dresses_itself_in_a_window_with_only_the_family_sheet(bar, fi
     _query(bar).setText("dog")
     QApplication.processEvents()
 
-    picture = bar.grab().toImage()
+    grab = bar.grab().toImage()
     query = _query(bar).geometry()
     close = _button(bar, "Close").geometry()
-    assert picture.pixelColor(query.left(), query.center().y()) == BLUE
-    assert picture.pixelColor(query.center().x(), query.y() + query.height() - 3) == BG_SECONDARY
-    assert picture.pixelColor(close.left() + 2, close.top() + 2) == BG_BUTTON
+    assert grab.pixelColor(query.left(), query.center().y()) == BLUE
+    assert grab.pixelColor(query.center().x(), query.y() + query.height() - 3) == BG_SECONDARY
+    assert grab.pixelColor(close.left() + 2, close.top() + 2) == BG_BUTTON
     assert bar.findChild(QLabel, "findCount").palette().color(QPalette.ColorRole.WindowText) == TEXT_MUTED
 
 

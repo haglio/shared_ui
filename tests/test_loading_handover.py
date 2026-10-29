@@ -35,7 +35,7 @@ class TestStartingWithoutTheLaunchersScreen:
 
         assert (taking_over.carried(0.25), taking_over.panel_for(SIZE)) == (0.25, None)
 
-    def test_nor_has_it_anywhere_to_leave_pictures(self):
+    def test_nor_has_it_anywhere_to_leave_snapshots(self):
         TakingOver.from_the_launcher({}).done(PANEL, covers_every_monitor=False)
 
     def test_a_launcher_whose_screen_is_not_up_hands_nothing_over(self, launched):
@@ -113,27 +113,27 @@ class TestOnTheMonitorTheAppsWindowComesUpOn:
         assert TakingOver.from_the_launcher(launched).panel_for(SIZE) == (-1300, 900)
 
 
-def _picture(path) -> Image.Image:
+def _snapshot(path) -> Image.Image:
     with Image.open(path) as image:
         return image.convert("RGB")
 
 
-class TestThePicturesForTheNextClick:
+class TestTheSnapshotsForTheNextClick:
     @pytest.fixture
-    def pictures(self, launched):
+    def snapshots(self, launched):
         TakingOver.from_the_launcher(launched).done(replace(PANEL, fraction=0.7), covers_every_monitor=True)
-        return _place(launched).pictures()
+        return _place(launched).snapshots()
 
-    def test_the_next_click_opens_on_the_panel_this_screen_opened_on_with_the_bar_empty(self, pictures):
-        assert _picture(pictures.opening).tobytes() == render(PANEL).tobytes()
+    def test_the_next_click_opens_on_the_panel_this_screen_opened_on_with_the_bar_empty(self, snapshots):
+        assert _snapshot(snapshots.opening).tobytes() == render(PANEL).tobytes()
 
-    def test_the_next_click_fills_its_bar_with_this_panels_own_fill(self, pictures):
-        assert _picture(pictures.full).tobytes() == render(replace(PANEL, fraction=1.0)).tobytes()
-        assert pictures.bar == bar_box()
+    def test_the_next_click_fills_its_bar_with_this_panels_own_fill(self, snapshots):
+        assert _snapshot(snapshots.full).tobytes() == render(replace(PANEL, fraction=1.0)).tobytes()
+        assert snapshots.bar == bar_box()
 
-    def test_each_line_the_launcher_says_while_it_waits_is_this_panel_saying_it(self, pictures):
+    def test_each_line_the_launcher_says_while_it_waits_is_this_panel_saying_it(self, snapshots):
         for line in ("Updating Example...", "Updating Hosted..."):
-            assert _picture(pictures.updating(line)).tobytes() == render(replace(PANEL, status=line)).tobytes()
+            assert _snapshot(snapshots.updating(line)).tobytes() == render(replace(PANEL, status=line)).tobytes()
 
-    def test_the_next_click_stands_where_this_screen_stands(self, pictures):
-        assert pictures.covers_every_monitor
+    def test_the_next_click_stands_where_this_screen_stands(self, snapshots):
+        assert snapshots.covers_every_monitor

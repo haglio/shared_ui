@@ -1,4 +1,4 @@
-"""The shape of a notice flashed over a picture, which every app draws alike:
+"""The shape of a notice flashed over a video or an image, which every app draws alike:
 Fun Time over a Funestra and in the headset, Origenerator over its media."""
 
 from __future__ import annotations

@@ -3,11 +3,11 @@ from __future__ import annotations
 from shared_ui.orientation import LANDSCAPE, ORIENTATIONS, PORTRAIT, orientation_of_size
 
 
-def test_a_picture_taller_than_it_is_wide_is_portrait():
+def test_an_item_taller_than_it_is_wide_is_portrait():
     assert orientation_of_size(1080, 1920) == PORTRAIT
 
 
-def test_a_picture_wider_than_it_is_tall_is_landscape():
+def test_an_item_wider_than_it_is_tall_is_landscape():
     assert orientation_of_size(1920, 1080) == LANDSCAPE
 
 

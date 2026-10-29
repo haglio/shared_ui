@@ -11,9 +11,9 @@ from __future__ import annotations
 
 # ruff: noqa: F821, B018 -- a whitelist is names, not statements
 # --- Qt method overrides, called by the event loop, not by us ---
-_.paintEvent  # tick_control, toggle_switch, pressable_picture
-_.mouseMoveEvent  # pressable_picture
-_.mouseReleaseEvent  # pressable_picture
+_.paintEvent  # tick_control, toggle_switch, pressable_drawing
+_.mouseMoveEvent  # pressable_drawing
+_.mouseReleaseEvent  # pressable_drawing
 _.eventFilter  # stand_in_tooltips
 
 # --- pytest reads these off a conftest or a test module ---

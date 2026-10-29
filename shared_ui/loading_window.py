@@ -53,10 +53,10 @@ class LoadingWindow(QDialog):
             icon=_inked(icon_image(icon), preview),
         )
         self._panel = replace(self._opening, fraction=self._taking_over.carried(0.0))
-        self._picture = QLabel(self)
+        self._drawing = QLabel(self)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self._picture)
+        layout.addWidget(self._drawing)
         self._show_the_panel()
         if (at := self._taking_over.panel_for((self.width(), self.height()))) is not None:
             self.move(*at)
@@ -96,7 +96,7 @@ class LoadingWindow(QDialog):
             image.tobytes(), image.width, image.height, 3 * image.width,
             QImage.Format.Format_RGB888,
         )
-        self._picture.setPixmap(QPixmap.fromImage(qimage))
+        self._drawing.setPixmap(QPixmap.fromImage(qimage))
         self.setFixedSize(image.width, image.height)
 
 

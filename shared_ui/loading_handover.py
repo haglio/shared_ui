@@ -1,5 +1,5 @@
 """An app's loading screen taking over from the one its launcher showed from the
-click, and leaving the pictures the launcher shows at the next."""
+click, and leaving the snapshots the launcher shows at the next."""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ class TakingOver:
             return
         self._place.say_taken()
         opening = replace(panel, fraction=0.0)
-        self._place.leave_pictures(
+        self._place.leave_snapshots(
             opening=_png(opening), full=_png(replace(opening, fraction=1.0)),
             updating=[_png(replace(opening, status=line)) for line in self._place.lines],
             bar=bar_box(), covers_every_monitor=covers_every_monitor)
