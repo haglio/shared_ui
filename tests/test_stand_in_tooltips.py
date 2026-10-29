@@ -17,7 +17,7 @@ from shared_ui.icon_geometry import tooltip_for
 from shared_ui.icons import draw_glyph, glyph_icon, glyph_pixmap
 
 _A_MARK_THIS_VERSION_LACKS = "a_mark_from_another_version"
-_WHY = ("This button's picture is missing from this version of the app.\n"
+_WHY = ("This button's icon is missing from this version of the app.\n"
         "Updating the app brings it back.")
 
 

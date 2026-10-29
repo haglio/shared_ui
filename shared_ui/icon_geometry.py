@@ -1092,7 +1092,7 @@ def shapes_of(name: str) -> tuple:
     return STAND_IN
 
 
-_WHY_IT_WEARS_THE_STAND_IN = ("This button's picture is missing from this version of the app.\n"
+_WHY_IT_WEARS_THE_STAND_IN = ("This button's icon is missing from this version of the app.\n"
                               "Updating the app brings it back.")
 
 
