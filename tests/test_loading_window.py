@@ -171,7 +171,7 @@ class TestTakingOverFromTheLaunchersScreen:
 
         assert (window.pos().x(), window.pos().y()) == ((2560 - window.width()) // 2, (1410 - window.height()) // 2)
 
-    def test_once_up_it_tells_the_launchers_screen_to_go_and_leaves_its_pictures(self, place):
+    def test_once_up_it_tells_the_launchers_screen_to_go_and_leaves_its_snapshots(self, place):
         place.stand(loading_screen.Shown(left=10, top=20, fraction=0.4))
         window = _window()
 
@@ -180,6 +180,6 @@ class TestTakingOverFromTheLaunchersScreen:
         window.close()
 
         assert place.taken
-        pictures = place.pictures()
-        assert not pictures.covers_every_monitor
-        assert pictures.updating("Updating Scripture...") is not None
+        snapshots = place.snapshots()
+        assert not snapshots.covers_every_monitor
+        assert snapshots.updating("Updating Scripture...") is not None

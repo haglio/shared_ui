@@ -228,7 +228,7 @@ def _enhance_filter() -> tuple:
     enhanced ones.
 
     Built the way ``reset`` is, out of the two marks it means at once: the plus
-    is the very sign an enhanced picture wears in its corner across this family,
+    is the very sign an enhanced image wears in its corner across this family,
     and the funnel is what narrows a set to part of itself.  Either alone is a
     different control -- a bare plus is Enhance, which exists on the toolbar, and
     a bare funnel would not say WHAT it kept.

@@ -14,7 +14,7 @@ def test_the_family_letters_in_one_face_at_four_sizes():
     assert type_scale.FONT_UI == fonts.FONT_UI
 
 
-def test_a_window_and_a_picture_letter_at_the_same_sizes():
+def test_a_window_and_a_drawing_letter_at_the_same_sizes():
     assert (fonts.SIZE_TINY, fonts.SIZE_SMALL, fonts.SIZE_BODY, fonts.SIZE_HEADING) == (
         type_scale.SIZE_TINY, type_scale.SIZE_SMALL, type_scale.SIZE_BODY, type_scale.SIZE_HEADING)
 

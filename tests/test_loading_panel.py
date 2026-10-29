@@ -1,5 +1,5 @@
 """shared_ui.loading_panel: the loading screen every app in the family shows,
-rendered once with Pillow so each toolkit draws the same picture."""
+rendered once with Pillow so each toolkit draws the same drawing."""
 
 from __future__ import annotations
 

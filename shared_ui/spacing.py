@@ -20,7 +20,7 @@ MARGIN_DIALOG = MARGIN_STANDARD * 2
 GAP_DIALOG = GAP_MEDIUM * 2
 
 # The family's one-pixel line: a border, a rule, and the gap that parts two
-# pictures laid edge to edge so they read as two rather than as one.
+# items laid edge to edge so they read as two rather than as one.
 HAIRLINE = 1
 
 

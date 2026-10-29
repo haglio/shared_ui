@@ -98,14 +98,14 @@ def test_a_button_whose_icon_is_made_from_a_stand_in_pixmap_says_why_too(host):
     assert _hover(button) == f"Copy it\n{_WHY}"
 
 
-def test_a_button_that_paints_the_stand_in_into_its_own_picture_says_why_too(host):
-    picture = QPixmap(48, 48)
-    picture.fill(Qt.GlobalColor.transparent)
-    painter = QPainter(picture)
+def test_a_button_that_paints_the_stand_in_into_its_own_icon_says_why_too(host):
+    pixmap = QPixmap(48, 48)
+    pixmap.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pixmap)
     draw_glyph(painter, _A_MARK_THIS_VERSION_LACKS, TEXT_PRIMARY, size=32, x=8, y=8)
     painter.end()
     button = _placed(host, QToolButton())
-    button.setIcon(QIcon(picture))
+    button.setIcon(QIcon(pixmap))
     button.setToolTip("Star it")
 
     assert _hover(button) == f"Star it\n{_WHY}"

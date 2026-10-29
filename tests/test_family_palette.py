@@ -65,10 +65,10 @@ def selection_pixels(qapp):
         field.resize(220, 30)
         field.selectAll()
 
-        picture = QPixmap(field.size())
-        picture.fill(BG_PRIMARY)  # the dark canvas these fields sit on
-        field.render(picture, flags=QWidget.RenderFlag.DrawChildren)
-        image = picture.toImage()
+        pixmap = QPixmap(field.size())
+        pixmap.fill(BG_PRIMARY)  # the dark canvas these fields sit on
+        field.render(pixmap, flags=QWidget.RenderFlag.DrawChildren)
+        image = pixmap.toImage()
 
         yield Counter(
             QColor(image.pixel(x, y)).name()

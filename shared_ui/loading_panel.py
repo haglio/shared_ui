@@ -1,7 +1,7 @@
 """The loading screen every app in the family shows while it starts: the app's
 icon, its name, a line saying what is happening, a progress bar and a hint,
 on one navy ground.  Rendered once, with Pillow, so a Tk cover, a Qt window, a
-pygame surface and a headset all show the same picture."""
+pygame surface and a headset all show the same drawing."""
 
 from __future__ import annotations
 
