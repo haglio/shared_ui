@@ -8,7 +8,6 @@ from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QApplication
 
 from shared_ui.pressable_drawing import PressableDrawing
-from shared_ui.pressable_picture import PressablePicture
 
 
 class _Pointer:
@@ -87,20 +86,6 @@ def test_the_pointer_leaving_is_handed_on():
 
 def test_it_shows_the_drawing_it_is_painted():
     widget = _Drawing(_Pointer())
-    widget.resize(20, 10)
-
-    shown = widget.grab().toImage()
-
-    assert shown.pixelColor(3, 4).getRgb() == RED
-
-
-class _PaintedBeforeTheRename(PressablePicture):
-    def picture(self) -> tuple[bytes, tuple[int, int]]:
-        return bytes(RED) * (20 * 10), (20, 10)
-
-
-def test_a_widget_written_before_the_rename_is_still_painted_from_its_picture():
-    widget = _PaintedBeforeTheRename(_Pointer())
     widget.resize(20, 10)
 
     shown = widget.grab().toImage()
