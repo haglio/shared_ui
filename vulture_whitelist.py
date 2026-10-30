@@ -4,7 +4,7 @@ This is a library: its tokens are read by the apps, not by anything here, so
 vulture over this tree alone reports every one no module or test of its own
 touches. Each is listed with the repos that import it, in place of the blanket
 all-caps exemption that used to hide a token nobody imports. vulture matches by
-bare name, so tests/test_dead_code.py asserts every entry here still answers a
+bare name, so the family's dead-code gate asserts every entry here still answers a
 report, and an entry may only be added with the reason it answers one.
 """
 from __future__ import annotations
