@@ -225,3 +225,7 @@ def _cap(draw: ImageDraw.ImageDraw, x: float, y: float, ink, width: float,
     radius = width / 2
     cx, cy = x * scale, y * scale
     draw.ellipse([(cx - radius, cy - radius), (cx + radius, cy + radius)], fill=ink)
+
+
+glyph_image = pil_icon
+paste_glyph = paste_icon

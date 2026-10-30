@@ -23,10 +23,11 @@ class FolderPath(QLabel):
         self.linkActivated.connect(lambda step: self.step_clicked.emit(int(step)))
 
     def set_path(self, steps: Sequence[str], *, linked: Collection[int] | None = None,
-                 lead: str = "", icons: Mapping[int, str] | None = None) -> None:
+                 lead: str = "", icons: Mapping[int, str] | None = None,
+                 marks: Mapping[int, str] | None = None) -> None:
         if linked is None:
             linked = range(len(steps) - 1)
-        icons = icons or {}
+        icons = icons or marks or {}
         self._plain = lead + self._separator.join(steps)
         drawn = [self._drawn(step, name, step in linked, icons.get(step))
                  for step, name in enumerate(steps)]

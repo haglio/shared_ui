@@ -1079,6 +1079,10 @@ def icon_names() -> tuple[str, ...]:
     return tuple(sorted(ICONS))
 
 
+GLYPHS = ICONS
+glyph_names = icon_names
+
+
 _log = logging.getLogger(__name__)
 _named_in_the_log: set[str] = set()
 
