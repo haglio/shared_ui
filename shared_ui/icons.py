@@ -232,3 +232,11 @@ def _painter_path(shape: Path) -> QPainterPath:
             x, y, w, h, radius = numbers
             path.addRoundedRect(QRectF(x, y, w, h), radius, radius)
     return path
+
+
+draw_glyph = draw_icon
+draw_glyph_filling = draw_icon_filling
+glyph_icon = qt_icon
+glyph_pixmap = icon_pixmap
+inline_mark = inline_icon
+marked_text = icon_then_text
