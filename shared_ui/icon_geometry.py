@@ -3,14 +3,14 @@
 The apps draw with two different things.  The desktop chrome is Qt, and paints
 with QPainter; the Funestras' HUDs are painted into the video frame with Pillow,
 because an mpv overlay takes a bitmap and there is no Qt in a Funestra process at
-all.  A mark drawn twice, once per side, is a mark that comes out two shapes.
+all.  An icon drawn twice, once per side, is an icon that comes out two shapes.
 
-So the marks live here, as a list of primitives per glyph, and each side renders
+So the icons live here, each as a list of primitives, and each side renders
 them: :mod:`shared_ui.icons` through QPainter, :mod:`shared_ui.icons_pil`
 through Pillow.  Neither renderer decides anything about the shape.
 
 Coordinates are in a :data:`CANVAS`-square frame and the renderers scale from
-there, so a mark keeps its proportions and its pen weight whether it lands on
+there, so an icon keeps its proportions and its pen weight whether it lands on
 a 14px HUD button or a 96px panel.  Angles are Qt's convention -- degrees
 counter-clockwise from 3 o'clock, given as a start and a span -- and the Pillow
 renderer converts; one convention had to win, and the geometry was written
@@ -25,20 +25,20 @@ from dataclasses import dataclass
 
 from shared_ui.orientation import LANDSCAPE, PORTRAIT
 
-# Every glyph is drawn to fill this frame, inset a little from its edge so a round
-# cap or a fat arrowhead still has room.  A mark that uses only the middle third
-# of its canvas is a mark the eye can't find once the frame is scaled onto a tree
+# Every icon is drawn to fill this frame, inset a little from its edge so a round
+# cap or a fat arrowhead still has room.  An icon that uses only the middle third
+# of its canvas is an icon the eye can't find once the frame is scaled onto a tree
 # row: the empty margin is scaled down with it.
 CANVAS = 48.0
 
 # The default pen width, in canvas units.  Renderers scale it with the drawing, so
-# a glyph at 14px carries under a third of this width and reads as the same mark
+# an icon at 14px carries under a third of this width and reads as the same icon
 # rather than as a heavier one shrunk.
 PEN_WIDTH = 5.0
 
 
 # ---------------------------------------------------------------------------
-# The primitives.  Six shapes cover every mark here, and both renderers can draw
+# The primitives.  Six shapes cover every icon here, and both renderers can draw
 # all six -- which is the constraint that keeps the two in step.  A shape with
 # ``fill`` set is a solid; otherwise it is outlined at ``width``.
 # ---------------------------------------------------------------------------
@@ -63,7 +63,7 @@ class Polygon:
 
     *round_radius* rounds a solid one's corners, by drawing its own outline at
     twice that width with round joins before filling it.  A play triangle drawn
-    with hard points reads as sharper and lighter than the marks beside it, and
+    with hard points reads as sharper and lighter than the icons beside it, and
     a filled polygon is the one place this family's round caps and joins did not
     reach.
     """
@@ -132,7 +132,7 @@ class Path:
 
 
 # ---------------------------------------------------------------------------
-# The marks
+# The icons
 # ---------------------------------------------------------------------------
 def _chevron(pointing_left: bool) -> tuple:
     """A left or right chevron, drawn corner to corner of the canvas."""
@@ -210,7 +210,7 @@ def _plus_outline() -> tuple:
     difference under a pixel at any size a badge is drawn at.
 
     Outlined thin, and thinner than the default: at the full weight the two arms
-    close up and the inside of the mark reads as a heavier bar rather than as
+    close up and the inside of the icon reads as a heavier bar rather than as
     empty.
     """
     half, arm = _PLUS_BAR / 2, _PLUS_REACH + _PLUS_BAR / 2
@@ -227,14 +227,14 @@ def _enhance_filter() -> tuple:
     """The enhancement plus with a funnel over its corner -- show only the
     enhanced ones.
 
-    Built the way ``reset`` is, out of the two marks it means at once: the plus
+    Built the way ``reset`` is, out of the two icons it means at once: the plus
     is the very sign an enhanced image wears in its corner across this family,
     and the funnel is what narrows a set to part of itself.  Either alone is a
     different control -- a bare plus is Enhance, which exists on the toolbar, and
     a bare funnel would not say WHAT it kept.
 
     The funnel sits down and right of the plus and crosses its lower arm rather
-    than clearing it: two marks set apart in one frame read as two controls
+    than clearing it: two icons set apart in one frame read as two controls
     crowded together, where one laid over the other reads as a single sign about
     a single thing.
     """
@@ -256,7 +256,7 @@ def _copy() -> tuple:
     The back sheet is drawn as the part of its outline the front sheet does not
     cover, rather than as a whole rectangle with a cutout punched through it: a
     punched cutout (a Clear-mode fill) works on an empty pixmap and erases
-    whatever is underneath anywhere else, so the mark could not be laid over a
+    whatever is underneath anywhere else, so the icon could not be laid over a
     chip or a thumbnail.  The gap matters either way -- two bare outlines at icon
     size read as a lattice rather than as one sheet in front of another.
     """
@@ -461,7 +461,7 @@ def _clip_scene_jump(to_scene: bool) -> tuple:
 def _compilation() -> tuple:
     """A stack of pages -- the set a clip belongs to, played in its own order.
 
-    Three rather than the copy mark's two, and stepped evenly along a diagonal:
+    Three rather than the copy icon's two, and stepped evenly along a diagonal:
     a stack says "several, in order", where two sheets say "this one and a copy
     of it".
     """
@@ -542,7 +542,7 @@ def _flat_2d() -> tuple:
 def _versions() -> tuple:
     """Two pages offset along a diagonal, with a double-headed arrow across them.
 
-    The copy mark is two sheets too, and stands square; this pair leans, and the
+    The copy icon is two sheets too, and stands square; this pair leans, and the
     arrow between them is what says the act is swapping one for the other rather
     than making a second.
     """
@@ -625,7 +625,7 @@ def _hold_cross(middle: float) -> tuple:
 
     It takes the whole band between the sleeve and the frame's edge, which is
     what keeps it legible at a HUD button's size -- and keeps it off the sleeve,
-    where an X overlapping the drawing read as a bow tie rather than as a mark
+    where an X overlapping the drawing read as a bow tie rather than as an icon
     beside it.
     """
     left, right = _ARROW_X - _CROSS_HALF, _ARROW_X + _CROSS_HALF
@@ -731,7 +731,7 @@ _THUMBS_UP = Path((
     ("Q", 20.1, 22, 17.8, 22), ("L", 9, 22), ("Q", 7, 22, 7, 20), ("Z",),
 ), frame=24.0)
 
-# A small arrow curling round in the lower right corner, laid over another mark
+# A small arrow curling round in the lower right corner, laid over another icon
 # to say "make this again".
 _REGENERATE_CORNER = (
     Arc(29, 29, 15, 15, 35, 250, 3.4),
@@ -869,7 +869,7 @@ def _snowflake_struck_out() -> tuple:
     return (ring, *arms, slash)
 
 
-GLYPHS: dict[str, tuple] = {
+ICONS: dict[str, tuple] = {
     "bolt": (
         Polygon(((34, 6), (28.5, 22.5), (36, 22.5), (14.5, 42), (20, 27.5), (12, 27.5))),
     ),
@@ -980,8 +980,8 @@ GLYPHS: dict[str, tuple] = {
         Ellipse(17, 21, 3.2, 3.2, fill=True),
         Polygon(((11, 34), (22, 22), (37, 34))),
     ),
-    # The play triangle's corners are rounded, like the transport marks in an icon
-    # font: hard points read as a sharper, lighter mark than the ones beside it.
+    # The play triangle's corners are rounded, like the transport icons in an icon
+    # font: hard points read as a sharper, lighter icon than the ones beside it.
     # Its ink sits right of the frame's center because a triangle's weight does --
     # the centroid lands on 24, which is where the eye reads middle.
     "play": (Polygon(((15, 8), (15, 40), (39, 24)), round_radius=3),),
@@ -1071,12 +1071,12 @@ GLYPHS: dict[str, tuple] = {
 RENAMED_MARKS: dict[str, str] = {
     "clock_full": "full", "clock_short": "clips", "full_length": "full", "shorts": "clips",
 }
-GLYPHS.update({old: GLYPHS[new] for old, new in RENAMED_MARKS.items()})
+ICONS.update({old: ICONS[new] for old, new in RENAMED_MARKS.items()})
 
 
-def glyph_names() -> tuple[str, ...]:
-    """Every mark the family can draw, sorted."""
-    return tuple(sorted(GLYPHS))
+def icon_names() -> tuple[str, ...]:
+    """Every icon the family can draw, sorted."""
+    return tuple(sorted(ICONS))
 
 
 _log = logging.getLogger(__name__)
@@ -1084,11 +1084,11 @@ _named_in_the_log: set[str] = set()
 
 
 def shapes_of(name: str) -> tuple:
-    if name in GLYPHS:
-        return GLYPHS[name]
+    if name in ICONS:
+        return ICONS[name]
     if name not in _named_in_the_log:
         _named_in_the_log.add(name)
-        _log.warning("shared_ui has no mark named %r, so its button shows the stand-in", name)
+        _log.warning("shared_ui has no icon named %r, so its button shows the stand-in", name)
     return STAND_IN
 
 
@@ -1096,7 +1096,7 @@ _WHY_IT_WEARS_THE_STAND_IN = ("This button's icon is missing from this version o
                               "Updating the app brings it back.")
 
 
-def tooltip_for(mark: str, tooltip: str) -> str:
-    if mark in GLYPHS:
+def tooltip_for(icon: str, tooltip: str) -> str:
+    if icon in ICONS:
         return tooltip
     return "\n".join(line for line in (tooltip, _WHY_IT_WEARS_THE_STAND_IN) if line)

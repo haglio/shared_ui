@@ -19,7 +19,7 @@ from PyQt6.QtWidgets import (
 from shared_ui.chrome import family_stylesheet
 from shared_ui.colors import BG_BUTTON, BG_SECONDARY, BLUE, TEXT_MUTED
 from shared_ui.find_bar import FindBar
-from shared_ui.icons import glyph_icon
+from shared_ui.icons import qt_icon
 
 
 @pytest.fixture
@@ -123,7 +123,7 @@ def test_the_arrows_step_each_way(bar, field):
     assert _count(bar) == "1 of 2"
 
 
-def test_the_close_button_puts_the_strip_away_and_its_marks_with_it(bar, field):
+def test_the_close_button_puts_the_strip_away_and_its_highlights_with_it(bar, field):
     searched = field("a cat")
     bar.open_find([searched])
     _query(bar).setText("cat")
@@ -268,9 +268,9 @@ def test_the_strip_dresses_itself_in_a_window_with_only_the_family_sheet(bar, fi
 @pytest.mark.parametrize(("tooltip_start", "drawn"), [
     ("Previous match", "chevron_up"), ("Next match", "chevron_down"), ("Close", "cross"),
 ])
-def test_each_button_wears_the_family_s_mark_rather_than_a_typed_one(bar, tooltip_start, drawn):
+def test_each_button_wears_the_family_s_icon_rather_than_a_typed_one(bar, tooltip_start, drawn):
     button = _button(bar, tooltip_start)
 
     assert button.text() == ""
     assert (button.icon().pixmap(48, 48).toImage()
-            == glyph_icon(drawn, size=48).pixmap(48, 48).toImage())
+            == qt_icon(drawn, size=48).pixmap(48, 48).toImage())

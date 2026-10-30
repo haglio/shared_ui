@@ -28,12 +28,12 @@ from shared_ui.colors import (
     family_palette,
 )
 from shared_ui.fonts import SIZE_BODY, make_font
-from shared_ui.icons import glyph_pixmap
+from shared_ui.icons import icon_pixmap
 from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, MARGIN_DIALOG
 
-# The mark beside the message, in pixels square.  Windows' own message dialogs
+# The icon beside the message, in pixels square.  Windows' own message dialogs
 # draw theirs at this size.
-MARK_SIZE = 32
+ICON_SIZE = 32
 
 # The band the message column lives in.  Below the floor a wrapping label
 # picks a column narrow enough to break a sentence that already fitted; above
@@ -88,14 +88,14 @@ class _GuiThreadCall(QObject):
 
 
 class Level(Enum):
-    """How bad the news is, in the family mark the dialog draws beside it."""
+    """How bad the news is, in the family icon the dialog draws beside it."""
 
     ERROR = ("error", palette.RED)
     WARNING = ("warning", palette.AMBER)
     INFO = ("info", palette.BLUE)
 
     @property
-    def mark(self) -> str:
+    def icon(self) -> str:
         return self.value[0]
 
     @property
@@ -103,8 +103,8 @@ class Level(Enum):
         return self.value[1]
 
 
-def mark_pixmap(level: Level, size: int) -> QPixmap:
-    return glyph_pixmap(level.mark, size, QColor(*level.ink))
+def icon_pixmap_for(level: Level, size: int) -> QPixmap:
+    return icon_pixmap(level.icon, size, QColor(*level.ink))
 
 
 @dataclass(frozen=True)
@@ -163,9 +163,9 @@ class AlertDialog(QDialog):
             QLabel {{ color: {TEXT_SECONDARY.name()}; }}
             {button_rules()}
         """)
-        mark = QLabel()
-        mark.setPixmap(mark_pixmap(level, MARK_SIZE))
-        mark.setAlignment(Qt.AlignmentFlag.AlignTop)
+        icon = QLabel()
+        icon.setPixmap(icon_pixmap_for(level, ICON_SIZE))
+        icon.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         body = QLabel(message)
         body.setFont(make_font(size=SIZE_BODY))
@@ -181,7 +181,7 @@ class AlertDialog(QDialog):
 
         said = QHBoxLayout()
         said.setSpacing(GAP_DIALOG)
-        said.addWidget(mark)
+        said.addWidget(icon)
         said.addLayout(column, stretch=1)
 
         ok = _button(button_text, self.accept)

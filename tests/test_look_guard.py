@@ -105,7 +105,7 @@ def test_one_color_is_named_once(app, line, named):
     assert _found(checkout) == [f"parlor/tiles.py:1: {named}"]
 
 
-def test_a_typed_glyph_is_named_and_typography_is_not(app):
+def test_a_typed_symbol_is_named_and_typography_is_not(app):
     checkout = app({"tiles.py": (
         'CROWN = "\U0001F451"\n'
         'MINUS = "−"\n'
@@ -113,12 +113,12 @@ def test_a_typed_glyph_is_named_and_typography_is_not(app):
     )})
 
     assert _found(checkout) == [
-        "parlor/tiles.py:1: glyph \U0001F451 (U+1F451 CROWN)",
-        "parlor/tiles.py:2: glyph − (U+2212 MINUS SIGN)",
+        "parlor/tiles.py:1: symbol \U0001F451 (U+1F451 CROWN)",
+        "parlor/tiles.py:2: symbol − (U+2212 MINUS SIGN)",
     ]
 
 
-def test_a_docstring_may_name_a_glyph_or_a_color(app):
+def test_a_docstring_may_name_a_symbol_or_a_color(app):
     checkout = app({"tiles.py": (
         '"""Draws the ✕ in the white #ffffff would."""\n'
         "def close():\n"
@@ -131,7 +131,7 @@ def test_a_docstring_may_name_a_glyph_or_a_color(app):
 def test_an_icon_from_outside_shared_ui_is_named(app):
     checkout = app({"tiles.py": (
         "import qtawesome as qta\n"
-        "mark = QApplication.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxWarning)\n"
+        "warning = QApplication.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxWarning)\n"
         "style.drawPrimitive(QStyle.PrimitiveElement.PE_IndicatorTabClose, option, painter)\n"
         "folder = QIcon.fromTheme('folder')\n"
         "from qtawesome import icon\n"
@@ -174,7 +174,7 @@ def test_the_failure_says_where_each_one_is_and_where_it_belongs(app):
         assert_the_look_is_shared_uis(checkout, [checkout / "parlor"])
 
     assert "parlor/tiles.py:1: color _TRACK = (56, 56, 62)" in str(failure.value)
-    assert "parlor/tiles.py:2: glyph ✎ (U+270E LOWER RIGHT PENCIL)" in str(failure.value)
+    assert "parlor/tiles.py:2: symbol ✎ (U+270E LOWER RIGHT PENCIL)" in str(failure.value)
     assert "shared_ui" in str(failure.value)
 
 
@@ -245,7 +245,7 @@ def test_a_spacing_of_its_own_is_named(app, line):
     "font = make_font(size=SIZE_HEADING, bold=True)",
     "layout.setContentsMargins(0, 0, 0, 0)",
     "layout.setSpacing(GAP_SMALL)",
-    "_MARK_PX = 48",
+    "_ICON_PX = 48",
     "SHEET = '#clip { margin: 0 auto; padding: 0em; }'",
     "font.setPixelSize(in_pixels(SIZE_BODY))",
     "font = QFont(FONT_UI, -1)",
@@ -279,7 +279,7 @@ def test_a_face_and_a_text_size_are_named_as_they_are_written(app):
     ("_SMALL_PX = 11", ["parlor/tiles.py:1: text size _SMALL_PX = 11"]),
     ("_ROW_PX = 12", ["parlor/tiles.py:1: text size _ROW_PX = 12"]),
     ("BANNER_MAX_WIDTH_PX = 1600", []),
-    ("_MARK_SIDE_PX = 12", []),
+    ("_ICON_SIDE_PX = 12", []),
     ("_LEGEND_POINT_SIZE = 8", ["parlor/tiles.py:1: text size _LEGEND_POINT_SIZE = 8"]),
 ])
 def test_a_size_is_a_text_size_by_what_its_name_says_it_sizes(app, line, named):

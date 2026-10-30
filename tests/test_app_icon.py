@@ -109,7 +109,7 @@ def test_a_hud_draws_an_app_s_letter_as_its_cells_in_magenta_leaving_the_rest_al
 
 @pytest.mark.parametrize("letter", ["B", "F"])
 def test_a_hud_s_letter_lands_on_the_pixels_as_its_own_grid(letter):
-    """The .ico files live in the apps' own repos, so a HUD draws the mark from the
+    """The .ico files live in the apps' own repos, so a HUD draws the letter from the
     grid instead of loading another repo's file -- which works only if what lands
     on the pixels is that grid."""
     image = Image.new("RGBA", (18, 18), (0, 0, 0, 0))

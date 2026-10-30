@@ -41,7 +41,7 @@ _LATTICE = (0.0, 0.5, 1.0)
 
 def draw_letter(draw, rect: tuple[int, int, int, int], letter: str) -> None:
     """*letter*'s cells centered in *rect*, the blank ones left alone so what is
-    under the mark shows through its counters as the .ico's transparent cells
+    under the letter shows through its counters as the .ico's transparent cells
     let the desktop through."""
     x, y, w, h = rect
     cell = max(1, min(w, h) // 7)

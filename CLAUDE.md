@@ -1,7 +1,7 @@
 
 ## This package is the family's small set, never a store of each app's look
 
-Every color, mark, glyph, font, size and spacing an app draws with comes from
+Every color, icon, font, size and spacing an app draws with comes from
 what is here, chosen from a deliberately short list so the apps read as one
 family. An app that needs something this package lacks takes the nearest thing
 it has; bringing an app's look here replaces the app's own values with these,

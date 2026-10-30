@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import (
 )
 
 from shared_ui.chrome import field_rules, tool_button_rules
-from shared_ui.icons import glyph_icon
+from shared_ui.icons import qt_icon
 from shared_ui.palette import TEXT_MUTED, as_hex
 from shared_ui.spacing import GAP_MEDIUM, GAP_SMALL
 from shared_ui.text_find import TextFind
@@ -69,16 +69,16 @@ class FindBar(QWidget):
         row.addWidget(self._prev_btn)
         row.addWidget(self._next_btn)
         close = QToolButton()
-        close.setIcon(glyph_icon("cross"))
+        close.setIcon(qt_icon("cross"))
         close.setToolTip(f"Close the find ({dismiss_key})" if dismiss_key else "Close the find")
         close.clicked.connect(self.close_find)
         row.addWidget(close)
         self.setStyleSheet(_look())
         self.hide()
 
-    def _step_button(self, mark: str, tooltip: str, delta: int) -> QToolButton:
+    def _step_button(self, icon: str, tooltip: str, delta: int) -> QToolButton:
         button = QToolButton()
-        button.setIcon(glyph_icon(mark))
+        button.setIcon(qt_icon(icon))
         button.setToolTip(tooltip)
         button.clicked.connect(lambda _checked=False, d=delta: self._step(d))
         button.setEnabled(False)

@@ -57,7 +57,7 @@ def test_the_family_sheet_is_every_fragment():
 
     for fragment in (chrome.ground_rules(), chrome.tooltip_rules(),
                      chrome.menu_rules(), chrome.button_rules(),
-                     chrome.mark_button_rules(), chrome.item_view_rules()):
+                     chrome.icon_button_rules(), chrome.item_view_rules()):
         assert fragment in sheet
 
 
@@ -139,17 +139,17 @@ def test_hovering_a_menu_row_that_cannot_be_clicked_promises_nothing():
     assert _background(rules["QMenu::item:disabled:selected"]) == "transparent"
 
 
-def _solid_mark() -> QIcon:
-    """A mark whose ink is its whole frame, so where it is drawn is where its ink is."""
+def _solid_icon() -> QIcon:
+    """An icon whose ink is its whole frame, so where it is drawn is where its ink is."""
     pixmap = QPixmap(16, 16)
     pixmap.fill(QColor(*palette.TEXT_PRIMARY))
     return QIcon(pixmap)
 
 
-def _menu_of_marked_rows(*labels: str) -> tuple[QMenu, list[QAction]]:
+def _menu_of_rows_with_icons(*labels: str) -> tuple[QMenu, list[QAction]]:
     menu = QMenu()
     menu.setStyleSheet(chrome.menu_rules())
-    rows = [QAction(_solid_mark(), label, menu) for label in labels]
+    rows = [QAction(_solid_icon(), label, menu) for label in labels]
     menu.addActions(rows)
     menu.resize(menu.sizeHint())
     return menu, rows
@@ -170,17 +170,17 @@ def _inked_runs(image: QImage, row: QRect) -> list[tuple[int, int]]:
     return runs
 
 
-def test_a_menu_row_s_mark_sits_midway_between_the_menu_s_edge_and_its_words():
-    """Qt puts a row's mark hard against the menu's edge and starts its words a
-    whole column further in; the mark belongs in the middle of that room."""
-    menu, (row,) = _menu_of_marked_rows("Heading")
+def test_a_menu_row_s_icon_sits_midway_between_the_menu_s_edge_and_its_words():
+    """Qt puts a row's icon hard against the menu's edge and starts its words a
+    whole column further in; the icon belongs in the middle of that room."""
+    menu, (row,) = _menu_of_rows_with_icons("Heading")
     rect = menu.actionGeometry(row)
 
-    (mark_left, mark_right), (words_left, _), *_ = _inked_runs(menu.grab().toImage(), rect)
+    (icon_left, icon_right), (words_left, _), *_ = _inked_runs(menu.grab().toImage(), rect)
 
-    before_the_mark = mark_left - rect.left()
-    after_the_mark = words_left - mark_right - 1
-    assert abs(before_the_mark - after_the_mark) <= 2, (before_the_mark, after_the_mark)
+    before_the_icon = icon_left - rect.left()
+    after_the_icon = words_left - icon_right - 1
+    assert abs(before_the_icon - after_the_icon) <= 2, (before_the_icon, after_the_icon)
 
 
 def test_a_row_that_opens_a_menu_draws_its_arrow_midway_across_the_padding_past_its_words():
@@ -204,20 +204,20 @@ def test_a_row_that_opens_a_menu_draws_its_arrow_midway_across_the_padding_past_
     assert abs(past_the_words - before_the_edge) <= 2, (past_the_words, before_the_edge)
 
 
-def test_a_checked_row_s_mark_sits_on_the_lighter_ground_of_a_control_that_is_on():
-    """A row that carries a mark shows its check through the mark alone, so
+def test_a_checked_row_s_icon_sits_on_the_lighter_ground_of_a_control_that_is_on():
+    """A row that carries an icon shows its check through the icon alone, so
     without this a toggle in a menu looks the same on as off."""
-    menu, (toggle,) = _menu_of_marked_rows("Heading")
+    menu, (toggle,) = _menu_of_rows_with_icons("Heading")
     toggle.setCheckable(True)
     rect = menu.actionGeometry(toggle)
     off = menu.grab().toImage()
-    (mark_left, _), *_ = _inked_runs(off, rect)
+    (icon_left, _), *_ = _inked_runs(off, rect)
     toggle.setChecked(True)
     on = menu.grab().toImage()
 
-    beside_the_mark = (mark_left - 2, rect.center().y())
-    assert off.pixelColor(*beside_the_mark) == QColor(*palette.BG_TERTIARY)
-    assert on.pixelColor(*beside_the_mark).lightness() > QColor(*palette.BG_TERTIARY).lightness()
+    beside_the_icon = (icon_left - 2, rect.center().y())
+    assert off.pixelColor(*beside_the_icon) == QColor(*palette.BG_TERTIARY)
+    assert on.pixelColor(*beside_the_icon).lightness() > QColor(*palette.BG_TERTIARY).lightness()
 
 
 def _shown_away_from_the_pointer(widget: QWidget) -> None:
@@ -295,7 +295,7 @@ def test_a_tooltip_has_square_corners():
 def test_a_picked_row_the_keyboard_is_on_wears_no_focus_frame():
     # Windows 11 draws a white frame round the row the keyboard is on, and keeps
     # it there only while the list has the focus: on a picked row it is a second
-    # mark beside the blue, saying nothing the blue does not.
+    # sign beside the blue, saying nothing the blue does not.
     blue = palette.as_hex(palette.BLUE)
     view = QTreeWidget()
     view.setHeaderHidden(True)

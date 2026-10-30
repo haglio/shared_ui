@@ -5,7 +5,7 @@ from collections.abc import Sequence
 from PIL import Image, ImageDraw
 
 from shared_ui.button_pil import button, slab
-from shared_ui.icons_pil import glyph_image
+from shared_ui.icons_pil import pil_icon
 from shared_ui.palette import (
     BG_BUTTON,
     BG_TERTIARY,
@@ -22,7 +22,7 @@ Rect = tuple[int, int, int, int]
 
 
 def arrow_down(size: int) -> Image.Image:
-    return glyph_image("chevron_right", size, TEXT_MUTED).rotate(-90, expand=False)
+    return pil_icon("chevron_right", size, TEXT_MUTED).rotate(-90, expand=False)
 
 
 def _written(pen: ImageDraw.ImageDraw, rect: Rect, text: str, font) -> None:
