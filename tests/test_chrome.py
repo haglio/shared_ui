@@ -292,6 +292,17 @@ def test_a_tooltip_has_square_corners():
     assert "border-radius" not in rules["QToolTip"]
 
 
+def test_a_picked_item_wears_the_family_blue_under_the_brightest_text():
+    body = _rules(chrome.picked_item_rules("QListWidget"))["QListWidget::item:selected"]
+
+    assert _background(body) == palette.as_hex(palette.BLUE)
+    assert f"color: {palette.as_hex(palette.TEXT_PRIMARY)}" in body
+
+
+def test_a_picked_item_rule_names_every_item_view_unless_it_is_told_one():
+    assert "QAbstractItemView::item:selected" in _rules(chrome.picked_item_rules())
+
+
 def test_a_picked_row_the_keyboard_is_on_wears_no_focus_frame():
     # Windows 11 draws a white frame round the row the keyboard is on, and keeps
     # it there only while the list has the focus: on a picked row it is a second
@@ -299,8 +310,7 @@ def test_a_picked_row_the_keyboard_is_on_wears_no_focus_frame():
     blue = palette.as_hex(palette.BLUE)
     view = QTreeWidget()
     view.setHeaderHidden(True)
-    view.setStyleSheet(chrome.family_stylesheet()
-                       + f"QTreeView::item:selected {{ background-color: {blue}; }}")
+    view.setStyleSheet(chrome.family_stylesheet() + chrome.picked_item_rules("QTreeView"))
     for _ in range(2):
         view.addTopLevelItem(QTreeWidgetItem([""]))
     view.resize(200, 80)

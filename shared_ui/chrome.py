@@ -248,6 +248,14 @@ def item_view_rules() -> str:
     }"""
 
 
+def picked_item_rules(view: str = "QAbstractItemView") -> str:
+    return f"""
+    {view}::item:selected {{
+        background-color: {as_hex(BLUE)};
+        color: {as_hex(TEXT_PRIMARY)};
+    }}"""
+
+
 def family_stylesheet() -> str:
     """Every rule above, for an app that dresses itself whole.
 
