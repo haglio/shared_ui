@@ -16,7 +16,8 @@ from PyQt6.QtGui import QColor, QPalette, QPixmap
 from PyQt6.QtWidgets import QLineEdit, QWidget
 
 from shared_ui import palette as tokens
-from shared_ui.colors import BG_PRIMARY, BLUE, TEXT_PRIMARY, family_palette
+from shared_ui.chrome import family_stylesheet
+from shared_ui.colors import BG_PRIMARY, BLUE, TEXT_PRIMARY, dress_application, family_palette
 
 # Stands in for the color Windows hands an app that never says otherwise.
 # Invented, so a machine whose accent happens to match the family's blue cannot
@@ -142,6 +143,32 @@ def test_the_roles_it_does_not_own_are_left_where_they_were():
 
     moved = sorted(role.name for role in untouched if result.color(role) != marker)
     assert not moved, moved
+
+
+@pytest.fixture
+def an_undressed_application(qapp):
+    was_palette, was_sheet = qapp.palette(), qapp.styleSheet()
+    qapp.setPalette(_desktop_palette())
+    qapp.setStyleSheet("")
+    try:
+        yield qapp
+    finally:
+        qapp.setStyleSheet(was_sheet)
+        qapp.setPalette(was_palette)
+
+
+def test_an_application_takes_the_family_palette_and_sheet_together(an_undressed_application):
+    dress_application(an_undressed_application)
+
+    assert an_undressed_application.palette().color(QPalette.ColorRole.Highlight) == BLUE
+    assert an_undressed_application.styleSheet() == family_stylesheet()
+
+
+def test_an_application_with_a_sheet_of_its_own_still_takes_the_family_palette(an_undressed_application):
+    dress_application(an_undressed_application, sheet="QWidget { margin: 0px; }")
+
+    assert an_undressed_application.palette().color(QPalette.ColorRole.Highlight) == BLUE
+    assert an_undressed_application.styleSheet() == "QWidget { margin: 0px; }"
 
 
 def test_a_field_paints_its_selection_in_the_family_blue(selection_pixels):
