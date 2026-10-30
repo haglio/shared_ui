@@ -10,6 +10,7 @@ from __future__ import annotations
 from PyQt6.QtGui import QColor, QPalette
 
 from shared_ui import palette
+from shared_ui.chrome import family_stylesheet
 
 # ---------------------------------------------------------------------------
 # Background tiers (darkest -> lightest)
@@ -87,10 +88,8 @@ def family_palette(base: QPalette | None = None) -> QPalette:
     text in these dark apps came to be highlighted in an accent orange no app
     chose and the family does not own.
 
-    Apply it to the ``QApplication``, beside the family style sheet::
-
-        app.setPalette(family_palette(app.palette()))
-        app.setStyleSheet(family_stylesheet())
+    :func:`dress_application` applies it to the ``QApplication`` together with
+    the style sheet, so no app can take one half.
 
     *base* defaults to the application's own palette.  Only the roles below are
     restated; the rest are left as Qt derived them, because a style computes a
@@ -121,3 +120,8 @@ def family_palette(base: QPalette | None = None) -> QPalette:
     result.setColor(role.AlternateBase, BG_SECONDARY)
 
     return result
+
+
+def dress_application(app, sheet: str | None = None) -> None:
+    app.setPalette(family_palette(app.palette()))
+    app.setStyleSheet(family_stylesheet() if sheet is None else sheet)
