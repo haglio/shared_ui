@@ -55,7 +55,7 @@ def test_a_close_leaves_pyqts_own_cleanup_nothing_to_delete():
     ran = subprocess.run([sys.executable, "-c", child], cwd=REPO_ROOT, timeout=120,
                          env=os.environ | {"QT_QPA_PLATFORM": "offscreen"},
                          capture_output=True, encoding="utf-8", errors="replace",
-                         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+                         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0), check=False)
 
     assert ran.returncode == 0, ran.stdout + ran.stderr
     assert json.loads(ran.stdout.splitlines()[-1]) == [0]

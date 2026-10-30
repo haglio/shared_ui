@@ -57,7 +57,7 @@ def test_a_preview_letter_drawn_by_qt_matches_the_one_written_for_windows_withou
         pixel = by_qt.pixelColor(x, y)
         drawn = _as_seen((pixel.red(), pixel.green(), pixel.blue(), pixel.alpha()))
         written_pixel = _as_seen(on_disk.getpixel((x, y)))
-        assert all(abs(a - b) <= _QTS_PREMULTIPLIED_ROUNDING for a, b in zip(drawn, written_pixel))
+        assert all(abs(a - b) <= _QTS_PREMULTIPLIED_ROUNDING for a, b in zip(drawn, written_pixel, strict=True))
 
 
 def test_a_qt_app_without_pillow_still_hands_the_taskbar_its_inked_letter_as_a_file(tmp_path):

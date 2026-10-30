@@ -19,4 +19,4 @@ def test_each_step_of_speed_reaches_the_next_family_color():
 def test_a_speed_between_two_steps_is_the_color_between_them():
     between = heat.heat_at(150)
 
-    assert between == tuple(round((a + b) / 2) for a, b in zip(palette.BLUE, palette.BLUE_LIGHT))
+    assert between == tuple(round((a + b) / 2) for a, b in zip(palette.BLUE, palette.BLUE_LIGHT, strict=True))
