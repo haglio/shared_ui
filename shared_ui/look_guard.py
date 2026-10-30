@@ -61,7 +61,7 @@ class LookNotRead(Exception):
 def _tracked(root: Path, package: Path) -> list[Path]:
     quiet = {name: value for name, value in os.environ.items() if not name.startswith("GIT_")}
     listed = subprocess.run(["git", "-C", str(root), "ls-files", "-z", "--", str(package)],
-                            capture_output=True, text=True, encoding="utf-8", env=quiet)
+                            capture_output=True, text=True, encoding="utf-8", env=quiet, check=False)
     files = [root / name for name in listed.stdout.split("\0") if name]
     if not files:
         raise LookNotRead(f"nothing to read: {root} tracks nothing under {package}\n{listed.stderr}")

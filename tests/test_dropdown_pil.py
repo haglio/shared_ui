@@ -36,7 +36,7 @@ def _color(image: Image.Image, x: int, y: int) -> tuple[int, ...]:
 
 
 def _near(color: tuple[int, ...], ink) -> bool:
-    return sum(abs(channel - wanted) for channel, wanted in zip(color, ink)) < 90
+    return sum(abs(channel - wanted) for channel, wanted in zip(color, ink, strict=True)) < 90
 
 
 class TestTheField:

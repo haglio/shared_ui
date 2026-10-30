@@ -13,6 +13,7 @@ from __future__ import annotations
 import logging
 import math
 import uuid
+from itertools import pairwise
 
 import pytest
 from PyQt6.QtCore import QRectF, QSize, Qt
@@ -165,7 +166,7 @@ def test_the_hollow_plus_traces_the_solid_one():
     # beside it -- an outline a size out reads as two plus signs, not one.
     solid = icons.icon_pixmap("plus", 48, TEXT_PRIMARY)
     hollow = icons.icon_pixmap("plus_outline", 48, TEXT_PRIMARY)
-    for solid_edge, hollow_edge in zip(_ink_rect(solid), _ink_rect(hollow)):
+    for solid_edge, hollow_edge in zip(_ink_rect(solid), _ink_rect(hollow), strict=True):
         assert abs(solid_edge - hollow_edge) <= 2
     # And hollow means hollow: the middle of the icon is left empty, which is
     # what the solid underneath it shows through.
@@ -207,9 +208,9 @@ def test_a_small_icon_is_the_same_icon_rather_than_a_heavier_one():
     sizes = (24, 48, 96)
     rects = [_ink_rect(icons.icon_pixmap("mic", size, TEXT_PRIMARY)) for size in sizes]
     widths = [(right - left) / size
-              for (left, _upper, right, _lower), size in zip(rects, sizes)]
+              for (left, _upper, right, _lower), size in zip(rects, sizes, strict=True)]
     heights = [(lower - upper) / size
-               for (_left, upper, _right, lower), size in zip(rects, sizes)]
+               for (_left, upper, _right, lower), size in zip(rects, sizes, strict=True)]
     assert max(widths) - min(widths) < 0.06
     assert max(heights) - min(heights) < 0.06
     # And the ink stays a like share of the frame.  Antialiasing fattens a small
@@ -373,13 +374,13 @@ _WAVEFORMS = ("wave", "wave_triangle", "wave_square", "wave_sawtooth")
 
 def test_each_waveform_is_drawn_in_the_frame_the_sine_fills():
     sine, *others = (_ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY)) for name in _WAVEFORMS)
-    for name, frame in zip(_WAVEFORMS[1:], others):
-        assert all(abs(edge - sines) <= 1 for edge, sines in zip(frame, sine)), name
+    for name, frame in zip(_WAVEFORMS[1:], others, strict=True):
+        assert all(abs(edge - sines) <= 1 for edge, sines in zip(frame, sine, strict=True)), name
 
 
 def test_the_sawtooth_climbs_at_once_and_falls_slowly_as_the_motion_does():
     (saw,) = ICONS["wave_sawtooth"]
-    segments = list(zip(saw.points, saw.points[1:]))
+    segments = list(pairwise(saw.points))
     climbs = [abs(x2 - x1) for (x1, y1), (x2, y2) in segments if y2 < y1]
     falls = [abs(x2 - x1) for (x1, y1), (x2, y2) in segments if y2 > y1]
     assert climbs and falls
@@ -429,7 +430,7 @@ def _strokes_down_the_middle(name: str, size: int) -> list[int]:
 def test_database_is_three_short_cylinders_stacked_under_one_lid():
     _lid_far_edge, lid_near_edge, *rims = _strokes_down_the_middle("database", 96)
     left, _upper, right, _lower = _ink_rect(icons.icon_pixmap("database", 96, TEXT_PRIMARY))
-    heights = [lower - upper for upper, lower in zip([lid_near_edge, *rims], rims)]
+    heights = [lower - upper for upper, lower in pairwise([lid_near_edge, *rims])]
 
     assert len(rims) == 3
     assert max(heights) - min(heights) <= 1

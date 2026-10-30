@@ -3,6 +3,8 @@ and core palette hues."""
 
 from __future__ import annotations
 
+from itertools import pairwise
+
 from PyQt6.QtGui import QColor
 
 from shared_ui import colors, tick_control
@@ -111,7 +113,7 @@ def test_no_two_grays_sit_within_a_hair_of_each_other():
     """Which is the rule underlying the count: two shades nobody can tell apart are
     one shade with two names, and they drift into different apps."""
     distinct = sorted({color.lightness() for color in _grays(colors).values()})
-    for first, second in zip(distinct, distinct[1:]):
+    for first, second in pairwise(distinct):
         assert second - first >= 10, f"{first} and {second} are the same gray twice"
 
 

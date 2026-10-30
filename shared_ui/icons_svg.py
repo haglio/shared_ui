@@ -10,6 +10,7 @@ corners where two meet, and an outlined ring or frame is the space between two.
 from __future__ import annotations
 
 import math
+from itertools import pairwise
 
 from shared_ui.icon_geometry import (
     CANVAS,
@@ -43,7 +44,7 @@ def _bar(start: tuple[float, float], end: tuple[float, float], width: float) -> 
 
 
 def _run(points, width: float) -> str:
-    return "".join(_bar(a, b, width) for a, b in zip(points, points[1:]))
+    return "".join(_bar(a, b, width) for a, b in pairwise(points))
 
 
 def _rounded_rect_path(x: float, y: float, w: float, h: float, r: float) -> str:
