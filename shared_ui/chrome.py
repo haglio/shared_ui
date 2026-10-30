@@ -35,7 +35,7 @@ from shared_ui.palette import (
 )
 from shared_ui.spacing import (
     BUTTON_GAP,
-    BUTTON_MARK_INSET,
+    BUTTON_ICON_INSET,
     BUTTON_PAD_H,
     BUTTON_PAD_H_TIGHT,
     BUTTON_PAD_V,
@@ -73,14 +73,14 @@ def tooltip_rules() -> str:
 _MENU_ROW_PAD_V = BUTTON_PAD_V
 _MENU_ROW_PAD_H = BUTTON_PAD_H
 
-# Qt's layout, not the family's: it draws a menu row's mark against the row's
+# Qt's layout, not the family's: it draws a menu row's icon against the row's
 # own edge, and starts the row's words past its padding and a column as wide as
 # the small icon size plus four.
-_QT_MENU_MARK = 16
-_ROOM_BEFORE_MENU_WORDS = _MENU_ROW_PAD_H + _QT_MENU_MARK + 4
+_QT_MENU_ICON = 16
+_ROOM_BEFORE_MENU_WORDS = _MENU_ROW_PAD_H + _QT_MENU_ICON + 4
 
 _CHECKED_GROUND_MARGIN = GAP_SMALL
-_MENU_MARK_BOX_LEFT = (_ROOM_BEFORE_MENU_WORDS - _QT_MENU_MARK) // 2 - _CHECKED_GROUND_MARGIN
+_MENU_ICON_BOX_LEFT = (_ROOM_BEFORE_MENU_WORDS - _QT_MENU_ICON) // 2 - _CHECKED_GROUND_MARGIN
 
 _MENU_ARROW = 9
 _MENU_ARROW_RIGHT = (_MENU_ROW_PAD_H - _MENU_ARROW) // 2
@@ -119,7 +119,7 @@ def menu_rules() -> str:
         color: {as_hex(TEXT_MUTED)};
     }}
     QMenu::icon {{
-        left: {_MENU_MARK_BOX_LEFT}px;
+        left: {_MENU_ICON_BOX_LEFT}px;
         padding: {_CHECKED_GROUND_MARGIN}px;
     }}
     QMenu::icon:checked {{
@@ -194,7 +194,7 @@ def tool_button_rules() -> str:
         color: {as_hex(TEXT_PRIMARY)};
         border: 1px solid {as_hex(BORDER_SUBTLE)};
         border-radius: {BUTTON_RADIUS}px;
-        padding: {BUTTON_MARK_INSET}px {GAP_MEDIUM}px;
+        padding: {BUTTON_ICON_INSET}px {GAP_MEDIUM}px;
         font-weight: bold;
     }}{control_ground(BG_BUTTON, "QToolButton")}{control_ground(BG_BUTTON_ACTIVE, "QToolButton:checked")}
     QToolButton:disabled {{
@@ -231,12 +231,12 @@ def toolbar_padding(*, right: int) -> str:
     return f"padding: {BUTTON_PAD_V}px {right}px {BUTTON_PAD_V}px {BUTTON_PAD_H_TIGHT}px;"
 
 
-MARK_BUTTON_PROPERTY = "markButton"
+ICON_BUTTON_PROPERTY = "iconButton"
 
 
-def mark_button_rules() -> str:
+def icon_button_rules() -> str:
     return f"""
-    QAbstractButton[{MARK_BUTTON_PROPERTY}="true"] {{
+    QAbstractButton[{ICON_BUTTON_PROPERTY}="true"] {{
         padding: 0px;
     }}"""
 
@@ -256,4 +256,4 @@ def family_stylesheet() -> str:
     every rule here, so a `QPushButton#generate` keeps its blue.
     """
     return (f"{ground_rules()}\n{tooltip_rules()}\n{menu_rules()}\n{button_rules()}"
-            f"\n{mark_button_rules()}\n{item_view_rules()}")
+            f"\n{icon_button_rules()}\n{item_view_rules()}")

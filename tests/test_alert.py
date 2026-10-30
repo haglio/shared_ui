@@ -13,13 +13,13 @@ from PyQt6.QtWidgets import QApplication, QDialog, QLabel, QPushButton
 
 from shared_ui.alert import (
     DISMISSED,
-    MARK_SIZE,
+    ICON_SIZE,
     MESSAGE_WIDTH_MAX,
     MESSAGE_WIDTH_MIN,
     AlertDialog,
     Level,
     Link,
-    mark_pixmap,
+    icon_pixmap_for,
     show_alert,
 )
 from shared_ui.colors import (
@@ -33,7 +33,7 @@ from shared_ui.colors import (
     hovered,
 )
 from shared_ui.fonts import SIZE_BODY, make_font
-from shared_ui.icons import glyph_pixmap
+from shared_ui.icons import icon_pixmap
 from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, MARGIN_DIALOG
 from shared_ui.testing import ground
 
@@ -215,12 +215,12 @@ def test_the_message_column_has_a_floor_as_well_as_a_ceiling():
         (Level.INFO, "info", BLUE),
     ],
 )
-def test_the_level_picks_the_family_mark_beside_the_message(level, drawn, ink):
+def test_the_level_picks_the_family_icon_beside_the_message(level, drawn, ink):
     dlg = AlertDialog("Example App", "Nothing to do.", level=level)
 
-    mark, = [lbl for lbl in dlg.findChildren(QLabel) if not lbl.text()]
-    assert mark.pixmap().toImage() == glyph_pixmap(drawn, MARK_SIZE, ink).toImage()
-    assert mark_pixmap(level, MARK_SIZE).toImage() == mark.pixmap().toImage()
+    icon, = [lbl for lbl in dlg.findChildren(QLabel) if not lbl.text()]
+    assert icon.pixmap().toImage() == icon_pixmap(drawn, ICON_SIZE, ink).toImage()
+    assert icon_pixmap_for(level, ICON_SIZE).toImage() == icon.pixmap().toImage()
 
 
 def test_the_dialog_wears_the_apps_own_icon(tmp_path):

@@ -1,4 +1,4 @@
-"""The family's icon glyphs, drawn with Pillow for the Funestras' HUDs.
+"""The family's icons, drawn with Pillow for the Funestras' HUDs.
 
 Same shapes as :mod:`shared_ui.icons` paints with QPainter -- both walk the list
 in :mod:`shared_ui.icon_geometry` -- so the trash can on a Funestra's HUD is the
@@ -12,7 +12,7 @@ without dragging PyQt6 into a video pipeline.
 Two things Pillow does not do that QPainter does, and how they are handled:
 antialiasing (everything is drawn at :data:`SUPERSAMPLE` scale and resampled
 down) and round line caps (a filled dot is laid at each line's ends).  Both
-matter at HUD size, where a mark is a dozen pixels across and a stair-stepped
+matter at HUD size, where an icon is a dozen pixels across and a stair-stepped
 edge or a chopped-off line is most of what the eye sees.
 """
 
@@ -34,9 +34,9 @@ from shared_ui.icon_geometry import (
     shapes_of,
 )
 
-__all__ = ["CANVAS", "SUPERSAMPLE", "glyph_image", "paste_glyph"]
+__all__ = ["CANVAS", "SUPERSAMPLE", "paste_icon", "pil_icon"]
 
-# Pillow's draw calls are hard-edged, so a glyph is drawn this many times too big
+# Pillow's draw calls are hard-edged, so an icon is drawn this many times too big
 # and resampled down; the resampling is where the smooth edge comes from.  Four
 # is where it stopped looking jagged at HUD sizes -- a 14px button is drawn at 56
 # and thrown away, which costs nothing worth measuring since the HUDs cache what
@@ -44,7 +44,7 @@ __all__ = ["CANVAS", "SUPERSAMPLE", "glyph_image", "paste_glyph"]
 SUPERSAMPLE = 4
 
 
-def glyph_image(name: str, size: int, color) -> Image.Image:
+def pil_icon(name: str, size: int, color) -> Image.Image:
     """*name* as a transparent RGBA square *size* px on an edge, drawn in *color*.
 
     *color* is an ``(r, g, b)`` or ``(r, g, b, a)`` tuple -- what the HUDs' own
@@ -54,7 +54,7 @@ def glyph_image(name: str, size: int, color) -> Image.Image:
     big = edge * SUPERSAMPLE
     # Drawn as a COVERAGE MASK and colored afterwards, rather than drawn in color
     # and resampled.  Lanczos overshoots at a hard edge, so resampling colored
-    # ink put pixels brighter than the ink itself around every mark -- a faint
+    # ink put pixels brighter than the ink itself around every icon -- a faint
     # halo, and enough to trip a HUD's own "is anything near-white here" checks.
     # A mask overshoots too, but only in coverage, which saturates harmlessly.
     mask = Image.new("L", (big, big), 0)
@@ -71,18 +71,18 @@ def glyph_image(name: str, size: int, color) -> Image.Image:
     return image
 
 
-def paste_glyph(image: Image.Image, name: str, frame: tuple[int, int, int, int],
-                color) -> None:
+def paste_icon(image: Image.Image, name: str, frame: tuple[int, int, int, int],
+               color) -> None:
     """Lay *name* over *image*, centered in ``frame`` and as big as its short edge.
 
-    Composited rather than pasted flat, so the mark sits on whatever the HUD has
+    Composited rather than pasted flat, so the icon sits on whatever the HUD has
     already drawn there -- a button's fill, the panel, the video -- instead of
     stamping a transparent square over it.
     """
     x, y, w, h = frame
     edge = max(1, min(int(w), int(h)))
-    glyph = glyph_image(name, edge, color)
-    image.alpha_composite(glyph, (int(x + (w - edge) / 2), int(y + (h - edge) / 2)))
+    icon = pil_icon(name, edge, color)
+    image.alpha_composite(icon, (int(x + (w - edge) / 2), int(y + (h - edge) / 2)))
 
 
 def _rgba(color) -> tuple[int, int, int, int]:
@@ -201,7 +201,7 @@ def _centered(frame: list, width: float) -> list:
     """*frame* grown by half a pen width on every side.
 
     Pillow draws an outline INSIDE the frame it is given, where QPainter centers
-    the pen on the path -- so the same numbers give Pillow a mark half a pen
+    the pen on the path -- so the same numbers give Pillow an icon half a pen
     width smaller all round.  Growing the frame first is what puts the two
     renderings on top of each other.
     """

@@ -1,8 +1,8 @@
-"""The shared glyphs: that each one draws, that they draw differently from each
-other, and that the three routes to one produce the same mark.
+"""The shared icons: that each one draws, that they draw differently from each
+other, and that the three routes to one produce the same icon.
 
 That last part is the whole point of the module.  The apps reached for their
-glyphs in different ways -- a toolbar wants a QIcon, a self-painted panel wants
+icons in different ways -- a toolbar wants a QIcon, a self-painted panel wants
 a pixmap, a badge wants to paint into a chip it already has -- and while each
 app answered that itself, the drawings drifted apart.  So the tests here lean
 hardest on the routes agreeing.
@@ -22,7 +22,7 @@ from PyQt6.QtWidgets import QLabel
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import (
-    GLYPHS,
+    ICONS,
     RENAMED_MARKS,
     STAND_IN,
     Ellipse,
@@ -30,13 +30,13 @@ from shared_ui.icon_geometry import (
     Path,
     Polygon,
     RoundedRect,
-    glyph_names,
+    icon_names,
 )
 from shared_ui.orientation import LANDSCAPE, PORTRAIT
-from shared_ui.spacing import BUTTON_ICON, BUTTON_MARK
+from shared_ui.spacing import BUTTON_FILLING_ICON, BUTTON_ICON
 
-_A_MARK_THIS_VERSION_LACKS = "a_mark_from_another_version"
-_EVERY_MARK_AND_THE_STAND_IN = (*glyph_names(), _A_MARK_THIS_VERSION_LACKS)
+_AN_ICON_THIS_VERSION_LACKS = "an_icon_from_another_version"
+_EVERY_ICON_AND_THE_STAND_IN = (*icon_names(), _AN_ICON_THIS_VERSION_LACKS)
 
 
 def _blank(size: int) -> QPixmap:
@@ -61,7 +61,7 @@ def _solid_ink(pixmap: QPixmap) -> set[tuple[int, int]]:
 
 
 def _as_a_menu_row_shows(name: str) -> QPixmap:
-    return icons.glyph_icon(name).pixmap(QSize(BUTTON_ICON, BUTTON_ICON))
+    return icons.qt_icon(name).pixmap(QSize(BUTTON_ICON, BUTTON_ICON))
 
 
 def _ink_rect(pixmap: QPixmap) -> tuple[int, int, int, int]:
@@ -78,7 +78,7 @@ def _ink_pixels(pixmap: QPixmap) -> int:
 
 
 def _pieces(ink: set[tuple[int, int]]) -> int:
-    """How many separate marks *ink* falls into, counting a diagonal as joined."""
+    """How many separate pieces *ink* falls into, counting a diagonal as joined."""
     unvisited, pieces = set(ink), 0
     while unvisited:
         pieces += 1
@@ -94,20 +94,20 @@ def _pieces(ink: set[tuple[int, int]]) -> int:
     return pieces
 
 
-def test_every_registered_glyph_draws_something():
+def test_every_registered_icon_draws_something():
     # A name in the registry that paints nothing is worse than a missing one:
     # the caller gets a button with an empty square on it and no error.
-    for name in glyph_names():
-        pixmap = icons.glyph_pixmap(name, 48, TEXT_PRIMARY)
+    for name in icon_names():
+        pixmap = icons.icon_pixmap(name, 48, TEXT_PRIMARY)
         assert not pixmap.isNull(), name
         assert _ink_pixels(pixmap) > 0, name
 
 
-def test_the_glyphs_are_all_different_marks():
-    # Icon-only controls are only as good as the marks telling each other apart.
+def test_the_icons_are_all_different():
+    # Icon-only controls are only as good as the icons telling each other apart.
     drawn = {
-        name: icons.glyph_pixmap(name, 48, TEXT_PRIMARY).toImage()
-        for name in _EVERY_MARK_AND_THE_STAND_IN
+        name: icons.icon_pixmap(name, 48, TEXT_PRIMARY).toImage()
+        for name in _EVERY_ICON_AND_THE_STAND_IN
         if name not in RENAMED_MARKS
     }
     names = sorted(drawn)
@@ -116,32 +116,32 @@ def test_the_glyphs_are_all_different_marks():
             assert drawn[first] != drawn[second], f"{first} and {second} draw alike"
 
 
-# A mark whose whole identity is a single row or column -- a bar, three dots -- cannot
+# An icon whose whole identity is a single row or column -- a bar, three dots -- cannot
 # fill a square and should not try: a minus stretched to be tall is a rectangle, not a minus. Named here one by
 # one, so widening the exemption takes a decision rather than a shrug.
 _ONE_BAR = {"minus", "more", "more_vertical"}
-# A mark laid into the corner of another one, which the other mark leaves free
+# An icon laid into the corner of another one, which the other icon leaves free
 # for it: spread over the canvas, it would cover what it is laid on.
 _IN_A_CORNER = {"regenerate_corner"}
 
 
-def test_every_glyph_fills_its_canvas():
-    # A mark using only the middle of its frame is a mark the eye can't find once
+def test_every_icon_fills_its_canvas():
+    # An icon using only the middle of its frame is an icon the eye can't find once
     # the frame is scaled onto a 16px tree row -- the empty margin shrinks with it.
     # The long side has to carry most of the canvas; the short side is allowed to
-    # be narrow, because some marks (a chevron) genuinely are.
-    for name in set(_EVERY_MARK_AND_THE_STAND_IN) - _ONE_BAR - _IN_A_CORNER:
-        left, upper, right, lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+    # be narrow, because some icons (a chevron) genuinely are.
+    for name in set(_EVERY_ICON_AND_THE_STAND_IN) - _ONE_BAR - _IN_A_CORNER:
+        left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
         width, height = right - left, lower - upper
         assert max(width, height) >= 0.6 * 48, f"{name} is small in its frame"
         assert min(width, height) >= 0.4 * 48, f"{name} is thin in its frame"
 
 
-def test_a_one_bar_mark_still_spans_its_canvas_the_long_way():
+def test_a_one_bar_icon_still_spans_its_canvas_the_long_way():
     # The exemption is for the SHORT side only. A minus that also stopped short
     # left to right would read as a hyphen dropped into an empty square.
     for name in _ONE_BAR:
-        left, upper, right, lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+        left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
         assert max(right - left, lower - upper) >= 0.6 * 48, f"{name} is short in its frame"
 
 
@@ -152,8 +152,8 @@ def test_the_speed_pair_is_one_control_drawn_twice():
     # pixel the plus lays down too, so the bar they share is one bar however the
     # geometry happens to spell it.  Drawn large, because the bars differing by a
     # canvas unit is a difference a 48px rendering rounds away.
-    minus = _ink(icons.glyph_pixmap("minus", 96, TEXT_PRIMARY))
-    plus = _ink(icons.glyph_pixmap("plus", 96, TEXT_PRIMARY))
+    minus = _ink(icons.icon_pixmap("minus", 96, TEXT_PRIMARY))
+    plus = _ink(icons.icon_pixmap("plus", 96, TEXT_PRIMARY))
     assert minus <= plus
     assert len(plus) > len(minus)   # and the second bar is really there
 
@@ -163,49 +163,49 @@ def test_the_hollow_plus_traces_the_solid_one():
     # over the solid to say "this has an enhancement, and can take another".
     # That only reads if the outline lands on the solid's own edge rather than
     # beside it -- an outline a size out reads as two plus signs, not one.
-    solid = icons.glyph_pixmap("plus", 48, TEXT_PRIMARY)
-    hollow = icons.glyph_pixmap("plus_outline", 48, TEXT_PRIMARY)
+    solid = icons.icon_pixmap("plus", 48, TEXT_PRIMARY)
+    hollow = icons.icon_pixmap("plus_outline", 48, TEXT_PRIMARY)
     for solid_edge, hollow_edge in zip(_ink_rect(solid), _ink_rect(hollow)):
         assert abs(solid_edge - hollow_edge) <= 2
-    # And hollow means hollow: the middle of the mark is left empty, which is
+    # And hollow means hollow: the middle of the icon is left empty, which is
     # what the solid underneath it shows through.
     assert hollow.toImage().pixelColor(24, 24).alpha() < 32
     assert solid.toImage().pixelColor(24, 24).alpha() > 32
 
 
-def test_every_glyph_sits_in_the_middle_of_its_canvas():
-    # Marks are laid beside each other in a button bank, so one drawn off-center
+def test_every_icon_sits_in_the_middle_of_its_canvas():
+    # Icons are laid beside each other in a button bank, so one drawn off-center
     # reads as misaligned with its neighbors rather than as its own shape.
-    for name in set(_EVERY_MARK_AND_THE_STAND_IN) - _IN_A_CORNER:
-        left, upper, right, lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+    for name in set(_EVERY_ICON_AND_THE_STAND_IN) - _IN_A_CORNER:
+        left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
         assert abs((left + right) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
         assert abs((upper + lower) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
 
 
-def test_a_glyph_is_drawn_in_the_color_it_is_asked_for():
-    # The apps tint marks to say what they do -- a delete in red, a star in the
+def test_an_icon_is_drawn_in_the_color_it_is_asked_for():
+    # The apps tint icons to say what they do -- a delete in red, a star in the
     # green that means "bookmarked" across the family -- so the ink has to be
     # the color handed in rather than a fixed one.
     for color in (RED, GREEN, TEXT_PRIMARY):
-        image = icons.glyph_pixmap("star", 48, color).toImage()
+        image = icons.icon_pixmap("star", 48, color).toImage()
         assert image.pixelColor(24, 25) == color
 
 
-def test_a_glyph_scales_to_the_size_it_is_asked_for():
+def test_an_icon_scales_to_the_size_it_is_asked_for():
     # Fun Time paints its bar's own panel size; Origenerator draws big and lets
     # Qt scale down.  Both get a square of exactly the side they named.
     for size in (16, 24, 48, 96):
-        pixmap = icons.glyph_pixmap("mic", size, TEXT_PRIMARY)
+        pixmap = icons.icon_pixmap("mic", size, TEXT_PRIMARY)
         assert pixmap.size() == QSize(size, size)
 
 
-def test_a_small_glyph_is_the_same_mark_rather_than_a_heavier_one():
+def test_a_small_icon_is_the_same_icon_rather_than_a_heavier_one():
     # The painter is scaled, not the coordinates, so the pen scales with the
-    # drawing: the mark takes up the same share of its frame at every size.  A
-    # fixed pen width instead leaves a 16px glyph a blob and a 96px one a
-    # wireframe -- two marks rather than one shown large and small.
+    # drawing: the icon takes up the same share of its frame at every size.  A
+    # fixed pen width instead leaves a 16px icon a blob and a 96px one a
+    # wireframe -- two icons rather than one shown large and small.
     sizes = (24, 48, 96)
-    rects = [_ink_rect(icons.glyph_pixmap("mic", size, TEXT_PRIMARY)) for size in sizes]
+    rects = [_ink_rect(icons.icon_pixmap("mic", size, TEXT_PRIMARY)) for size in sizes]
     widths = [(right - left) / size
               for (left, _upper, right, _lower), size in zip(rects, sizes)]
     heights = [(lower - upper) / size
@@ -213,9 +213,9 @@ def test_a_small_glyph_is_the_same_mark_rather_than_a_heavier_one():
     assert max(widths) - min(widths) < 0.06
     assert max(heights) - min(heights) < 0.06
     # And the ink stays a like share of the frame.  Antialiasing fattens a small
-    # glyph proportionally more than a large one, so this is a band, not equality.
+    # icon proportionally more than a large one, so this is a band, not equality.
     coverage = [
-        _ink_pixels(icons.glyph_pixmap("mic", size, TEXT_PRIMARY)) / (size * size)
+        _ink_pixels(icons.icon_pixmap("mic", size, TEXT_PRIMARY)) / (size * size)
         for size in sizes
     ]
     assert max(coverage) < 1.3 * min(coverage)
@@ -224,7 +224,7 @@ def test_a_small_glyph_is_the_same_mark_rather_than_a_heavier_one():
 def test_an_icon_carries_a_normal_and_a_dimmed_rendering():
     # Qt swaps to the disabled pixmap itself when a button goes dead, so both
     # have to be there and the dim one has to actually read as dim.
-    icon = icons.glyph_icon("trash", color=RED)
+    icon = icons.qt_icon("trash", color=RED)
     size = QSize(48, 48)
     normal = icon.pixmap(size, QIcon.Mode.Normal)
     disabled = icon.pixmap(size, QIcon.Mode.Disabled)
@@ -237,59 +237,59 @@ def test_a_disabled_icon_is_the_muted_gray_whatever_its_color():
     # A colored button that dims to a paler version of its own color reads as a
     # lighter red rather than as a button with nothing to act on.
     for color in (RED, GREEN, None):
-        icon = icons.glyph_icon("star", color=color)
+        icon = icons.qt_icon("star", color=color)
         image = icon.pixmap(QSize(48, 48), QIcon.Mode.Disabled).toImage()
         assert image.pixelColor(24, 25) == TEXT_MUTED
 
 
 def test_an_uncolored_icon_wears_the_chrome_text_color():
-    icon = icons.glyph_icon("star")
+    icon = icons.qt_icon("star")
     image = icon.pixmap(QSize(48, 48), QIcon.Mode.Normal).toImage()
     assert image.pixelColor(24, 25) == TEXT_PRIMARY
 
 
-def test_the_pixmap_and_the_icon_draw_the_very_same_mark():
-    # The mark Fun Time paints into its bar and the one Origenerator hands a
+def test_the_pixmap_and_the_qt_icon_draw_the_very_same_icon():
+    # The icon Fun Time paints into its bar and the one Origenerator hands a
     # toolbar button are one drawing -- which is the whole reason this module
     # exists, since the two apps' microphones had drifted into different shapes.
-    from_pixmap = icons.glyph_pixmap("mic", 48, TEXT_PRIMARY)
-    from_icon = icons.glyph_icon("mic", size=48).pixmap(QSize(48, 48), QIcon.Mode.Normal)
+    from_pixmap = icons.icon_pixmap("mic", 48, TEXT_PRIMARY)
+    from_icon = icons.qt_icon("mic", size=48).pixmap(QSize(48, 48), QIcon.Mode.Normal)
     assert from_pixmap.toImage() == from_icon.toImage()
 
 
-def test_painting_into_a_caller_s_painter_draws_that_same_mark_too():
-    # The third route: a badge paints its chip, then asks for the mark on top.
+def test_painting_into_a_caller_s_painter_draws_that_same_icon_too():
+    # The third route: a badge paints its chip, then asks for the icon on top.
     # It has to be the same drawing as the other two, in the place it asked for.
-    direct = icons.glyph_pixmap("play", 48, TEXT_PRIMARY)
+    direct = icons.icon_pixmap("play", 48, TEXT_PRIMARY)
     composed = _blank(48)
     painter = QPainter(composed)
-    icons.draw_glyph(painter, "play", TEXT_PRIMARY)
+    icons.draw_icon(painter, "play", TEXT_PRIMARY)
     painter.end()
     assert composed.toImage() == direct.toImage()
 
 
-def test_a_glyph_lands_where_the_caller_placed_it():
-    # A badge draws its mark inset into a chip, so the offset has to move the
+def test_an_icon_lands_where_the_caller_placed_it():
+    # A badge draws its icon inset into a chip, so the offset has to move the
     # whole drawing rather than clip it.
     canvas = _blank(48)
     painter = QPainter(canvas)
-    icons.draw_glyph(painter, "star", TEXT_PRIMARY, size=24, x=12, y=12)
+    icons.draw_icon(painter, "star", TEXT_PRIMARY, size=24, x=12, y=12)
     painter.end()
     left, upper, right, lower = _ink_rect(canvas)
     assert left >= 12 and right <= 36
     assert upper >= 12 and lower <= 36
 
 
-def test_drawing_a_glyph_leaves_the_caller_s_painter_as_it_found_it():
+def test_drawing_an_icon_leaves_the_caller_s_painter_as_it_found_it():
     # A caller part-way through drawing a chip must not find its pen, brush or
-    # transform swapped out underneath it -- the mark goes on top of the chip,
+    # transform swapped out underneath it -- the icon goes on top of the chip,
     # and whatever the caller draws next still comes out in its own colors.
     canvas = _blank(64)
     painter = QPainter(canvas)
     painter.translate(8, 8)
     painter.setPen(QPen(QColor(GREEN), 3))
     painter.setBrush(QColor(RED))
-    icons.draw_glyph(painter, "clock", TEXT_PRIMARY, size=24)
+    icons.draw_icon(painter, "clock", TEXT_PRIMARY, size=24)
     assert painter.pen().color() == QColor(GREEN)
     assert painter.pen().widthF() == 3
     assert painter.brush().color() == QColor(RED)
@@ -297,22 +297,22 @@ def test_drawing_a_glyph_leaves_the_caller_s_painter_as_it_found_it():
     painter.end()
 
 
-def test_a_mark_drawn_over_a_chip_keeps_the_chip_underneath():
-    # What the badge callers actually do: fill a chip, then lay the mark on it.
-    # The glyph paints only its own ink, so the chip still shows around it.
+def test_an_icon_drawn_over_a_chip_keeps_the_chip_underneath():
+    # What the badge callers actually do: fill a chip, then lay the icon on it.
+    # The icon paints only its own ink, so the chip still shows around it.
     canvas = _blank(48)
     painter = QPainter(canvas)
     painter.setPen(Qt.PenStyle.NoPen)
     painter.setBrush(QColor(GREEN))
     painter.drawRoundedRect(QRectF(3, 3, 42, 42), 12, 12)
-    icons.draw_glyph(painter, "play", RED, size=26, x=11, y=11)
+    icons.draw_icon(painter, "play", RED, size=26, x=11, y=11)
     painter.end()
     image = canvas.toImage()
-    assert image.pixelColor(6, 24) == QColor(GREEN)   # chip, clear of the mark
+    assert image.pixelColor(6, 24) == QColor(GREEN)   # chip, clear of the icon
     assert image.pixelColor(0, 0).alpha() == 0        # outside the chip, still clear
 
 
-_THE_MARKS = (
+_THE_ICONS = (
     "bolt", "cells_in_circle", "chart", "check", "chevron_down", "chevron_left",
     "chevron_right", "chevron_up", "chevrons_left", "chevrons_right", "circle",
     "clip_to_scene", "clips", "clock", "clock_full", "clock_short", "compilation",
@@ -330,13 +330,13 @@ _THE_MARKS = (
 )
 
 
-def test_the_marks_this_family_draws_are_the_ones_the_apps_ask_for():
-    assert glyph_names() == _THE_MARKS
+def test_the_icons_this_family_draws_are_the_ones_the_apps_ask_for():
+    assert icon_names() == _THE_ICONS
 
 
-def test_the_working_mark_is_the_circle_with_a_quarter_left_out():
-    (ring,) = GLYPHS["circle"]
-    (arc,) = GLYPHS["working"]
+def test_the_working_icon_is_the_circle_with_a_quarter_left_out():
+    (ring,) = ICONS["circle"]
+    (arc,) = ICONS["working"]
 
     assert (arc.x + arc.w / 2, arc.y + arc.h / 2) == (ring.cx, ring.cy)
     assert (arc.w / 2, arc.h / 2) == (ring.rx, ring.ry)
@@ -344,26 +344,26 @@ def test_the_working_mark_is_the_circle_with_a_quarter_left_out():
 
 
 # The four states OSR2 control can be in, in the order their buttons sit, and how
-# many primitives of each mark draw the device itself: the column, the sleeve and
+# many primitives of each icon draw the device itself: the column, the sleeve and
 # the arm carrying one to the other.
 _OSR2_CONTROL = ("park", "retract", "release", "control_off")
 _THE_DEVICE = 3
 
 
-def test_the_four_osr2_control_marks_draw_one_device():
+def test_the_four_osr2_control_icons_draw_one_device():
     # They sit in a row as one radio group, so what tells them apart is meant to
-    # be where the sleeve rides and the marks beside it -- never a second drawing
+    # be where the sleeve rides and the icons beside it -- never a second drawing
     # of the device. Four devices drawn four ways would read as four unrelated
     # controls rather than one control in four states.
-    columns = {GLYPHS[name][0] for name in _OSR2_CONTROL}
+    columns = {ICONS[name][0] for name in _OSR2_CONTROL}
     assert len(columns) == 1
 
 
 def test_control_off_crosses_out_what_driving_points_at():
     # Driving and control-off leave the sleeve in the same place, free in the
-    # middle of its travel; the whole difference is the pair of marks either side
+    # middle of its travel; the whole difference is the pair of icons either side
     # of it, arrows on one and X's on the other.
-    driving, off = GLYPHS["release"], GLYPHS["control_off"]
+    driving, off = ICONS["release"], ICONS["control_off"]
     assert driving[:_THE_DEVICE] == off[:_THE_DEVICE]
     assert driving[_THE_DEVICE:] != off[_THE_DEVICE:]
 
@@ -372,13 +372,13 @@ _WAVEFORMS = ("wave", "wave_triangle", "wave_square", "wave_sawtooth")
 
 
 def test_each_waveform_is_drawn_in_the_frame_the_sine_fills():
-    sine, *others = (_ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY)) for name in _WAVEFORMS)
+    sine, *others = (_ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY)) for name in _WAVEFORMS)
     for name, frame in zip(_WAVEFORMS[1:], others):
         assert all(abs(edge - sines) <= 1 for edge, sines in zip(frame, sine)), name
 
 
 def test_the_sawtooth_climbs_at_once_and_falls_slowly_as_the_motion_does():
-    (saw,) = GLYPHS["wave_sawtooth"]
+    (saw,) = ICONS["wave_sawtooth"]
     segments = list(zip(saw.points, saw.points[1:]))
     climbs = [abs(x2 - x1) for (x1, y1), (x2, y2) in segments if y2 < y1]
     falls = [abs(x2 - x1) for (x1, y1), (x2, y2) in segments if y2 > y1]
@@ -386,9 +386,9 @@ def test_the_sawtooth_climbs_at_once_and_falls_slowly_as_the_motion_does():
     assert max(climbs) < min(falls)
 
 
-def test_the_length_marks_are_a_clip_along_one_timeline_the_whole_way_or_only_its_start():
-    full_timeline, full_clip = GLYPHS["full"]
-    clips_timeline, clips_clip = GLYPHS["clips"]
+def test_the_length_icons_are_a_clip_along_one_timeline_the_whole_way_or_only_its_start():
+    full_timeline, full_clip = ICONS["full"]
+    clips_timeline, clips_clip = ICONS["clips"]
 
     assert full_timeline == clips_timeline
     assert full_clip.x == clips_clip.x == full_timeline.x1
@@ -398,16 +398,16 @@ def test_the_length_marks_are_a_clip_along_one_timeline_the_whole_way_or_only_it
 
 def test_a_jump_between_a_clip_and_its_scene_keeps_the_short_clip_left_of_the_long_one():
     for name in ("clip_to_scene", "scene_to_clip"):
-        short, long, *_arrow = GLYPHS[name]
+        short, long, *_arrow = ICONS[name]
         assert short.fill and long.fill, name
         assert short.x + short.w < long.x, name
         assert short.w < long.w / 2, name
-    assert GLYPHS["clip_to_scene"][:2] == GLYPHS["scene_to_clip"][:2]
+    assert ICONS["clip_to_scene"][:2] == ICONS["scene_to_clip"][:2]
 
 
 def test_a_jump_s_arrow_is_short_and_thick_with_room_on_either_side():
     for name in ("clip_to_scene", "scene_to_clip"):
-        *_clips, stem, head = GLYPHS[name]
+        *_clips, stem, head = ICONS[name]
         xs = [stem.x1, stem.x2, *(x for x, _y in head.points)]
         ys = [y for _x, y in head.points]
         assert stem.width >= 8, name
@@ -417,18 +417,18 @@ def test_a_jump_s_arrow_is_short_and_thick_with_room_on_either_side():
 
 
 def test_latest_is_its_own_drawing_rather_than_shuffle_uncrossed():
-    assert not set(GLYPHS["latest"]) & set(GLYPHS["shuffle"])
+    assert not set(ICONS["latest"]) & set(ICONS["shuffle"])
 
 
 def _strokes_down_the_middle(name: str, size: int) -> list[int]:
-    image = icons.glyph_pixmap(name, size, TEXT_PRIMARY).toImage()
+    image = icons.icon_pixmap(name, size, TEXT_PRIMARY).toImage()
     inked = [image.pixelColor(size // 2, y).alpha() > 32 for y in range(size)]
     return [y for y in range(size) if inked[y] and (y == 0 or not inked[y - 1])]
 
 
 def test_database_is_three_short_cylinders_stacked_under_one_lid():
     _lid_far_edge, lid_near_edge, *rims = _strokes_down_the_middle("database", 96)
-    left, _upper, right, _lower = _ink_rect(icons.glyph_pixmap("database", 96, TEXT_PRIMARY))
+    left, _upper, right, _lower = _ink_rect(icons.icon_pixmap("database", 96, TEXT_PRIMARY))
     heights = [lower - upper for upper, lower in zip([lid_near_edge, *rims], rims)]
 
     assert len(rims) == 3
@@ -437,7 +437,7 @@ def test_database_is_three_short_cylinders_stacked_under_one_lid():
 
 
 def _ink_size(name: str) -> tuple[int, int]:
-    left, upper, right, lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+    left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
     return right - left, lower - upper
 
 
@@ -450,17 +450,17 @@ def test_portrait_and_landscape_are_one_frame_and_its_quarter_turn():
 
 def test_an_orientation_is_drawn_as_a_frame_rather_than_a_filled_block():
     for name in (PORTRAIT, LANDSCAPE, "portrait_and_landscape"):
-        image = icons.glyph_pixmap(name, 48, TEXT_PRIMARY).toImage()
+        image = icons.icon_pixmap(name, 48, TEXT_PRIMARY).toImage()
         assert image.pixelColor(24, 24).alpha() == 0, name
 
 
 def test_portrait_and_landscape_is_the_two_frames_crossed():
-    assert GLYPHS["portrait_and_landscape"] == (*GLYPHS[PORTRAIT], *GLYPHS[LANDSCAPE])
+    assert ICONS["portrait_and_landscape"] == (*ICONS[PORTRAIT], *ICONS[LANDSCAPE])
 
 
 def test_portrait_beside_landscape_is_the_same_two_frames_side_by_side():
-    upright, lying_down = GLYPHS["portrait_beside_landscape"]
-    (portrait,) = GLYPHS[PORTRAIT]
+    upright, lying_down = ICONS["portrait_beside_landscape"]
+    (portrait,) = ICONS[PORTRAIT]
 
     assert upright.h / upright.w == pytest.approx(portrait.h / portrait.w)
     assert (lying_down.w, lying_down.h) == (upright.h, upright.w)
@@ -469,44 +469,44 @@ def test_portrait_beside_landscape_is_the_same_two_frames_side_by_side():
 
 def test_portrait_beside_landscape_fits_the_square_of_a_button():
     left, upper, right, lower = _ink_rect(
-        icons.glyph_pixmap("portrait_beside_landscape", BUTTON_MARK, TEXT_PRIMARY))
+        icons.icon_pixmap("portrait_beside_landscape", BUTTON_FILLING_ICON, TEXT_PRIMARY))
 
     assert min(left, upper) > 0
-    assert max(right, lower) < BUTTON_MARK - 1
+    assert max(right, lower) < BUTTON_FILLING_ICON - 1
 
 
-def test_a_renamed_mark_still_draws_under_its_old_name_for_branches_not_yet_rebased():
-    assert GLYPHS["clock_full"] == GLYPHS["full_length"] == GLYPHS["full"]
-    assert GLYPHS["clock_short"] == GLYPHS["shorts"] == GLYPHS["clips"]
+def test_a_renamed_icon_still_draws_under_its_old_name_for_branches_not_yet_rebased():
+    assert ICONS["clock_full"] == ICONS["full_length"] == ICONS["full"]
+    assert ICONS["clock_short"] == ICONS["shorts"] == ICONS["clips"]
 
 
-def test_the_registry_is_what_glyph_names_reports():
+def test_the_registry_is_what_icon_names_reports():
     # Callers walk the names to build a bank of buttons, and the tests above walk
-    # them to check every mark -- so a glyph added without a name is a glyph no
+    # them to check every icon -- so an icon added without a name is an icon no
     # test ever renders.
-    names = glyph_names()
+    names = icon_names()
     assert names == tuple(sorted(names))
     for name in names:
-        assert icons.glyph_pixmap(name, 24, TEXT_PRIMARY).size() == QSize(24, 24)
+        assert icons.icon_pixmap(name, 24, TEXT_PRIMARY).size() == QSize(24, 24)
 
 
 def test_the_canvas_and_pen_width_are_stated_in_canvas_units():
-    # Both are public: a caller composing a mark into its own drawing needs the
+    # Both are public: a caller composing an icon into its own drawing needs the
     # frame the geometry is written against.
     assert icons.CANVAS == 48.0
     assert 0 < icons.PEN_WIDTH < icons.CANVAS
 
 
-def test_a_mark_never_erases_the_ground_it_is_drawn_on():
-    # The copy mark holds a gap between its two sheets, and the apps each cut
+def test_an_icon_never_erases_the_ground_it_is_drawn_on():
+    # The copy icon holds a gap between its two sheets, and the apps each cut
     # that gap by erasing -- which works on an empty pixmap and punches a cutout
-    # through anything else.  Clipping is what makes the mark safe to lay over a
-    # chip or a thumbnail, so the ground has to survive under every glyph.
-    for name in _EVERY_MARK_AND_THE_STAND_IN:
+    # through anything else.  Clipping is what makes the icon safe to lay over a
+    # chip or a thumbnail, so the ground has to survive under every icon.
+    for name in _EVERY_ICON_AND_THE_STAND_IN:
         canvas = QPixmap(48, 48)
         canvas.fill(QColor(GREEN))
         painter = QPainter(canvas)
-        icons.draw_glyph(painter, name, RED)
+        icons.draw_icon(painter, name, RED)
         painter.end()
         image = canvas.toImage()
         cleared = [
@@ -521,13 +521,13 @@ def test_a_mark_never_erases_the_ground_it_is_drawn_on():
 def _quit_at_three_quarters_size_in_the_middle_of_the_frame() -> set[tuple[int, int]]:
     canvas = _blank(48)
     painter = QPainter(canvas)
-    icons.draw_glyph(painter, "power", TEXT_PRIMARY, size=36, x=6, y=6)
+    icons.draw_icon(painter, "power", TEXT_PRIMARY, size=36, x=6, y=6)
     painter.end()
     return _ink(canvas)
 
 
 def _restart_s_arrow() -> set[tuple[int, int]]:
-    restart = _ink(icons.glyph_pixmap("restart", 48, TEXT_PRIMARY))
+    restart = _ink(icons.icon_pixmap("restart", 48, TEXT_PRIMARY))
     return restart - _quit_at_three_quarters_size_in_the_middle_of_the_frame()
 
 
@@ -562,7 +562,7 @@ def _empty_sectors(ink: set[tuple[int, int]]) -> list[int]:
 
 
 def test_restart_carries_quit_at_three_quarters_size_in_its_middle():
-    restart = _ink(icons.glyph_pixmap("restart", 48, TEXT_PRIMARY))
+    restart = _ink(icons.icon_pixmap("restart", 48, TEXT_PRIMARY))
 
     assert _quit_at_three_quarters_size_in_the_middle_of_the_frame() <= restart
 
@@ -600,58 +600,58 @@ def test_restart_s_arrow_runs_counterclockwise_into_its_head_on_the_right_of_the
 
 
 def test_a_menu_row_s_restart_keeps_its_arrow_apart_from_the_quit_inside_it():
-    quit_mark = _solid_ink(_as_a_menu_row_shows("power"))
+    quit_icon = _solid_ink(_as_a_menu_row_shows("power"))
     restart = _solid_ink(_as_a_menu_row_shows("restart"))
 
-    assert _pieces(restart) == _pieces(quit_mark) + 1
+    assert _pieces(restart) == _pieces(quit_icon) + 1
 
 
 def test_the_enhance_filter_lays_its_funnel_over_the_plus():
-    # Two marks set apart in one frame read as two crowded controls; one laid over
+    # Two icons set apart in one frame read as two crowded controls; one laid over
     # the other reads as a single sign about a single thing. So the funnel's
     # mouth has to reach back across the plus's lower arm rather than starting
-    # clear of it -- which in ink is that the mark comes out in ONE piece. Set
+    # clear of it -- which in ink is that the icon comes out in ONE piece. Set
     # the two apart and the ink falls into two.
-    mark = _ink(icons.glyph_pixmap("enhance_filter", 48, TEXT_PRIMARY))
-    assert _pieces(mark) == 1
+    icon = _ink(icons.icon_pixmap("enhance_filter", 48, TEXT_PRIMARY))
+    assert _pieces(icon) == 1
 
-    # It is still two marks in one frame, though, rather than a single drawing:
+    # It is still two icons in one frame, though, rather than a single drawing:
     # the plus's arm reaches the left edge and the funnel's stem hangs to the
     # lower edge, and the piece above is what holds those two ends together.
-    assert any(x <= 8 for x, _y in mark), "the plus's arm is missing"
-    assert any(y >= 42 for _x, y in mark), "the funnel's stem is missing"
+    assert any(x <= 8 for x, _y in icon), "the plus's arm is missing"
+    assert any(y >= 42 for _x, y in icon), "the funnel's stem is missing"
 
 
-def test_the_transport_marks_have_rounded_corners(monkeypatch):
-    # A play triangle with hard points reads as a sharper, lighter mark than the
+def test_the_transport_icons_have_rounded_corners(monkeypatch):
+    # A play triangle with hard points reads as a sharper, lighter icon than the
     # ones beside it -- and beside an icon font's transport controls it plainly
     # was not the same drawing.
     #
-    # The rounding grows the mark, so it shows in what is drawn: the very same
+    # The rounding grows the icon, so it shows in what is drawn: the very same
     # corners with the rounding taken off cover less ground. The bare one is
-    # registered as a glyph of its own for the length of the test, so it is drawn
-    # by the same public route as the real mark rather than through the
+    # registered as an icon of its own for the length of the test, so it is drawn
+    # by the same public route as the real icon rather than through the
     # renderer's insides.
-    (triangle,) = GLYPHS["play"]
-    monkeypatch.setitem(GLYPHS, "_play_with_hard_points", (Polygon(triangle.points),))
+    (triangle,) = ICONS["play"]
+    monkeypatch.setitem(ICONS, "_play_with_hard_points", (Polygon(triangle.points),))
 
-    rounded = _ink_pixels(icons.glyph_pixmap("play", 48, TEXT_PRIMARY))
-    bare = _ink_pixels(icons.glyph_pixmap("_play_with_hard_points", 48, TEXT_PRIMARY))
+    rounded = _ink_pixels(icons.icon_pixmap("play", 48, TEXT_PRIMARY))
+    bare = _ink_pixels(icons.icon_pixmap("_play_with_hard_points", 48, TEXT_PRIMARY))
     assert rounded > bare
 
 
-def test_a_mark_this_version_does_not_have_is_drawn_as_the_stand_in(monkeypatch):
-    monkeypatch.setitem(GLYPHS, "_the_stand_in", STAND_IN)
-    stand_in = icons.glyph_pixmap("_the_stand_in", 48, TEXT_PRIMARY).toImage()
+def test_an_icon_this_version_does_not_have_is_drawn_as_the_stand_in(monkeypatch):
+    monkeypatch.setitem(ICONS, "_the_stand_in", STAND_IN)
+    stand_in = icons.icon_pixmap("_the_stand_in", 48, TEXT_PRIMARY).toImage()
 
-    drawn = icons.glyph_pixmap(_A_MARK_THIS_VERSION_LACKS, 48, TEXT_PRIMARY).toImage()
+    drawn = icons.icon_pixmap(_AN_ICON_THIS_VERSION_LACKS, 48, TEXT_PRIMARY).toImage()
 
     assert drawn == stand_in
 
 
 def test_the_stand_in_wears_its_button_s_color_and_is_gray_only_when_the_button_is_disabled():
     on_the_square_s_left_edge = (4, 24)
-    icon = icons.glyph_icon(_A_MARK_THIS_VERSION_LACKS, color=RED)
+    icon = icons.qt_icon(_AN_ICON_THIS_VERSION_LACKS, color=RED)
 
     normal = icon.pixmap(QSize(48, 48), QIcon.Mode.Normal).toImage()
     disabled = icon.pixmap(QSize(48, 48), QIcon.Mode.Disabled).toImage()
@@ -660,12 +660,12 @@ def test_the_stand_in_wears_its_button_s_color_and_is_gray_only_when_the_button_
     assert disabled.pixelColor(*on_the_square_s_left_edge) == TEXT_MUTED
 
 
-def test_each_mark_this_version_does_not_have_is_named_in_the_log_once(caplog):
-    first, second = (f"a_mark_first_asked_for_{uuid.uuid4().hex}" for _ in range(2))
+def test_each_icon_this_version_does_not_have_is_named_in_the_log_once(caplog):
+    first, second = (f"an_icon_first_asked_for_{uuid.uuid4().hex}" for _ in range(2))
 
     with caplog.at_level(logging.WARNING):
         for name in (first, second, first, second, first):
-            icons.glyph_pixmap(name, 24, TEXT_PRIMARY)
+            icons.icon_pixmap(name, 24, TEXT_PRIMARY)
 
     for name in (first, second):
         naming_it = [record.levelno for record in caplog.records if name in record.getMessage()]
@@ -673,26 +673,26 @@ def test_each_mark_this_version_does_not_have_is_named_in_the_log_once(caplog):
 
 
 def test_a_bar_ends_in_a_round_cap_that_reaches_past_its_endpoint():
-    # A mark's ends are round, so a bar's ink overhangs where its line stops by
+    # An icon's ends are round, so a bar's ink overhangs where its line stops by
     # about half the pen width -- what keeps a minus from reading as a chopped rule.
-    (bar,) = GLYPHS["minus"]
-    left, _upper, right, _lower = _ink_rect(icons.glyph_pixmap("minus", 48, TEXT_PRIMARY))
+    (bar,) = ICONS["minus"]
+    left, _upper, right, _lower = _ink_rect(icons.icon_pixmap("minus", 48, TEXT_PRIMARY))
     assert left <= bar.x1 - bar.width / 2 + 1
     assert right >= bar.x2 + bar.width / 2 - 1
 
 
 def test_a_path_written_in_a_frame_of_its_own_fills_the_canvas_that_frame_stands_for(monkeypatch):
     square = Path((("M", 0, 0), ("L", 24, 0), ("L", 24, 24), ("L", 0, 24), ("Z",)), frame=24.0)
-    monkeypatch.setitem(GLYPHS, "_a_square_in_a_frame_of_24", (square,))
+    monkeypatch.setitem(ICONS, "_a_square_in_a_frame_of_24", (square,))
 
-    drawn = icons.glyph_pixmap("_a_square_in_a_frame_of_24", 48, TEXT_PRIMARY)
+    drawn = icons.icon_pixmap("_a_square_in_a_frame_of_24", 48, TEXT_PRIMARY)
 
     assert _ink_rect(drawn) == (0, 0, 47, 47)
 
 
-def test_a_corner_mark_keeps_to_the_corner_its_mark_leaves_free():
+def test_a_corner_icon_keeps_to_the_corner_its_icon_leaves_free():
     for name in _IN_A_CORNER:
-        left, upper, _right, _lower = _ink_rect(icons.glyph_pixmap(name, 48, TEXT_PRIMARY))
+        left, upper, _right, _lower = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
         assert left >= 24 and upper >= 24, f"{name} reaches out of the lower right"
 
 
@@ -706,36 +706,36 @@ def _rendered_label(text: str) -> QImage:
 
 
 @pytest.mark.usefixtures("qapp")
-def test_a_line_of_text_can_lead_with_a_mark_drawn_in_its_ink():
+def test_a_line_of_text_can_lead_with_an_icon_drawn_in_its_ink():
     def reds(image) -> list[int]:
         return [x for y in range(image.height()) for x in range(image.width())
                 if image.pixelColor(x, y).red() > 150 and image.pixelColor(x, y).green() < 120]
 
-    marked = reds(_rendered_label(icons.marked_text("mic", "heard it", color=RED, size=16)))
+    led = reds(_rendered_label(icons.icon_then_text("mic", "heard it", color=RED, size=16)))
 
-    assert marked and max(marked) < 20, "the mark leads the line"
-
-
-@pytest.mark.usefixtures("qapp")
-def test_a_mark_set_among_the_words_is_the_lines_own_mark_alone():
-    mark = icons.inline_mark("check", color=RED, size=16)
-
-    assert mark.startswith("<img") and icons.marked_text("check", "x", color=RED, size=16) == (
-        mark + "&nbsp;x")
+    assert led and max(led) < 20, "the icon leads the line"
 
 
 @pytest.mark.usefixtures("qapp")
-def test_a_marked_line_shows_its_words_as_they_were_written():
-    line = icons.marked_text("mic", "1 < 2 & <b>bold</b>", color=RED, size=16)
+def test_an_icon_set_among_the_words_is_the_lines_own_icon_alone():
+    icon = icons.inline_icon("check", color=RED, size=16)
+
+    assert icon.startswith("<img") and icons.icon_then_text("check", "x", color=RED, size=16) == (
+        icon + "&nbsp;x")
+
+
+@pytest.mark.usefixtures("qapp")
+def test_a_line_led_by_an_icon_shows_its_words_as_they_were_written():
+    line = icons.icon_then_text("mic", "1 < 2 & <b>bold</b>", color=RED, size=16)
 
     assert "1 &lt; 2 &amp; &lt;b&gt;bold&lt;/b&gt;" in line
 
 
 
-# --- the marks Line's runs wear for the kind of run they are --------------------
+# --- the icons Line's runs wear for the kind of run they are --------------------
 
 def _of(name: str, kind: type) -> list:
-    return [shape for shape in GLYPHS[name] if isinstance(shape, kind)]
+    return [shape for shape in ICONS[name] if isinstance(shape, kind)]
 
 
 def _cells(name: str) -> list:
@@ -856,11 +856,11 @@ def test_the_warning_is_a_bar_and_a_dot_under_a_raised_triangles_point():
     assert point[1] < bar.y1 < bar.y2 < dot.cy < left[1]
 
 
-def test_a_mark_drawn_to_fill_a_box_reaches_it_along_one_side_and_sits_in_its_middle():
+def test_an_icon_drawn_to_fill_a_box_reaches_it_along_one_side_and_sits_in_its_middle():
     canvas = QPixmap(120, 60)
     canvas.fill(Qt.GlobalColor.transparent)
     painter = QPainter(canvas)
-    icons.draw_glyph_filling(painter, "question", TEXT_PRIMARY, QRectF(0, 0, 120, 60))
+    icons.draw_icon_filling(painter, "question", TEXT_PRIMARY, QRectF(0, 0, 120, 60))
     painter.end()
 
     left, top, right, bottom = _ink_rect(canvas)

@@ -1,25 +1,25 @@
-"""The family's icon glyphs, drawn with QPainter for the apps' Qt chrome.
+"""The family's icons, drawn with QPainter for the apps' Qt chrome.
 
 The shapes are not here -- they are in :mod:`shared_ui.icon_geometry`, which
 knows nothing about any toolkit, and :mod:`shared_ui.icons_pil` renders the same
-list through Pillow for the Funestras' HUDs.  That split is the point: a mark drawn
-here and the same mark on a HUD are one drawing.
+list through Pillow for the Funestras' HUDs.  That split is the point: an icon drawn
+here and the same icon on a HUD are one drawing.
 
 Callers take one of three routes:
 
-* :func:`glyph_pixmap` for a raw pixmap -- a panel that paints its own bitmap,
-* :func:`glyph_icon` for a QIcon carrying a normal and a disabled rendering --
+* :func:`icon_pixmap` for a raw pixmap -- a panel that paints its own bitmap,
+* :func:`qt_icon` for a QIcon carrying a normal and a disabled rendering --
   a toolbar button, which Qt swaps between as it enables and disables,
-* :func:`draw_glyph` to paint one through a painter the caller already holds --
-  the route a badge takes, so the mark lands on the chip the caller just drew.
+* :func:`draw_icon` to paint one through a painter the caller already holds --
+  the route a badge takes, so the icon lands on the chip the caller just drew.
 
-The marks are drawn rather than typed as font characters because a face is not
+The icons are drawn rather than typed as font characters because a face is not
 guaranteed to carry them (Windows draws a tofu rectangle for the ones it lacks),
-and because a typed glyph's weight then follows whatever face happens to be
-installed rather than the weight of the marks beside it.
+and because a typed character's weight then follows whatever face happens to be
+installed rather than the weight of the icons beside it.
 
 What is NOT here: an app's own composition -- the chip under a badge, which
-levels get a lettered mark, which button wears which glyph.  That is each app's
+levels get a lettered icon, which button wears which icon.  That is each app's
 business and it stays there.
 """
 
@@ -50,14 +50,14 @@ from shared_ui.stand_in_tooltips import remember_the_stand_in_on
 __all__ = [
     "CANVAS",
     "PEN_WIDTH",
-    "draw_glyph",
-    "glyph_icon",
-    "glyph_pixmap",
+    "draw_icon",
+    "icon_pixmap",
+    "qt_icon",
 ]
 
 
-def draw_glyph(painter: QPainter, name: str, color, *,
-               size: float = CANVAS, x: float = 0.0, y: float = 0.0) -> None:
+def draw_icon(painter: QPainter, name: str, color, *,
+              size: float = CANVAS, x: float = 0.0, y: float = 0.0) -> None:
     """Paint *name* through *painter*, in a *size*-square frame at ``(x, y)``.
 
     The painter's own pen, brush, transform and hints are left as they were --
@@ -83,7 +83,7 @@ _VISIBLE_ALPHA = 32
 
 @cache
 def _ink_box(name: str) -> QRectF:
-    image = glyph_pixmap(name, _INK_PROBE, TEXT_PRIMARY).toImage()
+    image = icon_pixmap(name, _INK_PROBE, TEXT_PRIMARY).toImage()
     inked = [(x, y) for y in range(image.height()) for x in range(image.width())
              if image.pixelColor(x, y).alpha() >= _VISIBLE_ALPHA]
     xs, ys = [x for x, _y in inked], [y for _x, y in inked]
@@ -92,27 +92,27 @@ def _ink_box(name: str) -> QRectF:
                   (max(xs) + 1 - min(xs)) * unit, (max(ys) + 1 - min(ys)) * unit)
 
 
-def draw_glyph_filling(painter: QPainter, name: str, color, box: QRectF) -> None:
+def draw_icon_filling(painter: QPainter, name: str, color, box: QRectF) -> None:
     """Paint *name* as large as its ink fits in *box*, centered there."""
     ink = _ink_box(name)
     scale = min(box.width() / ink.width(), box.height() / ink.height())
-    draw_glyph(painter, name, color, size=CANVAS * scale,
-               x=box.center().x() - ink.center().x() * scale,
-               y=box.center().y() - ink.center().y() * scale)
+    draw_icon(painter, name, color, size=CANVAS * scale,
+              x=box.center().x() - ink.center().x() * scale,
+              y=box.center().y() - ink.center().y() * scale)
 
 
-def glyph_pixmap(name: str, size: int, color) -> QPixmap:
+def icon_pixmap(name: str, size: int, color) -> QPixmap:
     """*name* as a transparent *size*-square pixmap, drawn in *color*."""
     edge = max(1, int(size))
     pixmap = QPixmap(edge, edge)
     pixmap.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pixmap)
-    draw_glyph(painter, name, color, size=edge)
+    draw_icon(painter, name, color, size=edge)
     painter.end()
     return pixmap
 
 
-def glyph_icon(name: str, *, color=None, size: int = int(CANVAS)) -> QIcon:
+def qt_icon(name: str, *, color=None, size: int = int(CANVAS)) -> QIcon:
     """*name* as an icon carrying its normal and its disabled rendering.
 
     *color* tints the normal one -- a button that says what it does before its
@@ -126,35 +126,35 @@ def glyph_icon(name: str, *, color=None, size: int = int(CANVAS)) -> QIcon:
     """
     icon = QIcon()
     icon.addPixmap(
-        glyph_pixmap(name, size, TEXT_PRIMARY if color is None else color),
+        icon_pixmap(name, size, TEXT_PRIMARY if color is None else color),
         QIcon.Mode.Normal,
     )
-    icon.addPixmap(glyph_pixmap(name, size, TEXT_MUTED), QIcon.Mode.Disabled)
+    icon.addPixmap(icon_pixmap(name, size, TEXT_MUTED), QIcon.Mode.Disabled)
     return icon
 
 
-def inline_mark(name: str, *, color, size: int) -> str:
+def inline_icon(name: str, *, color, size: int) -> str:
     """*name* as an image a label's rich text can set among its words, *size*
     across in *color*.
 
-    Drawn at twice that and scaled down, so the mark stays crisp on a screen
+    Drawn at twice that and scaled down, so the icon stays crisp on a screen
     that scales the label up.
     """
     png = QByteArray()
     buffer = QBuffer(png)
     buffer.open(QIODevice.OpenModeFlag.WriteOnly)
-    glyph_pixmap(name, 2 * size, color).save(buffer, "PNG")
+    icon_pixmap(name, 2 * size, color).save(buffer, "PNG")
     source = "data:image/png;base64," + bytes(png.toBase64()).decode("ascii")
     return f'<img src="{source}" width="{size}" height="{size}" style="vertical-align: middle">'
 
 
-def marked_text(name: str, text: str, *, color, size: int) -> str:
+def icon_then_text(name: str, text: str, *, color, size: int) -> str:
     """*text* as a label's rich text, led by *name* drawn *size* across in *color*."""
-    return f"{inline_mark(name, color=color, size=size)}&nbsp;{html.escape(text, quote=False)}"
+    return f"{inline_icon(name, color=color, size=size)}&nbsp;{html.escape(text, quote=False)}"
 
 
 def _set_pen(painter: QPainter, ink: QColor, width: float) -> None:
-    """Set up an outline pen: round caps and joins, so a mark has no sharp ends."""
+    """Set up an outline pen: round caps and joins, so an icon has no sharp ends."""
     pen = QPen(ink)
     pen.setWidthF(width)
     pen.setCapStyle(Qt.PenCapStyle.RoundCap)

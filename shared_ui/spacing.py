@@ -34,8 +34,8 @@ HAIRLINE = 1
 BUTTON_SIZE = 28
 BUTTON_SIZE_HUD = 18
 
-BUTTON_MARK_INSET = 2
-BUTTON_MARK = BUTTON_SIZE - 2 * BUTTON_MARK_INSET
+BUTTON_ICON_INSET = 2
+BUTTON_FILLING_ICON = BUTTON_SIZE - 2 * BUTTON_ICON_INSET
 BUTTON_ICON = 16
 
 BUTTON_RADIUS = 4
@@ -58,7 +58,7 @@ BUTTON_ROW_GAP = 8
 # draws them.
 BUTTON_GROUP_GAP = BUTTON_GAP * 3
 
-# A button carrying a word rather than a mark: the room above and below it, and
+# A button carrying a word rather than an icon: the room above and below it, and
 # the room to either side.
 BUTTON_PAD_V = 4
 BUTTON_PAD_H = 16

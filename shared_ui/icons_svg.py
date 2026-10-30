@@ -1,8 +1,8 @@
-"""The family's marks as SVG, for a page an app draws as HTML.
+"""The family's icons as SVG, for a page an app draws as HTML.
 
 The same geometry :mod:`shared_ui.icons` and :mod:`shared_ui.icons_pil` render,
 written out as SVG on the 48-square and inked in ``currentColor``, so the page's
-own style sheet says what color a mark takes.  Every shape is laid down filled:
+own style sheet says what color an icon takes.  Every shape is laid down filled:
 a pen's line is a rounded bar, which is also what gives it round ends and round
 corners where two meet, and an outlined ring or frame is the space between two.
 """
@@ -139,7 +139,7 @@ _ELEMENTS = {Line: _line, Polyline: _polyline, Polygon: _polygon, RoundedRect: _
              Ellipse: _ellipse, Arc: _arc, Path: _path}
 
 
-def svg_mark(name: str, *, size: float) -> str:
+def svg_icon(name: str, *, size: float) -> str:
     """*name* as an ``<svg>`` *size* across, drawn in the color around it."""
     shapes = "".join(_ELEMENTS[type(shape)](shape) for shape in shapes_of(name))
     return (f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 {_n(CANVAS)} {_n(CANVAS)}' "

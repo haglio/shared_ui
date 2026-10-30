@@ -1,4 +1,4 @@
-"""What an app spells of its own look: a color, a typed glyph, an icon, a face,
+"""What an app spells of its own look: a color, a typed symbol, an icon, a face,
 a text size or a spacing that does not come from shared_ui, found in the source
 it tracks."""
 
@@ -72,7 +72,7 @@ def _hexes(text: str) -> list[str]:
     return [match.group(1) for pattern in (_LONG_HEX, _SHORT_HEX) for match in pattern.finditer(text)]
 
 
-def _a_glyph(character: str) -> bool:
+def _a_typed_symbol(character: str) -> bool:
     if character in _TYPOGRAPHY:
         return False
     return unicodedata.category(character) in ("So", "Co") or character == _MINUS_SIGN
@@ -82,8 +82,8 @@ def _in_text(text: str) -> list[str]:
     found = [f"color {spelled}" for spelled in _hexes(text)]
     found += [f"color {match.group(0)}...)" for match in _CSS_FUNCTION.finditer(text)]
     found += [f"color '{match.group(0)}'" for match in _CSS_NAMED.finditer(text)]
-    found += [f"glyph {character} (U+{ord(character):04X} {unicodedata.name(character, '?')})"
-              for character in dict.fromkeys(text) if _a_glyph(character)]
+    found += [f"symbol {character} (U+{ord(character):04X} {unicodedata.name(character, '?')})"
+              for character in dict.fromkeys(text) if _a_typed_symbol(character)]
     found += [f"text size {match.group(0)}" for match in _TEXT_SIZE_IN_TEXT.finditer(text)]
     found += [f"face {match.group(0).rstrip()}" for match in _FACE_IN_TEXT.finditer(text)]
     found += [f"spacing {match.group(0)}" for match in _SPACING_IN_TEXT.finditer(text)]
@@ -322,6 +322,6 @@ def assert_the_look_is_shared_uis(root: Path, packages: Iterable[Path], *,
     allowed = set(allowing)
     found = [finding for finding in looks_of_its_own(root, packages)
              if _without_its_line(finding) not in allowed]
-    assert not found, ("These draw a color, a glyph, an icon, a face, a text size or a spacing of their "
-                       "own; take each from shared_ui (its palette, its marks, its type scale, its "
+    assert not found, ("These draw a color, a symbol, an icon, a face, a text size or a spacing of their "
+                       "own; take each from shared_ui (its palette, its icons, its type scale, its "
                        "spacing) instead:\n" + "\n".join(found))

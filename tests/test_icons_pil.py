@@ -1,12 +1,12 @@
 """The Pillow renderer: that it draws, and that it draws what Qt draws.
 
 The Funestras paint their HUDs into the video frame with Pillow, and there is no Qt
-in a Funestra process, so a HUD mark could never be the same object as a toolbar
-mark.  It can be the same *geometry*, which is what this checks: both renderers
+in a Funestra process, so a HUD icon could never be the same object as a toolbar
+icon.  It can be the same *geometry*, which is what this checks: both renderers
 walk :mod:`shared_ui.icon_geometry`, and the two renderings have to land on top
 of each other.  Not pixel for pixel -- Pillow has no antialiasing of its own and
 no round caps, and this module works around both -- but close enough that nobody
-looking at the two screens sees two different marks.
+looking at the two screens sees two different icons.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from shared_ui import icons, icons_pil
-from shared_ui.icon_geometry import GLYPHS, STAND_IN, Arc, glyph_names
+from shared_ui.icon_geometry import ICONS, STAND_IN, Arc, icon_names
 from shared_ui.icon_geometry import Path as Outline
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -27,8 +27,8 @@ from shared_ui.colors import GREEN, RED, TEXT_PRIMARY
 
 _SIZE = 48
 _INK = (240, 240, 240)  # TEXT_PRIMARY, as the HUDs' palette spells it
-_A_MARK_THIS_VERSION_LACKS = "a_mark_from_another_version"
-_EVERY_MARK_AND_THE_STAND_IN = (*glyph_names(), _A_MARK_THIS_VERSION_LACKS)
+_AN_ICON_THIS_VERSION_LACKS = "an_icon_from_another_version"
+_EVERY_ICON_AND_THE_STAND_IN = (*icon_names(), _AN_ICON_THIS_VERSION_LACKS)
 
 
 def _pil_ink(image: Image.Image) -> tuple[int, int, int, int, int]:
@@ -46,7 +46,7 @@ def _pil_ink(image: Image.Image) -> tuple[int, int, int, int, int]:
 
 
 def _qt_ink(name: str, size: int) -> tuple[int, int, int, int, int]:
-    image = icons.glyph_pixmap(name, size, TEXT_PRIMARY).toImage()
+    image = icons.icon_pixmap(name, size, TEXT_PRIMARY).toImage()
     xs, ys, count = [], [], 0
     for y in range(size):
         for x in range(size):
@@ -58,21 +58,21 @@ def _qt_ink(name: str, size: int) -> tuple[int, int, int, int, int]:
     return min(xs), min(ys), max(xs), max(ys), count
 
 
-def test_every_glyph_draws_through_pillow_too():
-    # A mark the Qt side can draw and the Pillow side cannot is a mark that goes
+def test_every_icon_draws_through_pillow_too():
+    # An icon the Qt side can draw and the Pillow side cannot is an icon that goes
     # missing on a HUD -- an empty button, with nothing raised.
-    for name in _EVERY_MARK_AND_THE_STAND_IN:
-        image = icons_pil.glyph_image(name, _SIZE, _INK)
+    for name in _EVERY_ICON_AND_THE_STAND_IN:
+        image = icons_pil.pil_icon(name, _SIZE, _INK)
         assert image.size == (_SIZE, _SIZE), name
         assert _pil_ink(image)[4] > 0, name
 
 
-def test_the_two_renderers_put_the_mark_in_the_same_place():
+def test_the_two_renderers_put_the_icon_in_the_same_place():
     # The whole point. A HUD's trash can and a toolbar's are one drawing now, so
     # their ink has to occupy the same frame -- within a pixel, which is what is
     # left after Pillow's inside-the-frame outlines are corrected for.
-    for name in _EVERY_MARK_AND_THE_STAND_IN:
-        pillow = _pil_ink(icons_pil.glyph_image(name, _SIZE, _INK))
+    for name in _EVERY_ICON_AND_THE_STAND_IN:
+        pillow = _pil_ink(icons_pil.pil_icon(name, _SIZE, _INK))
         qt = _qt_ink(name, _SIZE)
         for edge in range(4):
             assert abs(pillow[edge] - qt[edge]) <= 1, f"{name} edge {edge}"
@@ -82,84 +82,84 @@ def test_the_two_renderers_lay_down_a_like_amount_of_ink():
     # Same frame could still mean a hairline against a slab, so the weight has to
     # agree too. Pillow's arcs have no round caps and its resampling is not Qt's,
     # so this is a band rather than an equality.
-    for name in _EVERY_MARK_AND_THE_STAND_IN:
-        pillow = _pil_ink(icons_pil.glyph_image(name, _SIZE, _INK))[4]
+    for name in _EVERY_ICON_AND_THE_STAND_IN:
+        pillow = _pil_ink(icons_pil.pil_icon(name, _SIZE, _INK))[4]
         qt = _qt_ink(name, _SIZE)[4]
         assert abs(pillow - qt) / qt < 0.15, name
 
 
-def test_a_mark_this_version_does_not_have_is_drawn_as_the_stand_in(monkeypatch):
-    monkeypatch.setitem(GLYPHS, "_the_stand_in", STAND_IN)
-    stand_in = icons_pil.glyph_image("_the_stand_in", _SIZE, _INK)
+def test_an_icon_this_version_does_not_have_is_drawn_as_the_stand_in(monkeypatch):
+    monkeypatch.setitem(ICONS, "_the_stand_in", STAND_IN)
+    stand_in = icons_pil.pil_icon("_the_stand_in", _SIZE, _INK)
 
-    drawn = icons_pil.glyph_image(_A_MARK_THIS_VERSION_LACKS, _SIZE, _INK)
+    drawn = icons_pil.pil_icon(_AN_ICON_THIS_VERSION_LACKS, _SIZE, _INK)
 
     assert drawn.tobytes() == stand_in.tobytes()
 
 
-def test_a_glyph_is_drawn_in_the_color_it_is_asked_for():
-    # The HUDs tint marks the way the chrome does -- a muted control, a green
+def test_an_icon_is_drawn_in_the_color_it_is_asked_for():
+    # The HUDs tint icons the way the chrome does -- a muted control, a green
     # favorite -- so the ink is whatever tuple was handed in.
     for color in ((*RED.getRgb()[:3],), (*GREEN.getRgb()[:3],)):
-        image = icons_pil.glyph_image("star", _SIZE, color)
+        image = icons_pil.pil_icon("star", _SIZE, color)
         assert image.getpixel((24, 25))[:3] == color
 
 
-def test_a_pasted_mark_sits_on_what_the_hud_already_drew():
-    # A HUD button paints its fill and then asks for the mark. The mark has to
+def test_a_pasted_icon_sits_on_what_the_hud_already_drew():
+    # A HUD button paints its fill and then asks for the icon. The icon has to
     # composite onto that fill, not stamp a transparent square over it.
     panel = Image.new("RGBA", (40, 24), (0, 80, 0, 255))
-    icons_pil.paste_glyph(panel, "trash", (12, 2, 20, 20), _INK)
+    icons_pil.paste_icon(panel, "trash", (12, 2, 20, 20), _INK)
     pixels = [panel.getpixel((x, y)) for y in range(24) for x in range(40)]
 
-    assert panel.getpixel((2, 12)) == (0, 80, 0, 255)   # the fill, clear of the mark
+    assert panel.getpixel((2, 12)) == (0, 80, 0, 255)   # the fill, clear of the icon
     assert all(pixel[3] == 255 for pixel in pixels)     # nothing was punched out
-    # The mark is laid over the fill, so its ink blends toward white where the
+    # The icon is laid over the fill, so its ink blends toward white where the
     # fill has no red at all.
-    assert any(pixel[0] > 200 for pixel in pixels), "the mark did not land"
+    assert any(pixel[0] > 200 for pixel in pixels), "the icon did not land"
 
 
-def test_a_pasted_mark_is_centered_in_the_frame_it_was_given():
-    # HUD buttons are square-ish but not square, and a mark hugging one edge
+def test_a_pasted_icon_is_centered_in_the_frame_it_was_given():
+    # HUD buttons are square-ish but not square, and an icon hugging one edge
     # reads as misaligned with the buttons beside it.
     #
-    # The panel is TRANSPARENT so that the ink scan sees the mark and only the
-    # mark: drawn on an opaque one it measured the panel's own every pixel, so
-    # the center came out the panel's center whatever paste_glyph did with it.
+    # The panel is TRANSPARENT so that the ink scan sees the icon and only the
+    # icon: drawn on an opaque one it measured the panel's own every pixel, so
+    # the center came out the panel's center whatever paste_icon did with it.
     panel = Image.new("RGBA", (48, 24), (0, 0, 0, 0))
-    icons_pil.paste_glyph(panel, "plus", (0, 0, 48, 24), _INK)
+    icons_pil.paste_icon(panel, "plus", (0, 0, 48, 24), _INK)
     left, upper, right, lower, _count = _pil_ink(panel)
     assert abs((left + right) / 2 - 24) <= 1
     assert abs((upper + lower) / 2 - 12) <= 1
 
 
-def test_a_pasted_mark_is_centered_in_a_frame_that_is_not_at_the_origin():
+def test_a_pasted_icon_is_centered_in_a_frame_that_is_not_at_the_origin():
     # The frame a HUD hands over is wherever its button is, so the centering is
-    # of the frame rather than of the panel -- a mark centered on the panel
+    # of the frame rather than of the panel -- an icon centered on the panel
     # instead would land right for the one button that happens to sit in the
     # middle.
     panel = Image.new("RGBA", (64, 40), (0, 0, 0, 0))
-    icons_pil.paste_glyph(panel, "plus", (36, 8, 24, 28), _INK)
+    icons_pil.paste_icon(panel, "plus", (36, 8, 24, 28), _INK)
     left, upper, right, lower, _count = _pil_ink(panel)
     assert abs((left + right) / 2 - 48) <= 1
     assert abs((upper + lower) / 2 - 22) <= 1
 
 
 def test_the_geometry_is_the_one_registry_both_renderers_draw_from():
-    # One registry. A glyph added for the toolbar and not reachable from a HUD is
+    # One registry. An icon added for the toolbar and not reachable from a HUD is
     # how the two sides drifted apart in the first place -- so every name the
     # geometry lists draws through both renderers, and the renderers list none of
     # their own.
-    for name in glyph_names():
-        assert not icons.glyph_pixmap(name, _SIZE, TEXT_PRIMARY).isNull(), name
-        assert _pil_ink(icons_pil.glyph_image(name, _SIZE, _INK))[4] > 0, name
-    assert "glyph_names" not in icons.__all__
-    assert "glyph_names" not in icons_pil.__all__
+    for name in icon_names():
+        assert not icons.icon_pixmap(name, _SIZE, TEXT_PRIMARY).isNull(), name
+        assert _pil_ink(icons_pil.pil_icon(name, _SIZE, _INK))[4] > 0, name
+    assert "icon_names" not in icons.__all__
+    assert "icon_names" not in icons_pil.__all__
 
 
 def test_a_translucent_ink_lands_translucent():
-    # A HUD dims a mark by handing over an alpha, and the coverage is scaled to it.
-    image = icons_pil.glyph_image("star", _SIZE, (*_INK, 128))
+    # A HUD dims an icon by handing over an alpha, and the coverage is scaled to it.
+    image = icons_pil.pil_icon("star", _SIZE, (*_INK, 128))
     alphas = [image.getpixel((x, y))[3] for y in range(_SIZE) for x in range(_SIZE)]
     assert 100 <= max(alphas) <= 128
 
@@ -177,7 +177,7 @@ def test_a_negative_span_draws_the_same_arc_as_its_positive_twin():
     assert render(forward) == render(backward)
 
 
-def test_drawing_a_hud_mark_never_drags_qt_into_a_player():
+def test_drawing_a_hud_icon_never_drags_qt_into_a_player():
     # The Funestras are mpv and Pillow and nothing else; PyQt6 in that process
     # would be a GUI toolkit loaded into a video pipeline for the sake of a
     # dozen-pixel icon. The geometry module is what makes that avoidable, so
@@ -208,13 +208,13 @@ def test_drawing_a_hud_mark_never_drags_qt_into_a_player():
     assert qt_was_loaded == "False", result.stdout
 
 
-def test_a_mark_is_never_brighter_than_the_ink_it_was_drawn_in():
+def test_an_icon_is_never_brighter_than_the_ink_it_was_drawn_in():
     # Lanczos overshoots at a hard edge. Drawn in color and then resampled, a
-    # mark came out with pixels brighter than its own ink around every edge --
+    # icon came out with pixels brighter than its own ink around every edge --
     # a faint halo, and enough near-white to trip a HUD's own checks for it.
     # Drawing a coverage mask and coloring afterwards keeps the ink exact.
-    for name in _EVERY_MARK_AND_THE_STAND_IN:
-        image = icons_pil.glyph_image(name, 24, _INK)
+    for name in _EVERY_ICON_AND_THE_STAND_IN:
+        image = icons_pil.pil_icon(name, 24, _INK)
         for y in range(24):
             for x in range(24):
                 red, green, blue, _alpha = image.getpixel((x, y))
@@ -223,8 +223,8 @@ def test_a_mark_is_never_brighter_than_the_ink_it_was_drawn_in():
 
 def test_a_path_written_in_a_frame_of_its_own_fills_the_canvas_that_frame_stands_for(monkeypatch):
     square = Outline((("M", 0, 0), ("L", 24, 0), ("L", 24, 24), ("L", 0, 24), ("Z",)), frame=24.0)
-    monkeypatch.setitem(GLYPHS, "_a_square_in_a_frame_of_24", (square,))
+    monkeypatch.setitem(ICONS, "_a_square_in_a_frame_of_24", (square,))
 
-    drawn = icons_pil.glyph_image("_a_square_in_a_frame_of_24", _SIZE, _INK)
+    drawn = icons_pil.pil_icon("_a_square_in_a_frame_of_24", _SIZE, _INK)
 
     assert _pil_ink(drawn)[:4] == (0, 0, _SIZE - 1, _SIZE - 1)
