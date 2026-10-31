@@ -85,6 +85,11 @@ This repo is public at `github.com/haglio/shared_ui` with a merge-queue ruleset 
 - **app_support is pinned only in the dev extra, for this repo's own suite**:
   every app pins it itself, and a pin where installing this asks for one held
   every app to this repo's copy until this repo released again.
+- **A landing reaches the apps through a pull request it opens in each of them**
+  (`app_support.newest_pins`), which ships by itself once that app's checks pass.
+- **A change that takes out a module or a name another repo's main or open pull
+  request still uses is refused at the gate** (`app_support.taken_out`): keep it
+  until that work has moved off it, then take it out.
 
 Everything else in the global CLAUDE.md — work in a worktree, green tests before
 you push, clean handoff — still applies.
