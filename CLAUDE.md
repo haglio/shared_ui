@@ -82,6 +82,9 @@ This repo is public at `github.com/haglio/shared_ui` with a merge-queue ruleset 
   worktrees update with `git rebase origin/main` and the primary is never
   pulled, reset or merged into by hand.
 - **A red required check** (`.github/workflows/merge-gate.yml`) can't land.
+- **app_support is pinned only in the dev extra, for this repo's own suite**:
+  every app pins it itself, and a pin where installing this asks for one held
+  every app to this repo's copy until this repo released again.
 
 Everything else in the global CLAUDE.md — work in a worktree, green tests before
 you push, clean handoff — still applies.

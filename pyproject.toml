@@ -18,14 +18,11 @@ requires-python = ">=3.14"
 # one, for code that never touches it. Every consumer that uses the widgets
 # declares PyQt6 itself, and its own import gate says so.
 #
-# app_support is named at the tag it was built against rather than left to be
-# whatever copy sits beside this checkout. Unpinned, a change landing there
-# reached every consumer the same minute, and one whose other half had not
-# landed turned all of them red at once. Moving to a newer one is this repo's
-# own commit, with its own suite to answer for it. tests/test_sibling_pins.py
-# holds every declared sibling to having one.
+# app_support is not among these: every app pins it itself, and pip refuses two
+# pins of one repo that differ, so a pin here held every app to this repo's copy
+# until this repo released again. The copy this repo's own suite runs is named in
+# the dev extra, never left to whatever checkout sits beside it.
 dependencies = [
-    "app-support @ git+https://github.com/haglio/app_support@v0.1.307",
     # The loading screen draws its panel with it, in the app's process and in the
     # loading window's own.
     "pillow>=12,<13",
@@ -42,7 +39,8 @@ dependencies = [
 # the machine holds today.
 qt = ["PyQt6>=6,<7"]
 # The suite needs Qt, which is most of this package.
-dev = ["pytest>=9,<10", "pytest-cov>=7,<8", "pytest-timeout>=2.4,<3", "vulture>=2.16,<3",
+dev = ["app-support @ git+https://github.com/haglio/app_support@v0.1.307",
+       "pytest>=9,<10", "pytest-cov>=7,<8", "pytest-timeout>=2.4,<3", "vulture>=2.16,<3",
        "ruff==0.16.6", "PyQt6>=6,<7"]
 
 [tool.pytest.ini_options]
