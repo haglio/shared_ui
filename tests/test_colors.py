@@ -104,7 +104,7 @@ def test_the_palette_holds_as_few_hues_as_it_can():
     hues = {color.name() for name, color in _all_qcolors(colors)
             if name.isupper() and color.saturation() > 40}
 
-    # The one blue and its lighter step, green, red, amber, magenta, and the
+    # The one blue and its lighter step, green, red, yellow, magenta, and the
     # loading screen's four.
     assert len(hues) <= 10, sorted(hues)
 

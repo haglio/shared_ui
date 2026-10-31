@@ -13,7 +13,7 @@ def test_a_still_script_is_the_ground_and_the_fastest_is_red():
 
 def test_each_step_of_speed_reaches_the_next_family_color():
     assert [heat.heat_at(speed) for speed in (100, 200, 300, 400)] == [
-        palette.BLUE, palette.BLUE_LIGHT, palette.GREEN, palette.AMBER]
+        palette.BLUE, palette.BLUE_LIGHT, palette.GREEN, palette.YELLOW]
 
 
 def test_a_speed_between_two_steps_is_the_color_between_them():

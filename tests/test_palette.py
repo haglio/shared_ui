@@ -38,7 +38,7 @@ def test_a_hover_lifts_whatever_ground_it_lands_on():
 def test_the_hex_spelling_is_the_style_sheets():
     assert palette.as_hex(palette.BLUE) == "#3080e0"
     assert palette.as_hex((0, 0, 0)) == "#000000"
-    assert QColor(palette.as_hex(palette.AMBER)) == QColor(*palette.AMBER)
+    assert QColor(palette.as_hex(palette.YELLOW)) == QColor(*palette.YELLOW)
 
 
 def test_the_see_through_spelling_is_the_style_sheets_rgba():
@@ -70,3 +70,8 @@ def test_the_qt_spelling_is_the_palette_and_nothing_more():
     palette_values = {QColor(*rgb).name() for rgb in _tokens(palette).values()}
     strays = sorted(name for name, color in qt.items() if color.name() not in palette_values)
     assert not strays, f"QColors with a number of their own: {strays}"
+
+
+def test_amber_is_still_yellow_for_the_branches_that_have_not_taken_the_new_name():
+    assert palette.AMBER == palette.YELLOW
+    assert colors.AMBER == colors.YELLOW

@@ -23,13 +23,13 @@ from shared_ui.alert import (
     show_alert,
 )
 from shared_ui.colors import (
-    AMBER,
     BG_BUTTON,
     BG_TERTIARY,
     BLUE,
     RED,
     TEXT_PRIMARY,
     TEXT_SECONDARY,
+    YELLOW,
     hovered,
 )
 from shared_ui.fonts import SIZE_BODY, make_font
@@ -211,7 +211,7 @@ def test_the_message_column_has_a_floor_as_well_as_a_ceiling():
     "level, drawn, ink",
     [
         (Level.ERROR, "error", RED),
-        (Level.WARNING, "warning", AMBER),
+        (Level.WARNING, "warning", YELLOW),
         (Level.INFO, "info", BLUE),
     ],
 )
