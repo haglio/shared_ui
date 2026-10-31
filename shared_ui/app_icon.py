@@ -73,10 +73,12 @@ def assert_follows_the_family_spec(path: Path | str, letter: str) -> None:
 
     solid = image.getchannel("A").point(lambda alpha: 255 if alpha > SOLID else 0)
     left, upper, right, lower = solid.getbbox()
-    assert abs(left - INSET) <= 2 and abs(upper - INSET) <= 2, (
-        f"{path}: the letter grid starts at ({left}, {upper}), not ({INSET}, {INSET})")
-    assert abs((right - left) - GRID) <= 4 and abs((lower - upper) - GRID) <= 4, (
-        f"{path}: the letter grid is {right - left}x{lower - upper}, not {GRID}x{GRID}")
+    starts = f"{path}: the letter grid starts at ({left}, {upper}), not ({INSET}, {INSET})"
+    assert abs(left - INSET) <= 2, starts
+    assert abs(upper - INSET) <= 2, starts
+    measures = f"{path}: the letter grid is {right - left}x{lower - upper}, not {GRID}x{GRID}"
+    assert abs((right - left) - GRID) <= 4, measures
+    assert abs((lower - upper) - GRID) <= 4, measures
 
     for row, line in enumerate(cells):
         for column, cell in enumerate(line):
@@ -100,5 +102,5 @@ def assert_follows_the_family_spec(path: Path | str, letter: str) -> None:
                  if cell == "#"
                  for x, y in [(int(INSET + (column + 0.5) * UNIT), int(INSET + (row + 0.5) * UNIT))])
     assert pixels[a_bar][:3] == MAGENTA, f"{path}: the ink is {pixels[a_bar][:3]}, not MAGENTA"
-    assert not _solid(pixels, 0, 0) and not _solid(pixels, CANVAS - 1, CANVAS - 1), (
-        f"{path}: the background is not transparent")
+    assert not _solid(pixels, 0, 0), f"{path}: the background is not transparent"
+    assert not _solid(pixels, CANVAS - 1, CANVAS - 1), f"{path}: the background is not transparent"

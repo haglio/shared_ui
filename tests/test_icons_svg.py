@@ -23,7 +23,8 @@ def test_an_icon_is_an_svg_of_the_family_canvas_sized_for_its_place():
 
     assert drawn.tag.endswith("svg")
     assert drawn.get("viewBox") == "0 0 48 48"
-    assert drawn.get("width") == "26" and drawn.get("height") == "26"
+    assert drawn.get("width") == "26"
+    assert drawn.get("height") == "26"
 
 
 @pytest.mark.parametrize("name", icon_names())
@@ -49,7 +50,9 @@ def test_an_outlined_ring_is_the_band_between_two_circles(monkeypatch):
     (ring,) = list(_parsed(icons_svg.svg_icon("_ring", size=24)))
 
     assert ring.get("fill-rule") == "evenodd"
-    assert ring.get("d").count("Z") == 2 and " A12,12 " in ring.get("d") and " A8,8 " in ring.get("d")
+    assert ring.get("d").count("Z") == 2
+    assert " A12,12 " in ring.get("d")
+    assert " A8,8 " in ring.get("d")
 
 
 def test_an_arc_runs_counterclockwise_from_three_o_clock_and_ends_round(monkeypatch):

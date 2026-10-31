@@ -20,7 +20,8 @@ def test_every_token_is_a_channel_triple():
     found = _tokens(palette)
     assert found, "no tokens in the palette"
     for name, value in found.items():
-        assert isinstance(value, tuple) and len(value) == 3, name
+        assert isinstance(value, tuple), name
+        assert len(value) == 3, name
         assert all(isinstance(c, int) and 0 <= c <= 255 for c in value), name
 
 

@@ -91,13 +91,15 @@ class TestTheStatusLine:
 
         left, top, right, _bottom = _box_of(image, LOADING_STATUS)
         assert name_bottom < top < bar_top
-        assert DESKTOP.padding <= left and right < image.width - DESKTOP.padding
+        assert DESKTOP.padding <= left
+        assert right < image.width - DESKTOP.padding
 
     def test_a_line_wider_than_the_bar_is_cut_to_it(self):
         image = render(_panel(status="Reading video lengths " * 12, fraction=None))
 
         left, _top, right, _bottom = _box_of(image, LOADING_STATUS)
-        assert DESKTOP.padding <= left and right < image.width - DESKTOP.padding
+        assert DESKTOP.padding <= left
+        assert right < image.width - DESKTOP.padding
 
 
 class TestTheHint:
@@ -141,7 +143,8 @@ class TestTheIconFile:
 
         icon = icon_image(path)
 
-        assert icon is not None and icon.mode == "RGBA"
+        assert icon is not None
+        assert icon.mode == "RGBA"
         assert icon.getpixel((8, 8)) == (10, 200, 30, 255)
 
     def test_no_file_or_an_unreadable_one_means_a_panel_without_an_icon(self, tmp_path):

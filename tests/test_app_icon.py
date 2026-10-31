@@ -90,7 +90,8 @@ def test_the_grid_is_five_cells_of_one_bar():
     assert UNIT * 5 == GRID
     assert INSET * 2 + GRID == CANVAS
     for letter, cells in LETTERS.items():
-        assert len(cells) == 5 and all(len(line) == 5 for line in cells), letter
+        assert len(cells) == 5, letter
+        assert all(len(line) == 5 for line in cells), letter
         assert set("".join(cells)) <= {"#", "."}, letter
     assert app_icon.CORNER_SOFTENING_MAX < UNIT / 4
 
