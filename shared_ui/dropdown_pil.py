@@ -11,6 +11,7 @@ from shared_ui.palette import (
     BG_TERTIARY,
     BLUE,
     BORDER_SUBTLE,
+    CHANNEL_MAX,
     TEXT_MUTED,
     TEXT_PRIMARY,
 )
@@ -28,7 +29,7 @@ def arrow_down(size: int) -> Image.Image:
 def _written(pen: ImageDraw.ImageDraw, rect: Rect, text: str, font) -> None:
     x, y, _width, height = rect
     pen.text((x + BUTTON_PAD_H_TIGHT, y + height / 2), text, font=font, anchor="lm",
-             fill=(*TEXT_PRIMARY, 255))
+             fill=(*TEXT_PRIMARY, CHANNEL_MAX))
 
 
 def paint_field(image: Image.Image, rect: Rect, text: str, font, *, lit: bool = False) -> None:
@@ -48,5 +49,5 @@ def paint_list(image: Image.Image, rows: Sequence[tuple[Rect, str, bool]], font)
     for rect, text, chosen in rows:
         x, y, row_width, row_height = rect
         if chosen:
-            pen.rectangle((x + 1, y, x + row_width - 2, y + row_height - 1), fill=(*BLUE, 255))
+            pen.rectangle((x + 1, y, x + row_width - 2, y + row_height - 1), fill=(*BLUE, CHANNEL_MAX))
         _written(pen, rect, text, font)

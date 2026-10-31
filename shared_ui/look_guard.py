@@ -12,6 +12,8 @@ import unicodedata
 from collections.abc import Iterable
 from pathlib import Path
 
+from shared_ui.palette import CHANNEL_MAX, RGB_CHANNELS
+
 _LONG_HEX = re.compile(r"(?<![\w#&/])(#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}))\b(?!\s*\{)")
 _SHORT_HEX = re.compile(r"(?:^|[:=][^;{}:=]*?)(?<![\w#&/])(#[0-9a-fA-F]{3,4})\b(?!\s*\{)")
 _CSS_FUNCTION = re.compile(r"\b(?:rgba?|hsla?)\(\s*[\d.]", re.IGNORECASE)
@@ -31,6 +33,7 @@ _QCOLOR_FROM = {"fromRgb", "fromRgbF", "fromHsv", "fromHsvF", "fromHsl", "fromHs
                 "fromString", "fromCmyk", "fromCmykF"}
 _GL_COLORS = {"glClearColor", "glColor3f", "glColor4f", "glUniform3f", "glUniform4f"}
 _MASK_MODES = {"1", "L", "I", "F"}
+_IMAGE_NEW_COLOR_AT = 2
 _TYPOGRAPHY = set("°©®™")
 _MINUS_SIGN = "−"
 _UNIT = r"\d[\d.]*\s*(?:px|pt|em|rem|%)?"
@@ -108,7 +111,7 @@ def _channels(node: ast.AST) -> bool:
     if None in channels or channels == [0, 0, 0, 0]:
         return False
     if all(type(channel) is int for channel in channels):
-        return all(0 <= channel <= 255 for channel in channels)
+        return all(0 <= channel <= CHANNEL_MAX for channel in channels)
     return all(0.0 <= channel <= 1.0 for channel in channels)
 
 
@@ -125,8 +128,10 @@ def _bytes_in_hex(node: ast.AST, source: str) -> bool:
 
 
 def _a_stop(node: ast.AST) -> bool:
-    return (isinstance(node, ast.Tuple) and len(node.elts) == 2
-            and _number(node.elts[0]) is not None and _channels(node.elts[1]))
+    match node:
+        case ast.Tuple(elts=[position, color]):
+            return _number(position) is not None and _channels(color)
+    return False
 
 
 def _names(target: ast.AST) -> list[str]:
@@ -193,12 +198,12 @@ def _in_call(call: ast.Call, source: str) -> list[str]:
     if (name == "QColor" or name in _QCOLOR_FROM) and not spreads_a_family_color and any(
             _number(arg) is not None or _a_named_color(arg) for arg in call.args):
         return [*found, f"color {_spelled(call, source)}"]
-    if name in _GL_COLORS and sum(_number(arg) is not None for arg in call.args) >= 3:
+    if name in _GL_COLORS and sum(_number(arg) is not None for arg in call.args) >= RGB_CHANNELS:
         return [*found, f"color {_spelled(call, source)}"]
     found += [f"color {keyword.arg}={_spelled(keyword.value, source)}" for keyword in call.keywords
               if keyword.arg in _COLOR_KEYWORDS and _a_color(keyword.value)]
-    if name == "new" and _dotted(call.func).endswith("Image.new") and len(call.args) >= 3:
-        mode, color = call.args[0], call.args[2]
+    if name == "new" and _dotted(call.func).endswith("Image.new") and len(call.args) > _IMAGE_NEW_COLOR_AT:
+        mode, color = call.args[0], call.args[_IMAGE_NEW_COLOR_AT]
         masked = isinstance(mode, ast.Constant) and mode.value in _MASK_MODES
         if not masked and (_a_color(color) or _number(color) is not None):
             found.append(f"color {_spelled(color, source)}")
