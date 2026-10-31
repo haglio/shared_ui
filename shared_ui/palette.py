@@ -12,6 +12,8 @@ never pulls in Qt to learn what color a button is.
 from __future__ import annotations
 
 Rgb = tuple[int, int, int]
+RGB_CHANNELS = 3
+CHANNEL_MAX = 255
 
 # ---------------------------------------------------------------------------
 # Background tiers (darkest -> lightest)
@@ -85,7 +87,7 @@ HOVER_LIFT = 30
 
 def hovered(rgb: Rgb) -> Rgb:
     """*rgb* one step lighter -- the ground under the pointer."""
-    return tuple(min(255, channel + HOVER_LIFT) for channel in rgb)
+    return tuple(min(CHANNEL_MAX, channel + HOVER_LIFT) for channel in rgb)
 
 
 def as_hex(rgb: Rgb) -> str:
@@ -103,11 +105,11 @@ def as_rgba(rgb: Rgb, alpha: float) -> str:
 def as_fractions(rgb: Rgb, alpha: float = 1.0) -> tuple[float, float, float, float]:
     """The ``(red, green, blue, alpha)`` in 0-1 an OpenGL headset scene draws with."""
     red, green, blue = rgb
-    return (red / 255, green / 255, blue / 255, alpha)
+    return (red / CHANNEL_MAX, green / CHANNEL_MAX, blue / CHANNEL_MAX, alpha)
 
 
 def nearest(rgb: Rgb) -> Rgb:
     """The family's color closest to *rgb*, for one that reaches an app from outside its code."""
     family = {value for name, value in globals().items()
-              if name.isupper() and isinstance(value, tuple) and len(value) == 3}
+              if name.isupper() and isinstance(value, tuple) and len(value) == RGB_CHANNELS}
     return min(family, key=lambda color: sum((a - b) ** 2 for a, b in zip(color, rgb, strict=True)))

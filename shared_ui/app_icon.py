@@ -9,7 +9,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from shared_ui.palette import MAGENTA
+from shared_ui.palette import CHANNEL_MAX, MAGENTA
 
 CANVAS = 256  # the master frame
 INSET = 31  # the letter grid's offset inside the canvas
@@ -17,6 +17,8 @@ GRID = CANVAS - 2 * INSET  # 194: the letter grid, five cells across
 UNIT = GRID / 5  # one cell, and one bar
 CORNER_SOFTENING_MAX = 8  # rows a corner may round over; the family's round over three
 SOLID = 128  # the alpha above which a pixel is ink rather than an edge
+_GRID_START_SLACK = 2
+_GRID_SIZE_SLACK = 4
 
 LETTERS: dict[str, tuple[str, ...]] = {
     "B": ("####.", "#...#", "#####", "#...#", "####."),
@@ -50,7 +52,7 @@ def draw_letter(draw, rect: tuple[int, int, int, int], letter: str) -> None:
         for column, painted in enumerate(line):
             if painted == "#":
                 cx, cy = left + column * cell, top + row * cell
-                draw.rectangle([cx, cy, cx + cell - 1, cy + cell - 1], fill=(*MAGENTA, 255))
+                draw.rectangle([cx, cy, cx + cell - 1, cy + cell - 1], fill=(*MAGENTA, CHANNEL_MAX))
 
 
 def _master(path: Path) -> Image.Image:
@@ -71,14 +73,14 @@ def assert_follows_the_family_spec(path: Path | str, letter: str) -> None:
     assert image.size == (CANVAS, CANVAS), f"{path}: no {CANVAS}px master frame"
     pixels = image.load()
 
-    solid = image.getchannel("A").point(lambda alpha: 255 if alpha > SOLID else 0)
+    solid = image.getchannel("A").point(lambda alpha: CHANNEL_MAX if alpha > SOLID else 0)
     left, upper, right, lower = solid.getbbox()
     starts = f"{path}: the letter grid starts at ({left}, {upper}), not ({INSET}, {INSET})"
-    assert abs(left - INSET) <= 2, starts
-    assert abs(upper - INSET) <= 2, starts
+    assert abs(left - INSET) <= _GRID_START_SLACK, starts
+    assert abs(upper - INSET) <= _GRID_START_SLACK, starts
     measures = f"{path}: the letter grid is {right - left}x{lower - upper}, not {GRID}x{GRID}"
-    assert abs((right - left) - GRID) <= 4, measures
-    assert abs((lower - upper) - GRID) <= 4, measures
+    assert abs((right - left) - GRID) <= _GRID_SIZE_SLACK, measures
+    assert abs((lower - upper) - GRID) <= _GRID_SIZE_SLACK, measures
 
     for row, line in enumerate(cells):
         for column, cell in enumerate(line):
