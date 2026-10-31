@@ -17,13 +17,16 @@ jobs:
   # No siblings cloned: app_support is pinned in pyproject's dev extra, so pip
   # fetches the tag this repo's suite was built against. A clone here would install
   # whatever main held this minute and pip would replace it with the pin anyway.
+  # Five minutes: the suite takes about one and a half, and a change that takes
+  # out a module or a name has every other repo's open work read for it first.
   full-suite:
     uses: haglio/.github/.github/workflows/merge-gate.yml@main
     with:
       siblings: ""
       python-version: "3.14"
-      timeout-minutes: 3
+      timeout-minutes: 5
       qt-platform: offscreen
+      keeps-what-others-use: true
 
   # A consumer built against the candidate. This repo's own suite is the only
   # thing that has ever gated it, so a change here could merge green and turn a
@@ -44,11 +47,12 @@ jobs:
     uses: haglio/.github/.github/workflows/apps-import.yml@main
 
   # A version for each landing, so the repos that run this one can pin the copy
-  # they were built against. The tag is the version: pyproject reads it with
-  # setuptools-scm.
+  # they were built against, and a pull request in each of them taking it. The tag
+  # is the version: pyproject reads it with setuptools-scm.
   tag:
     if: github.event_name == 'push'
     needs: full-suite
     uses: haglio/.github/.github/workflows/tag-the-landing.yml@main
     permissions:
       contents: write
+    secrets: inherit
