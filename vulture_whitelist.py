@@ -9,7 +9,6 @@ report, and an entry may only be added with the reason it answers one.
 """
 from __future__ import annotations
 
-# ruff: noqa: F821, B018 -- a whitelist is names, not statements
 # --- Qt method overrides, called by the event loop, not by us ---
 _.paintEvent  # tick_control, toggle_switch, pressable_drawing
 _.mouseMoveEvent  # pressable_drawing
