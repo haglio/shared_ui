@@ -277,8 +277,10 @@ def test_an_icon_lands_where_the_caller_placed_it():
     icons.draw_icon(painter, "star", TEXT_PRIMARY, size=24, x=12, y=12)
     painter.end()
     left, upper, right, lower = _ink_rect(canvas)
-    assert left >= 12 and right <= 36
-    assert upper >= 12 and lower <= 36
+    assert left >= 12
+    assert right <= 36
+    assert upper >= 12
+    assert lower <= 36
 
 
 def test_drawing_an_icon_leaves_the_caller_s_painter_as_it_found_it():
@@ -294,7 +296,8 @@ def test_drawing_an_icon_leaves_the_caller_s_painter_as_it_found_it():
     assert painter.pen().color() == QColor(GREEN)
     assert painter.pen().widthF() == 3
     assert painter.brush().color() == QColor(RED)
-    assert painter.transform().dx() == 8 and painter.transform().dy() == 8
+    assert painter.transform().dx() == 8
+    assert painter.transform().dy() == 8
     painter.end()
 
 
@@ -383,7 +386,8 @@ def test_the_sawtooth_climbs_at_once_and_falls_slowly_as_the_motion_does():
     segments = list(pairwise(saw.points))
     climbs = [abs(x2 - x1) for (x1, y1), (x2, y2) in segments if y2 < y1]
     falls = [abs(x2 - x1) for (x1, y1), (x2, y2) in segments if y2 > y1]
-    assert climbs and falls
+    assert climbs
+    assert falls
     assert max(climbs) < min(falls)
 
 
@@ -400,7 +404,8 @@ def test_the_length_icons_are_a_clip_along_one_timeline_the_whole_way_or_only_it
 def test_a_jump_between_a_clip_and_its_scene_keeps_the_short_clip_left_of_the_long_one():
     for name in ("clip_to_scene", "scene_to_clip"):
         short, long, *_arrow = ICONS[name]
-        assert short.fill and long.fill, name
+        assert short.fill, name
+        assert long.fill, name
         assert short.x + short.w < long.x, name
         assert short.w < long.w / 2, name
     assert ICONS["clip_to_scene"][:2] == ICONS["scene_to_clip"][:2]
@@ -414,7 +419,8 @@ def test_a_jump_s_arrow_is_short_and_thick_with_room_on_either_side():
         assert stem.width >= 8, name
         assert max(ys) - min(ys) >= 20, name
         assert max(xs) - min(xs) <= 24, name
-        assert min(xs) - stem.width / 2 >= 8 and max(xs) + stem.width / 2 <= 40, name
+        assert min(xs) - stem.width / 2 >= 8, name
+        assert max(xs) + stem.width / 2 <= 40, name
 
 
 def test_latest_is_its_own_drawing_rather_than_shuffle_uncrossed():
@@ -694,7 +700,8 @@ def test_a_path_written_in_a_frame_of_its_own_fills_the_canvas_that_frame_stands
 def test_a_corner_icon_keeps_to_the_corner_its_icon_leaves_free():
     for name in _IN_A_CORNER:
         left, upper, _right, _lower = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
-        assert left >= 24 and upper >= 24, f"{name} reaches out of the lower right"
+        assert left >= 24, f"{name} reaches out of the lower right"
+        assert upper >= 24, f"{name} reaches out of the lower right"
 
 
 
@@ -714,14 +721,16 @@ def test_a_line_of_text_can_lead_with_an_icon_drawn_in_its_ink():
 
     led = reds(_rendered_label(icons.icon_then_text("mic", "heard it", color=RED, size=16)))
 
-    assert led and max(led) < 20, "the icon leads the line"
+    assert led, "the icon leads the line"
+    assert max(led) < 20, "the icon leads the line"
 
 
 @pytest.mark.usefixtures("qapp")
 def test_an_icon_set_among_the_words_is_the_lines_own_icon_alone():
     icon = icons.inline_icon("check", color=RED, size=16)
 
-    assert icon.startswith("<img") and icons.icon_then_text("check", "x", color=RED, size=16) == (
+    assert icon.startswith("<img")
+    assert icons.icon_then_text("check", "x", color=RED, size=16) == (
         icon + "&nbsp;x")
 
 

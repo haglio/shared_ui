@@ -133,7 +133,8 @@ def test_clearing_leaves_no_paint_behind(fields):
     find.clear()
 
     assert not field.extraSelections()
-    assert find.count() == 0 and find.position() == 0
+    assert find.count() == 0
+    assert find.position() == 0
 
 
 def test_retargeting_drops_the_previous_fields_highlights(fields):
