@@ -25,6 +25,7 @@ from shared_ui.icon_geometry import (
 )
 
 _INK = "fill='currentColor'"
+_HALF_TURN = 180
 _BETWEEN = "fill='currentColor' fill-rule='evenodd'"
 
 
@@ -102,7 +103,7 @@ def _arc(shape: Arc) -> str:
     cx, cy = shape.x + shape.w / 2, shape.y + shape.h / 2
     start, span = (shape.start, shape.span) if shape.span >= 0 else (shape.start + shape.span, -shape.span)
     half = shape.width / 2
-    large = 1 if span > 180 else 0
+    large = 1 if span > _HALF_TURN else 0
 
     def at(degrees: float, grow: float) -> tuple[float, float]:
         radians = math.radians(degrees)

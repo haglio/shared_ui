@@ -33,6 +33,7 @@ from shared_ui.icon_geometry import (
     RoundedRect,
     shapes_of,
 )
+from shared_ui.palette import CHANNEL_MAX, RGB_CHANNELS
 
 __all__ = ["CANVAS", "SUPERSAMPLE", "paste_icon", "pil_icon"]
 
@@ -61,11 +62,11 @@ def pil_icon(name: str, size: int, color) -> Image.Image:
     draw = ImageDraw.Draw(mask)
     scale = big / CANVAS
     for shape in shapes_of(name):
-        _draw(draw, shape, 255, scale)
+        _draw(draw, shape, CHANNEL_MAX, scale)
     mask = mask.resize((edge, edge), Image.LANCZOS)
     red, green, blue, alpha = _rgba(color)
-    if alpha != 255:
-        mask = mask.point(lambda value: value * alpha // 255)
+    if alpha != CHANNEL_MAX:
+        mask = mask.point(lambda value: value * alpha // CHANNEL_MAX)
     image = Image.new("RGBA", (edge, edge), (red, green, blue, 0))
     image.putalpha(mask)
     return image
@@ -87,8 +88,8 @@ def paste_icon(image: Image.Image, name: str, frame: tuple[int, int, int, int],
 
 def _rgba(color) -> tuple[int, int, int, int]:
     values = tuple(int(v) for v in color)
-    if len(values) == 3:
-        return (*values, 255)
+    if len(values) == RGB_CHANNELS:
+        return (*values, CHANNEL_MAX)
     return values[:4]
 
 
