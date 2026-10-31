@@ -6,7 +6,7 @@ from __future__ import annotations
 import pytest
 from PyQt6.QtWidgets import QPlainTextEdit, QTextBrowser, QVBoxLayout, QWidget
 
-from shared_ui.colors import AMBER
+from shared_ui.colors import YELLOW
 from shared_ui.text_find import TextFind
 
 
@@ -35,7 +35,7 @@ def fields():
 def _standing_on(*fields):
     for field in fields:
         for selection in field.extraSelections():
-            if selection.format.background().color() == AMBER:
+            if selection.format.background().color() == YELLOW:
                 return field
     return None
 
@@ -85,7 +85,7 @@ def test_stepping_walks_forward_and_wraps_both_ways(fields):
 
 def test_the_cursor_lands_on_the_current_match_without_selecting_it(fields):
     # Qt paints a real selection over an extra selection, in the palette's
-    # highlight color, so a selected match would hide the amber that says which
+    # highlight color, so a selected match would hide the yellow that says which
     # match is current.
     (field,) = fields("a cat on a mat")
     find = TextFind()

@@ -50,7 +50,8 @@ BLUE: Rgb = (48, 128, 224)
 BLUE_LIGHT: Rgb = (140, 192, 240)
 GREEN: Rgb = (48, 160, 48)
 RED: Rgb = (255, 60, 60)
-AMBER: Rgb = (255, 200, 120)
+YELLOW: Rgb = (255, 200, 120)
+AMBER: Rgb = YELLOW  # the old name, until no open branch of any app still uses it
 MAGENTA: Rgb = (200, 80, 160)
 WHITE: Rgb = (255, 255, 255)
 BLACK: Rgb = (0, 0, 0)  # the ground a video plays on, as every Funestra's mpv draws it
@@ -71,7 +72,7 @@ TOGGLE_ON: Rgb = BLUE
 TOGGLE_OFF: Rgb = TEXT_MUTED  # the muted gray everything else off wears
 TOGGLE_HANDLE: Rgb = WHITE
 
-PREVIEW_INK: Rgb = AMBER
+PREVIEW_INK: Rgb = YELLOW
 
 
 # How much lighter a control sits while the pointer is over it.  One step, taken

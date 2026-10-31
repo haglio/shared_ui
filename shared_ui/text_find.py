@@ -7,12 +7,12 @@ from collections.abc import Callable
 from PyQt6.QtGui import QTextCharFormat, QTextCursor
 from PyQt6.QtWidgets import QTextEdit
 
-from shared_ui.colors import AMBER, BG_PRIMARY, BLUE, TEXT_PRIMARY
+from shared_ui.colors import BG_PRIMARY, BLUE, TEXT_PRIMARY, YELLOW
 
 __all__ = ["TextFind"]
 
 _EVERY_MATCH = BLUE.darker(150)
-_THE_CURRENT_MATCH = AMBER
+_THE_CURRENT_MATCH = YELLOW
 
 
 class TextFind:

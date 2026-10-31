@@ -91,7 +91,7 @@ class Level(Enum):
     """How bad the news is, in the family icon the dialog draws beside it."""
 
     ERROR = ("error", palette.RED)
-    WARNING = ("warning", palette.AMBER)
+    WARNING = ("warning", palette.YELLOW)
     INFO = ("info", palette.BLUE)
 
     @property
