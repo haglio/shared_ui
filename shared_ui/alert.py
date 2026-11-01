@@ -224,6 +224,3 @@ def show_alert(
     on_gui_thread = QThread.currentThread() == app.thread()
     closed_with = open_it() if on_gui_thread else _GuiThreadCall(app.thread()).call(open_it)
     return closed_with == DISMISSED
-
-
-mark_pixmap = icon_pixmap_for

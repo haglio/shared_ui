@@ -24,7 +24,6 @@ from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import (
     ICONS,
-    RENAMED_MARKS,
     STAND_IN,
     Ellipse,
     Line,
@@ -109,7 +108,6 @@ def test_the_icons_are_all_different():
     drawn = {
         name: icons.icon_pixmap(name, 48, TEXT_PRIMARY).toImage()
         for name in _EVERY_ICON_AND_THE_STAND_IN
-        if name not in RENAMED_MARKS
     }
     names = sorted(drawn)
     for index, first in enumerate(names):
@@ -319,15 +317,15 @@ def test_an_icon_drawn_over_a_chip_keeps_the_chip_underneath():
 _THE_ICONS = (
     "bolt", "cells_in_circle", "chart", "check", "chevron_down", "chevron_left",
     "chevron_right", "chevron_up", "chevrons_left", "chevrons_right", "circle",
-    "clip_to_scene", "clips", "clock", "clock_full", "clock_short", "compilation",
+    "clip_to_scene", "clips", "clock", "compilation",
     "control_off", "copy", "cross", "crown", "database", "disc", "enhance_filter", "enlarge", "error",
     "expand_horizontal", "export", "external_link", "filter", "flask", "flat_2d", "flip_ends",
-    "fmode", "folder", "full", "full_length", "funscript_jump", "grid", "headset", "human",
+    "fmode", "folder", "full", "funscript_jump", "grid", "headset", "human",
     "info", "jigsaw", "landscape", "latest", "lock", "log", "loop", "mic", "minus", "monitor",
     "moon", "more", "more_vertical", "pair_in_circle", "park", "pause", "pencil", "photo", "play", "plus",
     "plus_outline", "portrait", "portrait_and_landscape", "portrait_beside_landscape", "power",
     "question", "redo_arrow", "regenerate_corner", "release", "reset", "restart", "retract",
-    "save", "scene_to_clip", "settings", "shield", "shorts", "shuffle", "slideshow",
+    "save", "scene_to_clip", "settings", "shield", "shuffle", "slideshow",
     "snowflake_struck_out", "speaker", "speaker_off", "star", "star_outline", "star_ring",
     "stop", "tag", "thumbs_up", "trash", "undo_arrow", "unlock", "versions", "vr_hemisphere",
     "warning", "wave", "wave_sawtooth", "wave_square", "wave_triangle", "working",
@@ -480,11 +478,6 @@ def test_portrait_beside_landscape_fits_the_square_of_a_button():
 
     assert min(left, upper) > 0
     assert max(right, lower) < BUTTON_FILLING_ICON - 1
-
-
-def test_a_renamed_icon_still_draws_under_its_old_name_for_branches_not_yet_rebased():
-    assert ICONS["clock_full"] == ICONS["full_length"] == ICONS["full"]
-    assert ICONS["clock_short"] == ICONS["shorts"] == ICONS["clips"]
 
 
 def test_the_registry_is_what_icon_names_reports():

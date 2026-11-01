@@ -146,6 +146,3 @@ def svg_icon(name: str, *, size: float) -> str:
     shapes = "".join(_ELEMENTS[type(shape)](shape) for shape in shapes_of(name))
     return (f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 {_n(CANVAS)} {_n(CANVAS)}' "
             f"width='{_n(size)}' height='{_n(size)}'>{shapes}</svg>")
-
-
-svg_mark = svg_icon
