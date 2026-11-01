@@ -1068,19 +1068,10 @@ ICONS: dict[str, tuple] = {
     "working": (Arc(7, 7, 34, 34, 90, 270),),
 }
 
-RENAMED_MARKS: dict[str, str] = {
-    "clock_full": "full", "clock_short": "clips", "full_length": "full", "shorts": "clips",
-}
-ICONS.update({old: ICONS[new] for old, new in RENAMED_MARKS.items()})
-
 
 def icon_names() -> tuple[str, ...]:
     """Every icon the family can draw, sorted."""
     return tuple(sorted(ICONS))
-
-
-GLYPHS = ICONS
-glyph_names = icon_names
 
 
 _log = logging.getLogger(__name__)
