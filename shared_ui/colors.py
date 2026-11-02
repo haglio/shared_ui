@@ -53,7 +53,6 @@ BLUE_LIGHT = QColor(*palette.BLUE_LIGHT)  # the one blue, tinted toward white
 GREEN = QColor(*palette.GREEN)
 RED = QColor(*palette.RED)
 YELLOW = QColor(*palette.YELLOW)
-AMBER = YELLOW  # the old name, until no open branch of any app still uses it
 MAGENTA = QColor(*palette.MAGENTA)
 WHITE = QColor(*palette.WHITE)
 BLACK = QColor(*palette.BLACK)
