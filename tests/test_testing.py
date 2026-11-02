@@ -6,7 +6,18 @@ from PyQt6.QtCore import QPoint, Qt
 from PyQt6.QtGui import QColor
 from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QApplication, QPushButton, QWidget
-from shared_ui.icon_geometry import ICONS
+
+from shared_ui import (
+    alert,
+    application,
+    chrome,
+    colors,
+    foreground,
+    icon_geometry,
+    loading_handover,
+    loading_process,
+    loading_window,
+)
 from shared_ui.testing import (
     Pointer,
     alert_shown,
@@ -17,17 +28,6 @@ from shared_ui.testing import (
     loading_at_the_click,
     loading_process_opened,
     taking_over_stand_in,
-)
-
-from shared_ui import (
-    alert,
-    application,
-    chrome,
-    colors,
-    foreground,
-    loading_handover,
-    loading_process,
-    loading_window,
 )
 
 
@@ -110,5 +110,5 @@ def test_nothing_is_brought_to_the_front():
 def test_an_icon_lacking_comes_back_after():
     present = "power"
     with icons_lacking(present):
-        assert present not in ICONS
-    assert present in ICONS
+        assert present not in icon_geometry.icon_names()
+    assert present in icon_geometry.icon_names()

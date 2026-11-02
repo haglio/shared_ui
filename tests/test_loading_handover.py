@@ -6,12 +6,12 @@ from __future__ import annotations
 from dataclasses import replace
 
 import pytest
+from app_support import loading_screen
 from app_support.testing import screens_measured_as
 from PIL import Image
+
 from shared_ui.loading_handover import TakingOver
 from shared_ui.loading_panel import LoadingPanel, bar_box, render
-
-from app_support import loading_screen
 
 PANEL = LoadingPanel(wordmark="Example", status="Starting...", fraction=0.0, hint="Press Esc to cancel")
 PORTRAIT = loading_screen.Monitor(area=(-1440, 0, 1440, 3440), work_area=(-1440, 0, 1440, 3410), main=False)
@@ -71,38 +71,40 @@ def _centered_on(monitor: loading_screen.Monitor) -> tuple[int, int]:
     return x + (width - SIZE[0]) // 2, y + (height - SIZE[1]) // 2
 
 
-@pytest.fixture
-def pointer_on_the_portrait():
-    with screens_measured_as(loading_screen.Screens(
-            virtual=(-1440, 0, 4000, 3440), primary=(2560, 1440), pointer_work_area=PORTRAIT.work_area,
-            monitors=(PORTRAIT, MAIN))):
-        yield
+def _pointer_on_the_portrait():
+    return screens_measured_as(loading_screen.Screens(
+        virtual=(-1440, 0, 4000, 3440), primary=(2560, 1440), pointer_work_area=PORTRAIT.work_area,
+        monitors=(PORTRAIT, MAIN)))
 
 
 class TestOnTheMonitorTheAppsWindowComesUpOn:
     def test_with_no_launchers_screen_up_it_comes_up_on_the_monitor_the_app_keeps_its_window_on(
-            self, launched, pointer_on_the_portrait):
-        _place(launched).say_where_the_app_comes_up(loading_screen.AppWindow(kept_on=MAIN.area))
+            self, launched):
+        with _pointer_on_the_portrait():
+            _place(launched).say_where_the_app_comes_up(loading_screen.AppWindow(kept_on=MAIN.area))
 
-        assert TakingOver.from_the_launcher(launched).panel_for(SIZE) == _centered_on(MAIN)
+            assert TakingOver.from_the_launcher(launched).panel_for(SIZE) == _centered_on(MAIN)
 
     def test_a_launchers_screen_up_on_that_monitor_is_taken_over_where_it_stands(
-            self, launched, pointer_on_the_portrait):
-        _place(launched).say_where_the_app_comes_up(loading_screen.AppWindow(kept_on=MAIN.area))
-        _place(launched).stand(loading_screen.Shown(left=1000, top=500, fraction=0.5))
+            self, launched):
+        with _pointer_on_the_portrait():
+            _place(launched).say_where_the_app_comes_up(loading_screen.AppWindow(kept_on=MAIN.area))
+            _place(launched).stand(loading_screen.Shown(left=1000, top=500, fraction=0.5))
 
-        assert TakingOver.from_the_launcher(launched).panel_for(SIZE) == (1000, 500)
+            assert TakingOver.from_the_launcher(launched).panel_for(SIZE) == (1000, 500)
 
     def test_an_app_too_big_for_the_monitor_he_clicked_on_comes_up_on_the_main_one(
-            self, launched, pointer_on_the_portrait):
-        _place(launched).say_where_the_app_comes_up(loading_screen.AppWindow(size=(1954, 600)))
+            self, launched):
+        with _pointer_on_the_portrait():
+            _place(launched).say_where_the_app_comes_up(loading_screen.AppWindow(size=(1954, 600)))
 
-        assert TakingOver.from_the_launcher(launched).panel_for(SIZE) == _centered_on(MAIN)
+            assert TakingOver.from_the_launcher(launched).panel_for(SIZE) == _centered_on(MAIN)
 
-    def test_an_app_that_said_nothing_follows_the_launchers_screen_as_ever(self, launched, pointer_on_the_portrait):
-        _place(launched).stand(loading_screen.Shown(left=-1300, top=900, fraction=0.5))
+    def test_an_app_that_said_nothing_follows_the_launchers_screen_as_ever(self, launched):
+        with _pointer_on_the_portrait():
+            _place(launched).stand(loading_screen.Shown(left=-1300, top=900, fraction=0.5))
 
-        assert TakingOver.from_the_launcher(launched).panel_for(SIZE) == (-1300, 900)
+            assert TakingOver.from_the_launcher(launched).panel_for(SIZE) == (-1300, 900)
 
     def test_screens_that_cannot_be_measured_leave_it_where_the_launchers_screen_stood(self, launched):
         with screens_measured_as(None):
