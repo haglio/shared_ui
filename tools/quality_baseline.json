@@ -40,7 +40,7 @@
     "shared_ui/loading_process.py": 7,
     "shared_ui/loading_window.py": 5,
     "shared_ui/look_guard.py": 3,
-    "shared_ui/notice_shape.py": 2,
+    "shared_ui/message_shape.py": 2,
     "shared_ui/pages.py": 4,
     "shared_ui/palette.py": 44,
     "shared_ui/pressable_drawing.py": 2,
@@ -108,7 +108,7 @@
   "uncovered_lines": {
     "shared_ui/alert.py": 3,
     "shared_ui/app_icon.py": 1,
-    "shared_ui/notice_shape.py": 8,
+    "shared_ui/message_shape.py": 8,
     "shared_ui/pressable_drawing.py": 1,
     "shared_ui/testing.py": 1,
     "shared_ui/text_find.py": 1,

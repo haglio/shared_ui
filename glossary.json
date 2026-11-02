@@ -55,6 +55,7 @@
       "id": "message",
       "thing": "the one line that flashes at the top center over a video or an image, whose shape every app takes from here",
       "code_today": [
+        "message shape",
         "notice"
       ],
       "status": "ruled",
