@@ -53,6 +53,13 @@ def test_a_description_written_over_several_lines_names_the_feature_by_its_first
     assert preview_of(worktree).feature == "the example stage's new pause"
 
 
+def test_a_worktree_taken_off_its_branch_still_names_the_feature_that_branch_describes(worktree):
+    _git("config", "branch.claude/scene-one.description", "the example stage's new pause", cwd=worktree)
+    _git("checkout", "--quiet", "--detach", cwd=worktree)
+
+    assert preview_of(worktree).feature == "the example stage's new pause"
+
+
 def test_a_preview_nobody_described_names_no_feature(worktree):
     assert preview_of(worktree).feature is None
 

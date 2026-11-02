@@ -25,9 +25,18 @@ def preview_of(checkout: Path) -> Preview | None:
 
 
 def _feature_described_on_the_branch_of(checkout: Path) -> str | None:
-    branch = _git(checkout, "branch", "--show-current")
-    description = _git(checkout, "config", "--get", f"branch.{branch}.description")
-    return description.splitlines()[0] if description else None
+    for branch in _branches_the_checkout_stands_on(checkout):
+        description = _git(checkout, "config", "--get", f"branch.{branch}.description")
+        if description:
+            return description.splitlines()[0]
+    return None
+
+
+def _branches_the_checkout_stands_on(checkout: Path) -> list[str]:
+    current = _git(checkout, "branch", "--show-current")
+    if current:
+        return [current]
+    return _git(checkout, "branch", "--points-at", "HEAD", "--format=%(refname:short)").splitlines()
 
 
 def _git(checkout: Path, *args: str) -> str:
