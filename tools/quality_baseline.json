@@ -50,7 +50,7 @@
     "shared_ui/palette.py": 44,
     "shared_ui/pressable_drawing.py": 2,
     "shared_ui/qt_messages.py": 5,
-    "shared_ui/spacing.py": 42,
+    "shared_ui/spacing.py": 37,
     "shared_ui/testing.py": 9,
     "shared_ui/text_find.py": 1,
     "shared_ui/tick_control.py": 12,
