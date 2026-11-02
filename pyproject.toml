@@ -39,9 +39,14 @@ dependencies = [
 # the machine holds today.
 qt = ["PyQt6>=6,<7"]
 # The suite needs Qt, which is most of this package.
-dev = ["app-support @ git+https://github.com/haglio/app_support@v0.1.326",
+dev = ["app-support @ git+https://github.com/haglio/app_support@v0.1.341",
        "pytest>=9,<10", "pytest-cov>=7,<8", "pytest-timeout>=2.4,<3", "vulture>=2.16,<3",
        "ruff==0.16.6", "PyQt6>=6,<7"]
+
+# Three lines of the icon drawing and the loading process excuse themselves from
+# coverage; the ceiling only comes down.
+[tool.haglio.coverage]
+max-pragmas = 3
 
 [tool.pytest.ini_options]
 # The content guard's enforcement check, taken from app_support rather than
