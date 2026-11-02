@@ -6,14 +6,14 @@ from __future__ import annotations
 import logging
 
 import pytest
+from app_support import loading_screen
 from app_support.testing import screens_measured_as
 from PyQt6.QtCore import Qt
 from PyQt6.QtTest import QTest
+
+from shared_ui import loading_window
 from shared_ui.loading_panel import render
 from shared_ui.loading_window import Loading, LoadingCanceled, LoadingWindow
-
-from app_support import loading_screen
-from shared_ui import loading_window
 
 
 def _window(**changes) -> LoadingWindow:
