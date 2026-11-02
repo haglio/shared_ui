@@ -9,11 +9,11 @@ import sys
 import time
 from unittest.mock import patch
 
+from app_support import loading_screen
 from app_support.testing import window_dressed
+
 from shared_ui.loading_process import LoadingProcess, run, serve
 from shared_ui.loading_window import LoadingWindow
-
-from app_support import loading_screen
 
 
 def _window(**changes) -> LoadingWindow:
