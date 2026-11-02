@@ -1,4 +1,4 @@
-"""The strip Ctrl+F opens over a window's text: a query field, a match count, the
+"""The find bar Ctrl+F opens over a window's text: a query field, a match count, the
 two steps between matches, and a close."""
 
 from __future__ import annotations
