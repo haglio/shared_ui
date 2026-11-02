@@ -1,4 +1,4 @@
-"""A funscript's speed as a color: the heat strip every timeline in the family
+"""A funscript's speed as a color: the heatmap every timeline in the family
 paints under a video, from the ground through the family's blues, green and
 yellow to its red."""
 

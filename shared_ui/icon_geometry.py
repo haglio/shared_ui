@@ -407,16 +407,16 @@ def _database() -> tuple:
     )
 
 
-def _upright_arrow(lane: float, *, pointing_up: bool) -> tuple:
+def _upright_arrow(column: float, *, pointing_up: bool) -> tuple:
     def along(distance: float) -> float:
         return CANVAS - distance if pointing_up else distance
 
     neck = along(_PAIR_NECK)
     return (
-        Line(lane, along(_PAIR_TAIL), lane, neck, _PAIR_PEN),
-        Polygon(((lane, along(_PAIR_TIP)),
-                 (lane - _PAIR_HALF_HEAD, neck),
-                 (lane + _PAIR_HALF_HEAD, neck))),
+        Line(column, along(_PAIR_TAIL), column, neck, _PAIR_PEN),
+        Polygon(((column, along(_PAIR_TIP)),
+                 (column - _PAIR_HALF_HEAD, neck),
+                 (column + _PAIR_HALF_HEAD, neck))),
     )
 
 
