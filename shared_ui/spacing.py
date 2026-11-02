@@ -51,11 +51,6 @@ BUTTON_ROW_GAP = 8
 # inside a group, which is what makes a boundary read as one without a rule
 # drawn there -- stated as that ratio rather than as a number of its own, so a
 # change to the gap inside a group carries the grouping with it.
-#
-# Imported by funestra (both HUD painters: the mode pair and the minimize
-# beside it) and by origenerator (the browser's button bank, the combine
-# panel), so the same two groups sit the same distance apart whichever app
-# draws them.
 BUTTON_GROUP_GAP = BUTTON_GAP * 3
 
 # A button carrying a word rather than an icon: the room above and below it, and
