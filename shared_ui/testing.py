@@ -47,10 +47,9 @@ def brought_to_front(**how: Any):
 
 @contextmanager
 def icons_lacking(*names: str) -> Iterator[None]:
-    with patch.dict("shared_ui.icon_geometry.ICONS"):
-        from shared_ui.icon_geometry import ICONS  # noqa: PLC0415
+    with patch.dict("shared_ui.icon_geometry.ICONS") as icons:
         for name in names:
-            del ICONS[name]
+            del icons[name]
         yield
 
 
