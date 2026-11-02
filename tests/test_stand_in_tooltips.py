@@ -67,6 +67,7 @@ def test_hovering_a_button_wearing_the_stand_in_says_why_under_its_own_tooltip(h
 
 
 def test_hovering_a_button_wearing_a_real_icon_shows_its_own_tooltip_alone(host):
+    qt_icon(_AN_ICON_THIS_VERSION_LACKS)
     button = _placed(host, QToolButton())
     button.setIcon(qt_icon("trash"))
     button.setToolTip("Move it to the trash")
