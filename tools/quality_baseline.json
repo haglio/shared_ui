@@ -82,7 +82,6 @@
     "tests/test_palette.py": 11,
     "tests/test_pressable_drawing.py": 1,
     "tests/test_qt_messages.py": 1,
-    "tests/test_sibling_pins.py": 1,
     "tests/test_spacing.py": 9,
     "tests/test_testing.py": 1,
     "tests/test_text_find.py": 6,
