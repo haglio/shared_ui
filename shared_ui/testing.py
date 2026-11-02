@@ -11,11 +11,47 @@ under the pointer is handed one directly.
 from __future__ import annotations
 
 from collections.abc import Iterator
+from contextlib import contextmanager
+from typing import Any
+from unittest.mock import patch
 
 import pytest
 from PyQt6.QtCore import QEvent, QPoint, QPointF, QRect, Qt
 from PyQt6.QtGui import QCursor, QMouseEvent
 from PyQt6.QtWidgets import QApplication, QWidget
+
+
+def alert_shown(**how: Any):
+    return patch("shared_ui.alert.show_alert", **how)
+
+
+def loading_process_opened(**how: Any):
+    return patch("shared_ui.loading_process.LoadingProcess.open", **how)
+
+
+def loading_at_the_click(loading: Any):
+    return patch("shared_ui.loading_window.Loading.at_the_click", return_value=loading)
+
+
+def taking_over_stand_in():
+    return patch("shared_ui.loading_handover.TakingOver")
+
+
+def application_stand_in(application: Any):
+    return patch("shared_ui.application.application", application)
+
+
+def brought_to_front(**how: Any):
+    return patch("shared_ui.foreground.bring_to_front", **how)
+
+
+@contextmanager
+def icons_lacking(*names: str) -> Iterator[None]:
+    with patch.dict("shared_ui.icon_geometry.ICONS"):
+        from shared_ui.icon_geometry import ICONS  # noqa: PLC0415
+        for name in names:
+            del ICONS[name]
+        yield
 
 
 def ground(widget: QWidget) -> str:
