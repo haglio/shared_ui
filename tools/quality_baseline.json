@@ -110,5 +110,14 @@
   "simple_namespaces": {},
   "statements": {
     "shared_ui/icon_geometry.py": 382
+  },
+  "uncovered_lines": {
+    "shared_ui/alert.py": 3,
+    "shared_ui/app_icon.py": 1,
+    "shared_ui/notice_shape.py": 8,
+    "shared_ui/pressable_drawing.py": 1,
+    "shared_ui/testing.py": 1,
+    "shared_ui/text_find.py": 1,
+    "shared_ui/toggle_switch.py": 2
   }
 }
