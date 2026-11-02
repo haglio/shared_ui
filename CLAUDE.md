@@ -64,6 +64,10 @@ again to take an update -- shows none, which is why an app opens its own with
 `Loading.at_the_click`, and why a launcher something other than his click runs
 carries no `loading-screen`.
 
+## Its words
+
+- **`glossary.json` lists the things this library draws and their words, and `tests/test_glossary.py` holds the code to it.** A noun for a drawn thing is a row there before it is a word in the code; a rename moves the old word from the row's `code_today` to its `retired`.
+
 ## Landing — GitHub merge queue, not local ff-merge
 
 This repo is public at `github.com/haglio/shared_ui` with a merge-queue ruleset on

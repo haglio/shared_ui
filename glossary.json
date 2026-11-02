@@ -1,0 +1,184 @@
+{
+  "app": "shared_ui",
+  "drafted": "2026-11-02",
+  "columns": {
+    "thing": "where it is on the screen and what it looks like",
+    "screen": "the words on the screen that name it (a label, a button, a tooltip), quoted; null when no label names it",
+    "his_word": "the word the user says for it, from his own messages and the spoken commands; null when he has none yet",
+    "code_today": "the words the code says for it now; each has to be in the code, or the row is stale",
+    "code_word": "the one word the code is to say for it; null while unruled",
+    "status": "ruled: his word, given where `ruled` says | his_word: a word he has used, not yet put to him as the code's | agreed: screen, user and code already say one word | unruled: no word of his yet, the row waits for him | kept: a name from outside this app, or a thing he has no word for, so the code keeps its own",
+    "retired": "code words for it that are gone and stay gone; `keep` lists the tokens that may still carry the letters (another thing's name)"
+  },
+  "things": [
+    {
+      "screen": null,
+      "his_word": "icon (2026-10-13, 2026-10-16, 2026-10-18)",
+      "code_word": "icon",
+      "id": "icon",
+      "thing": "the small picture on a button, drawn by this library for every app",
+      "code_today": [
+        "icon"
+      ],
+      "status": "ruled",
+      "ruled": "2026-10-16, his words, for the whole family: icon, never mark or glyph"
+    },
+    {
+      "screen": null,
+      "his_word": "HUD (2026-10-28)",
+      "code_word": "hud",
+      "id": "hud",
+      "thing": "the controls a Funestra draws over what it plays, whose buttons this library draws",
+      "code_today": [
+        "hud"
+      ],
+      "status": "ruled",
+      "ruled": "2026-10-28, his words"
+    },
+    {
+      "screen": null,
+      "his_word": "loading screen (2026-10-13)",
+      "code_word": "loading screen",
+      "id": "loading_screen",
+      "thing": "the window that shows while an app starts; the code's panel is what is drawn inside it",
+      "code_today": [
+        "loading screen",
+        "loading panel"
+      ],
+      "status": "ruled",
+      "ruled": "2026-10-16, his words, for the whole family"
+    },
+    {
+      "screen": null,
+      "his_word": "message (2026-10-30, 2026-10-24)",
+      "code_word": "message",
+      "id": "message",
+      "thing": "the one line that flashes at the top center over a video or an image, whose shape every app takes from here",
+      "code_today": [
+        "notice"
+      ],
+      "status": "ruled",
+      "ruled": "2026-10-30, his words on Origenerator's list"
+    },
+    {
+      "screen": null,
+      "his_word": "heatmap (2026-11-02)",
+      "code_word": "heatmap",
+      "id": "heatmap",
+      "thing": "the strip of colors under a video's timeline that shows the funscript's speed",
+      "code_today": [
+        "heatmap"
+      ],
+      "status": "ruled",
+      "ruled": "2026-11-02, accepted on Funestra's list",
+      "retired": [
+        "heat strip"
+      ]
+    },
+    {
+      "screen": null,
+      "his_word": "switch (2026-10-13)",
+      "code_word": "switch",
+      "id": "switch",
+      "thing": "the on/off control with Off on one side and On on the other",
+      "code_today": [
+        "toggle switch"
+      ],
+      "status": "his_word"
+    },
+    {
+      "screen": null,
+      "his_word": null,
+      "code_word": "find bar",
+      "id": "find_bar",
+      "thing": "the line Ctrl+F opens over a window's text",
+      "code_today": [
+        "find bar"
+      ],
+      "status": "kept"
+    },
+    {
+      "screen": null,
+      "his_word": "folder path (2026-10-10)",
+      "code_word": "folder path",
+      "id": "folder_path",
+      "thing": "the clickable path above a list of folders",
+      "code_today": [
+        "folder path"
+      ],
+      "status": "ruled",
+      "ruled": "2026-10-10, his words"
+    },
+    {
+      "screen": null,
+      "his_word": "tray (2026-09-28, 2026-10-11)",
+      "code_word": "tray",
+      "id": "tray",
+      "thing": "Windows' notification area, and an app's right-click menu there",
+      "code_today": [
+        "tray"
+      ],
+      "status": "kept",
+      "ruled": "Windows' own word"
+    },
+    {
+      "screen": null,
+      "his_word": null,
+      "code_word": "toolbar",
+      "id": "toolbar",
+      "thing": "the row of buttons along the top of Evolver's and Scripture's windows",
+      "code_today": [
+        "toolbar"
+      ],
+      "status": "kept"
+    },
+    {
+      "screen": null,
+      "his_word": "pane (2026-09-13, 2026-10-25)",
+      "code_word": "pane",
+      "id": "pane",
+      "thing": "one of the columns of an app's window, with the family's margin inside it",
+      "code_today": [
+        "pane"
+      ],
+      "status": "ruled",
+      "ruled": "2026-10-30, his words on Origenerator's list"
+    },
+    {
+      "screen": null,
+      "his_word": null,
+      "code_word": null,
+      "id": "app_named_things",
+      "thing": "things an app names and this library only mentions or takes a size for: its badge and chip, a Funestra's console and pill",
+      "code_today": [
+        "badge",
+        "chip",
+        "console",
+        "pill"
+      ],
+      "status": "kept"
+    },
+    {
+      "screen": null,
+      "his_word": null,
+      "code_word": null,
+      "id": "other_words",
+      "thing": "words the code uses for things no screen shows or names: a style sheet, the letter grid's cell, Qt's slot and panel border, a band of sizes, sip's map, Python's strip, and the color names the look guard refuses",
+      "code_today": [
+        "sheet",
+        "cell",
+        "slot",
+        "panel",
+        "band",
+        "map",
+        "strip",
+        "glow",
+        "halo",
+        "plate",
+        "scrim",
+        "swatch"
+      ],
+      "status": "kept"
+    }
+  ]
+}
