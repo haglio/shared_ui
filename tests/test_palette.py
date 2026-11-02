@@ -70,8 +70,3 @@ def test_the_qt_spelling_is_the_palette_and_nothing_more():
     palette_values = {QColor(*rgb).name() for rgb in _tokens(palette).values()}
     strays = sorted(name for name, color in qt.items() if color.name() not in palette_values)
     assert not strays, f"QColors with a number of their own: {strays}"
-
-
-def test_amber_is_still_yellow_for_the_branches_that_have_not_taken_the_new_name():
-    assert palette.AMBER == palette.YELLOW
-    assert colors.AMBER == colors.YELLOW

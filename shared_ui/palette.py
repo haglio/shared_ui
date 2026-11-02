@@ -53,7 +53,6 @@ BLUE_LIGHT: Rgb = (140, 192, 240)
 GREEN: Rgb = (48, 160, 48)
 RED: Rgb = (255, 60, 60)
 YELLOW: Rgb = (255, 200, 120)
-AMBER: Rgb = YELLOW  # the old name, until no open branch of any app still uses it
 MAGENTA: Rgb = (200, 80, 160)
 WHITE: Rgb = (255, 255, 255)
 BLACK: Rgb = (0, 0, 0)  # the ground a video plays on, as every Funestra's mpv draws it
