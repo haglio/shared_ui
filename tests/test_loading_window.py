@@ -6,13 +6,14 @@ from __future__ import annotations
 import logging
 
 import pytest
-from app_support import loading_screen
+from app_support.testing import screens_measured_as
 from PyQt6.QtCore import Qt
 from PyQt6.QtTest import QTest
-
-from shared_ui import loading_window
 from shared_ui.loading_panel import render
 from shared_ui.loading_window import Loading, LoadingCanceled, LoadingWindow
+
+from app_support import loading_screen
+from shared_ui import loading_window
 
 
 def _window(**changes) -> LoadingWindow:
@@ -159,15 +160,15 @@ class TestTakingOverFromTheLaunchersScreen:
         assert window.panel.fraction == pytest.approx(0.4 + 0.6 / 3)
 
     def test_with_no_launchers_screen_up_it_opens_on_the_monitor_the_app_keeps_its_window_on(
-            self, place, monkeypatch):
+            self, place):
         main = loading_screen.Monitor(area=(0, 0, 2560, 1440), work_area=(0, 0, 2560, 1410), main=True)
         portrait = loading_screen.Monitor(area=(-1440, 0, 1440, 3440), work_area=(-1440, 0, 1440, 3410), main=False)
-        monkeypatch.setattr(loading_screen, "screens", lambda: loading_screen.Screens(
-            virtual=(-1440, 0, 4000, 3440), primary=(2560, 1440), pointer_work_area=portrait.work_area,
-            monitors=(portrait, main)))
         place.say_where_the_app_comes_up(loading_screen.AppWindow(kept_on=main.area))
 
-        window = _window()
+        with screens_measured_as(loading_screen.Screens(
+                virtual=(-1440, 0, 4000, 3440), primary=(2560, 1440), pointer_work_area=portrait.work_area,
+                monitors=(portrait, main))):
+            window = _window()
 
         assert (window.pos().x(), window.pos().y()) == ((2560 - window.width()) // 2, (1410 - window.height()) // 2)
 

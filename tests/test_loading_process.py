@@ -9,10 +9,11 @@ import sys
 import time
 from unittest.mock import patch
 
-from app_support import loading_screen
-
+from app_support.testing import window_dressed
 from shared_ui.loading_process import LoadingProcess, run, serve
 from shared_ui.loading_window import LoadingWindow
+
+from app_support import loading_screen
 
 
 def _window(**changes) -> LoadingWindow:
@@ -128,7 +129,7 @@ class TestTheWholeWay:
 
     def test_a_preview_window_wears_the_apps_taskbar_identity_and_says_where_it_is(self, qapp):
         told = io.StringIO()
-        with patch("app_support.win32.dress_window") as dress:
+        with window_dressed() as dress:
             code = run({
                 "caption": "Scripture Loading", "wordmark": "Scripture", "icon": None,
                 "preview": "the scene list", "is_preview": True,
@@ -142,7 +143,7 @@ class TestTheWholeWay:
         assert told.getvalue().splitlines() == [f"shown {hwnd}"]
 
     def test_a_preview_window_wears_the_name_and_icon_its_taskbar_button_carries(self, qapp, tmp_path):
-        with patch("app_support.win32.dress_window") as dress:
+        with window_dressed() as dress:
             run({
                 "caption": "Scripture Loading", "wordmark": "Scripture", "icon": None,
                 "preview": "the scene list", "is_preview": True, "steps": ["Loading..."],
