@@ -13,7 +13,7 @@ MARGIN_STANDARD = 8
 GAP_SMALL = 4
 GAP_MEDIUM = 8
 
-# A dialog's own margin and gap: twice the ordinary ones.  A notice is a window
+# A dialog's own margin and gap: twice the ordinary ones.  An alert is a window
 # of its own with nothing else in it, and at the density of a packed toolbar --
 # which is what the ordinary pair are for -- it reads as cramped.
 MARGIN_DIALOG = MARGIN_STANDARD * 2

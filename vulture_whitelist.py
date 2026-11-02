@@ -30,9 +30,3 @@ BUTTON_ROW_GAP  # origenerator
 # --- type ---
 SIZES  # funestra: a satellite's title steps down through them to fit
 
-# --- the notice's shape, drawn by fun_time (desktop and headset) and origenerator ---
-NOTICE_TYPE_SIZE  # fun_time, origenerator
-NOTICE_PAD_V  # fun_time, origenerator
-NOTICE_PAD_H  # fun_time, origenerator
-NOTICE_RADIUS  # fun_time, origenerator
-NOTICE_TOP_MARGIN  # fun_time, origenerator

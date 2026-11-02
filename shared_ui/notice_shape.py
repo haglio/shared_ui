@@ -1,13 +1,7 @@
-"""The shape of a notice flashed over a video or an image, which every app draws alike:
-Fun Time over a Funestra and in the headset, Origenerator over its media."""
+from shared_ui.message_shape import MESSAGE_PAD_H as NOTICE_PAD_H
+from shared_ui.message_shape import MESSAGE_PAD_V as NOTICE_PAD_V
+from shared_ui.message_shape import MESSAGE_RADIUS as NOTICE_RADIUS
+from shared_ui.message_shape import MESSAGE_TOP_MARGIN as NOTICE_TOP_MARGIN
+from shared_ui.message_shape import MESSAGE_TYPE_SIZE as NOTICE_TYPE_SIZE
 
-from __future__ import annotations
-
-from shared_ui.spacing import BUTTON_RADIUS, MARGIN_DIALOG, MARGIN_STANDARD
-from shared_ui.type_scale import SIZE_HEADING
-
-NOTICE_TYPE_SIZE = SIZE_HEADING
-NOTICE_PAD_V = MARGIN_STANDARD
-NOTICE_PAD_H = MARGIN_DIALOG
-NOTICE_RADIUS = BUTTON_RADIUS
-NOTICE_TOP_MARGIN = MARGIN_DIALOG  # down from the top of what it is flashed over
+__all__ = ["NOTICE_PAD_H", "NOTICE_PAD_V", "NOTICE_RADIUS", "NOTICE_TOP_MARGIN", "NOTICE_TYPE_SIZE"]
