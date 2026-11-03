@@ -22,7 +22,7 @@ from typing import IO, TYPE_CHECKING
 from app_support import loading_screen
 from PyQt6.QtCore import QObject, pyqtSignal
 
-from shared_ui.loading_window import LoadingWindow
+from shared_ui.loading_window import LoadingWindow, LoadingWindowSpec
 from shared_ui.preview import Preview
 
 if TYPE_CHECKING:
@@ -43,15 +43,15 @@ class LoadingProcess(QObject):
         threading.Thread(target=self._listen, name="loading-window-listen", daemon=True).start()
 
     @classmethod
-    def open(cls, *, caption: str, wordmark: str, icon: Path | None, preview: Preview | None,
-             steps: Sequence[str | tuple[str, float]], cancel_hint: str = "",
-             app_id: str | None = None, taskbar: TaskbarApp | None = None) -> LoadingProcess:
+    def open(cls, *, app_id: str | None = None, taskbar: TaskbarApp | None = None,
+             **window) -> LoadingProcess:
+        shown = LoadingWindowSpec(**window)
         spec = {
-            "caption": caption, "wordmark": wordmark,
-            "icon": None if icon is None else str(icon),
-            "preview": None if preview is None else preview.feature,
-            "is_preview": preview is not None,
-            "steps": list(steps), "cancel_hint": cancel_hint, "app_id": app_id,
+            "caption": shown.caption, "wordmark": shown.wordmark,
+            "icon": None if shown.icon is None else str(shown.icon),
+            "preview": None if shown.preview is None else shown.preview.feature,
+            "is_preview": shown.preview is not None,
+            "steps": list(shown.steps), "cancel_hint": shown.cancel_hint, "app_id": app_id,
             "taskbar": None if taskbar is None else {
                 "name": taskbar.name, "icon": str(taskbar.icon), "relaunch": taskbar.relaunch},
         }
@@ -127,12 +127,12 @@ def main(argv: Sequence[str] | None = None) -> int:  # pragma: no cover -- the w
 
 
 def run(spec: dict, lines_in: IO[str], lines_out: IO[str], app) -> int:
-    window = LoadingWindow(
+    window = LoadingWindow(LoadingWindowSpec(
         caption=spec["caption"], wordmark=spec["wordmark"],
         icon=None if spec["icon"] is None else Path(spec["icon"]),
         preview=Preview(spec["preview"]) if spec["is_preview"] else None,
         steps=[step if isinstance(step, str) else tuple(step) for step in spec["steps"]],
-        cancel_hint=spec["cancel_hint"])
+        cancel_hint=spec["cancel_hint"]))
     if spec["app_id"]:
         from app_support.win32 import TaskbarApp, dress_window  # noqa: PLC0415
 

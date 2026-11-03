@@ -94,48 +94,50 @@ def _rgba(color) -> tuple[int, int, int, int]:
 
 
 def _draw(draw: ImageDraw.ImageDraw, shape, ink, scale: float) -> None:
-    if isinstance(shape, Line):
-        points = ((shape.x1, shape.y1), (shape.x2, shape.y2))
-        _draw_path(draw, points, ink, shape.width * scale, scale)
-    elif isinstance(shape, Polyline):
-        _draw_path(draw, shape.points, ink, shape.width * scale, scale)
-    elif isinstance(shape, Polygon):
-        if shape.fill:
-            draw.polygon([(px * scale, py * scale) for px, py in shape.points], fill=ink)
-            if shape.round_radius:
-                # Its own outline, drawn with round joins -- which is what
-                # rounds the corners, and grows the shape by the radius.
-                _draw_path(draw, (*shape.points, shape.points[0]), ink,
-                           shape.round_radius * 2 * scale, scale)
-        else:
-            # Closed as a path rather than as an outlined polygon: Pillow's
-            # polygon outline is hard-cornered whatever the width, and a star's
-            # points come out chipped.
-            _draw_path(draw, (*shape.points, shape.points[0]), ink,
-                       shape.width * scale, scale)
-    elif isinstance(shape, RoundedRect):
-        frame = _frame(shape.x, shape.y, shape.x + shape.w, shape.y + shape.h, scale)
-        if shape.fill:
-            draw.rounded_rectangle(frame, radius=shape.radius * scale, fill=ink)
-        else:
-            grown = _centered(frame, shape.width * scale)
-            draw.rounded_rectangle(grown, radius=shape.radius * scale + shape.width
-                                   * scale / 2, outline=ink,
-                                   width=max(1, round(shape.width * scale)))
-    elif isinstance(shape, Ellipse):
-        frame = _frame(shape.cx - shape.rx, shape.cy - shape.ry,
-                       shape.cx + shape.rx, shape.cy + shape.ry, scale)
-        if shape.fill:
-            draw.ellipse(frame, fill=ink)
-        else:
-            draw.ellipse(_centered(frame, shape.width * scale), outline=ink,
-                         width=max(1, round(shape.width * scale)))
-    elif isinstance(shape, Arc):
-        _arc(draw, shape, ink, scale)
-    elif isinstance(shape, Path):
-        _path(draw, shape, ink, scale * CANVAS / shape.frame)
-    else:  # pragma: no cover -- a shape added to the geometry and not to a renderer
-        raise TypeError(f"no Pillow rendering for {type(shape).__name__}")
+    _DRAWN_BY[type(shape)](draw, shape, ink, scale)
+
+
+def _line(draw: ImageDraw.ImageDraw, shape: Line, ink, scale: float) -> None:
+    _draw_path(draw, ((shape.x1, shape.y1), (shape.x2, shape.y2)), ink, shape.width * scale, scale)
+
+
+def _polyline(draw: ImageDraw.ImageDraw, shape: Polyline, ink, scale: float) -> None:
+    _draw_path(draw, shape.points, ink, shape.width * scale, scale)
+
+
+def _polygon(draw: ImageDraw.ImageDraw, shape: Polygon, ink, scale: float) -> None:
+    closed = (*shape.points, shape.points[0])
+    if not shape.fill:
+        # Pillow's polygon outline is hard-cornered whatever the width.
+        _draw_path(draw, closed, ink, shape.width * scale, scale)
+        return
+    draw.polygon([(px * scale, py * scale) for px, py in shape.points], fill=ink)
+    if shape.round_radius:
+        _draw_path(draw, closed, ink, shape.round_radius * 2 * scale, scale)
+
+
+def _rounded_rect(draw: ImageDraw.ImageDraw, shape: RoundedRect, ink, scale: float) -> None:
+    frame = _frame(shape.x, shape.y, shape.x + shape.w, shape.y + shape.h, scale)
+    if shape.fill:
+        draw.rounded_rectangle(frame, radius=shape.radius * scale, fill=ink)
+        return
+    pen = shape.width * scale
+    draw.rounded_rectangle(_centered(frame, pen), radius=shape.radius * scale + pen / 2,
+                           outline=ink, width=max(1, round(pen)))
+
+
+def _ellipse(draw: ImageDraw.ImageDraw, shape: Ellipse, ink, scale: float) -> None:
+    frame = _frame(shape.cx - shape.rx, shape.cy - shape.ry,
+                   shape.cx + shape.rx, shape.cy + shape.ry, scale)
+    if shape.fill:
+        draw.ellipse(frame, fill=ink)
+        return
+    pen = shape.width * scale
+    draw.ellipse(_centered(frame, pen), outline=ink, width=max(1, round(pen)))
+
+
+def _scaled_path(draw: ImageDraw.ImageDraw, shape: Path, ink, scale: float) -> None:
+    _path(draw, shape, ink, scale * CANVAS / shape.frame)
 
 
 _CURVE_STEPS = 8
@@ -184,7 +186,7 @@ def _arc(draw: ImageDraw.ImageDraw, shape: Arc, ink, scale: float) -> None:
     span = abs(shape.span)
     draw.arc(frame, -(start + span), -start, fill=ink, width=width)
     for angle in (start, start + span):
-        _cap(draw, *_on_arc(shape, angle), ink, shape.width * scale, scale)
+        _cap(draw, _on_arc(shape, angle), ink, shape.width * scale, scale)
 
 
 def _on_arc(shape: Arc, degrees: float) -> tuple[float, float]:
@@ -216,13 +218,19 @@ def _draw_path(draw: ImageDraw.ImageDraw, points, ink, width: float,
     """A polyline in *ink*, with rounded joints and rounded ends."""
     scaled = [(px * scale, py * scale) for px, py in points]
     draw.line(scaled, fill=ink, width=max(1, round(width)), joint="curve")
-    for px, py in (points[0], points[-1]):
-        _cap(draw, px, py, ink, width, scale)
+    for point in (points[0], points[-1]):
+        _cap(draw, point, ink, width, scale)
 
 
-def _cap(draw: ImageDraw.ImageDraw, x: float, y: float, ink, width: float,
+def _cap(draw: ImageDraw.ImageDraw, point: tuple[float, float], ink, width: float,
          scale: float) -> None:
     """The dot that stands in for a round cap on a line's end."""
     radius = width / 2
-    cx, cy = x * scale, y * scale
+    cx, cy = point[0] * scale, point[1] * scale
     draw.ellipse([(cx - radius, cy - radius), (cx + radius, cy + radius)], fill=ink)
+
+
+_DRAWN_BY = {
+    Line: _line, Polyline: _polyline, Polygon: _polygon, RoundedRect: _rounded_rect,
+    Ellipse: _ellipse, Arc: _arc, Path: _scaled_path,
+}

@@ -74,10 +74,16 @@ def render(panel: LoadingPanel, metrics: Metrics = DESKTOP) -> Image.Image:
     if panel.icon is not None:
         icon = panel.icon.convert("RGBA").resize((metrics.icon, metrics.icon), Image.LANCZOS)
         image.paste(icon, (center - metrics.icon // 2, icon_top), icon)
-    _centered(draw, center, wordmark_top, panel.wordmark, wordmark_font, panel.ink, metrics.bar[0])
-    _centered(draw, center, status_top, panel.status, status_font, LOADING_STATUS, metrics.bar[0])
+
+    def centered(top: int, text: str, font, ink: Rgb) -> None:
+        if text:
+            draw.text((center, top), fit_text(font, text, metrics.bar[0]), font=font, fill=ink,
+                      anchor="ma")
+
+    centered(wordmark_top, panel.wordmark, wordmark_font, panel.ink)
+    centered(status_top, panel.status, status_font, LOADING_STATUS)
     _bar(draw, metrics, bar_top, panel.fraction)
-    _centered(draw, center, hint_top, panel.hint, hint_font, LOADING_HINT, metrics.bar[0])
+    centered(hint_top, panel.hint, hint_font, LOADING_HINT)
     return image
 
 
@@ -103,12 +109,6 @@ def _tops(metrics: Metrics) -> tuple[int, ...]:
         tops.append(top)
         top += row + gap
     return (*tops, top)
-
-
-def _centered(draw: ImageDraw.ImageDraw, center: int, top: int, text: str, font, ink: Rgb,
-              width: int) -> None:
-    if text:
-        draw.text((center, top), fit_text(font, text, width), font=font, fill=ink, anchor="ma")
 
 
 def _bar(draw: ImageDraw.ImageDraw, metrics: Metrics, top: int, fraction: float | None) -> None:

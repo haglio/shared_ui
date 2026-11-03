@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import os
 from collections.abc import Callable, Sequence
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from app_support import loading_screen
@@ -25,32 +25,33 @@ from shared_ui.preview_icon_pil import in_preview_ink
 CANCELING = "Canceling..."
 
 
+@dataclass(frozen=True)
+class LoadingWindowSpec:
+    caption: str
+    wordmark: str
+    icon: Path | None
+    preview: Preview | None
+    steps: Sequence[str | tuple[str, float]]
+    cancel_hint: str = ""
+
+
 class LoadingWindow(QDialog):
     canceled = pyqtSignal()
 
-    def __init__(
-        self,
-        *,
-        caption: str,
-        wordmark: str,
-        icon: Path | None,
-        preview: Preview | None,
-        steps: Sequence[str | tuple[str, float]],
-        cancel_hint: str = "",
-    ) -> None:
+    def __init__(self, spec: LoadingWindowSpec) -> None:
         super().__init__()
-        self.setWindowTitle(caption)
+        self.setWindowTitle(spec.caption)
         self.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.FramelessWindowHint)
-        self._done_before = _work_done_before_each(steps)
+        self._done_before = _work_done_before_each(spec.steps)
         self._canceling = False
         self._taking_over = TakingOver.from_the_launcher()
         self._opening = LoadingPanel(
-            wordmark=wordmark,
+            wordmark=spec.wordmark,
             status=next(iter(self._done_before)),
             fraction=0.0,
-            hint=cancel_hint,
-            ink=LOADING_ACCENT if preview is None else PREVIEW_INK,
-            icon=_inked(icon_image(icon), preview),
+            hint=spec.cancel_hint,
+            ink=LOADING_ACCENT if spec.preview is None else PREVIEW_INK,
+            icon=_inked(icon_image(spec.icon), spec.preview),
         )
         self._panel = replace(self._opening, fraction=self._taking_over.carried(0.0))
         self._drawing = QLabel(self)

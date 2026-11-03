@@ -134,19 +134,24 @@ def _button(text: str, on_click: Callable[[], None]) -> QPushButton:
     return button
 
 
+@dataclass(frozen=True)
+class _AlertLook:
+    level: Level = Level.ERROR
+    icon: Path | QIcon | None = None
+    button_text: str = "OK"
+    links: Sequence[Link] = ()
+    dismissible: bool = False
+
+
 class AlertDialog(QDialog):
     def __init__(
         self,
         title: str,
         message: str,
-        *,
-        level: Level = Level.ERROR,
-        icon: Path | QIcon | None = None,
-        button_text: str = "OK",
-        links: Sequence[Link] = (),
-        dismissible: bool = False,
+        **look,
     ) -> None:
         super().__init__()
+        chosen = _AlertLook(**look)
         self.setWindowTitle(title)
         self.setWindowFlags(
             Qt.WindowType.Dialog
@@ -155,8 +160,9 @@ class AlertDialog(QDialog):
             | Qt.WindowType.WindowStaysOnTopHint
             | Qt.WindowType.MSWindowsFixedSizeDialogHint
         )
-        if icon is not None:
-            self.setWindowIcon(icon if isinstance(icon, QIcon) else QIcon(str(icon)))
+        if chosen.icon is not None:
+            given = chosen.icon
+            self.setWindowIcon(given if isinstance(given, QIcon) else QIcon(str(given)))
         self.setPalette(family_palette(self.palette()))
         self.setStyleSheet(f"""
             QDialog {{ background: {BG_TERTIARY.name()}; }}
@@ -164,7 +170,7 @@ class AlertDialog(QDialog):
             {button_rules()}
         """)
         icon = QLabel()
-        icon.setPixmap(icon_pixmap_for(level, ICON_SIZE))
+        icon.setPixmap(icon_pixmap_for(chosen.level, ICON_SIZE))
         icon.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         body = QLabel(message)
@@ -176,7 +182,7 @@ class AlertDialog(QDialog):
         column = QVBoxLayout()
         column.setSpacing(GAP_MEDIUM)
         column.addWidget(body)
-        for link in links:
+        for link in chosen.links:
             column.addWidget(_link_line(link))
 
         said = QHBoxLayout()
@@ -184,13 +190,13 @@ class AlertDialog(QDialog):
         said.addWidget(icon)
         said.addLayout(column, stretch=1)
 
-        ok = _button(button_text, self.accept)
+        ok = _button(chosen.button_text, self.accept)
         ok.setDefault(True)
 
         buttons = QHBoxLayout()
         buttons.addStretch()
         buttons.addWidget(ok)
-        if dismissible:
+        if chosen.dismissible:
             buttons.addWidget(_button("Dismiss", lambda: self.done(DISMISSED)))
 
         outer = QVBoxLayout(self)
@@ -202,24 +208,12 @@ class AlertDialog(QDialog):
         outer.addLayout(buttons)
 
 
-def show_alert(
-    title: str,
-    message: str,
-    *,
-    level: Level = Level.ERROR,
-    icon: Path | QIcon | None = None,
-    button_text: str = "OK",
-    links: Sequence[Link] = (),
-    dismissible: bool = False,
-) -> bool:
+def show_alert(title: str, message: str, **look) -> bool:
     """Block until the alert is closed, and say whether it was closed with Dismiss."""
     app = QApplication.instance() or QApplication([])
 
     def open_it() -> int:
-        return AlertDialog(
-            title, message, level=level, icon=icon, button_text=button_text,
-            links=links, dismissible=dismissible,
-        ).exec()
+        return AlertDialog(title, message, **look).exec()
 
     on_gui_thread = QThread.currentThread() == app.thread()
     closed_with = open_it() if on_gui_thread else _GuiThreadCall(app.thread()).call(open_it)
