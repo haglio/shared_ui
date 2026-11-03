@@ -1,5 +1,3 @@
-"""The family's one font, and what asking for a variation of it gets you."""
-
 from __future__ import annotations
 
 from shared_ui.fonts import (

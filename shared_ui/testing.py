@@ -1,13 +1,3 @@
-"""What a family suite uses to put the pointer on a widget it has shown.
-
-Offscreen, the screen hands a point to the window that was shown there first,
-so a window an earlier test left up takes the pointer from one shown under it:
-a widget is moved clear of every other window before the pointer goes to it.
-And a press an earlier test never let go of keeps the pointer's own moves from
-reaching any widget, while a push button lights only on a move: the widget
-under the pointer is handed one directly.
-"""
-
 from __future__ import annotations
 
 from collections.abc import Iterator
@@ -54,7 +44,6 @@ def icons_lacking(*names: str) -> Iterator[None]:
 
 
 def ground(widget: QWidget) -> str:
-    """The color *widget* is drawn on, just inside its left edge."""
     drawn = widget.grab().toImage()
     return drawn.pixelColor(3, drawn.height() // 2).name()
 

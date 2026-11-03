@@ -1,9 +1,3 @@
-"""A page -- HTML, a style sheet, a script -- names the family's look and gets it spelled.
-
-``__PALETTE_<NAME>__`` is that color's ``#rrggbb``, ``__TYPE_<NAME>__`` the face or a size
-in pixels, ``__SPACING_<NAME>__`` that spacing in pixels.
-"""
-
 from __future__ import annotations
 
 import re

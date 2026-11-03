@@ -5,8 +5,7 @@ from functools import cache
 
 from PIL import ImageFont
 
-# Segoe UI by file, the way Pillow loads a face: "b" is its bold, "z" its bold
-# italic -- the lean the app's name wears everywhere else it is written.
+# Segoe UI by file, the way Pillow loads a face: "b" is its bold, "z" its bold italic.
 BOLD_FACE = "segoeuib.ttf"
 REGULAR_FACE = "segoeui.ttf"
 WORDMARK_FACE = "segoeuiz.ttf"

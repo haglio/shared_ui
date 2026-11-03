@@ -1,6 +1,3 @@
-"""shared_ui.chrome: the family's style-sheet rules, read back off the sheet and
-off what Qt draws with it."""
-
 from __future__ import annotations
 
 import re
@@ -29,7 +26,6 @@ _BACKGROUND = re.compile(r"background(?:-color)?\s*:\s*(?P<value>[^;]+);")
 
 
 def _rules(sheet: str) -> dict[str, str]:
-    """Each selector's body, out of a sheet."""
     return {m.group("selector").strip(): m.group("body") for m in _RULE.finditer(sheet)}
 
 
@@ -81,9 +77,6 @@ def _button_ground(rules: str, *, lit: bool = False, enabled: bool = True) -> QC
 
 
 def test_a_button_that_is_on_sits_on_a_lighter_ground_than_one_at_rest():
-    """One rule across the family, so a toggled button reads the same whichever
-    app it is in.  Compared rather than name-matched, so it survives a palette
-    change and still fails an inversion."""
     at_rest = _button_ground(chrome.button_rules())
     on = _button_ground(chrome.button_rules(), lit=True)
 
@@ -130,9 +123,6 @@ def test_a_disabled_button_reads_as_disabled_in_text_and_ground():
 
 
 def test_hovering_a_menu_row_that_cannot_be_clicked_promises_nothing():
-    """A disabled row under the cursor keeps the menu's own ground, where an
-    enabled one lights up: hovering something unclickable must not promise a
-    click."""
     rules = _rules(chrome.menu_rules())
 
     assert _background(rules["QMenu::item:selected"]) == palette.as_hex(palette.BLUE)
@@ -140,7 +130,6 @@ def test_hovering_a_menu_row_that_cannot_be_clicked_promises_nothing():
 
 
 def _solid_icon() -> QIcon:
-    """An icon whose ink is its whole frame, so where it is drawn is where its ink is."""
     pixmap = QPixmap(16, 16)
     pixmap.fill(QColor(*palette.TEXT_PRIMARY))
     return QIcon(pixmap)
@@ -156,7 +145,6 @@ def _menu_of_rows_with_icons(*labels: str) -> tuple[QMenu, list[QAction]]:
 
 
 def _inked_runs(image: QImage, row: QRect) -> list[tuple[int, int]]:
-    """The spans of *row*'s columns with anything lighter than the row's own ground."""
     ground = image.pixelColor(row.right() - 2, row.center().y()).lightness()
     inked = [x for x in range(row.left(), row.left() + row.width())
              if any(image.pixelColor(x, y).lightness() > ground + 24
@@ -171,8 +159,6 @@ def _inked_runs(image: QImage, row: QRect) -> list[tuple[int, int]]:
 
 
 def test_a_menu_row_s_icon_sits_midway_between_the_menu_s_edge_and_its_words():
-    """Qt puts a row's icon hard against the menu's edge and starts its words a
-    whole column further in; the icon belongs in the middle of that room."""
     menu, (row,) = _menu_of_rows_with_icons("Heading")
     rect = menu.actionGeometry(row)
 
@@ -184,9 +170,6 @@ def test_a_menu_row_s_icon_sits_midway_between_the_menu_s_edge_and_its_words():
 
 
 def test_a_row_that_opens_a_menu_draws_its_arrow_midway_across_the_padding_past_its_words():
-    """Qt starts a sub-menu's arrow where the row's words may end, so a word
-    that fills its room runs into it; the arrow belongs in the middle of the
-    padding beyond."""
     menu = QMenu()
     menu.setStyleSheet(chrome.menu_rules())
     row = menu.addMenu("Add to folder")
@@ -205,8 +188,6 @@ def test_a_row_that_opens_a_menu_draws_its_arrow_midway_across_the_padding_past_
 
 
 def test_a_checked_row_s_icon_sits_on_the_lighter_ground_of_a_control_that_is_on():
-    """A row that carries an icon shows its check through the icon alone, so
-    without this a toggle in a menu looks the same on as off."""
     menu, (toggle,) = _menu_of_rows_with_icons("Heading")
     toggle.setCheckable(True)
     rect = menu.actionGeometry(toggle)
@@ -284,8 +265,7 @@ def test_a_toolbar_button_given_more_room_on_its_right_grows_by_that_much():
 
 
 def test_a_tooltip_has_square_corners():
-    # A rounded style-sheet tooltip on Windows paints artifact rectangles around
-    # itself.
+    # A rounded style-sheet tooltip on Windows paints artifact rectangles around itself.
     rules = _rules(chrome.tooltip_rules())
 
     assert "QToolTip" in rules
@@ -304,9 +284,7 @@ def test_a_picked_item_rule_names_every_item_view_unless_it_is_told_one():
 
 
 def test_a_picked_row_the_keyboard_is_on_wears_no_focus_frame():
-    # Windows 11 draws a white frame round the row the keyboard is on, and keeps
-    # it there only while the list has the focus: on a picked row it is a second
-    # sign beside the blue, saying nothing the blue does not.
+    # Windows 11 draws a white frame round the row the keyboard is on, while the list has the focus.
     blue = palette.as_hex(palette.BLUE)
     view = QTreeWidget()
     view.setHeaderHidden(True)

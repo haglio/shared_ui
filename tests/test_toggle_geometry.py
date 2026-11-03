@@ -1,5 +1,3 @@
-"""shared_ui.toggle_geometry: the family's on/off switch as sizes and places, for every toolkit that draws it."""
-
 from __future__ import annotations
 
 import pytest

@@ -1,5 +1,3 @@
-"""shared_ui.dropdown_pil: a dropdown's field and the list it opens, drawn with Pillow."""
-
 from __future__ import annotations
 
 from PIL import Image

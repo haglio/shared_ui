@@ -1,11 +1,6 @@
-"""The QApplication an app makes, and how it is let go of.
-
-PyQt deletes every QObject Python still owns as the QApplication's wrapper is
-freed, while it walks sip's map of wrappers, and a deletion that makes enough
-new wrappers has sip rebuild that map under the walk, which then reads freed
-memory: an access violation in sip as the app finishes closing. So they are
-deleted here first, from a list, and the walk finds none.
-"""
+"""PyQt deletes every QObject Python still owns as the QApplication's wrapper is freed,
+walking sip's map of wrappers, and a deletion that makes enough new wrappers has sip
+rebuild the map under the walk: an access violation. So they are deleted here first."""
 
 from __future__ import annotations
 

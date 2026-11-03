@@ -1,5 +1,3 @@
-"""shared_ui.loading_process: the family's loading window in a process of its own."""
-
 from __future__ import annotations
 
 import io

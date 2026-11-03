@@ -1,12 +1,5 @@
-"""A tick control that paints its own indicator.
-
-Once a Qt stylesheet touches a ``QCheckBox``, the native Windows dark
-indicator collapses to a bare chevron with no outline at all, which reads as
-a down-caret rather than as something ticked.  This widget draws the
-indicator itself -- a rounded square that fills with the accent color and
-shows a real check mark when ticked -- so every styled app gets a control
-that plainly reads as ticked or not, independent of the OS theme.
-"""
+"""Once a Qt stylesheet touches a QCheckBox, the native Windows dark indicator collapses
+to a bare chevron, so this control paints its own."""
 
 from __future__ import annotations
 
@@ -25,12 +18,10 @@ from shared_ui.colors import (
 )
 from shared_ui.spacing import BUTTON_RADIUS_HUD, GAP_MEDIUM
 
-_INDICATOR = 16  # edge length (px)
-_GAP = GAP_MEDIUM  # space between the indicator and the label
-_RADIUS = BUTTON_RADIUS_HUD  # indicator corner rounding
+_INDICATOR = 16
+_GAP = GAP_MEDIUM
+_RADIUS = BUTTON_RADIUS_HUD
 
-# The check mark as a fraction of the indicator: a short leg down into a long
-# leg up -- the classic tick, not a symmetric "v".
 _TICK_POINTS = ((0.24, 0.52), (0.42, 0.70), (0.78, 0.30))
 
 
@@ -42,8 +33,6 @@ class TickControl(QCheckBox):
         enabled = self.isEnabled()
 
         if self.isChecked():
-            # One that is on and cannot be changed still reads as on: the
-            # ground a control that is on sits on, in place of the accent.
             fill = BLUE if enabled else BG_BUTTON_ACTIVE
             painter.setPen(QPen(fill, 1))
             painter.setBrush(fill)

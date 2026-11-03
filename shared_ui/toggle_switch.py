@@ -1,20 +1,4 @@
-"""A plain on/off switch: a pill with a handle that slides across.
-
-Used where a setting is a standing state rather than a thing you tick as part
-of filling in a form -- a pipeline that is running or paused, an auto-enhance
-that is on or off.  Reads at a glance from across the pane, which a checkbox
-in a column of other fields does not.
-
-Usually built bare, sitting at the corner of the panel it powers; the optional
-label is for a switch that has to say what it is on its own.
-
-Painted rather than styled, because a Qt stylesheet cannot move a checkbox's
-indicator; the colors are the family's toggle tokens, so every app's switch is
-the same switch.  Two apps each drew their own before this, and the two had
-drifted apart in size, in the gray of the off track, and in what a right-click
-did -- one of them flipped on any button, so a right-click looking for a
-context menu paused a pipeline.
-"""
+"""Painted rather than styled, because a Qt stylesheet cannot move a checkbox's indicator."""
 
 from __future__ import annotations
 
@@ -26,18 +10,11 @@ from shared_ui.colors import TEXT_SECONDARY, TOGGLE_HANDLE, TOGGLE_OFF, TOGGLE_O
 from shared_ui.spacing import GAP_MEDIUM
 from shared_ui.toggle_geometry import HANDLE_INSET, TRACK, handle
 
-_GAP = GAP_MEDIUM        # between the pill and its label
-_DISABLED_OPACITY = 0.4  # how far a switch fades when it can't be thrown
+_GAP = GAP_MEDIUM
+_DISABLED_OPACITY = 0.4
 
 
 class ToggleSwitch(QAbstractButton):
-    """A checkable switch, optionally labeled to its right.
-
-    Behaves like any checkable button -- ``isChecked``, ``setChecked``,
-    ``toggled``, ``clicked`` -- so it drops in wherever a checkbox was.  Being
-    a button is also what makes it safe to right-click: only a left press
-    released back on the switch is a click.
-    """
 
     def __init__(self, text: str = "", parent=None):
         super().__init__(parent)
@@ -58,9 +35,6 @@ class ToggleSwitch(QAbstractButton):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         if not self.isEnabled():
-            # Painted rather than styled, so nothing else would have dimmed it:
-            # a disabled switch drawn at full strength reads as a live one, and
-            # the panel it powers goes dark around a switch that still looks on.
             painter.setOpacity(_DISABLED_OPACITY)
         top = (self.height() - TRACK[1]) / 2
         track = QRectF(0, top, *TRACK)

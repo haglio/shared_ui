@@ -1,6 +1,3 @@
-"""shared_ui.icon_button: a button that carries an icon and no word, in either of
-the family's two squares, read back off the button as the family sheet paints it."""
-
 from __future__ import annotations
 
 import pytest

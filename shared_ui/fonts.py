@@ -1,5 +1,3 @@
-"""Font tokens shared across all projects."""
-
 from __future__ import annotations
 
 from functools import lru_cache
@@ -17,9 +15,6 @@ from shared_ui.type_scale import (
 __all__ = ["FONT_UI", "SIZE_BODY", "SIZE_HEADING", "SIZE_SMALL", "SIZE_TINY", "make_font"]
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 
 @lru_cache(maxsize=32)
 def make_font(
@@ -27,7 +22,6 @@ def make_font(
     size: int = SIZE_BODY,
     bold: bool = False,
 ) -> QFont:
-    """Build a QFont from tokens.  Results are cached."""
     font = QFont(family)
     font.setPointSize(size)
     if bold:

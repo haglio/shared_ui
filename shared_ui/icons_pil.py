@@ -1,20 +1,5 @@
-"""The family's icons, drawn with Pillow for the Funestras' HUDs.
-
-Same shapes as :mod:`shared_ui.icons` paints with QPainter -- both walk the list
-in :mod:`shared_ui.icon_geometry` -- so the trash can on a Funestra's HUD is the
-trash can on Origenerator's toolbar rather than a lookalike.  An mpv overlay
-takes a bitmap, so the HUDs paint with Pillow and there is no Qt in a Funestra
-process at all.
-
-This module imports Pillow and NOT Qt, which is what lets a Funestra process use it
-without dragging PyQt6 into a video pipeline.
-
-Two things Pillow does not do that QPainter does, and how they are handled:
-antialiasing (everything is drawn at :data:`SUPERSAMPLE` scale and resampled
-down) and round line caps (a filled dot is laid at each line's ends).  Both
-matter at HUD size, where an icon is a dozen pixels across and a stair-stepped
-edge or a chopped-off line is most of what the eye sees.
-"""
+"""Pillow has neither antialiasing nor round line caps, so an icon is drawn large and
+resampled down, with a filled dot laid at each line's end."""
 
 from __future__ import annotations
 
@@ -37,27 +22,14 @@ from shared_ui.palette import CHANNEL_MAX, RGB_CHANNELS
 
 __all__ = ["CANVAS", "SUPERSAMPLE", "paste_icon", "pil_icon"]
 
-# Pillow's draw calls are hard-edged, so an icon is drawn this many times too big
-# and resampled down; the resampling is where the smooth edge comes from.  Four
-# is where it stopped looking jagged at HUD sizes -- a 14px button is drawn at 56
-# and thrown away, which costs nothing worth measuring since the HUDs cache what
-# they draw.
 SUPERSAMPLE = 4
 
 
 def pil_icon(name: str, size: int, color) -> Image.Image:
-    """*name* as a transparent RGBA square *size* px on an edge, drawn in *color*.
-
-    *color* is an ``(r, g, b)`` or ``(r, g, b, a)`` tuple -- what the HUDs' own
-    palette is in -- rather than a QColor, since nothing here knows about Qt.
-    """
     edge = max(1, int(size))
     big = edge * SUPERSAMPLE
-    # Drawn as a COVERAGE MASK and colored afterwards, rather than drawn in color
-    # and resampled.  Lanczos overshoots at a hard edge, so resampling colored
-    # ink put pixels brighter than the ink itself around every icon -- a faint
-    # halo, and enough to trip a HUD's own "is anything near-white here" checks.
-    # A mask overshoots too, but only in coverage, which saturates harmlessly.
+    # Pillow's Lanczos overshoots at a hard edge: resampled colored ink leaves a halo brighter
+    # than the ink. Resampled coverage saturates harmlessly, so the color goes on afterwards.
     mask = Image.new("L", (big, big), 0)
     draw = ImageDraw.Draw(mask)
     scale = big / CANVAS
@@ -74,12 +46,6 @@ def pil_icon(name: str, size: int, color) -> Image.Image:
 
 def paste_icon(image: Image.Image, name: str, frame: tuple[int, int, int, int],
                color) -> None:
-    """Lay *name* over *image*, centered in ``frame`` and as big as its short edge.
-
-    Composited rather than pasted flat, so the icon sits on whatever the HUD has
-    already drawn there -- a button's fill, the panel, the video -- instead of
-    stamping a transparent square over it.
-    """
     x, y, w, h = frame
     edge = max(1, min(int(w), int(h)))
     icon = pil_icon(name, edge, color)
@@ -144,7 +110,6 @@ _CURVE_STEPS = 8
 
 
 def _path(draw: ImageDraw.ImageDraw, shape: Path, ink, scale: float) -> None:
-    """Each run of *shape* as a filled polygon, its curves cut into short lines."""
     runs: list[list[tuple[float, float]]] = []
     for command, *numbers in shape.commands:
         if command == "M":
@@ -170,18 +135,12 @@ def _path(draw: ImageDraw.ImageDraw, shape: Path, ink, scale: float) -> None:
 
 
 def _arc(draw: ImageDraw.ImageDraw, shape: Arc, ink, scale: float) -> None:
-    """One arc, converted out of the geometry's Qt angles.
-
-    The geometry measures counter-clockwise from 3 o'clock and gives a span;
-    Pillow measures clockwise and takes two absolute angles.  Negating flips the
-    direction, so the Qt sweep ``[start, start + span]`` is the Pillow sweep
-    ``[-(start + span), -start]`` -- same arc, drawn the other way round.
-    """
+    """Pillow measures clockwise and takes two absolute angles, so the Qt sweep
+    ``[start, start + span]`` is ``[-(start + span), -start]``."""
     frame = _centered(_frame(shape.x, shape.y, shape.x + shape.w, shape.y + shape.h, scale),
                       shape.width * scale)
     width = max(1, round(shape.width * scale))
-    # A negative span sweeps the same arc for Qt and the long way round here, so
-    # it is turned into the equivalent positive one before converting.
+    # A negative span sweeps the same arc for Qt and the long way round for Pillow.
     start = shape.start if shape.span >= 0 else shape.start + shape.span
     span = abs(shape.span)
     draw.arc(frame, -(start + span), -start, fill=ink, width=width)
@@ -190,7 +149,6 @@ def _arc(draw: ImageDraw.ImageDraw, shape: Arc, ink, scale: float) -> None:
 
 
 def _on_arc(shape: Arc, degrees: float) -> tuple[float, float]:
-    """Where *degrees* lands on the arc's ellipse, in canvas coordinates."""
     radians = math.radians(degrees)
     return (shape.x + shape.w / 2 + shape.w / 2 * math.cos(radians),
             shape.y + shape.h / 2 - shape.h / 2 * math.sin(radians))
@@ -201,13 +159,8 @@ def _frame(x0: float, y0: float, x1: float, y1: float, scale: float) -> list:
 
 
 def _centered(frame: list, width: float) -> list:
-    """*frame* grown by half a pen width on every side.
-
-    Pillow draws an outline INSIDE the frame it is given, where QPainter centers
-    the pen on the path -- so the same numbers give Pillow an icon half a pen
-    width smaller all round.  Growing the frame first is what puts the two
-    renderings on top of each other.
-    """
+    """Pillow draws an outline inside the frame it is given, where QPainter centers the pen
+    on the path."""
     half = width / 2
     (x0, y0), (x1, y1) = frame
     return [(x0 - half, y0 - half), (x1 + half, y1 + half)]
@@ -215,7 +168,6 @@ def _centered(frame: list, width: float) -> list:
 
 def _draw_path(draw: ImageDraw.ImageDraw, points, ink, width: float,
                scale: float) -> None:
-    """A polyline in *ink*, with rounded joints and rounded ends."""
     scaled = [(px * scale, py * scale) for px, py in points]
     draw.line(scaled, fill=ink, width=max(1, round(width)), joint="curve")
     for point in (points[0], points[-1]):
@@ -224,7 +176,6 @@ def _draw_path(draw: ImageDraw.ImageDraw, points, ink, width: float,
 
 def _cap(draw: ImageDraw.ImageDraw, point: tuple[float, float], ink, width: float,
          scale: float) -> None:
-    """The dot that stands in for a round cap on a line's end."""
     radius = width / 2
     cx, cy = point[0] * scale, point[1] * scale
     draw.ellipse([(cx - radius, cy - radius), (cx + radius, cy + radius)], fill=ink)

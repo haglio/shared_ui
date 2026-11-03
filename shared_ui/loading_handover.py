@@ -1,6 +1,3 @@
-"""An app's loading screen taking over from the one its launcher showed from the
-click, and leaving the snapshots the launcher shows at the next."""
-
 from __future__ import annotations
 
 import io

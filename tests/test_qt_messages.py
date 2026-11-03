@@ -1,4 +1,3 @@
-"""What Qt says about the videos the apps open."""
 from __future__ import annotations
 
 import pytest

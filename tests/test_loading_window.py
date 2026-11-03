@@ -1,6 +1,3 @@
-"""shared_ui.loading_window: the family's loading screen as a Qt window, for
-the apps that boot in Qt."""
-
 from __future__ import annotations
 
 import logging
@@ -35,9 +32,7 @@ class TestTheWindow:
 
     def test_it_comes_up_in_front_with_the_keyboard_whoever_started_its_process(
             self, qapp, monkeypatch):
-        # Started from a launcher link, an app's process is one Windows will not
-        # let take the foreground: the screen opened under the window the user
-        # clicked in, and Esc went to that window.
+        # Started from a launcher link, an app's process is one Windows will not let take the foreground.
         brought: list = []
         monkeypatch.setattr(loading_window, "bring_to_front", brought.append)
         window = _window()

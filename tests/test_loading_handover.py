@@ -1,6 +1,3 @@
-"""shared_ui.loading_handover: an app's loading screen taking over from the one
-its launcher showed from the click."""
-
 from __future__ import annotations
 
 from dataclasses import replace
@@ -21,7 +18,6 @@ SIZE = (408, 271)
 
 @pytest.fixture
 def launched(tmp_path):
-    """The environment a launcher with a loading screen starts its app with."""
     return {loading_screen.FOLDER: str(tmp_path / "screen"),
             loading_screen.LINES: '["Updating Example...", "Updating Hosted..."]'}
 

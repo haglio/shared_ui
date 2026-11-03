@@ -1,5 +1,3 @@
-"""shared_ui.application: what Python still owns is deleted before the app goes."""
-
 from __future__ import annotations
 
 import json
@@ -22,8 +20,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_a_close_leaves_pyqts_own_cleanup_nothing_to_delete():
-    # Only a process of its own can free its QApplication's wrapper, which is
-    # the moment PyQt walks its map of wrappers deleting what Python owns.
+    # Only a process of its own can free its QApplication's wrapper, which is the moment
+    # PyQt walks its map of wrappers deleting what Python owns.
     child = textwrap.dedent("""
         import gc, json, sys, weakref
         from PyQt6 import sip

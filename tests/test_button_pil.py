@@ -1,5 +1,3 @@
-"""shared_ui.button_pil: the face a control is drawn on with Pillow, at the HUD's size."""
-
 from __future__ import annotations
 
 from PIL import Image, ImageDraw

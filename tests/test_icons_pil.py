@@ -1,14 +1,3 @@
-"""The Pillow renderer: that it draws, and that it draws what Qt draws.
-
-The Funestras paint their HUDs into the video frame with Pillow, and there is no Qt
-in a Funestra process, so a HUD icon could never be the same object as a toolbar
-icon.  It can be the same *geometry*, which is what this checks: both renderers
-walk :mod:`shared_ui.icon_geometry`, and the two renderings have to land on top
-of each other.  Not pixel for pixel -- Pillow has no antialiasing of its own and
-no round caps, and this module works around both -- but close enough that nobody
-looking at the two screens sees two different icons.
-"""
-
 from __future__ import annotations
 
 import os
@@ -26,13 +15,12 @@ from shared_ui.icon_geometry import Path as Outline
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 
 _SIZE = 48
-_INK = (240, 240, 240)  # TEXT_PRIMARY, as the HUDs' palette spells it
+_INK = (240, 240, 240)
 _AN_ICON_THIS_VERSION_LACKS = "an_icon_from_another_version"
 _EVERY_ICON_AND_THE_STAND_IN = (*icon_names(), _AN_ICON_THIS_VERSION_LACKS)
 
 
 def _pil_ink(image: Image.Image) -> tuple[int, int, int, int, int]:
-    """``(left, upper, right, lower, count)`` of what was drawn."""
     alpha = image.split()[3].load()
     xs, ys, count = [], [], 0
     for y in range(image.height):
@@ -59,8 +47,6 @@ def _qt_ink(name: str, size: int) -> tuple[int, int, int, int, int]:
 
 
 def test_every_icon_draws_through_pillow_too():
-    # An icon the Qt side can draw and the Pillow side cannot is an icon that goes
-    # missing on a HUD -- an empty button, with nothing raised.
     for name in _EVERY_ICON_AND_THE_STAND_IN:
         image = icons_pil.pil_icon(name, _SIZE, _INK)
         assert image.size == (_SIZE, _SIZE), name
@@ -68,9 +54,6 @@ def test_every_icon_draws_through_pillow_too():
 
 
 def test_the_two_renderers_put_the_icon_in_the_same_place():
-    # The whole point. A HUD's trash can and a toolbar's are one drawing now, so
-    # their ink has to occupy the same frame -- within a pixel, which is what is
-    # left after Pillow's inside-the-frame outlines are corrected for.
     for name in _EVERY_ICON_AND_THE_STAND_IN:
         pillow = _pil_ink(icons_pil.pil_icon(name, _SIZE, _INK))
         qt = _qt_ink(name, _SIZE)
@@ -79,9 +62,6 @@ def test_the_two_renderers_put_the_icon_in_the_same_place():
 
 
 def test_the_two_renderers_lay_down_a_like_amount_of_ink():
-    # Same frame could still mean a hairline against a slab, so the weight has to
-    # agree too. Pillow's arcs have no round caps and its resampling is not Qt's,
-    # so this is a band rather than an equality.
     for name in _EVERY_ICON_AND_THE_STAND_IN:
         pillow = _pil_ink(icons_pil.pil_icon(name, _SIZE, _INK))[4]
         qt = _qt_ink(name, _SIZE)[4]
@@ -98,34 +78,22 @@ def test_an_icon_this_version_does_not_have_is_drawn_as_the_stand_in(monkeypatch
 
 
 def test_an_icon_is_drawn_in_the_color_it_is_asked_for():
-    # The HUDs tint icons the way the chrome does -- a muted control, a green
-    # favorite -- so the ink is whatever tuple was handed in.
     for color in ((*RED.getRgb()[:3],), (*GREEN.getRgb()[:3],)):
         image = icons_pil.pil_icon("star", _SIZE, color)
         assert image.getpixel((24, 25))[:3] == color
 
 
 def test_a_pasted_icon_sits_on_what_the_hud_already_drew():
-    # A HUD button paints its fill and then asks for the icon. The icon has to
-    # composite onto that fill, not stamp a transparent square over it.
     panel = Image.new("RGBA", (40, 24), (0, 80, 0, 255))
     icons_pil.paste_icon(panel, "trash", (12, 2, 20, 20), _INK)
     pixels = [panel.getpixel((x, y)) for y in range(24) for x in range(40)]
 
-    assert panel.getpixel((2, 12)) == (0, 80, 0, 255)   # the fill, clear of the icon
-    assert all(pixel[3] == 255 for pixel in pixels)     # nothing was punched out
-    # The icon is laid over the fill, so its ink blends toward white where the
-    # fill has no red at all.
+    assert panel.getpixel((2, 12)) == (0, 80, 0, 255)
+    assert all(pixel[3] == 255 for pixel in pixels)
     assert any(pixel[0] > 200 for pixel in pixels), "the icon did not land"
 
 
 def test_a_pasted_icon_is_centered_in_the_frame_it_was_given():
-    # HUD buttons are square-ish but not square, and an icon hugging one edge
-    # reads as misaligned with the buttons beside it.
-    #
-    # The panel is TRANSPARENT so that the ink scan sees the icon and only the
-    # icon: drawn on an opaque one it measured the panel's own every pixel, so
-    # the center came out the panel's center whatever paste_icon did with it.
     panel = Image.new("RGBA", (48, 24), (0, 0, 0, 0))
     icons_pil.paste_icon(panel, "plus", (0, 0, 48, 24), _INK)
     left, upper, right, lower, _count = _pil_ink(panel)
@@ -134,10 +102,6 @@ def test_a_pasted_icon_is_centered_in_the_frame_it_was_given():
 
 
 def test_a_pasted_icon_is_centered_in_a_frame_that_is_not_at_the_origin():
-    # The frame a HUD hands over is wherever its button is, so the centering is
-    # of the frame rather than of the panel -- an icon centered on the panel
-    # instead would land right for the one button that happens to sit in the
-    # middle.
     panel = Image.new("RGBA", (64, 40), (0, 0, 0, 0))
     icons_pil.paste_icon(panel, "plus", (36, 8, 24, 28), _INK)
     left, upper, right, lower, _count = _pil_ink(panel)
@@ -146,10 +110,6 @@ def test_a_pasted_icon_is_centered_in_a_frame_that_is_not_at_the_origin():
 
 
 def test_the_geometry_is_the_one_registry_both_renderers_draw_from():
-    # One registry. An icon added for the toolbar and not reachable from a HUD is
-    # how the two sides drifted apart in the first place -- so every name the
-    # geometry lists draws through both renderers, and the renderers list none of
-    # their own.
     for name in icon_names():
         assert not icons.icon_pixmap(name, _SIZE, TEXT_PRIMARY).isNull(), name
         assert _pil_ink(icons_pil.pil_icon(name, _SIZE, _INK))[4] > 0, name
@@ -158,15 +118,12 @@ def test_the_geometry_is_the_one_registry_both_renderers_draw_from():
 
 
 def test_a_translucent_ink_lands_translucent():
-    # A HUD dims an icon by handing over an alpha, and the coverage is scaled to it.
     image = icons_pil.pil_icon("star", _SIZE, (*_INK, 128))
     alphas = [image.getpixel((x, y))[3] for y in range(_SIZE) for x in range(_SIZE)]
     assert 100 <= max(alphas) <= 128
 
 
 def test_a_negative_span_draws_the_same_arc_as_its_positive_twin():
-    # Qt sweeps a negative span backwards to the same arc; Pillow would take the
-    # long way round, so the renderer turns it around before converting.
     def render(arc):
         mask = Image.new("L", (_SIZE * 4, _SIZE * 4), 0)
         icons_pil._draw(ImageDraw.Draw(mask), arc, 255, 4.0)
@@ -178,17 +135,9 @@ def test_a_negative_span_draws_the_same_arc_as_its_positive_twin():
 
 
 def test_drawing_a_hud_icon_never_drags_qt_into_a_player():
-    # The Funestras are mpv and Pillow and nothing else; PyQt6 in that process
-    # would be a GUI toolkit loaded into a video pipeline for the sake of a
-    # dozen-pixel icon. The geometry module is what makes that avoidable, so
-    # neither it nor the Pillow renderer may reach for Qt -- nor may the palette
-    # the HUDs color with, nor the chrome, which is a string built from it.
-    #
-    # The probe says which tree it read before it says what it loaded: `python -c`
-    # puts the process cwd first on sys.path and nothing else, so run from
-    # anywhere but this checkout it imported the editable-installed copy in the
-    # primary one -- and every branch is worked on in a worktree, so a branch that
-    # dragged Qt in here passed this guard.
+    # `python -c` puts the process cwd first on sys.path and nothing else, so the probe says
+    # which tree it read: from elsewhere it would import the primary checkout's copy, and a
+    # branch that dragged Qt in would pass.
     probe = (
         "import sys; import shared_ui.icons_pil, shared_ui.icon_geometry, "
         "shared_ui.palette, shared_ui.chrome; "
@@ -209,10 +158,6 @@ def test_drawing_a_hud_icon_never_drags_qt_into_a_player():
 
 
 def test_an_icon_is_never_brighter_than_the_ink_it_was_drawn_in():
-    # Lanczos overshoots at a hard edge. Drawn in color and then resampled, a
-    # icon came out with pixels brighter than its own ink around every edge --
-    # a faint halo, and enough near-white to trip a HUD's own checks for it.
-    # Drawing a coverage mask and coloring afterwards keeps the ink exact.
     for name in _EVERY_ICON_AND_THE_STAND_IN:
         image = icons_pil.pil_icon(name, 24, _INK)
         for y in range(24):

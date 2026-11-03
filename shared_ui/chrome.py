@@ -1,21 +1,5 @@
-"""The family's chrome as Qt style-sheet rules, built from the tokens.
-
-The tokens kept the colors in step, and the apps still looked like five
-programs: each had written its own rules for the same three widgets -- six
-`QPushButton` rule sets, three `QMenu` rule sets, and one app's tray menu with
-none at all, rendering native beside another's dark one.  The padding, the
-corner radius, the border and what a hover does had drifted freely.  These are
-those rules, once, so an app applies them and adds only what is its own.
-
-Apply :func:`family_stylesheet` to the ``QApplication``, not to a window.  A
-tooltip is a top-level popup, so a rule set on a window never reaches it, and
-Windows 11's dark mode then paints the tooltip unreadably -- which is how
-tooltips came to look "missing".  A tray menu with no window to inherit from
-takes :func:`menu_rules` itself.
-
-No Qt is imported here: a sheet is a string, and the numbers come from
-:mod:`shared_ui.palette`.
-"""
+"""A Qt tooltip is a top-level popup, so a rule set on a window never reaches it, and
+Windows 11's dark mode then paints it unreadably: apply the sheet to the QApplication."""
 
 from __future__ import annotations
 
@@ -47,7 +31,6 @@ from shared_ui.spacing import (
 
 
 def ground_rules() -> str:
-    """The dark ground and the primary text, on every widget."""
     return f"""
     QMainWindow, QWidget {{
         background-color: {as_hex(BG_PRIMARY)};
@@ -56,11 +39,7 @@ def ground_rules() -> str:
 
 
 def tooltip_rules() -> str:
-    """A tooltip readable on a dark desktop.
-
-    Square corners on purpose: a rounded style-sheet tooltip on Windows paints
-    artifact rectangles around itself.
-    """
+    """A rounded style-sheet tooltip on Windows paints artifact rectangles around itself."""
     return f"""
     QToolTip {{
         background-color: {as_hex(BG_TERTIARY)};
@@ -73,9 +52,8 @@ def tooltip_rules() -> str:
 _MENU_ROW_PAD_V = BUTTON_PAD_V
 _MENU_ROW_PAD_H = BUTTON_PAD_H
 
-# Qt's layout, not the family's: it draws a menu row's icon against the row's
-# own edge, and starts the row's words past its padding and a column as wide as
-# the small icon size plus four.
+# Qt draws a menu row's icon against the row's own edge, and starts the row's words past
+# its padding and a column as wide as the small icon size plus four.
 _QT_MENU_ICON = 16
 _ROOM_BEFORE_MENU_WORDS = _MENU_ROW_PAD_H + _QT_MENU_ICON + 4
 
@@ -87,15 +65,6 @@ _MENU_ARROW_RIGHT = (_MENU_ROW_PAD_H - _MENU_ARROW) // 2
 
 
 def menu_rules() -> str:
-    """Every right-click and tray menu.
-
-    The ground rule paints a menu's rows on the same flat background as the
-    menu itself, which leaves the row under the cursor looking exactly like the
-    rows either side of it -- so a menu gives no sign of what a click would
-    land on.  The highlight is the blue a dropdown marks its rows with, and a
-    row that cannot be clicked never wears it: hovering something unclickable
-    must not promise a click.
-    """
     return f"""
     QMenu {{
         background-color: {as_hex(BG_TERTIARY)};
@@ -151,12 +120,6 @@ def control_ground(color: Rgb, *controls: str) -> str:
 
 
 def button_rules() -> str:
-    """A push button at rest, hovered, on, pressed and disabled.
-
-    A control that is ON sits on a lighter ground than one at rest -- the rule
-    the tokens state -- and a press flashes the blue that means more than
-    "engaged".
-    """
     return f"""
     QPushButton {{
         color: {as_hex(TEXT_PRIMARY)};
@@ -204,11 +167,6 @@ def tool_button_rules() -> str:
 
 
 def toolbar_rules() -> str:
-    """A toolbar's buttons as the family's buttons, for the toolbar it is set on.
-
-    Not part of the family sheet: Qt draws a toolbar's buttons faint and
-    edge to edge, and an app opts its toolbar into these by setting them on it.
-    """
     return f"""
     QToolBar {{
         spacing: {BUTTON_GAP}px;
@@ -257,11 +215,5 @@ def picked_item_rules(view: str = "QAbstractItemView") -> str:
 
 
 def family_stylesheet() -> str:
-    """Every rule above, for an app that dresses itself whole.
-
-    An app's own rules go after it in the same sheet, or on the window: a
-    later rule of equal specificity wins, and an id selector out-specifies
-    every rule here, so a `QPushButton#generate` keeps its blue.
-    """
     return (f"{ground_rules()}\n{tooltip_rules()}\n{menu_rules()}\n{button_rules()}"
             f"\n{icon_button_rules()}\n{item_view_rules()}")

@@ -1,7 +1,3 @@
-"""The family's icon spec, against icons drawn to it and icons drawn off it.
-
-Every fixture icon here is drawn by the test; no app's own file is read."""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -15,7 +11,6 @@ from shared_ui.palette import MAGENTA, WHITE
 
 
 def _draw(cells, *, inset=INSET, grid=GRID, ink=MAGENTA) -> Image.Image:
-    """A letter on the grid, as plain rectangles -- corners square, edges hard."""
     image = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
     unit = grid / 5
@@ -61,7 +56,6 @@ def test_a_letter_off_the_familys_grid_fails(tmp_path):
 
 def test_a_bar_wider_than_a_cell_fails(tmp_path):
     image = _draw(LETTERS["O"])
-    # Thicken the ring's top inward by half a cell: the grid is still the grid.
     ImageDraw.Draw(image).rectangle(
         (INSET + UNIT, INSET + UNIT, INSET + 4 * UNIT, INSET + 1.5 * UNIT), fill=(*MAGENTA, 255))
 
@@ -79,7 +73,6 @@ def test_ink_of_another_color_fails(tmp_path):
 def test_a_heavily_rounded_corner_fails(tmp_path):
     image = _draw(LETTERS["O"])
     draw = ImageDraw.Draw(image)
-    # Carve the top-left corner away over more rows than the family softens.
     draw.polygon([(INSET, INSET), (INSET + 12, INSET), (INSET, INSET + 12)], fill=(0, 0, 0, 0))
 
     with pytest.raises(AssertionError, match="rounds over"):
@@ -110,9 +103,6 @@ def test_a_hud_draws_an_app_s_letter_as_its_cells_in_magenta_leaving_the_rest_al
 
 @pytest.mark.parametrize("letter", ["B", "F"])
 def test_a_hud_s_letter_lands_on_the_pixels_as_its_own_grid(letter):
-    """The .ico files live in the apps' own repos, so a HUD draws the letter from the
-    grid instead of loading another repo's file -- which works only if what lands
-    on the pixels is that grid."""
     image = Image.new("RGBA", (18, 18), (0, 0, 0, 0))
 
     app_icon.draw_letter(ImageDraw.Draw(image), (0, 0, 18, 18), letter)
