@@ -103,7 +103,6 @@ class LoadingCanceled(BaseException):
 
 
 class Loading:
-
     def __init__(self, app: QApplication, logger: logging.Logger,
                  window: LoadingWindow | None) -> None:
         self._app = app

@@ -31,7 +31,6 @@ class TestTheWindow:
         assert window.windowFlags() & Qt.WindowType.FramelessWindowHint
         assert (window.width(), window.height()) == render(window.panel).size
 
-
     def test_its_wordmark_wears_the_accent_and_a_previews_the_preview_ink(self, qapp):
         assert _window().panel.ink == LOADING_ACCENT
         assert _window(preview=Preview("the scene list")).panel.ink == PREVIEW_INK

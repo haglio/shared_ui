@@ -25,7 +25,6 @@ class TestAllTokensValid:
 
 
 class TestPaletteColors:
-
     def test_blue(self):
         c = colors.BLUE
         assert (c.red(), c.green(), c.blue()) == (0x30, 0x80, 0xE0)
@@ -37,7 +36,6 @@ class TestPaletteColors:
     def test_magenta(self):
         c = colors.MAGENTA
         assert (c.red(), c.green(), c.blue()) == (200, 80, 160)
-
 
     def test_border_panel(self):
         c = colors.BORDER_PANEL

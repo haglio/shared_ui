@@ -180,7 +180,6 @@ def test_an_empty_query_matches_nothing(fields):
     assert not field.extraSelections()
 
 
-
 def test_the_window_is_told_which_field_a_match_is_shown_in(fields):
     first, second = fields("a cat", "another cat")
     shown = []

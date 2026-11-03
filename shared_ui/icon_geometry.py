@@ -31,7 +31,6 @@ class Polyline:
 
 @dataclass(frozen=True)
 class Polygon:
-
     points: tuple[tuple[float, float], ...]
     fill: bool = True
     width: float = PEN_WIDTH
@@ -74,7 +73,6 @@ class Arc:
 
 @dataclass(frozen=True)
 class Path:
-
     commands: tuple[tuple, ...]
     frame: float = CANVAS
 
