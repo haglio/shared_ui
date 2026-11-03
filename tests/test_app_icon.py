@@ -116,3 +116,13 @@ def test_a_hud_s_letter_lands_on_the_pixels_as_its_own_grid(letter):
                 else "." for c in range(5))
         for r in range(5)
     ] == list(LETTERS[letter])
+
+
+def test_a_bar_a_third_off_its_cell_fails_though_the_cells_middle_is_inked(tmp_path):
+    image = _draw(LETTERS["E"])
+    ImageDraw.Draw(image).rectangle(
+        (INSET, INSET + 2 * UNIT, INSET + 5 * UNIT, INSET + 2 * UNIT + UNIT / 3),
+        fill=(0, 0, 0, 0))
+
+    with pytest.raises(AssertionError, match=r"cell \(2, \d\)"):
+        assert_follows_the_family_spec(_ico(tmp_path, image), "E")
