@@ -121,12 +121,12 @@ def main(argv: Sequence[str] | None = None) -> int:  # pragma: no cover -- the w
 
 
 def run(spec: dict, lines_in: IO[str], lines_out: IO[str], app) -> int:
-    window = LoadingWindow(LoadingWindowSpec(
+    window = LoadingWindow(
         caption=spec["caption"], wordmark=spec["wordmark"],
         icon=None if spec["icon"] is None else Path(spec["icon"]),
         preview=Preview(spec["preview"]) if spec["is_preview"] else None,
         steps=[step if isinstance(step, str) else tuple(step) for step in spec["steps"]],
-        cancel_hint=spec["cancel_hint"]))
+        cancel_hint=spec["cancel_hint"])
     if spec["app_id"]:
         from app_support.win32 import TaskbarApp, dress_window  # noqa: PLC0415
 

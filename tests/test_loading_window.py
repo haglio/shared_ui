@@ -10,17 +10,17 @@ from PyQt6.QtTest import QTest
 
 from shared_ui import loading_window
 from shared_ui.loading_panel import render
-from shared_ui.loading_window import Loading, LoadingCanceled, LoadingWindow, LoadingWindowSpec
+from shared_ui.loading_window import Loading, LoadingCanceled, LoadingWindow
 from shared_ui.palette import LOADING_ACCENT, PREVIEW_INK
 from shared_ui.preview import Preview
 
 
 def _window(**changes) -> LoadingWindow:
-    return LoadingWindow(LoadingWindowSpec(**{
+    return LoadingWindow(**{
         "caption": "Scripture Loading", "wordmark": "Scripture", "icon": None, "preview": None,
         "steps": ("Checking the tracker...", "Loading...", "Building the window..."),
         **changes,
-    }))
+    })
 
 
 class TestTheWindow:

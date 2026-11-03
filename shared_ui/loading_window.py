@@ -35,8 +35,9 @@ class LoadingWindowSpec:
 class LoadingWindow(QDialog):
     canceled = pyqtSignal()
 
-    def __init__(self, spec: LoadingWindowSpec) -> None:
+    def __init__(self, **window) -> None:
         super().__init__()
+        spec = LoadingWindowSpec(**window)
         self.setWindowTitle(spec.caption)
         self.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.FramelessWindowHint)
         self._done_before = _work_done_before_each(spec.steps)
