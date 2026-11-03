@@ -52,11 +52,11 @@ def test_a_click_of_the_mouse_on_a_step_reaches_it(qapp):
 
 
 def test_the_separator_keeps_the_spacing_it_was_written_with():
-    path = FolderPath("  ›  ")
+    path = FolderPath("  \u203a  ")
 
     path.set_path(["Landscape", "All", "Images"])
 
-    assert QTextDocumentFragment.fromHtml(path.text()).toPlainText() == "Landscape  ›  All  ›  Images"
+    assert QTextDocumentFragment.fromHtml(path.text()).toPlainText() == "Landscape  \u203a  All  \u203a  Images"
 
 
 def test_a_name_reads_as_it_is_written_whatever_it_holds():
@@ -69,7 +69,7 @@ def test_a_name_reads_as_it_is_written_whatever_it_holds():
 
 
 def test_the_steps_to_draw_as_links_can_be_named():
-    path = FolderPath("  ›  ")
+    path = FolderPath("  \u203a  ")
 
     path.set_path(["Landscape", "All", "Images"], linked=(1, 2))
 
@@ -77,24 +77,24 @@ def test_the_steps_to_draw_as_links_can_be_named():
 
 
 def test_words_can_lead_the_path_without_being_a_step_of_it():
-    path = FolderPath("  ›  ")
+    path = FolderPath("  \u203a  ")
 
     path.set_path(["Landscape", "All"], linked=(1,), lead="Search: “cats & dogs” in ")
 
-    assert path.plain_text() == "Search: “cats & dogs” in Landscape  ›  All"
+    assert path.plain_text() == "Search: “cats & dogs” in Landscape  \u203a  All"
     assert QTextDocumentFragment.fromHtml(path.text()).toPlainText() == path.plain_text()
     assert _links(path) == [("1", "All")]
 
 
 def test_a_step_can_wear_one_of_the_familys_icons_ahead_of_its_name():
-    path = FolderPath("  ›  ")
+    path = FolderPath("  \u203a  ")
 
     path.set_path(["All", "Favorites"], icons={1: "star"})
 
     assert icon_then_text("star", "Favorites", color=TEXT_PRIMARY,
                           size=path.fontMetrics().height()) in path.text()
     assert _links(path) == [("0", "All")]
-    assert path.plain_text() == "All  ›  Favorites"
+    assert path.plain_text() == "All  \u203a  Favorites"
 
 
 def _light_blue_ink(path: FolderPath) -> int:
@@ -118,7 +118,7 @@ def test_a_step_that_is_a_link_is_drawn_in_the_familys_light_blue():
 
 
 def test_a_long_path_wraps_between_its_steps_where_it_is_let_wrap():
-    path = FolderPath("  ›  ")
+    path = FolderPath("  \u203a  ")
     path.setWordWrap(True)
     path.set_path(["Landscape", *["SDXL Text-to-Image"] * 6])
     one_line = path.heightForWidth(10_000)

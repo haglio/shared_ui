@@ -108,13 +108,13 @@ def test_one_color_is_named_once(app, line, named):
 def test_a_typed_symbol_is_named_and_typography_is_not(app):
     checkout = app({"tiles.py": (
         'CROWN = "\U0001F451"\n'
-        'MINUS = "−"\n'
+        'MINUS = "\u2212"\n'
         'TITLE = "Unlocked · Shuffle — waiting… → next, at 90°"\n'
     )})
 
     assert _found(checkout) == [
         "parlor/tiles.py:1: symbol \U0001F451 (U+1F451 CROWN)",
-        "parlor/tiles.py:2: symbol − (U+2212 MINUS SIGN)",
+        "parlor/tiles.py:2: symbol \u2212 (U+2212 MINUS SIGN)",
     ]
 
 
