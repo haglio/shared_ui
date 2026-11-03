@@ -27,6 +27,13 @@ pytestmark  # this repo's checks of itself, which app_support.repo_checks runs f
 BUTTON_WORD_W  # fun_time's dashboard and its headset copy
 BUTTON_ROW_GAP  # origenerator
 
+# --- the message's shape, drawn by fun_time (desktop and headset) and origenerator ---
+MESSAGE_TYPE_SIZE  # fun_time, origenerator
+MESSAGE_PAD_V  # fun_time, origenerator
+MESSAGE_PAD_H  # fun_time, origenerator
+MESSAGE_RADIUS  # fun_time, origenerator
+MESSAGE_TOP_MARGIN  # fun_time, origenerator
+
 # --- type ---
 SIZES  # funestra: a satellite's title steps down through them to fit
 

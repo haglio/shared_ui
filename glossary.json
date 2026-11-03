@@ -55,11 +55,13 @@
       "id": "message",
       "thing": "the one line that flashes at the top center over a video or an image, whose shape every app takes from here",
       "code_today": [
-        "message shape",
-        "notice"
+        "message"
       ],
       "status": "ruled",
-      "ruled": "2026-10-30, his words on Origenerator's list"
+      "ruled": "2026-10-30, his words on Origenerator's list",
+      "retired": [
+        "notice shape"
+      ]
     },
     {
       "screen": null,
