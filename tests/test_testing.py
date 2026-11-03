@@ -110,3 +110,23 @@ def test_an_icon_lacking_comes_back_after():
     with icons_lacking(present):
         assert present not in icon_geometry.icon_names()
     assert present in icon_geometry.icon_names()
+
+
+def test_the_pointer_on_a_window_is_handed_to_the_child_under_it(pointer):
+    moved = []
+
+    class Heard(QPushButton):
+        def mouseMoveEvent(self, event):
+            moved.append(event)
+
+    window = QWidget()
+    window.resize(200, 100)
+    button = Heard("Edit", window)
+    button.setGeometry(20, 20, 80, 40)
+    button.setMouseTracking(True)
+    window.show()
+    QApplication.processEvents()
+
+    pointer.on(window, QPoint(40, 40))
+
+    assert moved

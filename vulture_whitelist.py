@@ -9,8 +9,6 @@ pytest_plugins
 pytestmark
 
 
-BUTTON_WORD_W
-BUTTON_ROW_GAP
 
 MESSAGE_TYPE_SIZE
 MESSAGE_PAD_V

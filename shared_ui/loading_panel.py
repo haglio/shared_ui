@@ -68,9 +68,8 @@ def render(panel: LoadingPanel, metrics: Metrics = DESKTOP) -> Image.Image:
         image.paste(icon, (center - metrics.icon // 2, icon_top), icon)
 
     def centered(top: int, text: str, font, ink: Rgb) -> None:
-        if text:
-            draw.text((center, top), fit_text(font, text, metrics.bar[0]), font=font, fill=ink,
-                      anchor="ma")
+        draw.text((center, top), fit_text(font, text, metrics.bar[0]), font=font, fill=ink,
+                  anchor="ma")
 
     centered(wordmark_top, panel.wordmark, wordmark_font, panel.ink)
     centered(status_top, panel.status, status_font, LOADING_STATUS)

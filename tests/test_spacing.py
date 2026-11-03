@@ -40,3 +40,25 @@ class TestTheHudSquare:
         scaled = round(spacing.BUTTON_RADIUS * spacing.BUTTON_SIZE_HUD / spacing.BUTTON_SIZE)
 
         assert scaled == spacing.BUTTON_RADIUS_HUD
+
+
+class TestADialog:
+    def test_its_margin_is_twice_the_ordinary_one(self):
+        assert spacing.MARGIN_DIALOG == 2 * spacing.MARGIN_STANDARD
+
+    def test_its_gap_is_twice_the_ordinary_one(self):
+        assert spacing.GAP_DIALOG == 2 * spacing.GAP_MEDIUM
+
+
+class TestARowOfButtons:
+    def test_wrapped_rows_stand_further_apart_than_buttons_along_a_row(self):
+        assert spacing.BUTTON_ROW_GAP > spacing.BUTTON_GAP
+
+    def test_a_word_button_is_as_wide_as_two_hud_squares_and_the_gap_between_them(self):
+        assert spacing.BUTTON_WORD_W == 2 * spacing.BUTTON_SIZE_HUD + spacing.BUTTON_GAP
+
+    def test_a_row_that_has_to_fit_a_strip_pads_its_words_less(self):
+        assert spacing.BUTTON_PAD_H_TIGHT < spacing.BUTTON_PAD_H
+
+    def test_an_icon_that_fills_its_square_stays_inset_on_both_sides(self):
+        assert spacing.BUTTON_FILLING_ICON == spacing.BUTTON_SIZE - 2 * spacing.BUTTON_ICON_INSET

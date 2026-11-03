@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import base64
 import logging
 import math
+import re
 import uuid
 from itertools import pairwise
 
@@ -13,7 +15,9 @@ from PyQt6.QtWidgets import QLabel
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import (
+    CANVAS,
     ICONS,
+    PEN_WIDTH,
     STAND_IN,
     Ellipse,
     Line,
@@ -763,3 +767,27 @@ def test_an_icon_drawn_to_fill_a_box_reaches_it_along_one_side_and_sits_in_its_m
     assert bottom - top >= 56
     assert abs((left + right) / 2 - 60) <= 1.5
     assert abs((top + bottom) / 2 - 30) <= 1.5
+
+
+def test_the_two_history_icons_are_one_drawing_mirrored_about_the_center_line():
+    forward_ring, forward_head = ICONS["redo_arrow"]
+    back_ring, back_head = ICONS["undo_arrow"]
+
+    assert (forward_ring.x + forward_ring.w, forward_ring.y) == (CANVAS - back_ring.x, back_ring.y)
+    assert (180 - forward_ring.start - forward_ring.span) % 360 == back_ring.start
+    assert forward_ring.span == back_ring.span
+    assert {(CANVAS - x, y) for x, y in forward_head.points} == set(back_head.points)
+
+
+def test_the_shuffles_two_lines_are_drawn_under_the_default_pen():
+    assert all(shape.width < PEN_WIDTH for shape in ICONS["shuffle"] if isinstance(shape, Line))
+
+
+@pytest.mark.usefixtures("qapp")
+def test_an_icon_set_among_the_words_is_drawn_at_twice_the_size_it_shows():
+    written = re.search(r'base64,([^"]+)"', icons.inline_icon("check", color=RED, size=16)).group(1)
+
+    drawn = QImage.fromData(base64.b64decode(written))
+
+    assert (drawn.width(), drawn.height()) == (32, 32)
+

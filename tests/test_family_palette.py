@@ -8,7 +8,16 @@ from PyQt6.QtWidgets import QLineEdit, QWidget
 
 from shared_ui import palette as tokens
 from shared_ui.chrome import family_stylesheet
-from shared_ui.colors import BG_PRIMARY, BLUE, TEXT_PRIMARY, dress_application, family_palette
+from shared_ui.colors import (
+    BG_PRIMARY,
+    BG_SECONDARY,
+    BLUE,
+    BLUE_LIGHT,
+    TEXT_PRIMARY,
+    WHITE,
+    dress_application,
+    family_palette,
+)
 
 # Stands in for the color Windows hands an app that never says otherwise: invented, so a
 # machine whose accent matches the family's blue cannot make these pass for the wrong reason.
@@ -151,3 +160,15 @@ def test_a_field_paints_its_selection_in_the_family_blue(selection_pixels):
 
 def test_the_selected_words_are_still_legible_once_painted(selection_pixels):
     assert selection_pixels[TEXT_PRIMARY.name()] > 20, selection_pixels.most_common(5)
+
+
+def test_a_banded_row_is_a_ground_of_the_family_and_never_white():
+    assert family_palette().color(QPalette.ColorRole.AlternateBase) == BG_SECONDARY
+
+
+def test_a_visited_link_is_the_blues_lighter_step():
+    assert family_palette().color(QPalette.ColorRole.LinkVisited) == BLUE_LIGHT
+
+
+def test_text_on_the_accent_is_white():
+    assert family_palette().color(QPalette.ColorRole.BrightText) == WHITE
