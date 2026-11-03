@@ -3,7 +3,7 @@ from __future__ import annotations
 from PyQt6.QtGui import QColor, QPixmap
 from PyQt6.QtWidgets import QWidget
 
-from shared_ui.colors import BG_PRIMARY, BLUE
+from shared_ui.colors import BG_PRIMARY, BG_SECONDARY, BLUE
 from shared_ui.tick_control import _INDICATOR, TickControl
 
 
@@ -86,3 +86,12 @@ def test_the_hint_makes_room_for_the_indicator_and_the_label():
     assert hint.width() >= _INDICATOR + control.fontMetrics().horizontalAdvance("Random")
     assert hint.height() >= _INDICATOR + 4
     assert control.minimumSizeHint() == hint
+
+
+def test_an_empty_indicator_stands_on_the_raised_ground_rather_than_the_canvas():
+    control = TickControl("Random")
+    control.resize(140, 24)
+
+    middle = _rendered(control).pixelColor(_INDICATOR // 2, control.height() // 2)
+
+    assert middle == BG_SECONDARY

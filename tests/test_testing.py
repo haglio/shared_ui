@@ -116,10 +116,15 @@ def test_the_pointer_on_a_window_is_handed_to_the_child_under_it(pointer):
     moved = []
 
     class Heard(QPushButton):
-        def mouseMoveEvent(self, event):
-            moved.append(event)
+        def mouseMoveEvent(self, _event):
+            moved.append("the child")
 
-    window = QWidget()
+    class Window(QWidget):
+        def mouseMoveEvent(self, _event):
+            moved.append("the window")
+
+    window = Window()
+    window.setMouseTracking(True)
     window.resize(200, 100)
     button = Heard("Edit", window)
     button.setGeometry(20, 20, 80, 40)
@@ -129,4 +134,5 @@ def test_the_pointer_on_a_window_is_handed_to_the_child_under_it(pointer):
 
     pointer.on(window, QPoint(40, 40))
 
-    assert moved
+    assert "the child" in moved
+    assert "the window" not in moved
