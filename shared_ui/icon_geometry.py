@@ -776,9 +776,10 @@ def _crescent() -> tuple:
     def angle(cx, cy, point):
         return math.atan2(point[1] - cy, point[0] - cx)
 
-    def run(cx, cy, radius, start, end, steps):
-        return [(cx + radius * math.cos(start + (end - start) * k / steps),
-                 cy + radius * math.sin(start + (end - start) * k / steps)) for k in range(steps + 1)]
+    def run(center, radius, start, end, steps):
+        return [(center[0] + radius * math.cos(start + (end - start) * k / steps),
+                 center[1] + radius * math.sin(start + (end - start) * k / steps))
+                for k in range(steps + 1)]
 
     o0, o1 = angle(ox, oy, tips[0]), angle(ox, oy, tips[1])
     if o1 < o0:
@@ -786,7 +787,7 @@ def _crescent() -> tuple:
     i0, i1 = angle(ix, iy, tips[1]), angle(ix, iy, tips[0])
     if i1 > i0:
         i1 -= 2 * math.pi
-    rim = run(ox, oy, outer, o0, o1, 24) + run(ix, iy, inner, i0, i1, 16)[1:-1]
+    rim = run((ox, oy), outer, o0, o1, 24) + run((ix, iy), inner, i0, i1, 16)[1:-1]
     return (Polygon(tuple(rim), fill=False, width=4),)
 
 

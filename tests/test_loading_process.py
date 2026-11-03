@@ -13,15 +13,15 @@ from app_support import loading_screen
 from app_support.testing import window_dressed
 
 from shared_ui.loading_process import LoadingProcess, run, serve
-from shared_ui.loading_window import LoadingWindow
+from shared_ui.loading_window import LoadingWindow, LoadingWindowSpec
 
 
 def _window(**changes) -> LoadingWindow:
-    return LoadingWindow(**{
+    return LoadingWindow(LoadingWindowSpec(**{
         "caption": "Scripture Loading", "wordmark": "Scripture", "icon": None, "preview": None,
         "steps": ("Checking the tracker...", "Loading...", "Building the window..."),
         **changes,
-    })
+    }))
 
 
 def _until(app, holds, seconds: float = 2.0) -> bool:

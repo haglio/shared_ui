@@ -208,7 +208,7 @@ def test_the_message_column_has_a_floor_as_well_as_a_ceiling():
 
 
 @pytest.mark.parametrize(
-    "level, drawn, ink",
+    ("level", "drawn", "ink"),
     [
         (Level.ERROR, "error", RED),
         (Level.WARNING, "warning", YELLOW),
@@ -268,14 +268,13 @@ def test_show_alert_opens_the_dialog_the_caller_described(tmp_path):
         )
 
     dialog.assert_called_once_with(
-        "Example App", "Nothing to do.", level=Level.INFO, icon=icon, button_text="Got it",
-        links=links, dismissible=False,
+        "Example App", "Nothing to do.", level=Level.INFO, icon=icon, button_text="Got it", links=links,
     )
     dialog.return_value.exec.assert_called_once_with()
 
 
 @pytest.mark.parametrize(
-    "closed_with, dismissed",
+    ("closed_with", "dismissed"),
     [
         (DISMISSED, True),
         (QDialog.DialogCode.Accepted.value, False),

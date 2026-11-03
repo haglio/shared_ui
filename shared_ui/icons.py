@@ -26,6 +26,7 @@ business and it stays there.
 from __future__ import annotations
 
 import html
+from dataclasses import dataclass
 from functools import cache
 
 from PyQt6.QtCore import QBuffer, QByteArray, QIODevice, QPointF, QRectF, Qt
@@ -56,8 +57,14 @@ __all__ = [
 ]
 
 
-def draw_icon(painter: QPainter, name: str, color, *,
-              size: float = CANVAS, x: float = 0.0, y: float = 0.0) -> None:
+@dataclass(frozen=True)
+class _Frame:
+    size: float = CANVAS
+    x: float = 0.0
+    y: float = 0.0
+
+
+def draw_icon(painter: QPainter, name: str, color, **frame) -> None:
     """Paint *name* through *painter*, in a *size*-square frame at ``(x, y)``.
 
     The painter's own pen, brush, transform and hints are left as they were --
@@ -65,10 +72,11 @@ def draw_icon(painter: QPainter, name: str, color, *,
     out from under it.
     """
     ink = QColor(color)
+    placed = _Frame(**frame)
     painter.save()
     painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-    painter.translate(x, y)
-    painter.scale(size / CANVAS, size / CANVAS)
+    painter.translate(placed.x, placed.y)
+    painter.scale(placed.size / CANVAS, placed.size / CANVAS)
     shapes = shapes_of(name)
     for shape in shapes:
         _draw(painter, shape, ink)
@@ -168,51 +176,66 @@ def _solid(painter: QPainter, ink: QColor) -> None:
     painter.setBrush(ink)
 
 
-def _draw(painter: QPainter, shape, ink: QColor) -> None:
-    if isinstance(shape, Line):
-        _set_pen(painter, ink, shape.width)
-        painter.drawLine(QPointF(shape.x1, shape.y1), QPointF(shape.x2, shape.y2))
-    elif isinstance(shape, Polyline):
-        _set_pen(painter, ink, shape.width)
-        painter.drawPolyline(*(QPointF(px, py) for px, py in shape.points))
-    elif isinstance(shape, Polygon):
-        if shape.fill and shape.round_radius:
-            # Filled AND outlined with its own outline: the outline's round joins
-            # are what round the corners, and it grows the shape by the radius.
-            _set_pen(painter, ink, shape.round_radius * 2)
-            painter.setBrush(ink)
-        elif shape.fill:
-            _solid(painter, ink)
-        else:
-            _set_pen(painter, ink, shape.width)
-        painter.drawPolygon(*(QPointF(px, py) for px, py in shape.points))
-    elif isinstance(shape, RoundedRect):
-        if shape.fill:
-            _solid(painter, ink)
-        else:
-            _set_pen(painter, ink, shape.width)
-        painter.drawRoundedRect(QRectF(shape.x, shape.y, shape.w, shape.h),
-                                shape.radius, shape.radius)
-    elif isinstance(shape, Ellipse):
-        if shape.fill:
-            _solid(painter, ink)
-        else:
-            _set_pen(painter, ink, shape.width)
-        painter.drawEllipse(QPointF(shape.cx, shape.cy), shape.rx, shape.ry)
-    elif isinstance(shape, Arc):
-        _set_pen(painter, ink, shape.width)
-        # QPainter takes sixteenths of a degree, counter-clockwise from 3
-        # o'clock -- which is the convention the geometry is written in.
-        painter.drawArc(QRectF(shape.x, shape.y, shape.w, shape.h),
-                        round(shape.start * 16), round(shape.span * 16))
-    elif isinstance(shape, Path):
-        painter.save()
-        painter.scale(CANVAS / shape.frame, CANVAS / shape.frame)
+def _solid_or_outlined(painter: QPainter, shape, ink: QColor) -> None:
+    if shape.fill:
         _solid(painter, ink)
-        painter.drawPath(_painter_path(shape))
-        painter.restore()
-    else:  # pragma: no cover -- a shape added to the geometry and not to a renderer
-        raise TypeError(f"no Qt rendering for {type(shape).__name__}")
+    else:
+        _set_pen(painter, ink, shape.width)
+
+
+def _line(painter: QPainter, shape: Line, ink: QColor) -> None:
+    _set_pen(painter, ink, shape.width)
+    painter.drawLine(QPointF(shape.x1, shape.y1), QPointF(shape.x2, shape.y2))
+
+
+def _polyline(painter: QPainter, shape: Polyline, ink: QColor) -> None:
+    _set_pen(painter, ink, shape.width)
+    painter.drawPolyline(*(QPointF(px, py) for px, py in shape.points))
+
+
+def _polygon(painter: QPainter, shape: Polygon, ink: QColor) -> None:
+    if shape.fill and shape.round_radius:
+        _set_pen(painter, ink, shape.round_radius * 2)
+        painter.setBrush(ink)
+    else:
+        _solid_or_outlined(painter, shape, ink)
+    painter.drawPolygon(*(QPointF(px, py) for px, py in shape.points))
+
+
+def _rounded_rect(painter: QPainter, shape: RoundedRect, ink: QColor) -> None:
+    _solid_or_outlined(painter, shape, ink)
+    painter.drawRoundedRect(QRectF(shape.x, shape.y, shape.w, shape.h),
+                            shape.radius, shape.radius)
+
+
+def _ellipse(painter: QPainter, shape: Ellipse, ink: QColor) -> None:
+    _solid_or_outlined(painter, shape, ink)
+    painter.drawEllipse(QPointF(shape.cx, shape.cy), shape.rx, shape.ry)
+
+
+def _arc(painter: QPainter, shape: Arc, ink: QColor) -> None:
+    _set_pen(painter, ink, shape.width)
+    # QPainter takes sixteenths of a degree, counter-clockwise from 3 o'clock.
+    painter.drawArc(QRectF(shape.x, shape.y, shape.w, shape.h),
+                    round(shape.start * 16), round(shape.span * 16))
+
+
+def _path(painter: QPainter, shape: Path, ink: QColor) -> None:
+    painter.save()
+    painter.scale(CANVAS / shape.frame, CANVAS / shape.frame)
+    _solid(painter, ink)
+    painter.drawPath(_painter_path(shape))
+    painter.restore()
+
+
+_DRAWN_BY = {
+    Line: _line, Polyline: _polyline, Polygon: _polygon, RoundedRect: _rounded_rect,
+    Ellipse: _ellipse, Arc: _arc, Path: _path,
+}
+
+
+def _draw(painter: QPainter, shape, ink: QColor) -> None:
+    _DRAWN_BY[type(shape)](painter, shape, ink)
 
 
 def _painter_path(shape: Path) -> QPainterPath:
