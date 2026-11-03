@@ -75,7 +75,6 @@ class _GuiThreadCall(QObject):
 
 
 class Level(Enum):
-
     ERROR = ("error", palette.RED)
     WARNING = ("warning", palette.YELLOW)
     INFO = ("info", palette.BLUE)

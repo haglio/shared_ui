@@ -20,7 +20,6 @@ from shared_ui.type_scale import SIZE_HEADING, SIZE_SMALL, SIZE_TINY, in_pixels
 
 @dataclass(frozen=True)
 class Metrics:
-
     padding: int = MARGIN_DIALOG
     icon: int = 128
     wordmark_px: int = in_pixels(SIZE_HEADING)
@@ -39,7 +38,6 @@ DESKTOP = Metrics()
 
 @dataclass(frozen=True)
 class LoadingPanel:
-
     wordmark: str
     status: str
     fraction: float | None = None

@@ -595,7 +595,6 @@ def test_a_corner_icon_keeps_to_the_corner_its_icon_leaves_free():
         assert upper >= 24, f"{name} reaches out of the lower right"
 
 
-
 def _rendered_label(text: str) -> QImage:
     label = QLabel()
     label.setStyleSheet("background: black; color: white;")
@@ -630,8 +629,6 @@ def test_a_line_led_by_an_icon_shows_its_words_as_they_were_written():
     line = icons.icon_then_text("mic", "1 < 2 & <b>bold</b>", color=RED, size=16)
 
     assert "1 &lt; 2 &amp; &lt;b&gt;bold&lt;/b&gt;" in line
-
-
 
 
 def _of(name: str, kind: type) -> list:
@@ -790,4 +787,3 @@ def test_an_icon_set_among_the_words_is_drawn_at_twice_the_size_it_shows():
     drawn = QImage.fromData(base64.b64decode(written))
 
     assert (drawn.width(), drawn.height()) == (32, 32)
-

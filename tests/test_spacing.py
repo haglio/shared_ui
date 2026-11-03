@@ -19,7 +19,6 @@ class TestSpacingTokens:
 
 
 class TestButtonGrouping:
-
     def test_a_group_boundary_is_wider_than_the_gap_inside_a_group(self):
         assert spacing.BUTTON_GROUP_GAP > spacing.BUTTON_GAP
 

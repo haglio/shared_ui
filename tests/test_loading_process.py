@@ -90,7 +90,6 @@ class TestTheStartsSide:
         assert said.read_text(encoding="utf-8").splitlines() == [
             "Loading...", "Building the window..."]
 
-
     def test_a_step_of_several_lines_reaches_the_window_as_one(self, qapp, tmp_path):
         said = tmp_path / "said.txt"
         process = _a_window_process(

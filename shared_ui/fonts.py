@@ -15,7 +15,6 @@ from shared_ui.type_scale import (
 __all__ = ["FONT_UI", "SIZE_BODY", "SIZE_HEADING", "SIZE_SMALL", "SIZE_TINY", "make_font"]
 
 
-
 @lru_cache(maxsize=32)
 def make_font(
     family: str = FONT_UI,

@@ -15,7 +15,6 @@ _DISABLED_OPACITY = 0.4
 
 
 class ToggleSwitch(QAbstractButton):
-
     def __init__(self, text: str = "", parent=None):
         super().__init__(parent)
         self.setCheckable(True)
