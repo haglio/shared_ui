@@ -1,13 +1,3 @@
-"""The shared icons: that each one draws, that they draw differently from each
-other, and that the three routes to one produce the same icon.
-
-That last part is the whole point of the module.  The apps reached for their
-icons in different ways -- a toolbar wants a QIcon, a self-painted panel wants
-a pixmap, a badge wants to paint into a chip it already has -- and while each
-app answered that itself, the drawings drifted apart.  So the tests here lean
-hardest on the routes agreeing.
-"""
-
 from __future__ import annotations
 
 import logging
@@ -46,7 +36,6 @@ def _blank(size: int) -> QPixmap:
 
 
 def _ink(pixmap: QPixmap, *, alpha_above: int = 32) -> set[tuple[int, int]]:
-    """Every pixel of *pixmap* that was drawn on."""
     image = pixmap.toImage()
     return {
         (x, y)
@@ -65,7 +54,6 @@ def _as_a_menu_row_shows(name: str) -> QPixmap:
 
 
 def _ink_rect(pixmap: QPixmap) -> tuple[int, int, int, int]:
-    """The bounding rect of what was drawn: ``(left, upper, right, lower)``."""
     ink = _ink(pixmap)
     assert ink, "nothing was drawn"
     xs = [x for x, _y in ink]
@@ -78,7 +66,6 @@ def _ink_pixels(pixmap: QPixmap) -> int:
 
 
 def _pieces(ink: set[tuple[int, int]]) -> int:
-    """How many separate pieces *ink* falls into, counting a diagonal as joined."""
     unvisited, pieces = set(ink), 0
     while unvisited:
         pieces += 1
@@ -95,8 +82,6 @@ def _pieces(ink: set[tuple[int, int]]) -> int:
 
 
 def test_every_registered_icon_draws_something():
-    # A name in the registry that paints nothing is worse than a missing one:
-    # the caller gets a button with an empty square on it and no error.
     for name in icon_names():
         pixmap = icons.icon_pixmap(name, 48, TEXT_PRIMARY)
         assert not pixmap.isNull(), name
@@ -104,7 +89,6 @@ def test_every_registered_icon_draws_something():
 
 
 def test_the_icons_are_all_different():
-    # Icon-only controls are only as good as the icons telling each other apart.
     drawn = {
         name: icons.icon_pixmap(name, 48, TEXT_PRIMARY).toImage()
         for name in _EVERY_ICON_AND_THE_STAND_IN
@@ -115,20 +99,11 @@ def test_the_icons_are_all_different():
             assert drawn[first] != drawn[second], f"{first} and {second} draw alike"
 
 
-# An icon whose whole identity is a single row or column -- a bar, three dots -- cannot
-# fill a square and should not try: a minus stretched to be tall is a rectangle, not a minus. Named here one by
-# one, so widening the exemption takes a decision rather than a shrug.
 _ONE_BAR = {"minus", "more", "more_vertical"}
-# An icon laid into the corner of another one, which the other icon leaves free
-# for it: spread over the canvas, it would cover what it is laid on.
 _IN_A_CORNER = {"regenerate_corner"}
 
 
 def test_every_icon_fills_its_canvas():
-    # An icon using only the middle of its frame is an icon the eye can't find once
-    # the frame is scaled onto a 16px tree row -- the empty margin shrinks with it.
-    # The long side has to carry most of the canvas; the short side is allowed to
-    # be narrow, because some icons (a chevron) genuinely are.
     for name in set(_EVERY_ICON_AND_THE_STAND_IN) - _ONE_BAR - _IN_A_CORNER:
         left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
         width, height = right - left, lower - upper
@@ -137,44 +112,28 @@ def test_every_icon_fills_its_canvas():
 
 
 def test_a_one_bar_icon_still_spans_its_canvas_the_long_way():
-    # The exemption is for the SHORT side only. A minus that also stopped short
-    # left to right would read as a hyphen dropped into an empty square.
     for name in _ONE_BAR:
         left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
         assert max(right - left, lower - upper) >= 0.6 * 48, f"{name} is short in its frame"
 
 
 def test_the_speed_pair_is_one_control_drawn_twice():
-    # Minus and plus sit side by side on a speed control, so they have to be the
-    # same bar at the same weight -- one of them with a second bar across it.
-    # Said in ink rather than in primitives: every pixel the minus lays down is a
-    # pixel the plus lays down too, so the bar they share is one bar however the
-    # geometry happens to spell it.  Drawn large, because the bars differing by a
-    # canvas unit is a difference a 48px rendering rounds away.
     minus = _ink(icons.icon_pixmap("minus", 96, TEXT_PRIMARY))
     plus = _ink(icons.icon_pixmap("plus", 96, TEXT_PRIMARY))
     assert minus <= plus
-    assert len(plus) > len(minus)   # and the second bar is really there
+    assert len(plus) > len(minus)
 
 
 def test_the_hollow_plus_traces_the_solid_one():
-    # They are one sign drawn two ways, and a badge lays the outline straight
-    # over the solid to say "this has an enhancement, and can take another".
-    # That only reads if the outline lands on the solid's own edge rather than
-    # beside it -- an outline a size out reads as two plus signs, not one.
     solid = icons.icon_pixmap("plus", 48, TEXT_PRIMARY)
     hollow = icons.icon_pixmap("plus_outline", 48, TEXT_PRIMARY)
     for solid_edge, hollow_edge in zip(_ink_rect(solid), _ink_rect(hollow), strict=True):
         assert abs(solid_edge - hollow_edge) <= 2
-    # And hollow means hollow: the middle of the icon is left empty, which is
-    # what the solid underneath it shows through.
     assert hollow.toImage().pixelColor(24, 24).alpha() < 32
     assert solid.toImage().pixelColor(24, 24).alpha() > 32
 
 
 def test_every_icon_sits_in_the_middle_of_its_canvas():
-    # Icons are laid beside each other in a button bank, so one drawn off-center
-    # reads as misaligned with its neighbors rather than as its own shape.
     for name in set(_EVERY_ICON_AND_THE_STAND_IN) - _IN_A_CORNER:
         left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
         assert abs((left + right) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
@@ -182,27 +141,18 @@ def test_every_icon_sits_in_the_middle_of_its_canvas():
 
 
 def test_an_icon_is_drawn_in_the_color_it_is_asked_for():
-    # The apps tint icons to say what they do -- a delete in red, a star in the
-    # green that means "bookmarked" across the family -- so the ink has to be
-    # the color handed in rather than a fixed one.
     for color in (RED, GREEN, TEXT_PRIMARY):
         image = icons.icon_pixmap("star", 48, color).toImage()
         assert image.pixelColor(24, 25) == color
 
 
 def test_an_icon_scales_to_the_size_it_is_asked_for():
-    # Fun Time paints its bar's own panel size; Origenerator draws big and lets
-    # Qt scale down.  Both get a square of exactly the side they named.
     for size in (16, 24, 48, 96):
         pixmap = icons.icon_pixmap("mic", size, TEXT_PRIMARY)
         assert pixmap.size() == QSize(size, size)
 
 
 def test_a_small_icon_is_the_same_icon_rather_than_a_heavier_one():
-    # The painter is scaled, not the coordinates, so the pen scales with the
-    # drawing: the icon takes up the same share of its frame at every size.  A
-    # fixed pen width instead leaves a 16px icon a blob and a 96px one a
-    # wireframe -- two icons rather than one shown large and small.
     sizes = (24, 48, 96)
     rects = [_ink_rect(icons.icon_pixmap("mic", size, TEXT_PRIMARY)) for size in sizes]
     widths = [(right - left) / size
@@ -211,8 +161,6 @@ def test_a_small_icon_is_the_same_icon_rather_than_a_heavier_one():
                for (_left, upper, _right, lower), size in zip(rects, sizes, strict=True)]
     assert max(widths) - min(widths) < 0.06
     assert max(heights) - min(heights) < 0.06
-    # And the ink stays a like share of the frame.  Antialiasing fattens a small
-    # icon proportionally more than a large one, so this is a band, not equality.
     coverage = [
         _ink_pixels(icons.icon_pixmap("mic", size, TEXT_PRIMARY)) / (size * size)
         for size in sizes
@@ -221,8 +169,6 @@ def test_a_small_icon_is_the_same_icon_rather_than_a_heavier_one():
 
 
 def test_an_icon_carries_a_normal_and_a_dimmed_rendering():
-    # Qt swaps to the disabled pixmap itself when a button goes dead, so both
-    # have to be there and the dim one has to actually read as dim.
     icon = icons.qt_icon("trash", color=RED)
     size = QSize(48, 48)
     normal = icon.pixmap(size, QIcon.Mode.Normal)
@@ -233,8 +179,6 @@ def test_an_icon_carries_a_normal_and_a_dimmed_rendering():
 
 
 def test_a_disabled_icon_is_the_muted_gray_whatever_its_color():
-    # A colored button that dims to a paler version of its own color reads as a
-    # lighter red rather than as a button with nothing to act on.
     for color in (RED, GREEN, None):
         icon = icons.qt_icon("star", color=color)
         image = icon.pixmap(QSize(48, 48), QIcon.Mode.Disabled).toImage()
@@ -248,17 +192,12 @@ def test_an_uncolored_icon_wears_the_chrome_text_color():
 
 
 def test_the_pixmap_and_the_qt_icon_draw_the_very_same_icon():
-    # The icon Fun Time paints into its bar and the one Origenerator hands a
-    # toolbar button are one drawing -- which is the whole reason this module
-    # exists, since the two apps' microphones had drifted into different shapes.
     from_pixmap = icons.icon_pixmap("mic", 48, TEXT_PRIMARY)
     from_icon = icons.qt_icon("mic", size=48).pixmap(QSize(48, 48), QIcon.Mode.Normal)
     assert from_pixmap.toImage() == from_icon.toImage()
 
 
 def test_painting_into_a_caller_s_painter_draws_that_same_icon_too():
-    # The third route: a badge paints its chip, then asks for the icon on top.
-    # It has to be the same drawing as the other two, in the place it asked for.
     direct = icons.icon_pixmap("play", 48, TEXT_PRIMARY)
     composed = _blank(48)
     painter = QPainter(composed)
@@ -268,8 +207,6 @@ def test_painting_into_a_caller_s_painter_draws_that_same_icon_too():
 
 
 def test_an_icon_lands_where_the_caller_placed_it():
-    # A badge draws its icon inset into a chip, so the offset has to move the
-    # whole drawing rather than clip it.
     canvas = _blank(48)
     painter = QPainter(canvas)
     icons.draw_icon(painter, "star", TEXT_PRIMARY, size=24, x=12, y=12)
@@ -282,9 +219,6 @@ def test_an_icon_lands_where_the_caller_placed_it():
 
 
 def test_drawing_an_icon_leaves_the_caller_s_painter_as_it_found_it():
-    # A caller part-way through drawing a chip must not find its pen, brush or
-    # transform swapped out underneath it -- the icon goes on top of the chip,
-    # and whatever the caller draws next still comes out in its own colors.
     canvas = _blank(64)
     painter = QPainter(canvas)
     painter.translate(8, 8)
@@ -300,8 +234,6 @@ def test_drawing_an_icon_leaves_the_caller_s_painter_as_it_found_it():
 
 
 def test_an_icon_drawn_over_a_chip_keeps_the_chip_underneath():
-    # What the badge callers actually do: fill a chip, then lay the icon on it.
-    # The icon paints only its own ink, so the chip still shows around it.
     canvas = _blank(48)
     painter = QPainter(canvas)
     painter.setPen(Qt.PenStyle.NoPen)
@@ -310,8 +242,8 @@ def test_an_icon_drawn_over_a_chip_keeps_the_chip_underneath():
     icons.draw_icon(painter, "play", RED, size=26, x=11, y=11)
     painter.end()
     image = canvas.toImage()
-    assert image.pixelColor(6, 24) == QColor(GREEN)   # chip, clear of the icon
-    assert image.pixelColor(0, 0).alpha() == 0        # outside the chip, still clear
+    assert image.pixelColor(6, 24) == QColor(GREEN)
+    assert image.pixelColor(0, 0).alpha() == 0
 
 
 _THE_ICONS = (
@@ -345,26 +277,16 @@ def test_the_working_icon_is_the_circle_with_a_quarter_left_out():
     assert arc.span == 270
 
 
-# The four states OSR2 control can be in, in the order their buttons sit, and how
-# many primitives of each icon draw the device itself: the column, the sleeve and
-# the arm carrying one to the other.
 _OSR2_CONTROL = ("park", "retract", "release", "control_off")
 _THE_DEVICE = 3
 
 
 def test_the_four_osr2_control_icons_draw_one_device():
-    # They sit in a row as one radio group, so what tells them apart is meant to
-    # be where the sleeve rides and the icons beside it -- never a second drawing
-    # of the device. Four devices drawn four ways would read as four unrelated
-    # controls rather than one control in four states.
     columns = {ICONS[name][0] for name in _OSR2_CONTROL}
     assert len(columns) == 1
 
 
 def test_control_off_crosses_out_what_driving_points_at():
-    # Driving and control-off leave the sleeve in the same place, free in the
-    # middle of its travel; the whole difference is the pair of icons either side
-    # of it, arrows on one and X's on the other.
     driving, off = ICONS["release"], ICONS["control_off"]
     assert driving[:_THE_DEVICE] == off[:_THE_DEVICE]
     assert driving[_THE_DEVICE:] != off[_THE_DEVICE:]
@@ -481,9 +403,6 @@ def test_portrait_beside_landscape_fits_the_square_of_a_button():
 
 
 def test_the_registry_is_what_icon_names_reports():
-    # Callers walk the names to build a bank of buttons, and the tests above walk
-    # them to check every icon -- so an icon added without a name is an icon no
-    # test ever renders.
     names = icon_names()
     assert names == tuple(sorted(names))
     for name in names:
@@ -491,17 +410,11 @@ def test_the_registry_is_what_icon_names_reports():
 
 
 def test_the_canvas_and_pen_width_are_stated_in_canvas_units():
-    # Both are public: a caller composing an icon into its own drawing needs the
-    # frame the geometry is written against.
     assert icons.CANVAS == 48.0
     assert 0 < icons.PEN_WIDTH < icons.CANVAS
 
 
 def test_an_icon_never_erases_the_ground_it_is_drawn_on():
-    # The copy icon holds a gap between its two sheets, and the apps each cut
-    # that gap by erasing -- which works on an empty pixmap and punches a cutout
-    # through anything else.  Clipping is what makes the icon safe to lay over a
-    # chip or a thumbnail, so the ground has to survive under every icon.
     for name in _EVERY_ICON_AND_THE_STAND_IN:
         canvas = QPixmap(48, 48)
         canvas.fill(QColor(GREEN))
@@ -607,31 +520,14 @@ def test_a_menu_row_s_restart_keeps_its_arrow_apart_from_the_quit_inside_it():
 
 
 def test_the_enhance_filter_lays_its_funnel_over_the_plus():
-    # Two icons set apart in one frame read as two crowded controls; one laid over
-    # the other reads as a single sign about a single thing. So the funnel's
-    # mouth has to reach back across the plus's lower arm rather than starting
-    # clear of it -- which in ink is that the icon comes out in ONE piece. Set
-    # the two apart and the ink falls into two.
     icon = _ink(icons.icon_pixmap("enhance_filter", 48, TEXT_PRIMARY))
     assert _pieces(icon) == 1
 
-    # It is still two icons in one frame, though, rather than a single drawing:
-    # the plus's arm reaches the left edge and the funnel's stem hangs to the
-    # lower edge, and the piece above is what holds those two ends together.
     assert any(x <= 8 for x, _y in icon), "the plus's arm is missing"
     assert any(y >= 42 for _x, y in icon), "the funnel's stem is missing"
 
 
 def test_the_transport_icons_have_rounded_corners(monkeypatch):
-    # A play triangle with hard points reads as a sharper, lighter icon than the
-    # ones beside it -- and beside an icon font's transport controls it plainly
-    # was not the same drawing.
-    #
-    # The rounding grows the icon, so it shows in what is drawn: the very same
-    # corners with the rounding taken off cover less ground. The bare one is
-    # registered as an icon of its own for the length of the test, so it is drawn
-    # by the same public route as the real icon rather than through the
-    # renderer's insides.
     (triangle,) = ICONS["play"]
     monkeypatch.setitem(ICONS, "_play_with_hard_points", (Polygon(triangle.points),))
 
@@ -673,8 +569,6 @@ def test_each_icon_this_version_does_not_have_is_named_in_the_log_once(caplog):
 
 
 def test_a_bar_ends_in_a_round_cap_that_reaches_past_its_endpoint():
-    # An icon's ends are round, so a bar's ink overhangs where its line stops by
-    # about half the pen width -- what keeps a minus from reading as a chopped rule.
     (bar,) = ICONS["minus"]
     left, _upper, right, _lower = _ink_rect(icons.icon_pixmap("minus", 48, TEXT_PRIMARY))
     assert left <= bar.x1 - bar.width / 2 + 1
@@ -735,7 +629,6 @@ def test_a_line_led_by_an_icon_shows_its_words_as_they_were_written():
 
 
 
-# --- the icons Line's runs wear for the kind of run they are --------------------
 
 def _of(name: str, kind: type) -> list:
     return [shape for shape in ICONS[name] if isinstance(shape, kind)]

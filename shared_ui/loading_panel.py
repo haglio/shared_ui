@@ -1,8 +1,3 @@
-"""The loading screen every app in the family shows while it starts: the app's
-icon, its name, a line saying what is happening, a progress bar and a hint,
-on one navy ground.  Rendered once, with Pillow, so a Tk cover, a Qt window, a
-pygame surface and a headset all show the same drawing."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -25,7 +20,6 @@ from shared_ui.type_scale import SIZE_HEADING, SIZE_SMALL, SIZE_TINY, in_pixels
 
 @dataclass(frozen=True)
 class Metrics:
-    """The panel's sizes, in pixels."""
 
     padding: int = MARGIN_DIALOG
     icon: int = 128
@@ -45,7 +39,6 @@ DESKTOP = Metrics()
 
 @dataclass(frozen=True)
 class LoadingPanel:
-    """What the panel says right now."""
 
     wordmark: str
     status: str
@@ -56,7 +49,6 @@ class LoadingPanel:
 
 
 def icon_image(path: Path | None) -> Image.Image | None:
-    """An app's icon file as the panel takes it, or None for a panel without one."""
     if path is None:
         return None
     try:

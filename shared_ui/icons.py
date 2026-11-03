@@ -1,28 +1,3 @@
-"""The family's icons, drawn with QPainter for the apps' Qt chrome.
-
-The shapes are not here -- they are in :mod:`shared_ui.icon_geometry`, which
-knows nothing about any toolkit, and :mod:`shared_ui.icons_pil` renders the same
-list through Pillow for the Funestras' HUDs.  That split is the point: an icon drawn
-here and the same icon on a HUD are one drawing.
-
-Callers take one of three routes:
-
-* :func:`icon_pixmap` for a raw pixmap -- a panel that paints its own bitmap,
-* :func:`qt_icon` for a QIcon carrying a normal and a disabled rendering --
-  a toolbar button, which Qt swaps between as it enables and disables,
-* :func:`draw_icon` to paint one through a painter the caller already holds --
-  the route a badge takes, so the icon lands on the chip the caller just drew.
-
-The icons are drawn rather than typed as font characters because a face is not
-guaranteed to carry them (Windows draws a tofu rectangle for the ones it lacks),
-and because a typed character's weight then follows whatever face happens to be
-installed rather than the weight of the icons beside it.
-
-What is NOT here: an app's own composition -- the chip under a badge, which
-levels get a lettered icon, which button wears which icon.  That is each app's
-business and it stays there.
-"""
-
 from __future__ import annotations
 
 import html
@@ -65,12 +40,6 @@ class _Frame:
 
 
 def draw_icon(painter: QPainter, name: str, color, **frame) -> None:
-    """Paint *name* through *painter*, in a *size*-square frame at ``(x, y)``.
-
-    The painter's own pen, brush, transform and hints are left as they were --
-    a caller part-way through drawing a chip must not find its brush swapped
-    out from under it.
-    """
     ink = QColor(color)
     placed = _Frame(**frame)
     painter.save()
@@ -101,7 +70,6 @@ def _ink_box(name: str) -> QRectF:
 
 
 def draw_icon_filling(painter: QPainter, name: str, color, box: QRectF) -> None:
-    """Paint *name* as large as its ink fits in *box*, centered there."""
     ink = _ink_box(name)
     scale = min(box.width() / ink.width(), box.height() / ink.height())
     draw_icon(painter, name, color, size=CANVAS * scale,
@@ -110,7 +78,6 @@ def draw_icon_filling(painter: QPainter, name: str, color, box: QRectF) -> None:
 
 
 def icon_pixmap(name: str, size: int, color) -> QPixmap:
-    """*name* as a transparent *size*-square pixmap, drawn in *color*."""
     edge = max(1, int(size))
     pixmap = QPixmap(edge, edge)
     pixmap.fill(Qt.GlobalColor.transparent)
@@ -121,17 +88,6 @@ def icon_pixmap(name: str, size: int, color) -> QPixmap:
 
 
 def qt_icon(name: str, *, color=None, size: int = int(CANVAS)) -> QIcon:
-    """*name* as an icon carrying its normal and its disabled rendering.
-
-    *color* tints the normal one -- a button that says what it does before its
-    tooltip does -- and the disabled one stays the muted gray whatever that
-    color is, so a button with nothing to act on reads as dead rather than as a
-    dimmer shade of red.  There is deliberately no way to override the second:
-    the override would be the thing the rule above rules out.
-
-    Drawn at *size* and left for Qt to scale down onto the button, so the edges
-    stay crisp at whatever size the chrome ends up asking for.
-    """
     icon = QIcon()
     icon.addPixmap(
         icon_pixmap(name, size, TEXT_PRIMARY if color is None else color),
@@ -142,12 +98,6 @@ def qt_icon(name: str, *, color=None, size: int = int(CANVAS)) -> QIcon:
 
 
 def inline_icon(name: str, *, color, size: int) -> str:
-    """*name* as an image a label's rich text can set among its words, *size*
-    across in *color*.
-
-    Drawn at twice that and scaled down, so the icon stays crisp on a screen
-    that scales the label up.
-    """
     png = QByteArray()
     buffer = QBuffer(png)
     buffer.open(QIODevice.OpenModeFlag.WriteOnly)
@@ -157,12 +107,10 @@ def inline_icon(name: str, *, color, size: int) -> str:
 
 
 def icon_then_text(name: str, text: str, *, color, size: int) -> str:
-    """*text* as a label's rich text, led by *name* drawn *size* across in *color*."""
     return f"{inline_icon(name, color=color, size=size)}&nbsp;{html.escape(text, quote=False)}"
 
 
 def _set_pen(painter: QPainter, ink: QColor, width: float) -> None:
-    """Set up an outline pen: round caps and joins, so an icon has no sharp ends."""
     pen = QPen(ink)
     pen.setWidthF(width)
     pen.setCapStyle(Qt.PenCapStyle.RoundCap)

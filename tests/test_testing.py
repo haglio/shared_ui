@@ -1,5 +1,3 @@
-"""shared_ui.testing: putting the pointer on a widget a suite has shown."""
-
 from __future__ import annotations
 
 from PyQt6.QtCore import QPoint, Qt

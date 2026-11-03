@@ -1,5 +1,3 @@
-"""One query's matches across a window's text fields: found, painted, walked."""
-
 from __future__ import annotations
 
 from collections.abc import Callable

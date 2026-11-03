@@ -1,5 +1,3 @@
-"""The dialog the family shows when an app has to stop and say something."""
-
 from __future__ import annotations
 
 import html
@@ -31,13 +29,9 @@ from shared_ui.fonts import SIZE_BODY, make_font
 from shared_ui.icons import icon_pixmap
 from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, MARGIN_DIALOG
 
-# The icon beside the message, in pixels square.  Windows' own message dialogs
-# draw theirs at this size.
+# Windows' own message dialogs draw their icon at this size.
 ICON_SIZE = 32
 
-# The band the message column lives in.  Below the floor a wrapping label
-# picks a column narrow enough to break a sentence that already fitted; above
-# the ceiling a stage failure's list of file paths lays out on one line.
 MESSAGE_WIDTH_MIN = 340
 MESSAGE_WIDTH_MAX = 480
 
@@ -45,15 +39,8 @@ DISMISSED = QDialog.DialogCode.Accepted.value + 1
 
 
 class _GuiThreadCall(QObject):
-    """Runs work on the GUI thread, blocking the thread that asked for it.
-
-    Qt builds widgets on the GUI thread or not at all, and several callers here
-    are background workers: evolver's pipeline stages report a failure from the
-    thread the pipeline runs on.  The slot is decorated because PyQt routes an
-    undecorated Python callable through a proxy that stays put in the
-    connecting thread -- which delivers the work back to the very thread this
-    exists to leave.
-    """
+    """Qt builds widgets on the GUI thread or not at all. The slot is decorated because PyQt
+    routes an undecorated callable through a proxy in the connecting thread."""
 
     _requested = pyqtSignal(object)
 
@@ -88,7 +75,6 @@ class _GuiThreadCall(QObject):
 
 
 class Level(Enum):
-    """How bad the news is, in the family icon the dialog draws beside it."""
 
     ERROR = ("error", palette.RED)
     WARNING = ("warning", palette.YELLOW)
@@ -209,7 +195,6 @@ class AlertDialog(QDialog):
 
 
 def show_alert(title: str, message: str, **look) -> bool:
-    """Block until the alert is closed, and say whether it was closed with Dismiss."""
     app = QApplication.instance() or QApplication([])
 
     def open_it() -> int:

@@ -1,10 +1,3 @@
-"""The family's on/off switch drawn with Pillow, at the HUD buttons' size.
-
-The switch :mod:`shared_ui.toggle_switch` paints on the desktop, its shape read
-from :mod:`shared_ui.toggle_geometry`, drawn big and resampled down for the
-smooth edge Pillow does not draw, as :mod:`shared_ui.icons_pil` draws the icons.
-"""
-
 from __future__ import annotations
 
 from PIL import Image, ImageDraw

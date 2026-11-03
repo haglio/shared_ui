@@ -1,4 +1,3 @@
-"""shared_ui.type_scale: the family's lettering as plain numbers, with no toolkit."""
 from __future__ import annotations
 
 import subprocess

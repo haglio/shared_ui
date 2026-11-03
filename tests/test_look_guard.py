@@ -1,5 +1,3 @@
-"""shared_ui.look_guard: what an app spells of its own look, found in its source."""
-
 from __future__ import annotations
 
 import os
@@ -18,7 +16,6 @@ def _git(checkout: Path, *args: str) -> None:
 
 @pytest.fixture
 def app(tmp_path):
-    """A checkout holding one package, every file handed to it tracked."""
     checkout = tmp_path / "an_app"
     (checkout / "parlor").mkdir(parents=True)
     _git(checkout, "init", "-q")

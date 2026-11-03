@@ -1,6 +1,3 @@
-"""shared_ui.loading_panel: the loading screen every app in the family shows,
-rendered once with Pillow so each toolkit draws the same drawing."""
-
 from __future__ import annotations
 
 from PIL import Image
@@ -34,7 +31,6 @@ class TestTheGround:
 
 
 def _box_of(image, color) -> tuple[int, int, int, int]:
-    """``(left, top, right, lower)`` of every pixel in *color*."""
     pixels = image.load()
     xs = [x for y in range(image.height) for x in range(image.width) if pixels[x, y] == color]
     ys = [y for y in range(image.height) for x in range(image.width) if pixels[x, y] == color]

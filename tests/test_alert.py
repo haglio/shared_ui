@@ -1,5 +1,3 @@
-"""The family's alert dialog."""
-
 from __future__ import annotations
 
 import threading
@@ -188,18 +186,12 @@ def test_the_message_and_the_button_are_set_in_the_familys_body_font():
 
 
 def test_a_long_message_wraps_rather_than_stretching_off_the_screen():
-    """Evolver's stage failures list up to thirty file paths at a time, and a
-    label with nothing holding it back lays every one of them out on one line."""
     dlg = AlertDialog("Example App", " ".join(["a-fairly-long-file-name.mp4"] * 40))
 
     assert dlg.sizeHint().width() <= 600
 
 
 def test_the_message_column_has_a_floor_as_well_as_a_ceiling():
-    """The ceiling is what the wrapping test above proves.  The floor is the
-    other half: a wrapping label with nothing under it picks a column narrow
-    enough to break a sentence that already fitted -- the broker's two-line
-    idle notice came out over three lines at 260 pixels wide."""
     dlg = AlertDialog("Example App", "Nothing to do.")
 
     body, = [lbl for lbl in dlg.findChildren(QLabel) if lbl.text()]
@@ -224,8 +216,6 @@ def test_the_level_picks_the_family_icon_beside_the_message(level, drawn, ink):
 
 
 def test_the_dialog_wears_the_apps_own_icon(tmp_path):
-    """Windows takes a dialog's taskbar button from its window icon, so without
-    one the alert appears under the python interpreter's."""
     icon = tmp_path / "app.png"
     drawn = QPixmap(16, 16)
     drawn.fill(BLUE)
@@ -246,9 +236,6 @@ def test_the_dialog_wears_an_icon_the_app_has_already_drawn():
 
 
 def test_the_alert_opens_in_front_of_whatever_the_user_is_looking_at():
-    """Several of these apps are launched hidden from a shortcut, so they have
-    no claim on the foreground; an alert that opens under the window in front
-    is indistinguishable from having crashed silently."""
     dlg = AlertDialog("Example App", "Nothing to do.")
 
     assert dlg.windowFlags() & Qt.WindowType.WindowStaysOnTopHint
@@ -291,8 +278,6 @@ def test_show_alert_says_whether_the_person_dismissed_it(closed_with, dismissed)
 
 
 def test_show_alert_builds_a_qapplication_when_the_process_has_none():
-    """Several callers are dying processes and command-line tools that never
-    built one -- the alert is the only Qt they will ever put on the screen."""
     with (
         patch("shared_ui.alert.AlertDialog"),
         patch("shared_ui.alert.QApplication") as application,
@@ -332,8 +317,6 @@ def _show_alert_from_a_worker_thread(qapp, dialog_class, **kwargs) -> list[bool]
 
 
 def test_an_alert_raised_off_the_gui_thread_still_opens_on_it(qapp):
-    """Evolver's pipeline stages say what went wrong from a worker thread, and
-    Qt builds widgets on the GUI thread or not at all."""
     opened_on = []
 
     class RecordingDialog:
@@ -363,8 +346,6 @@ def test_an_alert_raised_off_the_gui_thread_says_whether_it_was_dismissed(qapp):
 
 
 def test_the_dialog_is_spaced_by_the_familys_dialog_tokens():
-    """A notice is a window of its own with nothing else in it; at the density
-    of a packed toolbar it reads as cramped."""
     dlg = AlertDialog("Example App", "Nothing to do.")
 
     margins = dlg.layout().contentsMargins()

@@ -1,5 +1,3 @@
-"""shared_ui.toggle_switch_pil: the family's on/off switch drawn with Pillow, at the HUD's size."""
-
 from __future__ import annotations
 
 from PIL import Image

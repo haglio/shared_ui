@@ -1,12 +1,3 @@
-"""The family's icons as SVG, for a page an app draws as HTML.
-
-The same geometry :mod:`shared_ui.icons` and :mod:`shared_ui.icons_pil` render,
-written out as SVG on the 48-square and inked in ``currentColor``, so the page's
-own style sheet says what color an icon takes.  Every shape is laid down filled:
-a pen's line is a rounded bar, which is also what gives it round ends and round
-corners where two meet, and an outlined ring or frame is the space between two.
-"""
-
 from __future__ import annotations
 
 import math
@@ -34,7 +25,6 @@ def _n(value: float) -> str:
 
 
 def _bar(start: tuple[float, float], end: tuple[float, float], width: float) -> str:
-    """A pen's line from *start* to *end*, its ends rounded by half its width."""
     (x1, y1), (x2, y2) = start, end
     length = math.dist(start, end) + width
     middle_x, middle_y = (x1 + x2) / 2, (y1 + y2) / 2
@@ -99,7 +89,6 @@ def _ellipse(shape: Ellipse) -> str:
 
 
 def _arc(shape: Arc) -> str:
-    """The band an arc's pen covers, between its two radii, with a round end."""
     cx, cy = shape.x + shape.w / 2, shape.y + shape.h / 2
     start, span = (shape.start, shape.span) if shape.span >= 0 else (shape.start + shape.span, -shape.span)
     half = shape.width / 2
@@ -142,7 +131,6 @@ _ELEMENTS = {Line: _line, Polyline: _polyline, Polygon: _polygon, RoundedRect: _
 
 
 def svg_icon(name: str, *, size: float) -> str:
-    """*name* as an ``<svg>`` *size* across, drawn in the color around it."""
     shapes = "".join(_ELEMENTS[type(shape)](shape) for shape in shapes_of(name))
     return (f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 {_n(CANVAS)} {_n(CANVAS)}' "
             f"width='{_n(size)}' height='{_n(size)}'>{shapes}</svg>")

@@ -1,53 +1,24 @@
-"""The family's colors as plain RGB triples -- no toolkit.
-
-Every color the apps share is here, once, as ``(red, green, blue)``.
-:mod:`shared_ui.colors` is the same list as QColors for the Qt chrome, and
-anything that draws without Qt reads this module instead: the Funestras paint
-their HUDs into the video frame with Pillow, and Fun Time's help page is HTML.
-A second copy of a number is a thing that drifts, so there is one.  This
-module imports nothing outside the standard library, so a Pillow-only process
-never pulls in Qt to learn what color a button is.
-"""
-
 from __future__ import annotations
 
 Rgb = tuple[int, int, int]
 RGB_CHANNELS = 3
 CHANNEL_MAX = 255
 
-# ---------------------------------------------------------------------------
-# Background tiers (darkest -> lightest)
-# ---------------------------------------------------------------------------
-BG_PRIMARY: Rgb = (24, 24, 24)  # main canvas / window background
-BG_SECONDARY: Rgb = (40, 40, 40)  # elevated surfaces (panes, cards)
-BG_TERTIARY: Rgb = (50, 50, 50)  # overlay / dialog background
-BG_BUTTON: Rgb = (62, 62, 62)  # a control at rest
-BG_KEYCAP: Rgb = (72, 72, 72)  # keycap / legend background
-# A control that is ON -- toggled, engaged, holding something down -- sits on a
-# LIGHTER ground than one at rest.  One rule, so an active control reads the
-# same whichever app it is in.
+BG_PRIMARY: Rgb = (24, 24, 24)
+BG_SECONDARY: Rgb = (40, 40, 40)
+BG_TERTIARY: Rgb = (50, 50, 50)
+BG_BUTTON: Rgb = (62, 62, 62)
+BG_KEYCAP: Rgb = (72, 72, 72)
 BG_BUTTON_ACTIVE: Rgb = (92, 92, 92)
 
-# ---------------------------------------------------------------------------
-# Text tiers (brightest -> dimmest)
-# ---------------------------------------------------------------------------
-TEXT_PRIMARY: Rgb = (240, 240, 240)  # titles, headings, button labels
-TEXT_SECONDARY: Rgb = (230, 230, 230)  # body text, info labels
-TEXT_MUTED: Rgb = (120, 120, 120)  # disabled / placeholder text
+TEXT_PRIMARY: Rgb = (240, 240, 240)
+TEXT_SECONDARY: Rgb = (230, 230, 230)
+TEXT_MUTED: Rgb = (120, 120, 120)
 
-# ---------------------------------------------------------------------------
-# Borders
-# ---------------------------------------------------------------------------
-BORDER_DEFAULT: Rgb = (210, 210, 210)  # standard border / outline
-BORDER_SUBTLE: Rgb = BG_BUTTON_ACTIVE  # disabled / de-emphasized border
-BORDER_PANEL: Rgb = TEXT_MUTED  # a panel's edge: the muted gray, not a shade of its own
+BORDER_DEFAULT: Rgb = (210, 210, 210)
+BORDER_SUBTLE: Rgb = BG_BUTTON_ACTIVE
+BORDER_PANEL: Rgb = TEXT_MUTED
 
-# ---------------------------------------------------------------------------
-# Hues (named by hue, not purpose)
-# ---------------------------------------------------------------------------
-# There is ONE blue in this family.  Where something needs a lighter one beside
-# it -- a range in play against a range loaded, a progress band -- it is this
-# blue tinted toward white, not a second hue.
 BLUE: Rgb = (48, 128, 224)
 BLUE_LIGHT: Rgb = (140, 192, 240)
 GREEN: Rgb = (48, 160, 48)
@@ -55,61 +26,44 @@ RED: Rgb = (255, 60, 60)
 YELLOW: Rgb = (255, 200, 120)
 MAGENTA: Rgb = (200, 80, 160)
 WHITE: Rgb = (255, 255, 255)
-BLACK: Rgb = (0, 0, 0)  # the ground a video plays on, as every Funestra's mpv draws it
+BLACK: Rgb = (0, 0, 0)
 
-# ---------------------------------------------------------------------------
-# The loading screen every app shows while it starts
-# ---------------------------------------------------------------------------
-LOADING_GROUND: Rgb = (26, 26, 46)  # the panel's own navy, under everything on it
-LOADING_ACCENT: Rgb = (233, 69, 96)  # the app's name, and the bar's fill
-LOADING_TROUGH: Rgb = (22, 33, 62)  # the bar's track
-LOADING_STATUS: Rgb = BORDER_DEFAULT  # the line saying what is happening: the ladder's standard gray
-LOADING_HINT: Rgb = (122, 122, 149)  # the line under the bar, subtler than the status
+LOADING_GROUND: Rgb = (26, 26, 46)
+LOADING_ACCENT: Rgb = (233, 69, 96)
+LOADING_TROUGH: Rgb = (22, 33, 62)
+LOADING_STATUS: Rgb = BORDER_DEFAULT
+LOADING_HINT: Rgb = (122, 122, 149)
 
-# ---------------------------------------------------------------------------
-# Toggle switch
-# ---------------------------------------------------------------------------
 TOGGLE_ON: Rgb = BLUE
-TOGGLE_OFF: Rgb = TEXT_MUTED  # the muted gray everything else off wears
+TOGGLE_OFF: Rgb = TEXT_MUTED
 TOGGLE_HANDLE: Rgb = WHITE
 
 PREVIEW_INK: Rgb = YELLOW
 
 
-# How much lighter a control sits while the pointer is over it.  One step, taken
-# from whatever ground the control already has, so a hover says "this is the one
-# you are about to press" without saying anything about what the control IS --
-# a lit control stays its own color, a shade brighter.  Lighter, never darker:
-# every other state in this family reads as lighter, and a control that dimmed
-# under the pointer read as going out of reach at the moment it was reached for.
 HOVER_LIFT = 30
 
 
 def hovered(rgb: Rgb) -> Rgb:
-    """*rgb* one step lighter -- the ground under the pointer."""
     return tuple(min(CHANNEL_MAX, channel + HOVER_LIFT) for channel in rgb)
 
 
 def as_hex(rgb: Rgb) -> str:
-    """The ``#rrggbb`` spelling a style sheet or an HTML page takes."""
     red, green, blue = rgb
     return f"#{red:02x}{green:02x}{blue:02x}"
 
 
 def as_rgba(rgb: Rgb, alpha: float) -> str:
-    """The ``rgba()`` spelling a style sheet takes for the color seen through, *alpha* in 0-1."""
     red, green, blue = rgb
     return f"rgba({red}, {green}, {blue}, {alpha:g})"
 
 
 def as_fractions(rgb: Rgb, alpha: float = 1.0) -> tuple[float, float, float, float]:
-    """The ``(red, green, blue, alpha)`` in 0-1 an OpenGL headset scene draws with."""
     red, green, blue = rgb
     return (red / CHANNEL_MAX, green / CHANNEL_MAX, blue / CHANNEL_MAX, alpha)
 
 
 def nearest(rgb: Rgb) -> Rgb:
-    """The family's color closest to *rgb*, for one that reaches an app from outside its code."""
     family = {value for name, value in globals().items()
               if name.isupper() and isinstance(value, tuple) and len(value) == RGB_CHANNELS}
     return min(family, key=lambda color: sum((a - b) ** 2 for a, b in zip(color, rgb, strict=True)))

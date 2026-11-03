@@ -1,5 +1,3 @@
-"""shared_ui.find_bar: the strip Ctrl+F opens over a window's text."""
-
 from __future__ import annotations
 
 import pytest
@@ -153,7 +151,6 @@ def test_a_query_that_finds_nothing_says_so(bar, field):
 
 
 def test_nothing_typed_yet_reads_as_nothing_rather_than_zero(bar, field):
-    # A count of zero before you have searched anything reads as a failed search.
     bar.open_find([field("a cat")])
 
     assert _count(bar) == ""

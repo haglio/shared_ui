@@ -1,8 +1,3 @@
-"""The family's app icons: one MAGENTA block letter each, on one 5x5 grid.
-
-Pillow only, so a test can check an icon without a Qt application.
-"""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,12 +6,12 @@ from PIL import Image
 
 from shared_ui.palette import CHANNEL_MAX, MAGENTA
 
-CANVAS = 256  # the master frame
-INSET = 31  # the letter grid's offset inside the canvas
-GRID = CANVAS - 2 * INSET  # 194: the letter grid, five cells across
-UNIT = GRID / 5  # one cell, and one bar
-CORNER_SOFTENING_MAX = 8  # rows a corner may round over; the family's round over three
-SOLID = 128  # the alpha above which a pixel is ink rather than an edge
+CANVAS = 256
+INSET = 31
+GRID = CANVAS - 2 * INSET
+UNIT = GRID / 5
+CORNER_SOFTENING_MAX = 8
+SOLID = 128
 _GRID_START_SLACK = 2
 _GRID_SIZE_SLACK = 4
 
@@ -35,16 +30,11 @@ LETTERS: dict[str, tuple[str, ...]] = {
     "VR": ("#####", "#...#", "#####", "####.", "#.##."),
 }
 
-# Where inside a cell to look: a 3x3 lattice kept clear of the cell's edges, so
-# a bar a hair wide or narrow of a cell passes and one a third off does not.
 _CELL_MARGIN = 8
 _LATTICE = (0.0, 0.5, 1.0)
 
 
 def draw_letter(draw, rect: tuple[int, int, int, int], letter: str) -> None:
-    """*letter*'s cells centered in *rect*, the blank ones left alone so what is
-    under the letter shows through its counters as the .ico's transparent cells
-    let the desktop through."""
     x, y, w, h = rect
     cell = max(1, min(w, h) // 7)
     left, top = x + (w - 5 * cell) / 2, y + (h - 5 * cell) / 2
@@ -58,7 +48,7 @@ def draw_letter(draw, rect: tuple[int, int, int, int], letter: str) -> None:
 def _master(path: Path) -> Image.Image:
     image = Image.open(path)
     if image.size != (CANVAS, CANVAS):
-        image.size = (CANVAS, CANVAS)  # the ICO plugin picks a frame by size
+        image.size = (CANVAS, CANVAS)
     return image.convert("RGBA")
 
 
@@ -67,7 +57,6 @@ def _solid(pixels, x: int, y: int) -> bool:
 
 
 def assert_follows_the_family_spec(path: Path | str, letter: str) -> None:
-    """Fail unless the icon at *path* is *letter*, drawn to the family's spec."""
     cells = LETTERS[letter]
     image = _master(Path(path))
     assert image.size == (CANVAS, CANVAS), f"{path}: no {CANVAS}px master frame"

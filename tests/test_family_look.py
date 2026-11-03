@@ -1,4 +1,3 @@
-"""shared_ui's own widgets wear the look it gives every app: its steps, none of their own."""
 from __future__ import annotations
 
 from pathlib import Path

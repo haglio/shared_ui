@@ -1,7 +1,3 @@
-"""What an app spells of its own look: a color, a typed symbol, an icon, a face,
-a text size or a spacing that does not come from shared_ui, found in the source
-it tracks."""
-
 from __future__ import annotations
 
 import ast

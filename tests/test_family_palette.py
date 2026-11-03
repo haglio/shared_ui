@@ -1,12 +1,3 @@
-"""shared_ui.colors.family_palette: the roles the desktop theme would fill in.
-
-A style sheet dresses what it names.  What it does not name stays the palette's,
-and the palette an app starts with is the desktop's -- which put the user's
-accent color, an orange, under every selected word in these dark apps.  These
-tests hand in a fabricated desktop accent as the base and check that no role the
-family owns comes back still wearing it.
-"""
-
 from __future__ import annotations
 
 from collections import Counter
@@ -19,9 +10,8 @@ from shared_ui import palette as tokens
 from shared_ui.chrome import family_stylesheet
 from shared_ui.colors import BG_PRIMARY, BLUE, TEXT_PRIMARY, dress_application, family_palette
 
-# Stands in for the color Windows hands an app that never says otherwise.
-# Invented, so a machine whose accent happens to match the family's blue cannot
-# make these pass for the wrong reason.
+# Stands in for the color Windows hands an app that never says otherwise: invented, so a
+# machine whose accent matches the family's blue cannot make these pass for the wrong reason.
 _DESKTOP_ACCENT = QColor(210, 70, 54)
 
 _OWNED = (
@@ -42,7 +32,6 @@ _GROUPS = (
 
 
 def _desktop_palette() -> QPalette:
-    """A palette with the accent in every role the family means to take back."""
     base = QPalette()
     for role in _OWNED:
         base.setColor(role, _DESKTOP_ACCENT)
@@ -51,13 +40,6 @@ def _desktop_palette() -> QPalette:
 
 @pytest.fixture
 def selection_pixels(qapp):
-    """What a field with its words picked actually puts on the screen, tallied
-    by color, drawn while the application wears the family palette.
-
-    The QApplication is one object for the whole session and the suite may
-    collect in any order, so the palette is put back: a test that dressed it and
-    walked away would decide what the tests after it were looking at.
-    """
     was = qapp.palette()
     qapp.setPalette(family_palette(_desktop_palette()))
     try:
@@ -67,7 +49,7 @@ def selection_pixels(qapp):
         field.selectAll()
 
         pixmap = QPixmap(field.size())
-        pixmap.fill(BG_PRIMARY)  # the dark canvas these fields sit on
+        pixmap.fill(BG_PRIMARY)
         field.render(pixmap, flags=QWidget.RenderFlag.DrawChildren)
         image = pixmap.toImage()
 
@@ -92,9 +74,6 @@ def test_no_role_the_family_owns_keeps_the_desktops_color():
 
 
 def test_every_role_it_restates_is_a_family_color():
-    """The rule the style sheet is already held to.  A color spelled in place
-    here is a near-blue nobody can find again -- and the point of this function
-    is that there is one blue, not that the orange became some other orange."""
     family = {tokens.as_hex(value) for name in dir(tokens) if name.isupper()
               for value in [getattr(tokens, name)] if isinstance(value, tuple)}
 
@@ -114,9 +93,6 @@ def test_a_selection_is_the_one_blue():
 
 
 def test_selected_words_read_against_the_ground_they_sit_on():
-    """Windows sat black text on its accent.  On a dark app's blue that would be
-    the darkest thing on the screen, which is not what picking words looks
-    like."""
     result = family_palette(_desktop_palette())
 
     ground = result.color(QPalette.ColorRole.Highlight)
@@ -126,9 +102,6 @@ def test_selected_words_read_against_the_ground_they_sit_on():
 
 
 def test_the_roles_it_does_not_own_are_left_where_they_were():
-    """A style computes a widget's bevels and shadows from that widget's own
-    ground, and the tooltip is the style sheet's; naming either here would fix
-    one answer across grounds that differ."""
     marker = QColor(1, 2, 3)
     untouched = (
         QPalette.ColorRole.Window, QPalette.ColorRole.Base, QPalette.ColorRole.Button,
@@ -172,14 +145,9 @@ def test_an_application_with_a_sheet_of_its_own_still_takes_the_family_palette(a
 
 
 def test_a_field_paints_its_selection_in_the_family_blue(selection_pixels):
-    """The palette is not a record of an intention: it is what a field reaches
-    for when it draws the words you have picked."""
     assert selection_pixels[_DESKTOP_ACCENT.name()] == 0
     assert selection_pixels[BLUE.name()] > 100, selection_pixels.most_common(5)
 
 
 def test_the_selected_words_are_still_legible_once_painted(selection_pixels):
-    """The ink as well as the ground: a selection drawn in the family's blue with
-    the desktop's black text would pass every check above and read as a dark
-    patch rather than as picked words."""
     assert selection_pixels[TEXT_PRIMARY.name()] > 20, selection_pixels.most_common(5)

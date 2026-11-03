@@ -1,6 +1,3 @@
-"""A drawing painted by something other than Qt, shown in a widget, with the
-pointer handed back to whatever painted it, in the drawing's own pixels."""
-
 from __future__ import annotations
 
 from PyQt6.QtGui import QImage, QPainter

@@ -1,6 +1,3 @@
-"""The family's loading screen as a Qt window, for the apps that boot in Qt:
-the panel alone, borderless, under a caption of the app's choosing."""
-
 from __future__ import annotations
 
 import logging
@@ -102,12 +99,10 @@ class LoadingWindow(QDialog):
 
 
 class LoadingCanceled(BaseException):
-    """He closed the loading window, or pressed Esc on it, before the app was up."""
+    pass
 
 
 class Loading:
-    """An app's start walked through its loading window, or through the log
-    where the start has no window of its own."""
 
     def __init__(self, app: QApplication, logger: logging.Logger,
                  window: LoadingWindow | None) -> None:

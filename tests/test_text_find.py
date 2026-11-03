@@ -1,6 +1,3 @@
-"""shared_ui.text_find: the matches of one query across a window's text fields,
-painted where they are, and walked one at a time."""
-
 from __future__ import annotations
 
 import pytest
@@ -12,7 +9,6 @@ from shared_ui.text_find import TextFind
 
 @pytest.fixture
 def fields():
-    """Loose fields holding the texts given, in the order a form would lay them."""
     hosts = []
 
     def make(*texts):
@@ -84,9 +80,7 @@ def test_stepping_walks_forward_and_wraps_both_ways(fields):
 
 
 def test_the_cursor_lands_on_the_current_match_without_selecting_it(fields):
-    # Qt paints a real selection over an extra selection, in the palette's
-    # highlight color, so a selected match would hide the yellow that says which
-    # match is current.
+    # Qt paints a real selection over an extra selection, in the palette's highlight color.
     (field,) = fields("a cat on a mat")
     find = TextFind()
     find.set_fields([field])

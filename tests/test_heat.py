@@ -1,5 +1,3 @@
-"""shared_ui.heat: a funscript's speed as one of the family's colors."""
-
 from __future__ import annotations
 
 from shared_ui import heat, palette

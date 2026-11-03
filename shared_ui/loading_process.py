@@ -1,11 +1,5 @@
-"""The family's loading window in a process of its own.
-
-An app's start keeps the thread its window would draw on busy, so a loading
-window in the same process stops drawing and stops answering Esc, and Windows
-marks it "Not Responding" until the start lets go. In a process of its own it
-answers throughout: the start sends it each step over a pipe, and it tells the
-start when the user cancels.
-"""
+"""An app's start keeps the thread a window would draw on busy, and Windows marks such a
+window "Not Responding", so the loading window has a process of its own."""
 
 from __future__ import annotations
 

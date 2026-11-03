@@ -1,5 +1,3 @@
-"""shared_ui.PressableDrawing: a drawing painted elsewhere, shown, and the pointer handed back."""
-
 from __future__ import annotations
 
 from PyQt6.QtCore import QEvent, QPoint, QPointF, Qt

@@ -114,18 +114,6 @@
     },
     {
       "screen": null,
-      "his_word": "tray (2026-09-28, 2026-10-11)",
-      "code_word": "tray",
-      "id": "tray",
-      "thing": "Windows' notification area, and an app's right-click menu there",
-      "code_today": [
-        "tray"
-      ],
-      "status": "kept",
-      "ruled": "Windows' own word"
-    },
-    {
-      "screen": null,
       "his_word": null,
       "code_word": "toolbar",
       "id": "toolbar",
@@ -137,26 +125,12 @@
     },
     {
       "screen": null,
-      "his_word": "pane (2026-09-13, 2026-10-25)",
-      "code_word": "pane",
-      "id": "pane",
-      "thing": "one of the columns of an app's window, with the family's margin inside it",
-      "code_today": [
-        "pane"
-      ],
-      "status": "ruled",
-      "ruled": "2026-10-30, his words on Origenerator's list"
-    },
-    {
-      "screen": null,
       "his_word": null,
       "code_word": null,
       "id": "app_named_things",
-      "thing": "things an app names and this library only mentions or takes a size for: its badge and chip, a Funestra's console and pill",
+      "thing": "things an app names and this library only takes a size for: its chip, a Funestra's pill",
       "code_today": [
-        "badge",
         "chip",
-        "console",
         "pill"
       ],
       "status": "kept"

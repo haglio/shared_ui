@@ -1,5 +1,3 @@
-"""shared_ui.icons_svg: the family's icons for a page drawn as SVG."""
-
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET

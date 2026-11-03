@@ -1,5 +1,3 @@
-"""shared_ui.pages: an HTML page or a style sheet names the family's look and gets it spelled."""
-
 from __future__ import annotations
 
 import pytest

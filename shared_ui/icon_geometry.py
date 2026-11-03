@@ -1,21 +1,5 @@
-"""Every icon in the family, as geometry -- no toolkit, no colors, no pixels.
-
-The apps draw with two different things.  The desktop chrome is Qt, and paints
-with QPainter; the Funestras' HUDs are painted into the video frame with Pillow,
-because an mpv overlay takes a bitmap and there is no Qt in a Funestra process at
-all.  An icon drawn twice, once per side, is an icon that comes out two shapes.
-
-So the icons live here, each as a list of primitives, and each side renders
-them: :mod:`shared_ui.icons` through QPainter, :mod:`shared_ui.icons_pil`
-through Pillow.  Neither renderer decides anything about the shape.
-
-Coordinates are in a :data:`CANVAS`-square frame and the renderers scale from
-there, so an icon keeps its proportions and its pen weight whether it lands on
-a 14px HUD button or a 96px panel.  Angles are Qt's convention -- degrees
-counter-clockwise from 3 o'clock, given as a start and a span -- and the Pillow
-renderer converts; one convention had to win, and the geometry was written
-against this one.
-"""
+"""The desktop paints these with QPainter and the HUDs with Pillow, since an mpv overlay
+takes a bitmap and a Funestra process holds no Qt."""
 
 from __future__ import annotations
 
@@ -25,23 +9,11 @@ from dataclasses import dataclass
 
 from shared_ui.orientation import LANDSCAPE, PORTRAIT
 
-# Every icon is drawn to fill this frame, inset a little from its edge so a round
-# cap or a fat arrowhead still has room.  An icon that uses only the middle third
-# of its canvas is an icon the eye can't find once the frame is scaled onto a tree
-# row: the empty margin is scaled down with it.
 CANVAS = 48.0
 
-# The default pen width, in canvas units.  Renderers scale it with the drawing, so
-# an icon at 14px carries under a third of this width and reads as the same icon
-# rather than as a heavier one shrunk.
 PEN_WIDTH = 5.0
 
 
-# ---------------------------------------------------------------------------
-# The primitives.  Six shapes cover every icon here, and both renderers can draw
-# all six -- which is the constraint that keeps the two in step.  A shape with
-# ``fill`` set is a solid; otherwise it is outlined at ``width``.
-# ---------------------------------------------------------------------------
 @dataclass(frozen=True)
 class Line:
     x1: float
@@ -59,14 +31,6 @@ class Polyline:
 
 @dataclass(frozen=True)
 class Polygon:
-    """A closed shape, solid when *fill* is set and an outline otherwise.
-
-    *round_radius* rounds a solid one's corners, by drawing its own outline at
-    twice that width with round joins before filling it.  A play triangle drawn
-    with hard points reads as sharper and lighter than the icons beside it, and
-    a filled polygon is the one place this family's round caps and joins did not
-    reach.
-    """
 
     points: tuple[tuple[float, float], ...]
     fill: bool = True
@@ -97,14 +61,7 @@ class Ellipse:
 
 @dataclass(frozen=True)
 class Arc:
-    """An outlined arc of the ellipse inscribed in ``(x, y, w, h)``.
-
-    ``start`` and ``span`` are degrees counter-clockwise from 3 o'clock, the
-    convention QPainter uses (in sixteenths, which the Qt renderer multiplies
-    back in).  Pillow measures clockwise and takes two absolute angles, so its
-    renderer converts.  Give a positive span and let the start go negative: a
-    negative span means the same arc to Qt and the long way round to Pillow.
-    """
+    """``start`` and ``span`` are degrees counter-clockwise from 3 o'clock, as QPainter takes them."""
 
     x: float
     y: float
@@ -117,69 +74,44 @@ class Arc:
 
 @dataclass(frozen=True)
 class Path:
-    """A filled outline of straight runs and curves, written in a *frame*-square
-    of its own and drawn at that frame's scale, so its curves come out exactly
-    as they were first drawn.
-
-    Each command is ``("M", x, y)`` to start a run, ``("L", x, y)`` a straight
-    line, ``("Q", cx, cy, x, y)`` a curve bent toward ``(cx, cy)``,
-    ``("C", x1, y1, x2, y2, x, y)`` one bent toward two points, ``("Z",)`` to
-    close the run, or ``("R", x, y, w, h, radius)`` a rounded rectangle.
-    """
 
     commands: tuple[tuple, ...]
     frame: float = CANVAS
 
 
-# ---------------------------------------------------------------------------
-# The icons
-# ---------------------------------------------------------------------------
 def _chevron(pointing_left: bool) -> tuple:
-    """A left or right chevron, drawn corner to corner of the canvas."""
     near, far, upper, lower = 15, 31, 9, 39
     if pointing_left:
         return (Polyline(((far, upper), (near, 24), (far, lower))),)
     return (Polyline(((near, upper), (far, 24), (near, lower))),)
 
 
-# The undo/redo arc: a ring broken across one upper quadrant, the arrowhead
-# filling that break.  The two are one drawing mirrored about the canvas's
-# vertical center line -- hence the coordinate pairs below summing to 48 -- so
-# side by side they read as a direction each, not as two rings.  The head is
-# deliberately huge and the arc stops short of it, so it stands in open space
-# rather than merging into the arc it caps -- which is what makes the two
-# tellable apart at a glance rather than by which end of a circle it sits on.
-_HISTORY_RING = (11, 13, 26, 26)  # center (24, 26), radius 13
+_HISTORY_RING = (11, 13, 26, 26)
 
 
 def _history_arrow(forward: bool) -> tuple:
     if forward:
         return (
-            Arc(*_HISTORY_RING, 80, 285),                  # break at the upper right
+            Arc(*_HISTORY_RING, 80, 285),
             Polygon(((39, 14), (24, 5), (24, 23))),
         )
     return (
-        Arc(*_HISTORY_RING, 175, 285),                     # break at the upper left
+        Arc(*_HISTORY_RING, 175, 285),
         Polygon(((9, 14), (24, 5), (24, 23))),
     )
 
 
 def _star(filled: bool) -> tuple:
-    """A five-pointed star, solid or an outline of one."""
     cx, cy, outer, inner = 24, 25, 17, 7
     points = []
     for index in range(10):
         angle = -math.pi / 2 + index * math.pi / 5
         radius = outer if index % 2 == 0 else inner
         points.append((cx + radius * math.cos(angle), cy + radius * math.sin(angle)))
-    # The outline is thinner than the default pen width: at the full weight the
-    # points close up and the star reads as a blob with dents.
     return (Polygon(tuple(points), fill=filled, width=3),)
 
 
 def _shield() -> tuple:
-    """A heater shield, outlined: flat across the top, straight down the sides,
-    then curving in to a point at the foot."""
     left, right, top, shoulder, bow, foot = 10.0, 38.0, 6.0, 20.0, 33.0, 43.0
 
     def down_to_the_point(side: float) -> list[tuple[float, float]]:
@@ -192,31 +124,15 @@ def _shield() -> tuple:
                      *up_from_the_point), fill=False),)
 
 
-# The two bars ``plus`` is drawn as, in one place: the outline below traces the
-# very silhouette they fill, and ``minus`` is the horizontal one of them, so all
-# three move together rather than being three hand-measured crosses.
-_PLUS_BAR = 7.0     # how wide a bar is drawn
-_PLUS_REACH = 15.0  # from the center to where a bar's line ends, before its cap
+_PLUS_BAR = 7.0
+_PLUS_REACH = 15.0
 
 
 def _plus_outline() -> tuple:
-    """The outline of the cross ``plus`` fills -- its hollow counterpart, the way
-    ``star_outline`` answers ``star``.
-
-    Twelve corners walked round the two bars' silhouette: out along an arm, back
-    across its tip, and in to the notch where the next arm starts.  The tips are
-    left square where the bars' own round caps are curved -- the pen's round join
-    softens them, and matching those caps exactly would cost an arc per arm for a
-    difference under a pixel at any size a badge is drawn at.
-
-    Outlined thin, and thinner than the default: at the full weight the two arms
-    close up and the inside of the icon reads as a heavier bar rather than as
-    empty.
-    """
     half, arm = _PLUS_BAR / 2, _PLUS_REACH + _PLUS_BAR / 2
     points = []
-    for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):     # up, right, down, left
-        px, py = -dy, dx                                  # that arm's own crossways
+    for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):
+        px, py = -dy, dx
         for along, across in ((arm, -half), (arm, half), (half, half)):
             points.append((24 + dx * along + px * across,
                            24 + dy * along + py * across))
@@ -224,81 +140,44 @@ def _plus_outline() -> tuple:
 
 
 def _enhance_filter() -> tuple:
-    """The enhancement plus with a funnel over its corner -- show only the
-    enhanced ones.
-
-    Built the way ``reset`` is, out of the two icons it means at once: the plus
-    is the very sign an enhanced image wears in its corner across this family,
-    and the funnel is what narrows a set to part of itself.  Either alone is a
-    different control -- a bare plus is Enhance, which exists on the toolbar, and
-    a bare funnel would not say WHAT it kept.
-
-    The funnel sits down and right of the plus and crosses its lower arm rather
-    than clearing it: two icons set apart in one frame read as two controls
-    crowded together, where one laid over the other reads as a single sign about
-    a single thing.
-    """
-    plus = (16.0, 16.0)                                   # up in the frame's corner
+    plus = (16.0, 16.0)
     bar, reach = 6.0, 10.0
     return (
         Line(plus[0], plus[1] - reach, plus[0], plus[1] + reach, bar),
         Line(plus[0] - reach, plus[1], plus[0] + reach, plus[1], bar),
-        Polygon(((17, 26), (45, 26),                      # the funnel's mouth...
-                 (33.5, 36), (33.5, 45),                  # ...down its right side
-                 (28.5, 41), (28.5, 36)),                 # ...and back up its left
+        Polygon(((17, 26), (45, 26),
+                 (33.5, 36), (33.5, 45),
+                 (28.5, 41), (28.5, 36)),
                 fill=False, width=3.2),
     )
 
 
 def _copy() -> tuple:
-    """Two overlapping sheets -- copy this to the clipboard.
-
-    The back sheet is drawn as the part of its outline the front sheet does not
-    cover, rather than as a whole rectangle with a cutout punched through it: a
-    punched cutout (a Clear-mode fill) works on an empty pixmap and erases
-    whatever is underneath anywhere else, so the icon could not be laid over a
-    chip or a thumbnail.  The gap matters either way -- two bare outlines at icon
-    size read as a lattice rather than as one sheet in front of another.
-    """
     radius = 3.5
     return (
-        Line(16, 13.5, 16, 9.5),                       # back sheet, left edge
-        Arc(16, 6, 7, 7, 90, 90),                      # its top-left corner
-        Line(19.5, 6, 36.5, 6),                        # its top edge
-        Arc(33, 6, 7, 7, 0, 90),                       # its top-right corner
-        Line(40, 9.5, 40, 28.5),                       # its right edge
-        Arc(33, 25, 7, 7, 270, 90),                    # its lower-right corner
-        Line(36.5, 32, 34.5, 32),                      # what is left of its lower edge
-        RoundedRect(8, 16, 24, 26, radius),            # the front sheet, whole
+        Line(16, 13.5, 16, 9.5),
+        Arc(16, 6, 7, 7, 90, 90),
+        Line(19.5, 6, 36.5, 6),
+        Arc(33, 6, 7, 7, 0, 90),
+        Line(40, 9.5, 40, 28.5),
+        Arc(33, 25, 7, 7, 270, 90),
+        Line(36.5, 32, 34.5, 32),
+        RoundedRect(8, 16, 24, 26, radius),
     )
 
 
 def _loop() -> tuple:
-    """Two arrows chasing each other around a rounded rectangle -- repeat this.
-
-    Two arrows rather than one ring, because a ring is what undo and the reset
-    badge already are; a circuit with a head at each end says "around and around"
-    where a single arc says "back one step".  Each arrow is a horizontal run into
-    a corner, ending in a head pointing along the way it was going.
-    """
     return (
-        Line(12, 13, 32, 13),                          # the upper run, left to right
-        Arc(25, 13, 14, 14, 0, 90),                    # around the top-right corner
-        Polygon(((34.5, 20), (43.5, 20), (39, 29))),   # and down into its head
-        Line(36, 35, 16, 35),                          # the lower run, right to left
-        Arc(9, 21, 14, 14, 180, 90),                   # around the lower-left corner
-        Polygon(((13.5, 28), (4.5, 28), (9, 19))),     # and up into its head
+        Line(12, 13, 32, 13),
+        Arc(25, 13, 14, 14, 0, 90),
+        Polygon(((34.5, 20), (43.5, 20), (39, 29))),
+        Line(36, 35, 16, 35),
+        Arc(9, 21, 14, 14, 180, 90),
+        Polygon(((13.5, 28), (4.5, 28), (9, 19))),
     )
 
 
 def _reset() -> tuple:
-    """A gear with a circular arrow at its corner -- put the settings back.
-
-    The gear says "this is about the settings" and the arrow says "back to how
-    they started"; either alone is a different control -- a bare gear is Settings
-    and a bare circular arrow is Undo, both of which exist elsewhere in this
-    family.
-    """
     cx, cy, root, tip = 20.0, 20.0, 10.0, 15.0
     teeth = tuple(
         Line(cx + root * math.cos(a), cy + root * math.sin(a),
@@ -306,11 +185,11 @@ def _reset() -> tuple:
         for a in (index * math.pi / 4 for index in range(8))
     )
     return (
-        Ellipse(cx, cy, root, root, width=4.5),        # the gear's rim
+        Ellipse(cx, cy, root, root, width=4.5),
         *teeth,
-        Ellipse(cx, cy, 3.5, 3.5, width=3),            # its bore
-        Arc(28, 28, 16, 16, 35, 250, 3.6),             # the circular arrow...
-        Polygon(((45.5, 33), (39, 30.5), (41, 38))),   # ...and its head
+        Ellipse(cx, cy, 3.5, 3.5, width=3),
+        Arc(28, 28, 16, 16, 35, 250, 3.6),
+        Polygon(((45.5, 33), (39, 30.5), (41, 38))),
     )
 
 
@@ -363,8 +242,7 @@ _PAIR_TAIL = 5.0
 _PAIR_NECK = 32.0
 _PAIR_TIP = 43.0
 _PAIR_HALF_HEAD = 6.5
-_PAIR_PEN = 4.5              # a shade under the default: two lines at full weight
-                             # closed the gap between them at button size
+_PAIR_PEN = 4.5
 
 
 def _shuffle() -> tuple:
@@ -459,12 +337,6 @@ def _clip_scene_jump(to_scene: bool) -> tuple:
 
 
 def _compilation() -> tuple:
-    """A stack of pages -- the set a clip belongs to, played in its own order.
-
-    Three rather than the copy icon's two, and stepped evenly along a diagonal:
-    a stack says "several, in order", where two sheets say "this one and a copy
-    of it".
-    """
     return tuple(
         RoundedRect(16 - 4 * step, 5 + 5.5 * step, 24, 26, 3, width=3.2)
         for step in range(3)
@@ -472,11 +344,6 @@ def _compilation() -> tuple:
 
 
 def _headset() -> tuple:
-    """A headset seen head-on: a visor with two lenses and a strap either side.
-
-    The family's VR icon is its own letters, which say the app rather than the
-    act; a control that means "put this on" wants the thing itself.
-    """
     return (
         RoundedRect(6, 14, 36, 20, 8, width=3.6),
         Ellipse(16, 24, 5, 5, fill=True),
@@ -487,13 +354,6 @@ def _headset() -> tuple:
 
 
 def _monitor() -> tuple:
-    """A desktop monitor: a screen on a stem and a foot.
-
-    What the control OUT of the headset goes to, rather than a headset negated.
-    A ring drawn across the visor is more line than a button this size can hold
-    — at eighteen pixels it read as a smudge — where two rectangles and a bar
-    stay legible all the way down.
-    """
     return (
         RoundedRect(5, 9, 38, 26, 3, width=3.6),
         Line(24, 35, 24, 40, 3.6),
@@ -502,21 +362,15 @@ def _monitor() -> tuple:
 
 
 def _vr_hemisphere() -> tuple:
-    """A gridded dome -- video that wraps around you rather than sitting flat."""
     return (
-        Arc(4, 6, 40, 52, 0, 180, 3.6),      # the dome, over its equator
-        Arc(4, 22, 40, 20, 180, 180, 3.6),   # the rim, coming toward you
-        Arc(14, 6, 20, 52, 0, 180, 2.8),     # a meridian
-        Arc(9, 14, 30, 16, 180, 180, 2.8),   # and a parallel
+        Arc(4, 6, 40, 52, 0, 180, 3.6),
+        Arc(4, 22, 40, 20, 180, 180, 3.6),
+        Arc(14, 6, 20, 52, 0, 180, 2.8),
+        Arc(9, 14, 30, 16, 180, 180, 2.8),
     )
 
 
 def _flat_2d() -> tuple:
-    """A gridded screen seen at an angle -- video that stays a rectangle.
-
-    Leaning, because square-on it is a plain rectangle, and a plain rectangle
-    beside a dome reads as a missing icon rather than as the flat one.
-    """
     lean, top, lower = 10.0, 10.0, 38.0
 
     def edge(y: float) -> tuple[float, float]:
@@ -540,53 +394,33 @@ def _flat_2d() -> tuple:
 
 
 def _versions() -> tuple:
-    """Two pages offset along a diagonal, with a double-headed arrow across them.
-
-    The copy icon is two sheets too, and stands square; this pair leans, and the
-    arrow between them is what says the act is swapping one for the other rather
-    than making a second.
-    """
     return (
-        RoundedRect(22, 5, 21, 26, 3, width=3.4),      # the other cut
-        RoundedRect(5, 17, 21, 26, 3, width=3.4),      # the one on screen
-        Line(15, 33, 33, 15, 4.0),                     # the swap, along the offset
+        RoundedRect(22, 5, 21, 26, 3, width=3.4),
+        RoundedRect(5, 17, 21, 26, 3, width=3.4),
+        Line(15, 33, 33, 15, 4.0),
         Polygon(((36, 12), (26, 13), (35, 22))),
         Polygon(((12, 36), (22, 35), (13, 26))),
     )
 
 
 def _funscript_jump() -> tuple:
-    """An arrow running into an F -- skip ahead to where the scripting starts.
-
-    The F is the letter every funscripted thing in this family is marked with,
-    and the arrow says the act is going TO it rather than switching it on.
-    """
     return (
         Line(4, 24, 15, 24, 4.5),
         Polygon(((25, 24), (14, 17), (14, 31))),
-        Line(31, 8, 31, 40, 4.5),                      # the F's stem
-        Line(31, 8, 44, 8, 4.5),                       # its top bar
-        Line(31, 22, 41, 22, 4.5),                     # and its waist
+        Line(31, 8, 31, 40, 4.5),
+        Line(31, 8, 44, 8, 4.5),
+        Line(31, 22, 41, 22, 4.5),
     )
 
 
-# The four states of OSR2 control, as one drawing read four ways: the device from
-# the side -- its column on the right, the sleeve riding up and down it on the arm
-# between them -- with the sleeve at whichever end the hold settles it on.  An
-# arrow points AT the sleeve for the two holds, from above for the one that
-# settles it home and from below for the one that sends it away, and points away
-# from it both ways for the release that lets it move again.  Control-off draws
-# that same free sleeve with an X where each of release's arrows was: the device
-# is not being held anywhere, it is simply not being driven.
 _COLUMN = RoundedRect(28, 8, 15, 32, 3, width=3.4)
 _SLEEVE_X, _SLEEVE_W, _SLEEVE_H = 6.0, 15.0, 13.0
-_ARROW_X = 13.5      # the arrows run up the sleeve's own center line
-_ARROW_HALF = 7.0    # half an arrowhead's width
+_ARROW_X = 13.5
+_ARROW_HALF = 7.0
 _ARROW_PEN = 4.0
 
 
 def _sleeve(top: float) -> tuple:
-    """The sleeve at *top*, and the arm carrying it to the column."""
     middle = top + _SLEEVE_H / 2
     return (
         RoundedRect(_SLEEVE_X, top, _SLEEVE_W, _SLEEVE_H, 4, width=3.4),
@@ -595,7 +429,6 @@ def _sleeve(top: float) -> tuple:
 
 
 def _hold_arrow(tip: float, base: float) -> tuple:
-    """An arrowhead at *tip* with its stem running back from *base*."""
     tail = base + (base - tip) * 0.7
     return (
         Line(_ARROW_X, tail, _ARROW_X, base, _ARROW_PEN),
@@ -616,18 +449,11 @@ def _release() -> tuple:
     return (_COLUMN, *_sleeve(17.5), *_hold_arrow(3, 12), *_hold_arrow(45, 36))
 
 
-_CROSS_HALF = 6.0    # an X's arm, from its middle
-_CROSS_PEN = 3.6     # a shade finer than an arrow's, which has a solid head
+_CROSS_HALF = 6.0
+_CROSS_PEN = 3.6
 
 
 def _hold_cross(middle: float) -> tuple:
-    """An X centered at *middle* on the sleeve's own center line.
-
-    It takes the whole band between the sleeve and the frame's edge, which is
-    what keeps it legible at a HUD button's size -- and keeps it off the sleeve,
-    where an X overlapping the drawing read as a bow tie rather than as an icon
-    beside it.
-    """
     left, right = _ARROW_X - _CROSS_HALF, _ARROW_X + _CROSS_HALF
     upper, lower = middle - _CROSS_HALF, middle + _CROSS_HALF
     return (
@@ -640,18 +466,12 @@ def _control_off() -> tuple:
     return (_COLUMN, *_sleeve(17.5), *_hold_cross(8), *_hold_cross(40))
 
 
-# The letter grid every app in this family is marked on: five cells square, each
-# painted cell a solid block, adjacent ones merging into a bar.  The .ico files
-# are drawn on it (:mod:`shared_ui.app_icon`) and the Funestras stamp F-mode's
-# letter off it, so a toolbar's copy has to be the same letter and not a
-# letter drawn some other way.
 _GRID_CELLS = 5
 _GRID_INSET = 5.0
 _GRID_UNIT = (CANVAS - 2 * _GRID_INSET) / _GRID_CELLS
 
 
 def _grid_letter(rows: tuple[str, ...]) -> tuple:
-    """The cells *rows* paints, as solid blocks on the family's letter grid."""
     blocks = []
     for row, line in enumerate(rows):
         for column, painted in enumerate(line):
@@ -667,21 +487,10 @@ def _grid_letter(rows: tuple[str, ...]) -> tuple:
 
 
 def _fmode() -> tuple:
-    """F-mode's letter, on the grid the app icons are drawn on.
-
-    The same cells the Funestras stamp on their HUDs, so the one on a toolbar is
-    that letter rather than one drawn some other way.
-    """
     return _grid_letter(("#####", "#....", "#####", "#....", "#...."))
 
 
 def _expand_horizontal() -> tuple:
-    """A double-headed arrow lying flat -- widen this.
-
-    Deliberately chunky.  Typed as a character it was a hairline beside the solid
-    arrowheads of the transport controls, which made one control look like a
-    different class of thing from its neighbors.
-    """
     return (
         Line(15, 24, 33, 24, 6),
         Polygon(((5, 24), (17, 13), (17, 35))),
@@ -716,14 +525,10 @@ def _upright_beside_lying_down() -> tuple:
 
 
 def _star_ring() -> tuple:
-    """The star grown all round by a ring of its own color, which is what a
-    favorited star is drawn over to show it picked."""
     (star,) = _star(filled=True)
     return (Polygon(star.points, fill=True, round_radius=3.0),)
 
 
-# A thumb raised from a fist, in the 24-square it was first drawn in, so its
-# curves come out as they always have.
 _THUMBS_UP = Path((
     ("R", 1.5, 10, 4, 12, 0.8),
     ("M", 7, 11), ("L", 11.2, 3.2), ("Q", 12.2, 1.6, 13.6, 2.4), ("Q", 15, 3.4, 14.5, 5.5),
@@ -731,8 +536,6 @@ _THUMBS_UP = Path((
     ("Q", 20.1, 22, 17.8, 22), ("L", 9, 22), ("Q", 7, 22, 7, 20), ("Z",),
 ), frame=24.0)
 
-# A small arrow curling round in the lower right corner, laid over another icon
-# to say "make this again".
 _REGENERATE_CORNER = (
     Arc(29, 29, 15, 15, 35, 250, 3.4),
     Polygon(((45, 33), (39, 31), (41, 38))),
@@ -740,7 +543,6 @@ _REGENERATE_CORNER = (
 
 
 def _chevron_pointing(direction: str) -> tuple:
-    """A chevron pointing up or down, the left and right ones turned a quarter."""
     near, far, upper, lower = 15, 31, 9, 39
     if direction == "down":
         return (Polyline(((upper, near), (24, far), (lower, near))),)
@@ -748,7 +550,6 @@ def _chevron_pointing(direction: str) -> tuple:
 
 
 def _double_chevron(pointing_left: bool) -> tuple:
-    """Two chevrons in a row: a step further than one, back or forward."""
     first, second, tip = (7.0, 25.0, 14.0) if not pointing_left else (41.0, 23.0, -14.0)
     return tuple(Polyline(((x, 10), (x + tip, 24), (x, 38))) for x in (first, second))
 
@@ -764,7 +565,6 @@ def _lock(*, open_: bool) -> tuple:
 
 
 def _crescent() -> tuple:
-    """A new moon: the part of one disc another, up and to its right, leaves."""
     (ox, oy, outer), (ix, iy, inner) = (22.0, 25.0, 17.0), (31.0, 17.0, 13.0)
     distance = math.dist((ox, oy), (ix, iy))
     along = (outer ** 2 - inner ** 2 + distance ** 2) / (2 * distance)
@@ -799,8 +599,6 @@ def _cog() -> tuple:
     return (hub, *teeth)
 
 
-# Line's run-kind icons, drawn in the 26-square they were made in and moved onto
-# the canvas a little in from its edges.
 _KIND_SQUARE = 26.0
 _KIND_SCALE = (CANVAS - 6) / _KIND_SQUARE
 
@@ -828,7 +626,6 @@ def _kind_cells(columns_by_row: list[list[int]], across: int, size: float, gap: 
 
 
 def _jigsaw_piece() -> Path:
-    """A jigsaw piece, two of its sides a tab and two a blank, inside the frame."""
     middle, side, tab = (13.0, 13.0), 11.0, 0.13
     half = side / 2
     corners = [(middle[0] - half, middle[1] - half), (middle[0] + half, middle[1] - half),
@@ -849,7 +646,6 @@ def _jigsaw_piece() -> Path:
 
 
 def _snowflake_struck_out() -> tuple:
-    """A snowflake in a ring with a slash across it: no flakes here."""
     ring = _kind_ring()
     arm, fork_at, branch, branch_angle = 7.4, 5.0, 2.9, 40
     pen = 1.5 * _KIND_SCALE
@@ -874,7 +670,7 @@ ICONS: dict[str, tuple] = {
     "bolt": (
         Polygon(((34, 6), (28.5, 22.5), (36, 22.5), (14.5, 42), (20, 27.5), (12, 27.5))),
     ),
-    "chart": (                                            # three bars on a baseline
+    "chart": (
         RoundedRect(10, 26, 7, 12, 2, fill=True),
         RoundedRect(20.5, 11, 7, 27, 2, fill=True),
         RoundedRect(31, 19, 7, 19, 2, fill=True),
@@ -886,7 +682,7 @@ ICONS: dict[str, tuple] = {
     "chevron_down": _chevron_pointing("down"),
     "chevron_left": _chevron(pointing_left=True),
     "chevron_right": _chevron(pointing_left=False),
-    "clock": (                                            # hands at 12 and 3
+    "clock": (
         Ellipse(24, 24, 15, 15),
         Line(24, 24, 24, 13),
         Line(24, 24, 33, 24),
@@ -899,7 +695,7 @@ ICONS: dict[str, tuple] = {
     "compilation": _compilation(),
     "control_off": _control_off(),
     "copy": _copy(),
-    "crown": (                                            # five points over a band
+    "crown": (
         Polygon(((9, 33), (6, 13), (16, 22), (24, 8), (32, 22), (42, 13), (39, 33)),
                 fill=False, width=4),
         Line(9, 40, 39, 40, 4),
@@ -911,18 +707,18 @@ ICONS: dict[str, tuple] = {
     "database": _database(),
     "disc": (Ellipse(24, 24, 21, 21, fill=True),),
     "enhance_filter": _enhance_filter(),
-    "enlarge": (                                          # four corners pushed outward
+    "enlarge": (
         Polyline(((8, 19), (8, 8), (19, 8))), Polyline(((29, 8), (40, 8), (40, 19))),
         Polyline(((40, 29), (40, 40), (29, 40))), Polyline(((19, 40), (8, 40), (8, 29))),
     ),
     "error": (Ellipse(24, 24, 18, 18, width=4), Line(18, 18, 30, 30, 4.5), Line(30, 18, 18, 30, 4.5)),
     "expand_horizontal": _expand_horizontal(),
-    "export": (                                           # out of a tray
+    "export": (
         Polyline(((9, 27), (9, 39), (39, 39), (39, 27)), 4),
         Line(24, 31, 24, 9, 4.5),
         Polyline(((15, 17), (24, 8), (33, 17)), 4.5),
     ),
-    "external_link": (                                    # out of a box's corner
+    "external_link": (
         Polyline(((20, 10), (10, 10), (10, 38), (38, 38), (38, 28)), 3.6),
         Line(23, 25, 37, 11, 3.6),
         Polyline(((27, 10), (38, 10), (38, 21)), 3.6),
@@ -931,9 +727,9 @@ ICONS: dict[str, tuple] = {
     "filter": (Polygon(((8, 10), (40, 10), (28, 25), (28, 38), (20, 42), (20, 25)),
                        fill=False, width=4),),
     "flip_ends": _flip_ends(),
-    "flask": (                                            # an Erlenmeyer, with liquid
+    "flask": (
         Polyline(((19, 8), (19, 18), (9, 38), (39, 38), (29, 18), (29, 8))),
-        Line(16, 8, 32, 8),                               # the lip
+        Line(16, 8, 32, 8),
         Polygon(((14, 29), (34, 29), (38, 36), (10, 36))),
     ),
     "fmode": _fmode(),
@@ -943,7 +739,7 @@ ICONS: dict[str, tuple] = {
     "full": _clip_on_the_timeline(_TIMELINE.x2),
     "grid": (_kind_frame(), *_kind_cells([[0, 1, 2, 3]] * 4, 4, 3.2, 1.4)),
     "headset": _headset(),
-    "human": (                                            # a stick figure
+    "human": (
         Ellipse(24, 10, 5.5, 5.5, fill=True),
         Line(24, 17, 24, 30),
         Polyline(((13, 26), (24, 20), (35, 26))),
@@ -968,7 +764,7 @@ ICONS: dict[str, tuple] = {
              Ellipse(38, 24, 4.5, 4.5, fill=True)),
     "more_vertical": (Ellipse(24, 10, 4.5, 4.5, fill=True), Ellipse(24, 24, 4.5, 4.5, fill=True),
                       Ellipse(24, 38, 4.5, 4.5, fill=True)),
-    "mic": (                                              # capsule, cradle, stand
+    "mic": (
         RoundedRect(18, 6, 12, 21, 6, fill=True),
         Arc(11, 11, 26, 26, 200, 140),
         Line(24, 37, 24, 42),
@@ -976,28 +772,22 @@ ICONS: dict[str, tuple] = {
     ),
     "pair_in_circle": (_kind_ring(), *_kind_cells([[1, 3]], 5, 3, 0.6)),
     "park": _park(),
-    "photo": (                                            # a sun over a mountain
+    "photo": (
         RoundedRect(8, 12, 32, 24, 4, width=3.4),
         Ellipse(17, 21, 3.2, 3.2, fill=True),
         Polygon(((11, 34), (22, 22), (37, 34))),
     ),
-    # The play triangle's corners are rounded, like the transport icons in an icon
-    # font: hard points read as a sharper, lighter icon than the ones beside it.
-    # Its ink sits right of the frame's center because a triangle's weight does --
-    # the centroid lands on 24, which is where the eye reads middle.
     "play": (Polygon(((15, 8), (15, 40), (39, 24)), round_radius=3),),
     "pencil": (
         Polygon(((8, 40), (12, 29), (31, 10), (38, 17), (19, 36)), fill=False, width=4),
         Line(27, 14, 34, 21, 4),
     ),
-    "pause": (                                            # two bars, rounded to match
+    "pause": (
         RoundedRect(13, 7, 8.5, 34, 3.5, fill=True),
         RoundedRect(26.5, 7, 8.5, 34, 3.5, fill=True),
     ),
     "power": _power(),
     "cells_in_circle": (_kind_ring(), *_kind_cells([[1, 3], [0, 1, 2, 3, 4], [1, 3]], 5, 3, 0.6)),
-    # A pair: one bar and two, at one weight, so a speed-down and a speed-up
-    # beside each other read as the same control twice rather than as two.
     "minus": (Line(24 - _PLUS_REACH, 24, 24 + _PLUS_REACH, 24, _PLUS_BAR),),
     "plus": (
         Line(24, 24 - _PLUS_REACH, 24, 24 + _PLUS_REACH, _PLUS_BAR),
@@ -1014,7 +804,7 @@ ICONS: dict[str, tuple] = {
     "reset": _reset(),
     "restart": _restart(),
     "retract": _retract(),
-    "save": (                                             # a floppy disk
+    "save": (
         Polygon(((8, 8), (33, 8), (40, 15), (40, 40), (8, 40)), fill=False, width=4),
         Polyline(((16, 8), (16, 17), (30, 17), (30, 8)), 3.6),
         RoundedRect(14, 25, 20, 15, 2, width=3.6),
@@ -1024,17 +814,17 @@ ICONS: dict[str, tuple] = {
     "clips": _clip_on_the_timeline(_CLIPS_END),
     "settings": _cog(),
     "shuffle": _shuffle(),
-    "slideshow": (                                        # a play triangle in a screen
+    "slideshow": (
         RoundedRect(8, 11, 32, 26, 4),
         Polygon(((20, 16), (20, 32), (33, 24))),
     ),
     "snowflake_struck_out": _snowflake_struck_out(),
-    "speaker": (                                          # a cone and two waves
+    "speaker": (
         Polygon(((7, 18), (14, 18), (22, 9), (22, 39), (14, 30), (7, 30))),
         Arc(23, 16, 12, 16, -70, 140, 4.5),
         Arc(25, 8, 18, 32, -70, 140, 4.5),
     ),
-    "speaker_off": (                                      # the cone, crossed out
+    "speaker_off": (
         Polygon(((7, 18), (14, 18), (22, 9), (22, 39), (14, 30), (7, 30))),
         Line(29, 19, 39, 29, 4.5),
         Line(39, 19, 29, 29, 4.5),
@@ -1046,7 +836,7 @@ ICONS: dict[str, tuple] = {
     "tag": (Polygon(((9, 9), (25, 9), (41, 25), (25, 41), (9, 25)), fill=False, width=4),
             Ellipse(17, 17, 3, 3, fill=True)),
     "thumbs_up": (_THUMBS_UP,),
-    "trash": (                                            # lid, handle, body, ridges
+    "trash": (
         Line(9, 15, 39, 15),
         Polyline(((18, 15), (18, 9), (30, 9), (30, 15))),
         Polyline(((13, 15), (16, 41), (32, 41), (35, 15))),
@@ -1059,7 +849,7 @@ ICONS: dict[str, tuple] = {
     "vr_hemisphere": _vr_hemisphere(),
     "warning": (Polygon(((24, 7), (43, 40), (5, 40)), fill=False, width=4.5),
                 Line(24, 18, 24, 28, 5), Ellipse(24, 34.5, 2.8, 2.8, fill=True)),
-    "wave": (                                             # one cycle of a sine
+    "wave": (
         Arc(6, 11, 18, 26, 0, 180),
         Arc(24, 11, 18, 26, 180, 180),
     ),
@@ -1071,7 +861,6 @@ ICONS: dict[str, tuple] = {
 
 
 def icon_names() -> tuple[str, ...]:
-    """Every icon the family can draw, sorted."""
     return tuple(sorted(ICONS))
 
 
