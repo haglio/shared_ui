@@ -19,11 +19,11 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from shared_ui import icons, icons_pil
+from shared_ui.colors import GREEN, RED, TEXT_PRIMARY
 from shared_ui.icon_geometry import ICONS, STAND_IN, Arc, icon_names
 from shared_ui.icon_geometry import Path as Outline
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
-from shared_ui.colors import GREEN, RED, TEXT_PRIMARY
 
 _SIZE = 48
 _INK = (240, 240, 240)  # TEXT_PRIMARY, as the HUDs' palette spells it
