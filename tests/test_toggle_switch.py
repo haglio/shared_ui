@@ -6,6 +6,8 @@ from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QHBoxLayout, QWidget
 
 from shared_ui.colors import BG_PRIMARY, TOGGLE_HANDLE, TOGGLE_OFF, TOGGLE_ON
+from shared_ui.spacing import GAP_MEDIUM
+from shared_ui.toggle_geometry import TRACK
 from shared_ui.toggle_switch import ToggleSwitch
 
 _OFF_THE_SWITCH = 200
@@ -114,3 +116,10 @@ def test_a_disabled_switch_dims():
     off.setEnabled(False)
 
     assert _mean_ink(off) < _mean_ink(on)
+
+
+def test_a_labeled_switch_asks_for_its_track_the_gap_and_its_words(qapp):
+    switch = ToggleSwitch("Run")
+
+    assert switch.sizeHint().width() == (
+        TRACK[0] + GAP_MEDIUM + switch.fontMetrics().horizontalAdvance("Run"))

@@ -91,6 +91,17 @@ class TestTheStartsSide:
             "Loading...", "Building the window..."]
 
 
+    def test_a_step_of_several_lines_reaches_the_window_as_one(self, qapp, tmp_path):
+        said = tmp_path / "said.txt"
+        process = _a_window_process(
+            f"import sys; open({str(said)!r}, 'w', encoding='utf-8').write(sys.stdin.read())")
+        window = LoadingProcess(process)
+
+        window.say("Loading\nthe scene list")
+        window.accept()
+
+        assert said.read_text(encoding="utf-8").splitlines() == ["Loading the scene list"]
+
     def test_a_window_that_will_not_go_is_ended_rather_than_waited_on_for_good(
             self, qapp, monkeypatch):
         monkeypatch.setattr("shared_ui.loading_process.GONE_WITHIN_S", 0.2)

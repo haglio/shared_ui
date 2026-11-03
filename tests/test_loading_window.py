@@ -11,6 +11,8 @@ from PyQt6.QtTest import QTest
 from shared_ui import loading_window
 from shared_ui.loading_panel import render
 from shared_ui.loading_window import Loading, LoadingCanceled, LoadingWindow, LoadingWindowSpec
+from shared_ui.palette import LOADING_ACCENT, PREVIEW_INK
+from shared_ui.preview import Preview
 
 
 def _window(**changes) -> LoadingWindow:
@@ -29,6 +31,10 @@ class TestTheWindow:
         assert window.windowFlags() & Qt.WindowType.FramelessWindowHint
         assert (window.width(), window.height()) == render(window.panel).size
 
+
+    def test_its_wordmark_wears_the_accent_and_a_previews_the_preview_ink(self, qapp):
+        assert _window().panel.ink == LOADING_ACCENT
+        assert _window(preview=Preview("the scene list")).panel.ink == PREVIEW_INK
 
     def test_it_comes_up_in_front_with_the_keyboard_whoever_started_its_process(
             self, qapp, monkeypatch):
