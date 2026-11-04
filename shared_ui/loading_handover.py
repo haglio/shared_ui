@@ -19,15 +19,13 @@ class TakingOver:
     def from_the_launcher(cls, environment: Mapping[str, str] = os.environ) -> TakingOver:
         return cls(loading_screen.meeting_place(environment))
 
-    @property
-    def _standing_at(self) -> tuple[int, int] | None:
-        return None if self._shown is None else (self._shown.left, self._shown.top)
-
     def panel_for(self, size: tuple[int, int]) -> tuple[int, int] | None:
+        if self._shown is not None:
+            return self._shown.left, self._shown.top
         app = None if self._place is None else self._place.where_the_app_comes_up()
         if app is None or (screens := loading_screen.screens()) is None:
-            return self._standing_at
-        return loading_screen.on_the_apps_monitor(size, screens, app, panel_at=self._standing_at).panel_on_screen
+            return None
+        return loading_screen.on_the_apps_monitor(size, screens, app).panel_on_screen
 
     def carried(self, fraction: float) -> float:
         start = 0.0 if self._shown is None else self._shown.fraction
