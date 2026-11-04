@@ -89,6 +89,14 @@ class TestOnTheMonitorTheAppsWindowComesUpOn:
 
             assert TakingOver.from_the_launcher(launched).panel_for(SIZE) == (1000, 500)
 
+    def test_a_launchers_screen_up_on_another_monitor_is_taken_over_where_it_stands(
+            self, launched):
+        with _pointer_on_the_portrait():
+            _place(launched).say_where_the_app_comes_up(loading_screen.AppWindow(kept_on=MAIN.area))
+            _place(launched).stand(loading_screen.Shown(left=-1300, top=900, fraction=0.5))
+
+            assert TakingOver.from_the_launcher(launched).panel_for(SIZE) == (-1300, 900)
+
     def test_an_app_too_big_for_the_monitor_he_clicked_on_comes_up_on_the_main_one(
             self, launched):
         with _pointer_on_the_portrait():
