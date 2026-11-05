@@ -31,8 +31,8 @@ the suite when a **known** blocked term appears in the tracked tree, but a brand
 new performer name it has never seen passes every check and lands. The guard is a
 backstop for names already known; it cannot see the next one.
 
-So fabricate fully. Use `Jane Doe`, `Example Studio`, `scene one`, the
-`alpha`/`beta`/`gamma` act placeholders the family's committed overlay examples
+So fabricate fully. Use `Jane Doe`, `Example Studio`, `video one`, the
+`alpha`/`beta`/`gamma` action placeholders the family's committed overlay examples
 use. The near miss that still counts: taking a real filename and
 changing a character or two — it is still that clip, still that performer. Make
 it up from scratch, don't lightly edit a real one.
