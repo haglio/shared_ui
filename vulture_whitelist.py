@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 _.paintEvent
+_.nextCheckState
 _.mouseMoveEvent
 _.mouseReleaseEvent
 _.eventFilter

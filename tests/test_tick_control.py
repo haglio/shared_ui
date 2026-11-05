@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QPixmap
 from PyQt6.QtWidgets import QWidget
 
@@ -95,3 +96,66 @@ def test_an_empty_indicator_stands_on_the_raised_ground_rather_than_the_canvas()
     middle = _rendered(control).pixelColor(_INDICATOR // 2, control.height() // 2)
 
     assert middle == BG_SECONDARY
+
+
+def _half_checked():
+    control = TickControl("Random")
+    control.setCheckState(Qt.CheckState.PartiallyChecked)
+    control.resize(140, 24)
+    return control
+
+
+def test_half_checked_fills_the_indicator_and_draws_a_level_bar_where_the_tick_goes():
+    control = _half_checked()
+
+    blue, white, _ = _classify(control)
+    img = _rendered(control)
+    top = (control.height() - _INDICATOR) // 2
+    bar_row = top + _INDICATOR // 2
+    brightest_of = [max(QColor(img.pixel(x, y)).red() for x in range(_INDICATOR + 1))
+                    for y in range(top, top + _INDICATOR)]
+
+    assert blue > 30
+    assert white > 4
+    assert QColor(img.pixel(1 + _INDICATOR // 2, bar_row)).red() > 200
+    assert sum(red > 200 for red in brightest_of) <= 3
+
+
+def test_half_checked_that_cannot_be_changed_still_shows_its_bar():
+    control = _half_checked()
+    control.setEnabled(False)
+
+    blue, white, _ = _classify(control)
+
+    assert blue == 0
+    assert white > 4
+
+
+def test_a_press_on_half_checked_ticks_it():
+    control = _half_checked()
+
+    control.click()
+
+    assert control.checkState() == Qt.CheckState.Checked
+
+
+def test_presses_go_between_ticked_and_unticked_and_never_back_to_half_checked():
+    control = _half_checked()
+    control.click()
+
+    control.click()
+    assert control.checkState() == Qt.CheckState.Unchecked
+
+    control.click()
+    assert control.checkState() == Qt.CheckState.Checked
+
+
+def test_a_press_says_which_way_it_went_as_any_tick_does():
+    pressed = []
+    control = _half_checked()
+    control.clicked.connect(pressed.append)
+
+    control.click()
+    control.click()
+
+    assert pressed == [True, False]
