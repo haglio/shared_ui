@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import subprocess
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
@@ -10,6 +10,8 @@ from app_support.subprocess_utils import hidden_subprocess_kwargs
 
 _GIVE_UP_ON_GIT_AFTER_SECONDS = 5
 _LONGEST_FEATURE = 60
+_WHERE_EACH_KIND_OF_REBASE_NAMES_ITS_BRANCH = ("--git-path", "rebase-merge/head-name",
+                                               "--git-path", "rebase-apply/head-name")
 
 
 @dataclass(frozen=True)
@@ -32,11 +34,23 @@ def _feature_described_on_the_branch_of(checkout: Path) -> str | None:
     return None
 
 
-def _branches_the_checkout_stands_on(checkout: Path) -> list[str]:
+def _branches_the_checkout_stands_on(checkout: Path) -> Iterator[str]:
     current = _git(checkout, "branch", "--show-current")
     if current:
-        return [current]
-    return _git(checkout, "branch", "--points-at", "HEAD", "--format=%(refname:short)").splitlines()
+        yield current
+        return
+    yield from _branches_a_rebase_under_way_returns_to(checkout)
+    yield from _git(checkout, "branch", "--points-at", "HEAD", "--format=%(refname:short)").splitlines()
+
+
+def _branches_a_rebase_under_way_returns_to(checkout: Path) -> Iterator[str]:
+    answer = _git(checkout, "rev-parse", *_WHERE_EACH_KIND_OF_REBASE_NAMES_ITS_BRANCH)
+    for where_git_keeps_the_name in answer.splitlines():
+        try:
+            ref = (checkout / where_git_keeps_the_name).read_text(encoding="utf-8")
+        except OSError:
+            continue
+        yield ref.strip().removeprefix("refs/heads/")
 
 
 def _git(checkout: Path, *args: str) -> str:
