@@ -3,6 +3,8 @@ Windows 11's dark mode then paints it unreadably: apply the sheet to the QApplic
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from shared_ui.palette import (
     BG_BUTTON,
     BG_BUTTON_ACTIVE,
@@ -28,6 +30,9 @@ from shared_ui.spacing import (
     GAP_SMALL,
     HAIRLINE,
 )
+
+if TYPE_CHECKING:
+    from PyQt6.QtWidgets import QToolBar
 
 
 def ground_rules() -> str:
@@ -183,6 +188,12 @@ def toolbar_rules() -> str:
         background-color: {as_hex(BG_SECONDARY)};
         color: {as_hex(TEXT_MUTED)};
     }}"""
+
+
+def style_toolbar(toolbar: QToolBar) -> None:
+    toolbar.setStyleSheet(toolbar_rules())
+    toolbar.ensurePolished()
+    toolbar.setStyleSheet(toolbar_rules())
 
 
 def toolbar_padding(*, right: int) -> str:

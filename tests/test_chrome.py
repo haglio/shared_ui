@@ -210,7 +210,7 @@ def _shown_away_from_the_pointer(widget: QWidget) -> None:
 
 def _toolbar_button(padding: str = "") -> tuple[QToolBar, QToolButton]:
     toolbar = QToolBar()
-    toolbar.setStyleSheet(chrome.toolbar_rules())
+    chrome.style_toolbar(toolbar)
     toolbar.addAction(QAction("Heading", toolbar))
     [button] = [widget for widget in map(toolbar.widgetForAction, toolbar.actions())
                 if isinstance(widget, QToolButton)]
@@ -243,7 +243,7 @@ def test_a_toolbar_button_under_the_pointer_sits_one_step_lighter_than_at_rest(
 
 def test_a_toolbar_s_buttons_stand_the_family_s_button_gap_apart():
     toolbar = QToolBar()
-    toolbar.setStyleSheet(chrome.toolbar_rules())
+    chrome.style_toolbar(toolbar)
     toolbar.addActions([QAction("One", toolbar), QAction("Two", toolbar)])
     _shown_away_from_the_pointer(toolbar)
     first, second = (toolbar.widgetForAction(action) for action in toolbar.actions())
@@ -251,6 +251,28 @@ def test_a_toolbar_s_buttons_stand_the_family_s_button_gap_apart():
     toolbar.close()
 
     assert gap == spacing.BUTTON_GAP
+
+
+def _a_styled_window_with_a_button_that_is_never_shown() -> None:
+    window = QWidget()
+    window.setStyleSheet(chrome.ground_rules())
+    QPushButton("One", window)
+
+
+def test_a_toolbar_keeps_the_gap_where_a_styled_window_that_was_never_shown_just_died():
+    # Qt forgets a never-polished widget's rules only once no styled widget is left alive, so
+    # one is kept here, as every app does; the rest finds the address such a window freed.
+    alive = QWidget()
+    alive.setStyleSheet(chrome.ground_rules())
+    gaps = set()
+    for _ in range(50):
+        _a_styled_window_with_a_button_that_is_never_shown()
+        toolbar = QToolBar()
+        chrome.style_toolbar(toolbar)
+        gaps.add(toolbar.layout().spacing())
+        del toolbar
+
+    assert gaps == {spacing.BUTTON_GAP}
 
 
 def test_a_toolbar_button_given_more_room_on_its_right_grows_by_that_much():
