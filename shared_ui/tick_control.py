@@ -23,6 +23,14 @@ _GAP = GAP_MEDIUM
 _RADIUS = BUTTON_RADIUS_HUD
 
 _TICK_POINTS = ((0.24, 0.52), (0.42, 0.70), (0.78, 0.30))
+_HALF_CHECKED_POINTS = ((0.26, 0.5), (0.74, 0.5))
+
+
+def _mark_points(state: Qt.CheckState, indicator: QRectF) -> QPolygonF:
+    edge = indicator.width()
+    fractions = _HALF_CHECKED_POINTS if state == Qt.CheckState.PartiallyChecked else _TICK_POINTS
+    return QPolygonF([QPointF(indicator.left() + fx * edge, indicator.top() + fy * edge)
+                      for fx, fy in fractions])
 
 
 class TickControl(QCheckBox):
@@ -32,12 +40,13 @@ class TickControl(QCheckBox):
         indicator = self._indicator_rect()
         enabled = self.isEnabled()
 
-        if self.isChecked():
+        state = self.checkState()
+        if state != Qt.CheckState.Unchecked:
             fill = BLUE if enabled else BG_BUTTON_ACTIVE
             painter.setPen(QPen(fill, 1))
             painter.setBrush(fill)
             painter.drawRoundedRect(indicator, _RADIUS, _RADIUS)
-            self._draw_tick(painter, indicator, enabled)
+            self._draw_mark(painter, _mark_points(state, indicator), enabled)
         else:
             painter.setPen(QPen(BORDER_SUBTLE, 1.4))
             painter.setBrush(BG_SECONDARY)
@@ -59,12 +68,7 @@ class TickControl(QCheckBox):
         top = (self.height() - _INDICATOR) / 2.0
         return QRectF(1.0, top, float(_INDICATOR), float(_INDICATOR))
 
-    def _draw_tick(self, painter: QPainter, indicator: QRectF, enabled: bool):
-        edge = indicator.width()
-        points = QPolygonF([
-            QPointF(indicator.left() + fx * edge, indicator.top() + fy * edge)
-            for fx, fy in _TICK_POINTS
-        ])
+    def _draw_mark(self, painter: QPainter, points: QPolygonF, enabled: bool):
         pen = QPen(WHITE if enabled else TEXT_SECONDARY)
         pen.setWidthF(2.0)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
@@ -72,6 +76,10 @@ class TickControl(QCheckBox):
         painter.setPen(pen)
         painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawPolyline(points)
+
+    def nextCheckState(self):
+        fully_on = self.checkState() == Qt.CheckState.Checked
+        self.setCheckState(Qt.CheckState.Unchecked if fully_on else Qt.CheckState.Checked)
 
     def sizeHint(self) -> QSize:
         width = _INDICATOR + _GAP + self.fontMetrics().horizontalAdvance(self.text())
