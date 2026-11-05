@@ -60,6 +60,24 @@ def test_a_worktree_taken_off_its_branch_still_names_the_feature_that_branch_des
     assert preview_of(worktree).feature == "the example stage's new pause"
 
 
+def _stop_a_rebase_on_a_conflict(checkout: Path, *how: str) -> None:
+    for where, line in ((checkout.parent / "example_app", "one way"), (checkout, "another way")):
+        (where / "scene.txt").write_text(line, encoding="utf-8")
+        _git("add", "scene.txt", cwd=where)
+        _git("commit", "--quiet", "--message=Write the scene", cwd=where)
+    with pytest.raises(subprocess.CalledProcessError):
+        _git("rebase", *how, "main", cwd=checkout)
+
+
+@pytest.mark.parametrize("how_git_replays_the_commits", ["--merge", "--apply"])
+def test_a_worktree_stopped_partway_through_a_rebase_still_names_the_feature_its_branch_describes(
+        worktree, how_git_replays_the_commits):
+    _git("config", "branch.claude/scene-one.description", "the example stage's new pause", cwd=worktree)
+    _stop_a_rebase_on_a_conflict(worktree, how_git_replays_the_commits)
+
+    assert preview_of(worktree).feature == "the example stage's new pause"
+
+
 def test_a_preview_nobody_described_names_no_feature(worktree):
     assert preview_of(worktree).feature is None
 
