@@ -35,6 +35,12 @@ def test_the_b_has_no_right_hand_corners_so_it_reads_as_a_b_not_an_8():
     assert (first_row[-1], last_row[-1]) == (".", ".")
 
 
+def test_the_x_inks_its_two_diagonals_and_nothing_else():
+    inked = {(row, column) for row, line in enumerate(LETTERS["X"]) for column, cell in enumerate(line) if cell == "#"}
+
+    assert inked == {(i, i) for i in range(5)} | {(i, 4 - i) for i in range(5)}
+
+
 @pytest.mark.parametrize("letter", sorted(LETTERS))
 def test_every_letter_drawn_to_the_grid_passes(tmp_path, letter):
     assert_follows_the_family_spec(_ico(tmp_path, _draw(LETTERS[letter])), letter)
