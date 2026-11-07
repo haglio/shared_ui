@@ -3,13 +3,12 @@ from __future__ import annotations
 from collections import Counter
 
 import pytest
-from PyQt6.QtGui import QColor, QPalette, QPixmap
-from PyQt6.QtWidgets import QLineEdit, QWidget
+from PyQt6.QtGui import QColor, QPalette
+from PyQt6.QtWidgets import QLineEdit
 
 from shared_ui import palette as tokens
 from shared_ui.chrome import family_stylesheet
 from shared_ui.colors import (
-    BG_PRIMARY,
     BG_SECONDARY,
     BLUE,
     BLUE_LIGHT,
@@ -18,6 +17,7 @@ from shared_ui.colors import (
     dress_application,
     family_palette,
 )
+from shared_ui.testing import rendered_on_the_dark_ground
 
 # Stands in for the color Windows hands an app that never says otherwise: invented, so a
 # machine whose accent matches the family's blue cannot make these pass for the wrong reason.
@@ -57,10 +57,7 @@ def selection_pixels(qapp):
         field.resize(220, 30)
         field.selectAll()
 
-        pixmap = QPixmap(field.size())
-        pixmap.fill(BG_PRIMARY)
-        field.render(pixmap, flags=QWidget.RenderFlag.DrawChildren)
-        image = pixmap.toImage()
+        image = rendered_on_the_dark_ground(field)
 
         yield Counter(
             QColor(image.pixel(x, y)).name()
