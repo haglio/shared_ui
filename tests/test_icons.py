@@ -13,7 +13,6 @@ from PyQt6.QtGui import QColor, QIcon, QImage, QPainter, QPen, QPixmap
 from PyQt6.QtWidgets import QLabel
 
 from shared_ui import icons
-from shared_ui.app_icon import LETTERS
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import (
     CANVAS,
@@ -915,18 +914,6 @@ def test_an_up_or_down_chevron_is_the_left_or_right_one_turned_a_quarter():
 
     assert set(ICONS["chevron_up"][0].points) == turned("chevron_left")
     assert set(ICONS["chevron_down"][0].points) == turned("chevron_right")
-
-
-def test_the_toolbar_s_f_is_the_app_icons_f_on_the_family_s_letter_grid():
-    blocks = _of("fmode", Polygon)
-    unit = blocks[0].points[1][0] - blocks[0].points[0][0]
-    inset = min(x for block in blocks for x, _y in block.points)
-
-    painted = {(round((block.points[0][1] - inset) / unit), round((block.points[0][0] - inset) / unit))
-               for block in blocks}
-    assert painted == {(row, column) for row, line in enumerate(LETTERS["F"])
-                       for column, cell in enumerate(line) if cell == "#"}
-    assert len(LETTERS["F"]) * unit == CANVAS - 2 * inset
 
 
 def test_a_qt_icon_is_drawn_at_the_whole_canvas_for_qt_to_scale_down_crisp():

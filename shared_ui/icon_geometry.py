@@ -7,6 +7,7 @@ import logging
 import math
 from dataclasses import dataclass
 
+from shared_ui.letter_grid import LETTERS
 from shared_ui.orientation import LANDSCAPE, PORTRAIT
 
 CANVAS = 48.0
@@ -514,7 +515,7 @@ def _grid_letter(rows: tuple[str, ...]) -> tuple:
 
 
 def _fmode() -> tuple:
-    return _grid_letter(("#####", "#....", "#####", "#....", "#...."))
+    return _grid_letter(LETTERS["F"])
 
 
 def _expand_horizontal() -> tuple:
