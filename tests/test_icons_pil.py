@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -8,7 +9,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from shared_ui import icons, icons_pil
-from shared_ui.colors import GREEN, RED, TEXT_PRIMARY
+from shared_ui.colors import GREEN, TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import ICONS, STAND_IN, Arc, icon_names
 from shared_ui.icon_geometry import Path as Outline
 from shared_ui.palette import TEXT_PRIMARY as _INK
@@ -16,8 +17,8 @@ from shared_ui.palette import TEXT_PRIMARY as _INK
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 
 _SIZE = 48
-_WITHIN_A_PIXEL = 1
-_PILLOW_S_ARCS_AND_RESAMPLING_ARE_NOT_QT_S = 0.15
+_A_PIXEL_OF_OUTLINE_CENTERING = 1
+_THE_BAND_PILLOW_S_ARCS_AND_RESAMPLING_NEED = 0.15
 _AN_ICON_THIS_VERSION_LACKS = "an_icon_from_another_version"
 _EVERY_ICON_AND_THE_STAND_IN = (*icon_names(), _AN_ICON_THIS_VERSION_LACKS)
 
@@ -60,14 +61,14 @@ def test_the_two_renderers_put_the_icon_in_the_same_place():
         pillow = _pil_ink(icons_pil.pil_icon(name, _SIZE, _INK))
         qt = _qt_ink(name, _SIZE)
         for edge in range(4):
-            assert abs(pillow[edge] - qt[edge]) <= _WITHIN_A_PIXEL, f"{name} edge {edge}"
+            assert abs(pillow[edge] - qt[edge]) <= _A_PIXEL_OF_OUTLINE_CENTERING, f"{name} edge {edge}"
 
 
 def test_the_two_renderers_lay_down_a_like_amount_of_ink():
     for name in _EVERY_ICON_AND_THE_STAND_IN:
         pillow = _pil_ink(icons_pil.pil_icon(name, _SIZE, _INK))[4]
         qt = _qt_ink(name, _SIZE)[4]
-        assert abs(pillow - qt) / qt < _PILLOW_S_ARCS_AND_RESAMPLING_ARE_NOT_QT_S, name
+        assert abs(pillow - qt) / qt < _THE_BAND_PILLOW_S_ARCS_AND_RESAMPLING_NEED, name
 
 
 def test_an_icon_this_version_does_not_have_is_drawn_as_the_stand_in(monkeypatch):
@@ -80,7 +81,7 @@ def test_an_icon_this_version_does_not_have_is_drawn_as_the_stand_in(monkeypatch
 
 
 def test_an_icon_is_drawn_in_the_color_it_is_asked_for_a_muted_control_or_a_green_favorite():
-    for color in ((*RED.getRgb()[:3],), (*GREEN.getRgb()[:3],)):
+    for color in ((*TEXT_MUTED.getRgb()[:3],), (*GREEN.getRgb()[:3],)):
         image = icons_pil.pil_icon("star", _SIZE, color)
         assert image.getpixel((24, 25))[:3] == color
 
@@ -149,9 +150,6 @@ def test_a_negative_span_draws_the_same_arc_as_its_positive_twin():
 
 
 def test_drawing_a_hud_icon_never_drags_qt_into_a_player():
-    # `python -c` puts the process cwd first on sys.path and nothing else, so the probe says
-    # which tree it read: from elsewhere it would import the primary checkout's copy, and a
-    # branch that dragged Qt in would pass.
     loaded = _toolkits_loaded_by_importing(
         "shared_ui.icons_pil", "shared_ui.icon_geometry", "shared_ui.palette", "shared_ui.chrome",
         "shared_ui.app_icon", "shared_ui.toggle_switch_pil")
@@ -166,10 +164,13 @@ def test_the_geometry_of_an_icon_or_a_switch_takes_no_toolkit_pillow_included():
 
 
 def _toolkits_loaded_by_importing(*modules: str) -> set[str]:
+    # `python -c` puts the process cwd first on sys.path and nothing else, so the probe says
+    # which tree it read: from elsewhere it would import the primary checkout's copy, and a
+    # branch that dragged Qt or Pillow in would pass.
     probe = (
-        f"import sys; import {', '.join(modules)}; "
+        f"import json, sys; import {', '.join(modules)}; "
         "print(shared_ui.__file__); "
-        "print(sorted({m.split('.')[0] for m in sys.modules if m.split('.')[0] in ('PyQt6', 'PIL')}))"
+        "print(json.dumps(sorted({m.split('.')[0] for m in sys.modules if m.split('.')[0] in ('PyQt6', 'PIL')})))"
     )
     result = subprocess.run(
         [sys.executable, "-c", probe], cwd=_REPO_ROOT,
@@ -181,7 +182,7 @@ def _toolkits_loaded_by_importing(*modules: str) -> set[str]:
     assert Path(read_from).resolve().is_relative_to(_REPO_ROOT), (
         f"the probe read {read_from}, not the tree under test at {_REPO_ROOT}"
     )
-    return set(eval(toolkits))
+    return set(json.loads(toolkits))
 
 
 def test_an_icon_is_never_brighter_than_the_ink_it_was_drawn_in():

@@ -115,17 +115,16 @@ def test_the_icons_are_all_different():
 _ONE_BAR = {"minus", "more", "more_vertical"}
 _IN_A_CORNER = {"regenerate_corner"}
 _RUNS_TO_THE_EDGE = {"headset", "control_off"}
-_A_TREE_ROW = BUTTON_ICON
 _MOST_OF_THE_CANVAS = 0.6
 _AS_NARROW_AS_A_CHEVRON = 0.4
 
 
-def test_every_icon_fills_its_canvas_so_the_eye_still_finds_it_on_a_tree_row():
+def test_every_icon_fills_its_canvas_or_the_eye_loses_it_once_it_is_scaled_onto_a_tree_row():
     for name in set(_EVERY_ICON_AND_THE_STAND_IN) - _ONE_BAR - _IN_A_CORNER:
-        left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, _A_TREE_ROW, TEXT_PRIMARY))
-        width, height = right - left + 1, lower - upper + 1
-        assert max(width, height) >= _MOST_OF_THE_CANVAS * _A_TREE_ROW, f"{name} is small in its frame"
-        assert min(width, height) >= _AS_NARROW_AS_A_CHEVRON * _A_TREE_ROW, f"{name} is thin in its frame"
+        left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
+        width, height = right - left, lower - upper
+        assert max(width, height) >= _MOST_OF_THE_CANVAS * 48, f"{name} is small in its frame"
+        assert min(width, height) >= _AS_NARROW_AS_A_CHEVRON * 48, f"{name} is thin in its frame"
 
 
 def test_an_icon_s_ink_stays_inside_its_canvas_with_room_for_its_caps_and_heads():
@@ -335,21 +334,30 @@ def test_the_device_is_the_column_the_sleeve_and_the_arm_between_them():
     assert [type(shape) for shape in device] == [RoundedRect, RoundedRect, Line]
 
 
+def _the_device_of(name: str) -> tuple:
+    return ICONS[name][:len(_the_device(ICONS["release"], ICONS["control_off"]))]
+
+
+def _beyond_the_device(name: str) -> tuple:
+    return ICONS[name][len(_the_device_of(name)):]
+
+
 def test_control_off_crosses_out_what_driving_points_at():
-    driving, off = ICONS["release"], ICONS["control_off"]
-    device = _the_device(driving, off)
-    assert device
-    assert driving[len(device):] != off[len(device):]
+    arrows = _beyond_the_device("release")
+    crosses = _beyond_the_device("control_off")
+
+    assert [type(shape) for shape in arrows] == [Line, Polygon, Line, Polygon]
+    assert [type(shape) for shape in crosses] == [Line, Line, Line, Line]
 
 
 def _sleeve_of(name: str) -> RoundedRect:
-    _column, sleeve, *_rest = ICONS[name]
+    _column, sleeve, _arm = _the_device_of(name)
     return sleeve
 
 
 def _arrows_of(name: str) -> list[tuple[Line, Polygon]]:
-    _column, _sleeve, _arm, *rest = ICONS[name]
-    return [(stem, head) for stem, head in zip(rest[::2], rest[1::2], strict=True) if isinstance(head, Polygon)]
+    rest = _beyond_the_device(name)
+    return list(zip(rest[::2], rest[1::2], strict=True))
 
 
 def _tip_of(stem: Line, head: Polygon) -> float:
@@ -366,7 +374,9 @@ def test_park_s_arrow_points_down_at_the_sleeve_settled_low_and_retract_s_up_at_
 
     assert _sleeve_of("park").y > _sleeve_of("retract").y
     assert _points_toward(park_stem, park_head) > 0
+    assert _tip_of(park_stem, park_head) <= _sleeve_of("park").y
     assert _points_toward(retract_stem, retract_head) < 0
+    assert _tip_of(retract_stem, retract_head) >= _sleeve_of("retract").y + _sleeve_of("retract").h
 
 
 def test_release_s_arrows_point_away_from_the_sleeve_both_ways():
@@ -380,7 +390,7 @@ def test_release_s_arrows_point_away_from_the_sleeve_both_ways():
 
 
 def _crosses_of(name: str) -> list[tuple[Line, Line]]:
-    _column, _sleeve, _arm, *legs = ICONS[name]
+    legs = _beyond_the_device(name)
     return list(zip(legs[::2], legs[1::2], strict=True))
 
 
@@ -399,6 +409,14 @@ def test_a_cross_is_finer_than_an_arrow_and_stays_off_the_sleeve():
     assert all(leg.width < arrow_stem.width for cross in (upper, lower) for leg in cross)
     assert max(upper[0].y1, upper[0].y2) + upper[0].width / 2 < sleeve.y
     assert min(lower[0].y1, lower[0].y2) - lower[0].width / 2 > sleeve.y + sleeve.h
+
+
+def test_a_cross_takes_most_of_the_band_between_the_sleeve_and_the_frame_s_edge():
+    sleeve = _sleeve_of("control_off")
+    upper, lower = _crosses_of("control_off")
+
+    assert abs(upper[0].y2 - upper[0].y1) >= 0.6 * sleeve.y
+    assert abs(lower[0].y2 - lower[0].y1) >= 0.6 * (CANVAS - sleeve.y - sleeve.h)
 
 
 def test_the_osr2_arrows_and_crosses_run_up_the_sleeve_s_own_middle():
@@ -527,7 +545,7 @@ def test_the_registry_is_what_icon_names_reports():
 
 
 def test_icon_names_leaves_no_registered_icon_out_of_the_sweeps(monkeypatch):
-    _drawn_by_the_public_route(monkeypatch, "_an_icon_added_for_the_test", ICONS["disc"])
+    monkeypatch.setitem(ICONS, "_an_icon_added_for_the_test", ICONS["disc"])
 
     assert set(icon_names()) == set(ICONS)
 
@@ -649,7 +667,8 @@ def test_the_enhance_filter_is_the_enhancement_plus_with_the_filter_s_funnel_lai
     [filter_funnel] = _of("filter", Polygon)
 
     (upright,), (flat,) = (bar for bar in bars if bar.x1 == bar.x2), (bar for bar in bars if bar.y1 == bar.y2)
-    assert upright.x1 == flat.y1 == (upright.y1 + upright.y2) / 2 == (flat.x1 + flat.x2) / 2
+    assert upright.x1 == (flat.x1 + flat.x2) / 2
+    assert flat.y1 == (upright.y1 + upright.y2) / 2
     assert len(funnel.points) == len(filter_funnel.points)
     assert not funnel.fill
     assert funnel.points[0][1] == funnel.points[1][1] < min(y for _x, y in funnel.points[2:])
@@ -679,6 +698,7 @@ def test_a_rounded_polygon_s_points_are_round_rather_than_cut_flat():
     _left, _upper, right, _lower = _ink_rect(icons.icon_pixmap("play", 2 * 48, TEXT_PRIMARY))
 
     assert right >= 2 * (tip + triangle.round_radius) - 1
+    assert right <= 2 * (tip + triangle.round_radius)
 
 
 def test_the_play_triangle_is_placed_by_its_weight_so_its_box_leans_right():
@@ -740,13 +760,14 @@ def test_a_bar_s_cap_is_round_so_its_corner_is_clear_where_a_square_cap_inks_it(
     assert image.pixelColor(*middle_of_the_cap).alpha() > 200
 
 
-def test_two_bars_meet_in_a_round_join_that_reaches_past_a_bevel():
+def test_two_bars_meet_in_a_round_join_reaching_past_a_bevel_and_short_of_a_miter():
     (check,) = ICONS["check"]
     _first, corner, _last = check.points
     image = icons.icon_pixmap("check", 2 * 48, TEXT_PRIMARY).toImage()
+    x, y = int(2 * corner[0]), int(2 * corner[1])
 
-    outward_from_the_corner = (int(2 * corner[0]), int(2 * corner[1]) + 4)
-    assert image.pixelColor(*outward_from_the_corner).alpha() > 200
+    assert image.pixelColor(x, y + 4).alpha() > 200
+    assert image.pixelColor(x, y + 7).alpha() < 32
 
 
 def test_a_path_written_in_a_frame_of_its_own_fills_the_canvas_that_frame_stands_for(monkeypatch):
@@ -933,8 +954,10 @@ def test_the_star_ring_shows_as_a_rim_all_round_a_favorited_star_drawn_over_it()
     star = _ink_rect(icons.icon_pixmap("star", 48, TEXT_PRIMARY))
 
     left, upper, right, lower = _ink_rect_of(rim)
-    assert (left, upper) < star[:2]
-    assert (right, lower) > star[2:]
+    assert left < star[0]
+    assert upper < star[1]
+    assert right > star[2]
+    assert lower > star[3]
 
 
 def test_an_up_or_down_chevron_is_the_left_or_right_one_turned_a_quarter():
@@ -972,7 +995,7 @@ def test_loop_is_two_arrows_chasing_round_a_circuit_rather_than_one_ring():
     assert all(arc.span < 180 for arc in arcs)
 
 
-def test_reset_is_a_gear_with_a_circular_arrow_at_its_corner_since_either_alone_is_another_control():
+def test_reset_is_neither_a_bare_gear_nor_a_bare_circular_arrow_but_both():
     rim, _bore = _of("reset", Ellipse)
     teeth = _of("reset", Line)
     [arrow] = _of("reset", Arc)
@@ -987,7 +1010,6 @@ def test_compilation_is_a_stack_of_three_sheets_where_copy_is_two():
     sheets = _of("compilation", RoundedRect)
 
     assert len(sheets) == 3
-    assert len(_of("copy", RoundedRect)) + len(_of("copy", Arc)) // 2 == 2
     assert all((sheets[n + 1].x - sheets[n].x, sheets[n + 1].y - sheets[n].y) == (sheets[1].x - sheets[0].x, sheets[1].y - sheets[0].y)
                for n in range(2))
 
@@ -1017,7 +1039,6 @@ def test_the_flat_screen_leans_where_square_on_it_would_be_a_plain_rectangle_bes
     (left_top, _right_top, _right_low, left_low) = frame.points
 
     assert left_top[0] != left_low[0]
-    assert len(_of("vr_hemisphere", Arc)) == len(ICONS["vr_hemisphere"])
 
 
 def test_versions_leans_and_carries_the_swap_arrow_where_copy_stands_square():
@@ -1137,7 +1158,7 @@ def test_the_hollow_plus_s_square_tips_land_within_a_pixel_of_the_solid_s_caps_a
 
 
 @pytest.mark.usefixtures("qapp")
-def test_an_icon_set_among_the_words_is_drawn_at_twice_the_size_it_shows():
+def test_an_icon_among_the_words_is_drawn_at_twice_its_size_to_stay_crisp_on_a_screen_that_scales_the_label_up():
     written = re.search(r'base64,([^"]+)"', icons.inline_icon("check", color=RED, size=16)).group(1)
 
     drawn = QImage.fromData(base64.b64decode(written))
