@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import os
 import subprocess
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
@@ -23,15 +25,50 @@ class Preview:
 def preview_of(checkout: Path) -> Preview | None:
     if not (checkout / ".git").is_file():
         return None
-    return Preview(feature=_feature_described_on_the_branch_of(checkout))
+    return Preview(feature=_name_of_the_claude_session_working_in(checkout)
+                   or _name_the_branch_gives(checkout))
 
 
-def _feature_described_on_the_branch_of(checkout: Path) -> str | None:
-    for branch in _branches_the_checkout_stands_on(checkout):
+def _name_of_the_claude_session_working_in(checkout: Path) -> str | None:
+    newest = max(_claude_sessions_working_in(checkout), key=lambda session: session[0], default=None)
+    return newest[1] if newest else None
+
+
+def _claude_sessions_working_in(checkout: Path) -> Iterator[tuple[float, str]]:
+    here = _same_folder_key(checkout)
+    for record in _claude_desktop_session_records():
+        try:
+            session = json.loads(record.read_text(encoding="utf-8"))
+            folder = session.get("worktreePath") or session.get("cwd")
+            title = session.get("title")
+        except (OSError, ValueError, AttributeError):
+            continue
+        if isinstance(folder, str) and isinstance(title, str) and title.strip() and _same_folder_key(folder) == here:
+            last_active = session.get("lastActivityAt")
+            yield (last_active if isinstance(last_active, (int, float)) else 0), title.strip()
+
+
+def _same_folder_key(folder: Path | str) -> str:
+    return os.path.normcase(os.path.normpath(str(folder)))
+
+
+def _claude_desktop_session_records() -> Iterator[Path]:
+    local = os.environ.get("LOCALAPPDATA")
+    places = [Path(base) for base in (os.environ.get("APPDATA"), local) if base]
+    if local:
+        places += [cache / kind for cache in Path(local).glob("Packages/Claude_*/LocalCache")
+                   for kind in ("Roaming", "Local")]
+    for place in places:
+        yield from place.glob("Claude*/claude-code-sessions/*/*/*.json")
+
+
+def _name_the_branch_gives(checkout: Path) -> str:
+    branches = list(_branches_the_checkout_stands_on(checkout))
+    for branch in branches:
         description = _git(checkout, "config", "--get", f"branch.{branch}.description")
         if description:
             return description.splitlines()[0]
-    return None
+    return branches[0] if branches else checkout.name
 
 
 def _branches_the_checkout_stands_on(checkout: Path) -> Iterator[str]:

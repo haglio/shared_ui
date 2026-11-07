@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 from pathlib import Path
@@ -28,6 +29,67 @@ def worktree(tmp_path, monkeypatch) -> Path:
     checkout = tmp_path / "scene-one"
     _git("worktree", "add", "--quiet", "-b", "claude/scene-one", str(checkout), cwd=primary)
     return checkout
+
+
+@pytest.fixture(autouse=True)
+def claude_desktop_keeps_no_records(tmp_path, monkeypatch) -> Path:
+    local = tmp_path / "local app data"
+    monkeypatch.setenv("LOCALAPPDATA", str(local))
+    monkeypatch.setenv("APPDATA", str(tmp_path / "roaming app data"))
+    return local
+
+
+def _claude_session(records: Path, title: str, checkout: Path, *, last_active: int = 1, name: str = "one") -> None:
+    folder = records / "claude-code-sessions" / "account" / "project"
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / f"local_{name}.json").write_text(json.dumps(
+        {"title": title, "worktreePath": str(checkout), "cwd": str(checkout), "lastActivityAt": last_active}),
+        encoding="utf-8")
+
+
+def test_a_preview_is_named_after_the_claude_session_whose_worktree_it_runs_from(
+        worktree, claude_desktop_keeps_no_records):
+    _claude_session(claude_desktop_keeps_no_records / "ClaudeProfileB", "Example scene pausing", worktree)
+
+    assert preview_of(worktree).feature == "Example scene pausing"
+
+
+def test_the_sessions_name_is_found_where_an_app_outside_claudes_package_reads_it(
+        worktree, claude_desktop_keeps_no_records):
+    package = claude_desktop_keeps_no_records / "Packages" / "Claude_example" / "LocalCache" / "Local"
+    _claude_session(package / "Claude", "Example scene pausing", worktree)
+
+    assert preview_of(worktree).feature == "Example scene pausing"
+
+
+def test_the_sessions_name_comes_before_what_the_branch_describes(worktree, claude_desktop_keeps_no_records):
+    _git("config", "branch.claude/scene-one.description", "the example stage's new pause", cwd=worktree)
+    _claude_session(claude_desktop_keeps_no_records / "Claude", "Example scene pausing", worktree)
+
+    assert preview_of(worktree).feature == "Example scene pausing"
+
+
+def test_of_two_sessions_on_one_worktree_the_one_at_work_most_recently_names_it(
+        worktree, claude_desktop_keeps_no_records):
+    records = claude_desktop_keeps_no_records / "Claude"
+    _claude_session(records, "Example scene stalling", worktree, last_active=1, name="older")
+    _claude_session(records, "Example scene pausing", worktree, last_active=2, name="newer")
+
+    assert preview_of(worktree).feature == "Example scene pausing"
+
+
+def test_another_worktrees_session_names_nothing_here(worktree, tmp_path, claude_desktop_keeps_no_records):
+    _claude_session(claude_desktop_keeps_no_records / "Claude", "Example scene stalling", tmp_path / "scene-two")
+
+    assert preview_of(worktree).feature == "claude/scene-one"
+
+
+def test_a_session_record_that_cannot_be_read_is_passed_over(worktree, claude_desktop_keeps_no_records):
+    folder = claude_desktop_keeps_no_records / "Claude" / "claude-code-sessions" / "account" / "project"
+    folder.mkdir(parents=True)
+    (folder / "local_torn.json").write_text('{"title": "Example scene pausing", "worktreePath": ', encoding="utf-8")
+
+    assert preview_of(worktree).feature == "claude/scene-one"
 
 
 def test_the_primary_checkout_is_the_live_app(tmp_path):
@@ -78,14 +140,14 @@ def test_a_worktree_stopped_partway_through_a_rebase_still_names_the_feature_its
     assert preview_of(worktree).feature == "the example stage's new pause"
 
 
-def test_a_preview_nobody_described_names_no_feature(worktree):
-    assert preview_of(worktree).feature is None
+def test_a_preview_no_session_or_description_names_is_named_after_its_branch(worktree):
+    assert preview_of(worktree).feature == "claude/scene-one"
 
 
-def test_a_preview_opens_with_no_feature_named_where_git_cannot_be_run(worktree, tmp_path, monkeypatch):
+def test_a_preview_where_git_cannot_be_run_is_named_after_its_folder(worktree, tmp_path, monkeypatch):
     monkeypatch.setenv("PATH", str(tmp_path / "nothing on it"))
 
-    assert preview_of(worktree).feature is None
+    assert preview_of(worktree).feature == "scene-one"
 
 
 def test_a_git_that_never_answers_is_given_up_on(worktree, monkeypatch):
@@ -94,7 +156,7 @@ def test_a_git_that_never_answers_is_given_up_on(worktree, monkeypatch):
 
     monkeypatch.setattr(subprocess, "run", never_answers)
 
-    assert preview_of(worktree).feature is None
+    assert preview_of(worktree).feature == "scene-one"
 
 
 def test_the_live_app_wears_its_own_name():
