@@ -62,17 +62,35 @@ def _grays(module):
     }
 
 
+_THE_GRAYS = (
+    colors.BG_PRIMARY, colors.BG_SECONDARY, colors.BG_TERTIARY,
+    colors.BG_BUTTON, colors.BG_BUTTON_ACTIVE,
+    colors.BG_KEYCAP,
+    colors.TEXT_MUTED,
+    colors.BORDER_DEFAULT,
+    colors.TEXT_PRIMARY, colors.TEXT_SECONDARY,
+    colors.WHITE,
+    colors.BLACK,
+)
+
+_THE_HUES = (
+    colors.BLUE, colors.BLUE_LIGHT,
+    colors.GREEN, colors.RED, colors.YELLOW, colors.MAGENTA,
+    colors.LOADING_GROUND, colors.LOADING_ACCENT, colors.LOADING_TROUGH, colors.LOADING_HINT,
+)
+
+
 def test_the_palette_holds_as_few_grays_as_it_can():
     values = {color.name() for color in _grays(colors).values()}
 
-    assert len(values) <= 12, sorted(values)
+    assert values == {gray.name() for gray in _THE_GRAYS}, sorted(values)
 
 
-def test_the_palette_holds_as_few_hues_as_it_can():
+def test_a_new_hue_joins_the_palette_only_by_adding_it_to_this_list_on_purpose():
     hues = {color.name() for name, color in _all_qcolors(colors)
             if name.isupper() and color.saturation() > 40}
 
-    assert len(hues) <= 10, sorted(hues)
+    assert hues == {hue.name() for hue in _THE_HUES}, sorted(hues)
 
 
 def test_no_two_grays_sit_within_a_hair_of_each_other():
