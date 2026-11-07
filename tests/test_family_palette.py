@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import re
 from collections import Counter
+from contextlib import contextmanager
 
 import pytest
 from PyQt6.QtGui import QColor, QPalette, QPixmap
 from PyQt6.QtWidgets import QLineEdit, QWidget
 
 from shared_ui import palette as tokens
-from shared_ui.chrome import family_stylesheet
+from shared_ui.chrome import family_stylesheet, menu_rules
 from shared_ui.colors import (
     BG_PRIMARY,
     BG_SECONDARY,
@@ -47,8 +49,8 @@ def _desktop_palette() -> QPalette:
     return base
 
 
-@pytest.fixture
-def selection_pixels(qapp):
+@contextmanager
+def _a_painted_selection(qapp):
     was = qapp.palette()
     qapp.setPalette(family_palette(_desktop_palette()))
     try:
@@ -68,6 +70,12 @@ def selection_pixels(qapp):
         )
     finally:
         qapp.setPalette(was)
+
+
+@pytest.fixture
+def selection_pixels(qapp):
+    with _a_painted_selection(qapp) as pixels:
+        yield pixels
 
 
 def test_no_role_the_family_owns_keeps_the_desktops_color():
@@ -102,6 +110,7 @@ def test_a_selection_is_the_one_blue():
 
 
 def test_selected_words_read_against_the_ground_they_sit_on():
+    # Windows sat black text on its accent: on a dark app's blue, the darkest thing on the screen.
     result = family_palette(_desktop_palette())
 
     ground = result.color(QPalette.ColorRole.Highlight)
@@ -110,7 +119,13 @@ def test_selected_words_read_against_the_ground_they_sit_on():
     assert ink.lightness() > ground.lightness() + 60
 
 
-def test_the_roles_it_does_not_own_are_left_where_they_were():
+def test_selected_words_wear_the_text_a_picked_menu_row_wears():
+    picked_row = re.search(r"QMenu::item:selected\s*\{[^}]*?(?<![\w-])color:\s*(#[0-9a-f]{6})", menu_rules())
+
+    assert family_palette().color(QPalette.ColorRole.HighlightedText).name() == picked_row.group(1)
+
+
+def test_the_palette_leaves_the_tooltip_to_the_sheet_and_the_bevels_to_each_widget():
     marker = QColor(1, 2, 3)
     untouched = (
         QPalette.ColorRole.Window, QPalette.ColorRole.Base, QPalette.ColorRole.Button,
@@ -151,6 +166,13 @@ def test_an_application_with_a_sheet_of_its_own_still_takes_the_family_palette(a
 
     assert an_undressed_application.palette().color(QPalette.ColorRole.Highlight) == BLUE
     assert an_undressed_application.styleSheet() == "QWidget { margin: 0px; }"
+
+
+def test_painting_a_selection_puts_back_the_palette_every_test_shares(an_undressed_application):
+    with _a_painted_selection(an_undressed_application):
+        pass
+
+    assert an_undressed_application.palette().color(QPalette.ColorRole.Highlight) == _DESKTOP_ACCENT
 
 
 def test_a_field_paints_its_selection_in_the_family_blue(selection_pixels):
