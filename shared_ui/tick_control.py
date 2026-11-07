@@ -3,6 +3,8 @@ to a bare chevron, so this control paints its own."""
 
 from __future__ import annotations
 
+from itertools import accumulate
+
 from PyQt6.QtCore import QPointF, QRectF, QSize, Qt
 from PyQt6.QtGui import QPainter, QPen, QPolygonF
 from PyQt6.QtWidgets import QCheckBox
@@ -22,7 +24,11 @@ _INDICATOR = 16
 _GAP = GAP_MEDIUM
 _RADIUS = BUTTON_RADIUS_HUD
 
-_TICK_POINTS = ((0.24, 0.52), (0.42, 0.70), (0.78, 0.30))
+_TICK_START = (0.24, 0.52)
+_A_SHORT_LEG_DOWN = (0.18, 0.18)
+_A_LONG_LEG_UP = (0.36, -0.40)
+_TICK_POINTS = tuple(accumulate((_TICK_START, _A_SHORT_LEG_DOWN, _A_LONG_LEG_UP),
+                                lambda at, leg: (at[0] + leg[0], at[1] + leg[1])))
 _HALF_CHECKED_POINTS = ((0.26, 0.5), (0.74, 0.5))
 
 
