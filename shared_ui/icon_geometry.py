@@ -440,6 +440,10 @@ def _sleeve(top: float) -> tuple:
     )
 
 
+def _the_device(sleeve_top: float) -> tuple:
+    return (_COLUMN, *_sleeve(sleeve_top))
+
+
 def _hold_arrow(tip: float, base: float) -> tuple:
     tail = base + (base - tip) * 0.7
     return (
@@ -466,15 +470,15 @@ def _arrows_away_from_the_sleeve() -> tuple:
 
 
 def _park() -> tuple:
-    return (_COLUMN, *_sleeve(_SLEEVE_SETTLED), *_an_arrow_down_at_the_sleeve(_SLEEVE_SETTLED))
+    return (*_the_device(_SLEEVE_SETTLED), *_an_arrow_down_at_the_sleeve(_SLEEVE_SETTLED))
 
 
 def _retract() -> tuple:
-    return (_COLUMN, *_sleeve(_SLEEVE_RAISED), *_an_arrow_up_at_the_sleeve(_SLEEVE_RAISED))
+    return (*_the_device(_SLEEVE_RAISED), *_an_arrow_up_at_the_sleeve(_SLEEVE_RAISED))
 
 
 def _release() -> tuple:
-    return (_COLUMN, *_sleeve(_SLEEVE_BETWEEN), *_arrows_away_from_the_sleeve())
+    return (*_the_device(_SLEEVE_BETWEEN), *_arrows_away_from_the_sleeve())
 
 
 _CROSS_HALF = 6.0
@@ -491,7 +495,7 @@ def _a_cross_where_an_arrowhead_was(middle: float) -> tuple:
 
 
 def _control_off() -> tuple:
-    return (_COLUMN, *_sleeve(_SLEEVE_BETWEEN),
+    return (*_the_device(_SLEEVE_BETWEEN),
             *_a_cross_where_an_arrowhead_was(8), *_a_cross_where_an_arrowhead_was(40))
 
 
