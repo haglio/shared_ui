@@ -26,7 +26,7 @@ RED: Rgb = (255, 60, 60)
 YELLOW: Rgb = (255, 200, 120)
 MAGENTA: Rgb = (200, 80, 160)
 WHITE: Rgb = (255, 255, 255)
-BLACK: Rgb = (0, 0, 0)
+BLACK: Rgb = (0, 0, 0)  # the ground mpv draws behind a video
 
 LOADING_GROUND: Rgb = (26, 26, 46)
 LOADING_ACCENT: Rgb = (233, 69, 96)
