@@ -101,7 +101,7 @@ def test_a_button_under_the_pointer_sits_one_step_lighter_than_its_own_ground(
 
 
 @pytest.mark.parametrize("lit", [False, True], ids=["at rest", "lit"])
-def test_a_press_flashes_the_blue_rather_than_one_more_lighter_step(pointer, lit):
+def test_a_press_flashes_the_blue_that_means_more_than_engaged(pointer, lit):
     button = _shown_button(chrome.button_rules(), lit=lit)
     pointer.off(button)
     pointer.on(button)
