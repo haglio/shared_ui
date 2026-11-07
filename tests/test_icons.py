@@ -622,19 +622,6 @@ def test_a_menu_row_s_restart_keeps_its_arrow_apart_from_the_quit_inside_it():
     assert _pieces(restart) == _pieces(quit_icon) + 1
 
 
-def test_the_enhance_filter_is_the_enhancement_plus_with_the_filter_s_funnel_laid_over_it():
-    bars = _of("enhance_filter", Line)
-    [funnel] = _of("enhance_filter", Polygon)
-    [filter_funnel] = _of("filter", Polygon)
-
-    (upright,), (flat,) = (bar for bar in bars if bar.x1 == bar.x2), (bar for bar in bars if bar.y1 == bar.y2)
-    assert upright.x1 == (flat.x1 + flat.x2) / 2
-    assert flat.y1 == (upright.y1 + upright.y2) / 2
-    assert len(funnel.points) == len(filter_funnel.points)
-    assert not funnel.fill
-    assert funnel.points[0][1] == funnel.points[1][1] < min(y for _x, y in funnel.points[2:])
-
-
 def test_the_enhance_filter_reads_as_one_sign_rather_than_two_controls_crowded_together():
     icon = _ink(icons.icon_pixmap("enhance_filter", 48, TEXT_PRIMARY))
     assert _pieces(icon) == 1

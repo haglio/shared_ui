@@ -142,16 +142,17 @@ def _plus_outline() -> tuple:
 
 
 def _enhance_filter() -> tuple:
-    plus = (16.0, 16.0)
+    x, y = 16.0, 16.0
     bar, reach = 6.0, 10.0
-    return (
-        Line(plus[0], plus[1] - reach, plus[0], plus[1] + reach, bar),
-        Line(plus[0] - reach, plus[1], plus[0] + reach, plus[1], bar),
-        Polygon(((17, 26), (45, 26),
-                 (33.5, 36), (33.5, 45),
-                 (28.5, 41), (28.5, 36)),
-                fill=False, width=3.2),
+    the_plus = (
+        Line(x, y - reach, x, y + reach, bar),
+        Line(x - reach, y, x + reach, y, bar),
     )
+    mouth = y + reach
+    a_funnel_from_its_lower_arm = Polygon(
+        ((17, mouth), (45, mouth), (33.5, mouth + 10), (33.5, 45), (28.5, 41), (28.5, mouth + 10)),
+        fill=False, width=3.2)
+    return (*the_plus, a_funnel_from_its_lower_arm)
 
 
 def _copy() -> tuple:
