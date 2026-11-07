@@ -900,30 +900,10 @@ def test_the_star_ring_shows_as_a_rim_all_round_a_favorited_star_drawn_over_it()
     assert lower > star[3]
 
 
-
-
 def test_a_qt_icon_is_drawn_at_the_whole_canvas_for_qt_to_scale_down_crisp():
     [drawn] = icons.qt_icon("mic").availableSizes()
 
     assert drawn.width() == drawn.height() == CANVAS > max(BUTTON_ICON, BUTTON_FILLING_ICON)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def test_the_warning_is_a_bar_and_a_dot_under_a_raised_triangles_point():
