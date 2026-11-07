@@ -1,11 +1,5 @@
 from __future__ import annotations
 
-import json
-import os
-import subprocess
-import sys
-from pathlib import Path
-
 from PIL import Image, ImageDraw
 
 from shared_ui import icons, icons_pil
@@ -13,8 +7,7 @@ from shared_ui.colors import GREEN, TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import ICONS, STAND_IN, Arc, icon_names
 from shared_ui.icon_geometry import Path as Outline
 from shared_ui.palette import TEXT_PRIMARY as _INK
-
-_REPO_ROOT = Path(__file__).resolve().parent.parent
+from shared_ui.testing import toolkits_loaded_by_importing
 
 _SIZE = 48
 _A_PIXEL_OF_OUTLINE_CENTERING = 1
@@ -150,7 +143,7 @@ def test_a_negative_span_draws_the_same_arc_as_its_positive_twin():
 
 
 def test_drawing_a_hud_icon_never_drags_qt_into_a_player():
-    loaded = _toolkits_loaded_by_importing(
+    loaded = toolkits_loaded_by_importing(
         "shared_ui.icons_pil", "shared_ui.icon_geometry", "shared_ui.palette", "shared_ui.chrome",
         "shared_ui.app_icon", "shared_ui.toggle_switch_pil")
 
@@ -158,31 +151,9 @@ def test_drawing_a_hud_icon_never_drags_qt_into_a_player():
 
 
 def test_the_geometry_of_an_icon_or_a_switch_takes_no_toolkit_pillow_included():
-    loaded = _toolkits_loaded_by_importing("shared_ui.icon_geometry", "shared_ui.toggle_geometry")
+    loaded = toolkits_loaded_by_importing("shared_ui.icon_geometry", "shared_ui.toggle_geometry")
 
     assert loaded == set(), loaded
-
-
-def _toolkits_loaded_by_importing(*modules: str) -> set[str]:
-    # `python -c` puts the process cwd first on sys.path and nothing else, so the probe says
-    # which tree it read: from elsewhere it would import the primary checkout's copy, and a
-    # branch that dragged Qt or Pillow in would pass.
-    probe = (
-        f"import json, sys; import {', '.join(modules)}; "
-        "print(shared_ui.__file__); "
-        "print(json.dumps(sorted({m.split('.')[0] for m in sys.modules if m.split('.')[0] in ('PyQt6', 'PIL')})))"
-    )
-    result = subprocess.run(
-        [sys.executable, "-c", probe], cwd=_REPO_ROOT,
-        env={**os.environ, "PYTHONPATH": str(_REPO_ROOT)},
-        capture_output=True, text=True, check=True,
-    )
-    read_from, toolkits = result.stdout.splitlines()
-
-    assert Path(read_from).resolve().is_relative_to(_REPO_ROOT), (
-        f"the probe read {read_from}, not the tree under test at {_REPO_ROOT}"
-    )
-    return set(json.loads(toolkits))
 
 
 def test_an_icon_is_never_brighter_than_the_ink_it_was_drawn_in():
