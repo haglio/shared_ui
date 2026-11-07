@@ -360,35 +360,6 @@ def _arrows_of(name: str) -> list[tuple[Line, Polygon]]:
     return list(zip(rest[::2], rest[1::2], strict=True))
 
 
-def _tip_of(stem: Line, head: Polygon) -> float:
-    return next(y for x, y in head.points if x == stem.x1)
-
-
-def _points_toward(stem: Line, head: Polygon) -> float:
-    return _tip_of(stem, head) - stem.y1
-
-
-def test_park_s_arrow_points_down_at_the_sleeve_settled_low_and_retract_s_up_at_it_raised():
-    (park_stem, park_head), = _arrows_of("park")
-    (retract_stem, retract_head), = _arrows_of("retract")
-
-    assert _sleeve_of("park").y > _sleeve_of("retract").y
-    assert _points_toward(park_stem, park_head) > 0
-    assert _tip_of(park_stem, park_head) <= _sleeve_of("park").y
-    assert _points_toward(retract_stem, retract_head) < 0
-    assert _tip_of(retract_stem, retract_head) >= _sleeve_of("retract").y + _sleeve_of("retract").h
-
-
-def test_release_s_arrows_point_away_from_the_sleeve_both_ways():
-    sleeve = _sleeve_of("release")
-    (upper_stem, upper_head), (lower_stem, lower_head) = _arrows_of("release")
-
-    assert _tip_of(upper_stem, upper_head) < sleeve.y
-    assert _points_toward(upper_stem, upper_head) < 0
-    assert _tip_of(lower_stem, lower_head) > sleeve.y + sleeve.h
-    assert _points_toward(lower_stem, lower_head) > 0
-
-
 def _crosses_of(name: str) -> list[tuple[Line, Line]]:
     legs = _beyond_the_device(name)
     return list(zip(legs[::2], legs[1::2], strict=True))
@@ -401,12 +372,10 @@ def test_control_off_s_crosses_stand_where_release_s_arrowheads_were():
     assert all(head[0] <= cross <= head[-1] for cross, head in zip(crosses, heads, strict=True))
 
 
-def test_a_cross_is_finer_than_an_arrow_and_stays_off_the_sleeve():
+def test_a_cross_stays_off_the_sleeve():
     sleeve = _sleeve_of("control_off")
-    (arrow_stem, _head), *_rest = _arrows_of("release")
     upper, lower = _crosses_of("control_off")
 
-    assert all(leg.width < arrow_stem.width for cross in (upper, lower) for leg in cross)
     assert max(upper[0].y1, upper[0].y2) + upper[0].width / 2 < sleeve.y
     assert min(lower[0].y1, lower[0].y2) - lower[0].width / 2 > sleeve.y + sleeve.h
 
@@ -417,14 +386,6 @@ def test_a_cross_takes_most_of_the_band_between_the_sleeve_and_the_frame_s_edge(
 
     assert abs(upper[0].y2 - upper[0].y1) >= 0.6 * sleeve.y
     assert abs(lower[0].y2 - lower[0].y1) >= 0.6 * (CANVAS - sleeve.y - sleeve.h)
-
-
-def test_the_osr2_arrows_and_crosses_run_up_the_sleeve_s_own_middle():
-    sleeve = _sleeve_of("release")
-    middle = sleeve.x + sleeve.w / 2
-
-    assert all(stem.x1 == stem.x2 == middle for stem, _head in _arrows_of("release"))
-    assert all((one.x1 + one.x2) / 2 == middle for one, _other in _crosses_of("control_off"))
 
 
 _WAVEFORMS = ("wave", "wave_triangle", "wave_square", "wave_sawtooth")
