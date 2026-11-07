@@ -3,12 +3,12 @@ from __future__ import annotations
 import re
 
 from PyQt6.QtCore import QEvent, QPointF, Qt
-from PyQt6.QtGui import QColor, QMouseEvent, QPixmap, QTextDocumentFragment
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtGui import QColor, QMouseEvent, QTextDocumentFragment
 
-from shared_ui.colors import BG_PRIMARY, BLUE_LIGHT, TEXT_PRIMARY
+from shared_ui.colors import BLUE_LIGHT, TEXT_PRIMARY
 from shared_ui.folder_path import FolderPath
 from shared_ui.icons import icon_then_text
+from shared_ui.testing import rendered_on_the_dark_ground
 
 
 def _links(path: FolderPath) -> list[tuple[str, str]]:
@@ -99,10 +99,7 @@ def test_a_step_can_wear_one_of_the_familys_icons_ahead_of_its_name():
 
 def _light_blue_ink(path: FolderPath) -> int:
     path.resize(path.sizeHint())
-    drawn = QPixmap(path.size())
-    drawn.fill(BG_PRIMARY)
-    path.render(drawn, flags=QWidget.RenderFlag.DrawChildren)
-    image = drawn.toImage()
+    image = rendered_on_the_dark_ground(path)
     return sum(1 for x in range(image.width()) for y in range(image.height())
                if QColor(image.pixel(x, y)) == BLUE_LIGHT)
 
