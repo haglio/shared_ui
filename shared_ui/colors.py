@@ -24,6 +24,8 @@ BORDER_DEFAULT = QColor(*palette.BORDER_DEFAULT)
 BORDER_SUBTLE = QColor(*palette.BORDER_SUBTLE)
 BORDER_PANEL = QColor(*palette.BORDER_PANEL)
 
+PICKED_TEXT = QColor(*palette.PICKED_TEXT)
+
 BLUE = QColor(*palette.BLUE)
 BLUE_LIGHT = QColor(*palette.BLUE_LIGHT)
 GREEN = QColor(*palette.GREEN)
@@ -54,7 +56,7 @@ def family_palette(base: QPalette | None = None) -> QPalette:
     role = QPalette.ColorRole
 
     result.setColor(role.Highlight, BLUE)
-    result.setColor(role.HighlightedText, TEXT_PRIMARY)
+    result.setColor(role.HighlightedText, PICKED_TEXT)
 
     # No Qt style sheet property reaches the link color of a rich-text label.
     result.setColor(role.Link, BLUE)
