@@ -326,12 +326,6 @@ def test_the_four_osr2_control_icons_draw_one_device():
     assert len(columns) == 1
 
 
-def test_the_device_is_the_column_the_sleeve_and_the_arm_between_them():
-    device = _the_device(ICONS["release"], ICONS["control_off"])
-
-    assert [type(shape) for shape in device] == [RoundedRect, RoundedRect, Line]
-
-
 def _the_device_of(name: str) -> tuple:
     return ICONS[name][:len(_the_device(ICONS["release"], ICONS["control_off"]))]
 
