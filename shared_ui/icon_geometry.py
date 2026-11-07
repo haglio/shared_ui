@@ -551,9 +551,12 @@ def _upright_beside_lying_down() -> tuple:
     return (_frame(left, short, long), _frame(left + short + _FRAMES_GAP, long, short))
 
 
+_A_RIM_ROUND_THE_STAR = 3.0
+
+
 def _star_ring() -> tuple:
     (star,) = _star(filled=True)
-    return (Polygon(star.points, fill=True, round_radius=3.0),)
+    return (Polygon(star.points, fill=True, round_radius=_A_RIM_ROUND_THE_STAR),)
 
 
 _THUMBS_UP = Path((
