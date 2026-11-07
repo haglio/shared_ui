@@ -13,7 +13,7 @@ class TestALineCutToFit:
 
         assert fit_text(font, "play", 500) == "play"
 
-    def test_a_line_that_does_not_is_cut_at_its_tail(self):
+    def test_a_line_that_does_not_is_cut_at_its_tail_so_a_notice_keeps_its_head(self):
         font = ImageFont.load_default(12)
         cut = fit_text(font, "unrecognized voice command: " + "word " * 40, 100)
 
@@ -22,6 +22,7 @@ class TestALineCutToFit:
         assert font.getlength(cut) <= 100
 
     def test_a_cut_just_after_a_space_keeps_the_space_before_the_ellipsis(self):
+        # As Qt's own cut does, which Origenerator's labels use.
         font = ImageFont.load_default(12)
 
         assert fit_text(font, "aaaa bbbb", math.ceil(font.getlength("aaaa …"))) == "aaaa …"
@@ -43,7 +44,7 @@ class TestLinesWrappedToFit:
         assert " ".join(lines) == said
         assert all(font.getlength(line) <= 150 for line in lines)
 
-    def test_what_will_not_fit_in_the_lines_it_may_take_goes_on_the_last_whole(self):
+    def test_what_will_not_fit_in_the_lines_it_may_take_goes_on_the_last_whole_for_the_surface_to_cut(self):
         font = ImageFont.load_default(12)
 
         lines = wrap_text(font, "word " * 60, 150, max_lines=3)
@@ -52,7 +53,8 @@ class TestLinesWrappedToFit:
         assert " ".join(lines).split() == ["word"] * 60
         assert font.getlength(lines[-1]) > 150
 
-    def test_a_word_wider_than_a_whole_line_keeps_a_line_of_its_own_whole(self):
+    def test_a_word_wider_than_a_whole_line_keeps_a_line_of_its_own_whole_for_the_surface_to_cut(self):
+        # As Qt's word wrap gives it one, and as a Qt widget's elide mode is its own.
         font = ImageFont.load_default(12)
 
         assert wrap_text(font, "lead " + "w" * 80 + " tail", 150) == ["lead", "w" * 80, "tail"]
