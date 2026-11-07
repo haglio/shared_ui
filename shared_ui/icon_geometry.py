@@ -420,6 +420,13 @@ _SLEEVE_X, _SLEEVE_W, _SLEEVE_H = 6.0, 15.0, 13.0
 _SLEEVE_MIDDLE_X = _SLEEVE_X + _SLEEVE_W / 2
 _ARROW_HALF = 7.0
 _ARROW_PEN = 4.0
+_SLEEVE_RAISED = 8.0
+_SLEEVE_SETTLED = 27.0
+_SLEEVE_BETWEEN = (_SLEEVE_RAISED + _SLEEVE_SETTLED) / 2
+_SHORT_OF_THE_SLEEVE = 4.0
+_HEAD_TO_BASE = 10.0
+_IN_FROM_THE_FRAME_S_EDGE = 3.0
+_HEAD_TO_BASE_AWAY = 9.0
 
 
 def _sleeve(top: float) -> tuple:
@@ -439,23 +446,39 @@ def _hold_arrow(tip: float, base: float) -> tuple:
     )
 
 
+def _an_arrow_down_at_the_sleeve(top: float) -> tuple:
+    tip = top - _SHORT_OF_THE_SLEEVE
+    return _hold_arrow(tip, tip - _HEAD_TO_BASE)
+
+
+def _an_arrow_up_at_the_sleeve(top: float) -> tuple:
+    tip = top + _SLEEVE_H + _SHORT_OF_THE_SLEEVE
+    return _hold_arrow(tip, tip + _HEAD_TO_BASE)
+
+
+def _arrows_away_from_the_sleeve() -> tuple:
+    upper_tip, lower_tip = _IN_FROM_THE_FRAME_S_EDGE, CANVAS - _IN_FROM_THE_FRAME_S_EDGE
+    return (*_hold_arrow(upper_tip, upper_tip + _HEAD_TO_BASE_AWAY),
+            *_hold_arrow(lower_tip, lower_tip - _HEAD_TO_BASE_AWAY))
+
+
 def _park() -> tuple:
-    return (_COLUMN, *_sleeve(27), *_hold_arrow(23, 13))
+    return (_COLUMN, *_sleeve(_SLEEVE_SETTLED), *_an_arrow_down_at_the_sleeve(_SLEEVE_SETTLED))
 
 
 def _retract() -> tuple:
-    return (_COLUMN, *_sleeve(8), *_hold_arrow(25, 35))
+    return (_COLUMN, *_sleeve(_SLEEVE_RAISED), *_an_arrow_up_at_the_sleeve(_SLEEVE_RAISED))
 
 
 def _release() -> tuple:
-    return (_COLUMN, *_sleeve(17.5), *_hold_arrow(3, 12), *_hold_arrow(45, 36))
+    return (_COLUMN, *_sleeve(_SLEEVE_BETWEEN), *_arrows_away_from_the_sleeve())
 
 
 _CROSS_HALF = 6.0
-_CROSS_PEN = 3.6
+_CROSS_PEN = _ARROW_PEN * 0.9
 
 
-def _hold_cross(middle: float) -> tuple:
+def _a_cross_where_an_arrowhead_was(middle: float) -> tuple:
     left, right = _SLEEVE_MIDDLE_X - _CROSS_HALF, _SLEEVE_MIDDLE_X + _CROSS_HALF
     upper, lower = middle - _CROSS_HALF, middle + _CROSS_HALF
     return (
@@ -465,7 +488,8 @@ def _hold_cross(middle: float) -> tuple:
 
 
 def _control_off() -> tuple:
-    return (_COLUMN, *_sleeve(17.5), *_hold_cross(8), *_hold_cross(40))
+    return (_COLUMN, *_sleeve(_SLEEVE_BETWEEN),
+            *_a_cross_where_an_arrowhead_was(8), *_a_cross_where_an_arrowhead_was(40))
 
 
 _GRID_CELLS = 5
