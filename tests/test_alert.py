@@ -4,8 +4,8 @@ import threading
 from unittest.mock import patch
 
 import pytest
-from PyQt6.QtCore import QMargins, QPoint, Qt, QThread, QTimer, QUrl
-from PyQt6.QtGui import QColor, QIcon, QPalette, QPixmap, QTextDocument
+from PyQt6.QtCore import QMargins, QPoint, QRect, Qt, QThread, QTimer, QUrl
+from PyQt6.QtGui import QColor, QFontMetrics, QIcon, QPalette, QPixmap, QTextDocument
 from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QApplication, QDialog, QLabel, QPushButton
 
@@ -199,6 +199,24 @@ def test_the_message_column_has_a_floor_as_well_as_a_ceiling():
     assert body.maximumWidth() == MESSAGE_WIDTH_MAX
 
 
+def _lines_at(label: QLabel, width: int) -> int:
+    metrics = QFontMetrics(label.font())
+    laid_out = metrics.boundingRect(QRect(0, 0, width, 10_000), Qt.TextFlag.TextWordWrap, label.text())
+    return laid_out.height() // metrics.lineSpacing()
+
+
+def test_the_column_s_floor_keeps_a_message_that_fits_it_from_breaking_over_more_lines():
+    dlg = AlertDialog("Example App", "The broker has nothing to do until the next job is queued.")
+    dlg.show()
+    QApplication.processEvents()
+
+    body, = [lbl for lbl in dlg.findChildren(QLabel) if lbl.text()]
+    as_laid_out, at_the_floor = _lines_at(body, body.width()), _lines_at(body, MESSAGE_WIDTH_MIN)
+    dlg.close()
+    assert at_the_floor > 1
+    assert as_laid_out <= at_the_floor
+
+
 @pytest.mark.parametrize(
     ("level", "drawn", "ink"),
     [
@@ -216,6 +234,8 @@ def test_the_level_picks_the_family_icon_beside_the_message(level, drawn, ink):
 
 
 def test_the_dialog_wears_the_apps_own_icon(tmp_path):
+    # Windows takes a dialog's taskbar button from its window icon, so without one the alert
+    # shows under the python interpreter's.
     icon = tmp_path / "app.png"
     drawn = QPixmap(16, 16)
     drawn.fill(BLUE)
@@ -236,6 +256,8 @@ def test_the_dialog_wears_an_icon_the_app_has_already_drawn():
 
 
 def test_the_alert_opens_in_front_of_whatever_the_user_is_looking_at():
+    # Windows gives a process launched hidden from a shortcut no claim on the foreground, so an
+    # alert opening under the window in front would look like a silent crash.
     dlg = AlertDialog("Example App", "Nothing to do.")
 
     assert dlg.windowFlags() & Qt.WindowType.WindowStaysOnTopHint
@@ -277,7 +299,7 @@ def test_show_alert_says_whether_the_person_dismissed_it(closed_with, dismissed)
     assert dialog.call_args.kwargs["dismissible"] is True
 
 
-def test_show_alert_builds_a_qapplication_when_the_process_has_none():
+def test_show_alert_builds_a_qapplication_for_a_dying_process_or_command_line_tool_that_has_none():
     with (
         patch("shared_ui.alert.AlertDialog"),
         patch("shared_ui.alert.QApplication") as application,
