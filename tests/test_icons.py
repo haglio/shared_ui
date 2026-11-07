@@ -13,12 +13,14 @@ from PyQt6.QtGui import QColor, QIcon, QImage, QPainter, QPen, QPixmap
 from PyQt6.QtWidgets import QLabel
 
 from shared_ui import icons
+from shared_ui.app_icon import LETTERS
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import (
     CANVAS,
     ICONS,
     PEN_WIDTH,
     STAND_IN,
+    Arc,
     Ellipse,
     Line,
     Path,
@@ -27,10 +29,14 @@ from shared_ui.icon_geometry import (
     icon_names,
 )
 from shared_ui.orientation import LANDSCAPE, PORTRAIT
-from shared_ui.spacing import BUTTON_FILLING_ICON, BUTTON_ICON
+from shared_ui.spacing import BUTTON_FILLING_ICON, BUTTON_ICON, BUTTON_SIZE_HUD
 
 _AN_ICON_THIS_VERSION_LACKS = "an_icon_from_another_version"
 _EVERY_ICON_AND_THE_STAND_IN = (*icon_names(), _AN_ICON_THIS_VERSION_LACKS)
+
+
+def _drawn_by_the_public_route(monkeypatch, name: str, shapes: tuple) -> None:
+    monkeypatch.setitem(ICONS, name, shapes)
 
 
 def _blank(size: int) -> QPixmap:
@@ -58,7 +64,10 @@ def _as_a_menu_row_shows(name: str) -> QPixmap:
 
 
 def _ink_rect(pixmap: QPixmap) -> tuple[int, int, int, int]:
-    ink = _ink(pixmap)
+    return _ink_rect_of(_ink(pixmap))
+
+
+def _ink_rect_of(ink: set[tuple[int, int]]) -> tuple[int, int, int, int]:
     assert ink, "nothing was drawn"
     xs = [x for x, _y in ink]
     ys = [y for _x, y in ink]
@@ -85,7 +94,7 @@ def _pieces(ink: set[tuple[int, int]]) -> int:
     return pieces
 
 
-def test_every_registered_icon_draws_something():
+def test_every_registered_icon_inks_something_so_no_button_comes_up_empty():
     for name in icon_names():
         pixmap = icons.icon_pixmap(name, 48, TEXT_PRIMARY)
         assert not pixmap.isNull(), name
@@ -105,14 +114,25 @@ def test_the_icons_are_all_different():
 
 _ONE_BAR = {"minus", "more", "more_vertical"}
 _IN_A_CORNER = {"regenerate_corner"}
+_RUNS_TO_THE_EDGE = {"headset", "control_off"}
+_A_TREE_ROW = BUTTON_ICON
+_MOST_OF_THE_CANVAS = 0.6
+_AS_NARROW_AS_A_CHEVRON = 0.4
 
 
-def test_every_icon_fills_its_canvas():
+def test_every_icon_fills_its_canvas_so_the_eye_still_finds_it_on_a_tree_row():
     for name in set(_EVERY_ICON_AND_THE_STAND_IN) - _ONE_BAR - _IN_A_CORNER:
-        left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
-        width, height = right - left, lower - upper
-        assert max(width, height) >= 0.6 * 48, f"{name} is small in its frame"
-        assert min(width, height) >= 0.4 * 48, f"{name} is thin in its frame"
+        left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, _A_TREE_ROW, TEXT_PRIMARY))
+        width, height = right - left + 1, lower - upper + 1
+        assert max(width, height) >= _MOST_OF_THE_CANVAS * _A_TREE_ROW, f"{name} is small in its frame"
+        assert min(width, height) >= _AS_NARROW_AS_A_CHEVRON * _A_TREE_ROW, f"{name} is thin in its frame"
+
+
+def test_an_icon_s_ink_stays_inside_its_canvas_with_room_for_its_caps_and_heads():
+    for name in set(_EVERY_ICON_AND_THE_STAND_IN) - _RUNS_TO_THE_EDGE:
+        left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, 2 * 48, TEXT_PRIMARY))
+        assert min(left, upper) >= 1, f"{name} is clipped by its canvas"
+        assert max(right, lower) <= 2 * 48 - 2, f"{name} is clipped by its canvas"
 
 
 def test_a_one_bar_icon_still_spans_its_canvas_the_long_way():
@@ -121,11 +141,19 @@ def test_a_one_bar_icon_still_spans_its_canvas_the_long_way():
         assert max(right - left, lower - upper) >= 0.6 * 48, f"{name} is short in its frame"
 
 
-def test_the_speed_pair_is_one_control_drawn_twice():
-    minus = _ink(icons.icon_pixmap("minus", 96, TEXT_PRIMARY))
-    plus = _ink(icons.icon_pixmap("plus", 96, TEXT_PRIMARY))
+_SHOWS_A_CANVAS_UNIT = 2 * 48
+
+
+def test_the_speed_pair_is_one_control_drawn_twice_in_ink_however_the_geometry_spells_it():
+    (bar,) = ICONS["minus"]
+    scale = _SHOWS_A_CANVAS_UNIT / CANVAS
+    minus = _ink(icons.icon_pixmap("minus", _SHOWS_A_CANVAS_UNIT, TEXT_PRIMARY))
+    plus = _ink(icons.icon_pixmap("plus", _SHOWS_A_CANVAS_UNIT, TEXT_PRIMARY))
+
     assert minus <= plus
-    assert len(plus) > len(minus)
+    the_second_bar = plus - minus
+    assert the_second_bar
+    assert all(abs(x + 0.5 - _SHOWS_A_CANVAS_UNIT / 2) <= scale * bar.width / 2 + 1 for x, _y in the_second_bar)
 
 
 def test_the_hollow_plus_traces_the_solid_one():
@@ -137,14 +165,14 @@ def test_the_hollow_plus_traces_the_solid_one():
     assert solid.toImage().pixelColor(24, 24).alpha() > 32
 
 
-def test_every_icon_sits_in_the_middle_of_its_canvas():
+def test_every_icon_sits_in_the_middle_of_its_canvas_so_a_bank_of_buttons_lines_up():
     for name in set(_EVERY_ICON_AND_THE_STAND_IN) - _IN_A_CORNER:
         left, upper, right, lower = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
         assert abs((left + right) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
         assert abs((upper + lower) / 2 - 24) <= 0.12 * 48, f"{name} sits off-center"
 
 
-def test_an_icon_is_drawn_in_the_color_it_is_asked_for():
+def test_an_icon_is_drawn_in_the_color_it_is_asked_for_a_red_delete_or_a_green_favorite():
     for color in (RED, GREEN, TEXT_PRIMARY):
         image = icons.icon_pixmap("star", 48, color).toImage()
         assert image.pixelColor(24, 25) == color
@@ -154,6 +182,9 @@ def test_an_icon_scales_to_the_size_it_is_asked_for():
     for size in (16, 24, 48, 96):
         pixmap = icons.icon_pixmap("mic", size, TEXT_PRIMARY)
         assert pixmap.size() == QSize(size, size)
+
+
+_ANTIALIASING_FATTENS_A_SMALL_ICON = 1.3
 
 
 def test_a_small_icon_is_the_same_icon_rather_than_a_heavier_one():
@@ -169,7 +200,7 @@ def test_a_small_icon_is_the_same_icon_rather_than_a_heavier_one():
         _ink_pixels(icons.icon_pixmap("mic", size, TEXT_PRIMARY)) / (size * size)
         for size in sizes
     ]
-    assert max(coverage) < 1.3 * min(coverage)
+    assert max(coverage) < _ANTIALIASING_FATTENS_A_SMALL_ICON * min(coverage)
 
 
 def test_an_icon_carries_a_normal_and_a_dimmed_rendering():
@@ -282,7 +313,15 @@ def test_the_working_icon_is_the_circle_with_a_quarter_left_out():
 
 
 _OSR2_CONTROL = ("park", "retract", "release", "control_off")
-_THE_DEVICE = 3
+
+
+def _the_device(first: tuple, second: tuple) -> tuple:
+    shared = []
+    for one, other in zip(first, second, strict=False):
+        if one != other:
+            break
+        shared.append(one)
+    return tuple(shared)
 
 
 def test_the_four_osr2_control_icons_draw_one_device():
@@ -290,10 +329,84 @@ def test_the_four_osr2_control_icons_draw_one_device():
     assert len(columns) == 1
 
 
+def test_the_device_is_the_column_the_sleeve_and_the_arm_between_them():
+    device = _the_device(ICONS["release"], ICONS["control_off"])
+
+    assert [type(shape) for shape in device] == [RoundedRect, RoundedRect, Line]
+
+
 def test_control_off_crosses_out_what_driving_points_at():
     driving, off = ICONS["release"], ICONS["control_off"]
-    assert driving[:_THE_DEVICE] == off[:_THE_DEVICE]
-    assert driving[_THE_DEVICE:] != off[_THE_DEVICE:]
+    device = _the_device(driving, off)
+    assert device
+    assert driving[len(device):] != off[len(device):]
+
+
+def _sleeve_of(name: str) -> RoundedRect:
+    _column, sleeve, *_rest = ICONS[name]
+    return sleeve
+
+
+def _arrows_of(name: str) -> list[tuple[Line, Polygon]]:
+    _column, _sleeve, _arm, *rest = ICONS[name]
+    return [(stem, head) for stem, head in zip(rest[::2], rest[1::2], strict=True) if isinstance(head, Polygon)]
+
+
+def _tip_of(stem: Line, head: Polygon) -> float:
+    return next(y for x, y in head.points if x == stem.x1)
+
+
+def _points_toward(stem: Line, head: Polygon) -> float:
+    return _tip_of(stem, head) - stem.y1
+
+
+def test_park_s_arrow_points_down_at_the_sleeve_settled_low_and_retract_s_up_at_it_raised():
+    (park_stem, park_head), = _arrows_of("park")
+    (retract_stem, retract_head), = _arrows_of("retract")
+
+    assert _sleeve_of("park").y > _sleeve_of("retract").y
+    assert _points_toward(park_stem, park_head) > 0
+    assert _points_toward(retract_stem, retract_head) < 0
+
+
+def test_release_s_arrows_point_away_from_the_sleeve_both_ways():
+    sleeve = _sleeve_of("release")
+    (upper_stem, upper_head), (lower_stem, lower_head) = _arrows_of("release")
+
+    assert _tip_of(upper_stem, upper_head) < sleeve.y
+    assert _points_toward(upper_stem, upper_head) < 0
+    assert _tip_of(lower_stem, lower_head) > sleeve.y + sleeve.h
+    assert _points_toward(lower_stem, lower_head) > 0
+
+
+def _crosses_of(name: str) -> list[tuple[Line, Line]]:
+    _column, _sleeve, _arm, *legs = ICONS[name]
+    return list(zip(legs[::2], legs[1::2], strict=True))
+
+
+def test_control_off_s_crosses_stand_where_release_s_arrowheads_were():
+    heads = [sorted(y for _x, y in head.points) for _stem, head in _arrows_of("release")]
+    crosses = [(one.y1 + one.y2) / 2 for one, _other in _crosses_of("control_off")]
+
+    assert all(head[0] <= cross <= head[-1] for cross, head in zip(crosses, heads, strict=True))
+
+
+def test_a_cross_is_finer_than_an_arrow_and_stays_off_the_sleeve():
+    sleeve = _sleeve_of("control_off")
+    (arrow_stem, _head), *_rest = _arrows_of("release")
+    upper, lower = _crosses_of("control_off")
+
+    assert all(leg.width < arrow_stem.width for cross in (upper, lower) for leg in cross)
+    assert max(upper[0].y1, upper[0].y2) + upper[0].width / 2 < sleeve.y
+    assert min(lower[0].y1, lower[0].y2) - lower[0].width / 2 > sleeve.y + sleeve.h
+
+
+def test_the_osr2_arrows_and_crosses_run_up_the_sleeve_s_own_middle():
+    sleeve = _sleeve_of("release")
+    middle = sleeve.x + sleeve.w / 2
+
+    assert all(stem.x1 == stem.x2 == middle for stem, _head in _arrows_of("release"))
+    assert all((one.x1 + one.x2) / 2 == middle for one, _other in _crosses_of("control_off"))
 
 
 _WAVEFORMS = ("wave", "wave_triangle", "wave_square", "wave_sawtooth")
@@ -413,7 +526,14 @@ def test_the_registry_is_what_icon_names_reports():
         assert icons.icon_pixmap(name, 24, TEXT_PRIMARY).size() == QSize(24, 24)
 
 
-def test_the_canvas_and_pen_width_are_stated_in_canvas_units():
+def test_icon_names_leaves_no_registered_icon_out_of_the_sweeps(monkeypatch):
+    _drawn_by_the_public_route(monkeypatch, "_an_icon_added_for_the_test", ICONS["disc"])
+
+    assert set(icon_names()) == set(ICONS)
+
+
+def test_the_canvas_and_pen_width_are_public_for_a_caller_composing_an_icon_into_its_own_drawing():
+    assert {"CANVAS", "PEN_WIDTH"} <= set(icons.__all__)
     assert icons.CANVAS == 48.0
     assert 0 < icons.PEN_WIDTH < icons.CANVAS
 
@@ -523,7 +643,19 @@ def test_a_menu_row_s_restart_keeps_its_arrow_apart_from_the_quit_inside_it():
     assert _pieces(restart) == _pieces(quit_icon) + 1
 
 
-def test_the_enhance_filter_lays_its_funnel_over_the_plus():
+def test_the_enhance_filter_is_the_enhancement_plus_with_the_filter_s_funnel_laid_over_it():
+    bars = _of("enhance_filter", Line)
+    [funnel] = _of("enhance_filter", Polygon)
+    [filter_funnel] = _of("filter", Polygon)
+
+    (upright,), (flat,) = (bar for bar in bars if bar.x1 == bar.x2), (bar for bar in bars if bar.y1 == bar.y2)
+    assert upright.x1 == flat.y1 == (upright.y1 + upright.y2) / 2 == (flat.x1 + flat.x2) / 2
+    assert len(funnel.points) == len(filter_funnel.points)
+    assert not funnel.fill
+    assert funnel.points[0][1] == funnel.points[1][1] < min(y for _x, y in funnel.points[2:])
+
+
+def test_the_enhance_filter_reads_as_one_sign_rather_than_two_controls_crowded_together():
     icon = _ink(icons.icon_pixmap("enhance_filter", 48, TEXT_PRIMARY))
     assert _pieces(icon) == 1
 
@@ -531,17 +663,35 @@ def test_the_enhance_filter_lays_its_funnel_over_the_plus():
     assert any(y >= 42 for _x, y in icon), "the funnel's stem is missing"
 
 
-def test_the_transport_icons_have_rounded_corners(monkeypatch):
+def test_the_rounded_play_carries_more_weight_than_one_with_hard_points(monkeypatch):
     (triangle,) = ICONS["play"]
-    monkeypatch.setitem(ICONS, "_play_with_hard_points", (Polygon(triangle.points),))
+    _drawn_by_the_public_route(monkeypatch, "_play_with_hard_points", (Polygon(triangle.points),))
 
     rounded = _ink_pixels(icons.icon_pixmap("play", 48, TEXT_PRIMARY))
     bare = _ink_pixels(icons.icon_pixmap("_play_with_hard_points", 48, TEXT_PRIMARY))
     assert rounded > bare
 
 
+def test_a_rounded_polygon_s_points_are_round_rather_than_cut_flat():
+    (triangle,) = ICONS["play"]
+    tip = max(x for x, _y in triangle.points)
+
+    _left, _upper, right, _lower = _ink_rect(icons.icon_pixmap("play", 2 * 48, TEXT_PRIMARY))
+
+    assert right >= 2 * (tip + triangle.round_radius) - 1
+
+
+def test_the_play_triangle_is_placed_by_its_weight_so_its_box_leans_right():
+    (triangle,) = ICONS["play"]
+    centroid = sum(x for x, _y in triangle.points) / len(triangle.points)
+    left, _upper, right, _lower = _ink_rect(icons.icon_pixmap("play", 48, TEXT_PRIMARY))
+
+    assert abs(centroid - 24) <= 1
+    assert (left + right) / 2 > 24 + 2
+
+
 def test_an_icon_this_version_does_not_have_is_drawn_as_the_stand_in(monkeypatch):
-    monkeypatch.setitem(ICONS, "_the_stand_in", STAND_IN)
+    _drawn_by_the_public_route(monkeypatch, "_the_stand_in", STAND_IN)
     stand_in = icons.icon_pixmap("_the_stand_in", 48, TEXT_PRIMARY).toImage()
 
     drawn = icons.icon_pixmap(_AN_ICON_THIS_VERSION_LACKS, 48, TEXT_PRIMARY).toImage()
@@ -579,9 +729,29 @@ def test_a_bar_ends_in_a_round_cap_that_reaches_past_its_endpoint():
     assert right >= bar.x2 + bar.width / 2 - 1
 
 
+def test_a_bar_s_cap_is_round_so_its_corner_is_clear_where_a_square_cap_inks_it():
+    (bar,) = ICONS["minus"]
+    image = icons.icon_pixmap("minus", 2 * 48, TEXT_PRIMARY).toImage()
+    half = bar.width / 2
+    corner = (int(2 * (bar.x1 - half)) + 1, int(2 * (bar.y1 - half)) + 1)
+    middle_of_the_cap = (int(2 * (bar.x1 - half)), int(2 * bar.y1))
+
+    assert image.pixelColor(*corner).alpha() < 32
+    assert image.pixelColor(*middle_of_the_cap).alpha() > 200
+
+
+def test_two_bars_meet_in_a_round_join_that_reaches_past_a_bevel():
+    (check,) = ICONS["check"]
+    _first, corner, _last = check.points
+    image = icons.icon_pixmap("check", 2 * 48, TEXT_PRIMARY).toImage()
+
+    outward_from_the_corner = (int(2 * corner[0]), int(2 * corner[1]) + 4)
+    assert image.pixelColor(*outward_from_the_corner).alpha() > 200
+
+
 def test_a_path_written_in_a_frame_of_its_own_fills_the_canvas_that_frame_stands_for(monkeypatch):
     square = Path((("M", 0, 0), ("L", 24, 0), ("L", 24, 24), ("L", 0, 24), ("Z",)), frame=24.0)
-    monkeypatch.setitem(ICONS, "_a_square_in_a_frame_of_24", (square,))
+    _drawn_by_the_public_route(monkeypatch, "_a_square_in_a_frame_of_24", (square,))
 
     drawn = icons.icon_pixmap("_a_square_in_a_frame_of_24", 48, TEXT_PRIMARY)
 
@@ -742,6 +912,144 @@ def test_the_jigsaw_is_a_piece_tabbed_left_and_right_and_blanked_above_and_below
     assert (middle + half) - max(across_the_middle) > side / 4
 
 
+def test_the_copy_s_back_sheet_breaks_off_where_the_front_sheet_lies_over_it():
+    image = icons.icon_pixmap("copy", 48, TEXT_PRIMARY).toImage()
+    [front] = _of("copy", RoundedRect)
+    back_sheet_s_left_edge = min(line.x1 for line in _of("copy", Line))
+    back_sheet_s_lower_edge = max(line.y1 for line in _of("copy", Line))
+
+    inside_the_front_sheet = ((int(back_sheet_s_left_edge), int(front.y + front.h / 2)),
+                              (int(front.x + front.w / 2), int(back_sheet_s_lower_edge)))
+    assert all(image.pixelColor(*point).alpha() < 32 for point in inside_the_front_sheet)
+
+
+def test_the_star_ring_shows_as_a_rim_all_round_a_favorited_star_drawn_over_it():
+    canvas = _blank(48)
+    painter = QPainter(canvas)
+    icons.draw_icon(painter, "star_ring", RED)
+    icons.draw_icon(painter, "star", GREEN)
+    painter.end()
+    rim = {(x, y) for x, y in _ink(canvas) if canvas.toImage().pixelColor(x, y).red() > 200}
+    star = _ink_rect(icons.icon_pixmap("star", 48, TEXT_PRIMARY))
+
+    left, upper, right, lower = _ink_rect_of(rim)
+    assert (left, upper) < star[:2]
+    assert (right, lower) > star[2:]
+
+
+def test_an_up_or_down_chevron_is_the_left_or_right_one_turned_a_quarter():
+    def turned(name: str) -> set[tuple[float, float]]:
+        (chevron,) = ICONS[name]
+        return {(y, x) for x, y in chevron.points}
+
+    assert set(ICONS["chevron_up"][0].points) == turned("chevron_left")
+    assert set(ICONS["chevron_down"][0].points) == turned("chevron_right")
+
+
+def test_the_toolbar_s_f_is_the_app_icons_f_on_the_family_s_letter_grid():
+    blocks = _of("fmode", Polygon)
+    unit = blocks[0].points[1][0] - blocks[0].points[0][0]
+    inset = min(x for block in blocks for x, _y in block.points)
+
+    painted = {(round((block.points[0][1] - inset) / unit), round((block.points[0][0] - inset) / unit))
+               for block in blocks}
+    assert painted == {(row, column) for row, line in enumerate(LETTERS["F"])
+                       for column, cell in enumerate(line) if cell == "#"}
+    assert len(LETTERS["F"]) * unit == CANVAS - 2 * inset
+
+
+def test_a_qt_icon_is_drawn_at_the_whole_canvas_for_qt_to_scale_down_crisp():
+    [drawn] = icons.qt_icon("mic").availableSizes()
+
+    assert drawn.width() == drawn.height() == CANVAS > max(BUTTON_ICON, BUTTON_FILLING_ICON)
+
+
+def test_loop_is_two_arrows_chasing_round_a_circuit_rather_than_one_ring():
+    heads = _of("loop", Polygon)
+    arcs = _of("loop", Arc)
+
+    assert len(heads) == 2
+    assert all(arc.span < 180 for arc in arcs)
+
+
+def test_reset_is_a_gear_with_a_circular_arrow_at_its_corner_since_either_alone_is_another_control():
+    rim, _bore = _of("reset", Ellipse)
+    teeth = _of("reset", Line)
+    [arrow] = _of("reset", Arc)
+    [head] = _of("reset", Polygon)
+
+    assert len(teeth) == 8
+    assert (arrow.x + arrow.w / 2, arrow.y + arrow.h / 2) > (rim.cx, rim.cy)
+    assert max(x for x, _y in head.points) > rim.cx + rim.rx
+
+
+def test_compilation_is_a_stack_of_three_sheets_where_copy_is_two():
+    sheets = _of("compilation", RoundedRect)
+
+    assert len(sheets) == 3
+    assert len(_of("copy", RoundedRect)) + len(_of("copy", Arc)) // 2 == 2
+    assert all((sheets[n + 1].x - sheets[n].x, sheets[n + 1].y - sheets[n].y) == (sheets[1].x - sheets[0].x, sheets[1].y - sheets[0].y)
+               for n in range(2))
+
+
+def test_the_headset_is_the_thing_itself_a_visor_with_two_lenses_and_a_strap_either_side():
+    [visor] = _of("headset", RoundedRect)
+    lenses = _of("headset", Ellipse)
+    straps = _of("headset", Line)
+
+    assert [lens.fill for lens in lenses] == [True, True]
+    assert len(straps) == 2
+    assert min(strap.x1 for strap in straps) < visor.x
+    assert max(strap.x2 for strap in straps) > visor.x + visor.w
+
+
+def test_the_monitor_is_a_screen_on_a_stem_and_a_foot_not_a_headset_struck_out():
+    [screen] = _of("monitor", RoundedRect)
+    stem, foot = _of("monitor", Line)
+
+    assert not set(ICONS["monitor"]) & set(ICONS["headset"])
+    assert stem.x1 == stem.x2
+    assert screen.y + screen.h <= stem.y1 < stem.y2 <= foot.y1 == foot.y2
+
+
+def test_the_flat_screen_leans_where_square_on_it_would_be_a_plain_rectangle_beside_the_dome():
+    [frame] = _of("flat_2d", Polygon)
+    (left_top, _right_top, _right_low, left_low) = frame.points
+
+    assert left_top[0] != left_low[0]
+    assert len(_of("vr_hemisphere", Arc)) == len(ICONS["vr_hemisphere"])
+
+
+def test_versions_leans_and_carries_the_swap_arrow_where_copy_stands_square():
+    sheets = _of("versions", RoundedRect)
+    [swap_line] = _of("versions", Line)
+    heads = _of("versions", Polygon)
+
+    assert sheets[0].x != sheets[1].x
+    assert sheets[0].y != sheets[1].y
+    assert len(heads) == 2
+    assert swap_line.x1 != swap_line.x2
+    assert swap_line.y1 != swap_line.y2
+    assert not _of("copy", Polygon)
+
+
+def test_funscript_jump_is_an_arrow_running_into_the_f():
+    [head] = _of("funscript_jump", Polygon)
+    stem, *the_f = _of("funscript_jump", Line)
+
+    assert len(the_f) == 3
+    assert max(x for x, _y in head.points) <= min(min(bar.x1, bar.x2) for bar in the_f)
+    assert stem.x2 > stem.x1
+
+
+def test_expand_horizontal_is_as_chunky_as_the_transport_controls_beside_it():
+    [bar] = _of("expand_horizontal", Line)
+    heads = _of("expand_horizontal", Polygon)
+
+    assert bar.width >= PEN_WIDTH
+    assert [head.fill for head in heads] == [True, True]
+
+
 def test_the_warning_is_a_bar_and_a_dot_under_a_raised_triangles_point():
     [triangle] = _of("warning", Polygon)
     [bar] = _of("warning", Line)
@@ -766,6 +1074,19 @@ def test_an_icon_drawn_to_fill_a_box_reaches_it_along_one_side_and_sits_in_its_m
     assert abs((top + bottom) / 2 - 30) <= 1.5
 
 
+def test_a_history_arrow_s_head_is_far_deeper_than_its_ring():
+    for name in ("undo_arrow", "redo_arrow"):
+        depths = sorted(_depth_in_each_sector(_ink(icons.icon_pixmap(name, 48, TEXT_PRIMARY))).values())
+        along_the_ring = depths[len(depths) // 2]
+        assert depths[-1] > 2 * along_the_ring, name
+
+
+def test_a_history_arrow_s_ring_stops_short_of_its_head_leaving_open_space():
+    for name in ("undo_arrow", "redo_arrow"):
+        gap = _empty_sectors(_ink(icons.icon_pixmap(name, 48, TEXT_PRIMARY)))
+        assert len(gap) * _DEGREES_A_SECTOR >= 15, name
+
+
 def test_the_two_history_icons_are_one_drawing_mirrored_about_the_center_line():
     forward_ring, forward_head = ICONS["redo_arrow"]
     back_ring, back_head = ICONS["undo_arrow"]
@@ -778,6 +1099,41 @@ def test_the_two_history_icons_are_one_drawing_mirrored_about_the_center_line():
 
 def test_the_shuffles_two_lines_are_drawn_under_the_default_pen():
     assert all(shape.width < PEN_WIDTH for shape in ICONS["shuffle"] if isinstance(shape, Line))
+
+
+def _solid_runs(image: QImage, row: int) -> int:
+    inked = [image.pixelColor(x, row).alpha() > 127 for x in range(image.width())]
+    return sum(1 for x, is_inked in enumerate(inked) if is_inked and (x == 0 or not inked[x - 1]))
+
+
+def test_the_shuffle_s_lines_are_still_told_apart_a_step_before_they_cross_at_a_hud_button_s_size():
+    image = icons.icon_pixmap("shuffle", BUTTON_SIZE_HUD, TEXT_PRIMARY).toImage()
+    a_step_before_the_crossing = BUTTON_SIZE_HUD // 2 - 2
+
+    assert _solid_runs(image, a_step_before_the_crossing) == 2
+
+
+def test_the_star_outline_s_points_stay_open_rather_than_closing_up():
+    image = icons.icon_pixmap("star_outline", 48, TEXT_PRIMARY).toImage()
+    (star,) = ICONS["star_outline"]
+    top = min(y for _x, y in star.points)
+
+    inside_the_top_point = (24, int(top) + 8)
+    assert image.pixelColor(*inside_the_top_point).alpha() < 32
+
+
+def test_the_hollow_plus_s_middle_reads_empty_at_a_badge_s_size():
+    image = icons.icon_pixmap("plus_outline", BUTTON_ICON, TEXT_PRIMARY).toImage()
+    middle = BUTTON_ICON // 2
+
+    assert image.pixelColor(middle, middle).alpha() < 32
+
+
+def test_the_hollow_plus_s_square_tips_land_within_a_pixel_of_the_solid_s_caps_at_a_badge_s_size():
+    solid = _ink_rect(icons.icon_pixmap("plus", BUTTON_ICON, TEXT_PRIMARY))
+    hollow = _ink_rect(icons.icon_pixmap("plus_outline", BUTTON_ICON, TEXT_PRIMARY))
+
+    assert all(abs(edge - twin) <= 1 for edge, twin in zip(solid, hollow, strict=True))
 
 
 @pytest.mark.usefixtures("qapp")

@@ -72,6 +72,8 @@ def _hexes(text: str) -> list[str]:
 
 
 def _a_typed_symbol(character: str) -> bool:
+    # Windows draws a box for a glyph the face lacks, and a typed symbol takes its weight from
+    # whatever face is installed rather than from the icons beside it.
     if character in _TYPOGRAPHY:
         return False
     return unicodedata.category(character) in ("So", "Co") or character == _MINUS_SIGN

@@ -88,6 +88,7 @@ def icon_pixmap(name: str, size: int, color) -> QPixmap:
 
 
 def qt_icon(name: str, *, color=None, size: int = int(CANVAS)) -> QIcon:
+    # Qt puts a QIcon's disabled pixmap on a button the moment the button goes dead.
     icon = QIcon()
     icon.addPixmap(
         icon_pixmap(name, size, TEXT_PRIMARY if color is None else color),
