@@ -4,6 +4,7 @@ import html
 from collections.abc import Collection, Mapping, Sequence
 
 from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QLabel
 
 from shared_ui.colors import BLUE_LIGHT, TEXT_PRIMARY
@@ -23,7 +24,8 @@ class FolderPath(QLabel):
         self.linkActivated.connect(lambda step: self.step_clicked.emit(int(step)))
 
     def set_path(self, steps: Sequence[str], *, linked: Collection[int] | None = None,
-                 lead: str = "", icons: Mapping[int, str] | None = None) -> None:
+                 lead: str = "", icons: Mapping[int, str | tuple[str, QColor]] | None = None,
+                 ) -> None:
         if linked is None:
             linked = range(len(steps) - 1)
         icons = icons or {}
@@ -36,9 +38,13 @@ class FolderPath(QLabel):
     def plain_text(self) -> str:
         return self._plain
 
-    def _drawn(self, step: int, name: str, is_link: bool, icon: str | None) -> str:
-        named = (icon_then_text(icon, name, color=TEXT_PRIMARY, size=self.fontMetrics().height())
-                 if icon else html.escape(name))
+    def _drawn(self, step: int, name: str, is_link: bool,
+               icon: str | tuple[str, QColor] | None) -> str:
+        if not icon:
+            named = html.escape(name)
+        else:
+            icon_name, color = (icon, TEXT_PRIMARY) if isinstance(icon, str) else icon
+            named = icon_then_text(icon_name, name, color=color, size=self.fontMetrics().height())
         return _link(step, named) if is_link else named
 
 
