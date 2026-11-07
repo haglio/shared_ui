@@ -60,7 +60,7 @@ def test_a_control_that_is_on_but_cannot_be_changed_still_shows_its_tick():
     assert white > 4
 
 
-def test_a_control_that_cannot_be_changed_mutes_its_label():
+def test_a_control_that_cannot_be_changed_mutes_its_label_the_one_sign_of_it_beside_the_tick():
     live = TickControl("Random")
     live.resize(140, 24)
     dim = TickControl("Random")
