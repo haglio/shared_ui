@@ -57,6 +57,10 @@ def test_the_family_sheet_is_every_fragment():
         assert fragment in sheet
 
 
+def test_the_family_sheet_leaves_toolbars_alone_for_an_app_to_opt_its_own_into():
+    assert "QToolBar" not in chrome.family_stylesheet()
+
+
 def _shown_button(rules: str, kind: type[QAbstractButton] = QPushButton, *,
                   lit: bool = False) -> QAbstractButton:
     button = kind()
@@ -101,7 +105,7 @@ def test_a_button_under_the_pointer_sits_one_step_lighter_than_its_own_ground(
 
 
 @pytest.mark.parametrize("lit", [False, True], ids=["at rest", "lit"])
-def test_a_press_flashes_the_blue_over_the_hover(pointer, lit):
+def test_a_press_flashes_the_blue_rather_than_one_more_lighter_step(pointer, lit):
     button = _shown_button(chrome.button_rules(), lit=lit)
     pointer.off(button)
     pointer.on(button)
@@ -127,6 +131,36 @@ def test_hovering_a_menu_row_that_cannot_be_clicked_promises_nothing():
 
     assert _background(rules["QMenu::item:selected"]) == palette.as_hex(palette.BLUE)
     assert _background(rules["QMenu::item:disabled:selected"]) == "transparent"
+
+
+def _row_grounds_with_the_middle_one_under_the_pointer(rules: str) -> list[str]:
+    menu = QMenu()
+    menu.setStyleSheet(rules)
+    rows = [menu.addAction(label) for label in ("One", "Two", "Three")]
+    menu.resize(menu.sizeHint())
+    menu.setActiveAction(rows[1])
+    image = menu.grab().toImage()
+    return [image.pixelColor(menu.actionGeometry(row).right() - 2,
+                             menu.actionGeometry(row).center().y()).name() for row in rows]
+
+
+def test_the_ground_rule_paints_a_menu_s_rows_flat_so_the_menu_rules_mark_the_one_under_the_pointer():
+    flat = _row_grounds_with_the_middle_one_under_the_pointer(chrome.ground_rules())
+    marked = _row_grounds_with_the_middle_one_under_the_pointer(
+        chrome.ground_rules() + chrome.menu_rules())
+
+    assert len(set(flat)) == 1
+    assert marked[1] == palette.as_hex(palette.BLUE)
+    assert marked[0] == marked[2] != marked[1]
+
+
+def test_a_tray_menu_with_no_window_to_inherit_from_is_dressed_by_the_menu_rules_alone():
+    menu = QMenu()
+    menu.setStyleSheet(chrome.menu_rules())
+    menu.addAction("Quit")
+    menu.resize(menu.sizeHint())
+
+    assert menu.grab().toImage().pixelColor(2, 2) == QColor(*palette.BG_TERTIARY)
 
 
 def _solid_icon() -> QIcon:
@@ -170,6 +204,8 @@ def test_a_menu_row_s_icon_sits_midway_between_the_menu_s_edge_and_its_words():
 
 
 def test_a_row_that_opens_a_menu_draws_its_arrow_midway_across_the_padding_past_its_words():
+    # Qt starts a sub-menu's arrow where the row's words may end, so a word that fills its room
+    # runs into it.
     menu = QMenu()
     menu.setStyleSheet(chrome.menu_rules())
     row = menu.addMenu("Add to folder")
@@ -188,6 +224,8 @@ def test_a_row_that_opens_a_menu_draws_its_arrow_midway_across_the_padding_past_
 
 
 def test_a_checked_row_s_icon_sits_on_the_lighter_ground_of_a_control_that_is_on():
+    # Qt shows a checked row's state through its icon alone when it has one, so without this a
+    # toggle in a menu looks the same on as off.
     menu, (toggle,) = _menu_of_rows_with_icons("Heading")
     toggle.setCheckable(True)
     rect = menu.actionGeometry(toggle)
@@ -275,6 +313,25 @@ def test_a_toolbar_keeps_the_gap_where_a_styled_window_that_was_never_shown_just
     assert gaps == {spacing.BUTTON_GAP}
 
 
+def _all_said_of(selector: str, sheet: str) -> str:
+    return "".join(m.group("body") for m in _RULE.finditer(sheet) if m.group("selector").strip() == selector)
+
+
+def _value(body: str, name: str) -> str:
+    return re.search(rf"(?<![\w-]){name}\s*:\s*([^;]+);", body).group(1).strip()
+
+
+def test_a_toolbar_button_padded_tight_is_the_family_button_with_less_room_at_its_sides():
+    pushed = _all_said_of("QPushButton", chrome.button_rules())
+    tight = _all_said_of("QToolButton", chrome.toolbar_rules())
+    top, _, bottom, _ = _value(tight, "padding").split()
+    pushed_top, _ = _value(pushed, "padding").split()
+
+    assert top == bottom == pushed_top
+    for kept in ("border", "border-radius", "background-color"):
+        assert _value(tight, kept) == _value(pushed, kept), kept
+
+
 def test_a_toolbar_button_given_more_room_on_its_right_grows_by_that_much():
     toolbar, button = _toolbar_button()
     ordinary = button.sizeHint().width()
@@ -306,7 +363,8 @@ def test_a_picked_item_rule_names_every_item_view_unless_it_is_told_one():
 
 
 def test_a_picked_row_the_keyboard_is_on_wears_no_focus_frame():
-    # Windows 11 draws a white frame round the row the keyboard is on, while the list has the focus.
+    # Windows 11 draws a white frame round the row the keyboard is on, while the list has the focus;
+    # on a picked row it says nothing the blue does not.
     blue = palette.as_hex(palette.BLUE)
     view = QTreeWidget()
     view.setHeaderHidden(True)

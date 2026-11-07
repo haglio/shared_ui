@@ -172,6 +172,8 @@ def tool_button_rules() -> str:
 
 
 def toolbar_rules() -> str:
+    """Qt draws a toolbar's buttons faint and edge to edge, so an app opts its toolbar into
+    these with :func:`style_toolbar`; the family sheet leaves toolbars alone."""
     return f"""
     QToolBar {{
         spacing: {BUTTON_GAP}px;
@@ -226,5 +228,8 @@ def picked_item_rules(view: str = "QAbstractItemView") -> str:
 
 
 def family_stylesheet() -> str:
+    """In a Qt style sheet a later rule of equal specificity wins, and an id selector outweighs
+    every rule here: an app's own rules go after this sheet or on its window, and a
+    ``QPushButton#generate`` keeps its blue."""
     return (f"{ground_rules()}\n{tooltip_rules()}\n{menu_rules()}\n{button_rules()}"
             f"\n{icon_button_rules()}\n{item_view_rules()}")
