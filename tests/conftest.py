@@ -6,6 +6,8 @@ import sys
 import pytest
 
 # Qt has to get this before the QApplication below exists, or a run flashes real windows.
+# setdefault leaves a developer's own QT_QPA_PLATFORM standing, to watch a run on a real
+# display; the merge gate sets it for its own runs only, not for a run started by hand.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PyQt6.QtWidgets import QApplication
