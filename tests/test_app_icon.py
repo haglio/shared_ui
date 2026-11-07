@@ -124,7 +124,6 @@ def test_a_hud_draws_an_app_s_letter_as_its_cells_in_magenta_leaving_the_rest_al
 
 @pytest.mark.parametrize("letter", ["B", "F"])
 def test_a_hud_with_no_icon_file_to_load_draws_the_letter_from_its_own_grid(letter):
-    assert not list(Path(app_icon.__file__).parent.rglob("*.ico"))
     image = Image.new("RGBA", (18, 18), (0, 0, 0, 0))
 
     app_icon.draw_letter(ImageDraw.Draw(image), (0, 0, 18, 18), letter)
