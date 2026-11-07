@@ -25,13 +25,21 @@ class TestButtonGrouping:
     def test_the_group_gap_is_stated_as_a_ratio_of_the_gap_inside_one(self):
         assert spacing.BUTTON_GROUP_GAP == spacing.BUTTON_GAP * 3
 
-    def test_a_group_boundary_still_fits_inside_a_button(self):
+    def test_a_group_boundary_still_fits_inside_a_button_or_two_groups_read_as_two_bars(self):
         assert spacing.BUTTON_GROUP_GAP < spacing.BUTTON_SIZE
 
 
 class TestIcons:
     def test_an_icon_set_beside_a_word_is_smaller_than_an_icon_that_fills_its_square(self):
         assert spacing.BUTTON_ICON < spacing.BUTTON_FILLING_ICON
+
+
+class TestTheButtonSizes:
+    def test_there_are_two_and_the_hud_s_is_the_smaller_as_room_over_video_is_scarce(self):
+        sizes = {name for name, _ in _all_spacing_constants() if name.startswith("BUTTON_SIZE")}
+
+        assert sizes == {"BUTTON_SIZE", "BUTTON_SIZE_HUD"}
+        assert spacing.BUTTON_SIZE_HUD < spacing.BUTTON_SIZE
 
 
 class TestTheHudSquare:
@@ -42,15 +50,15 @@ class TestTheHudSquare:
 
 
 class TestADialog:
-    def test_its_margin_is_twice_the_ordinary_one(self):
+    def test_its_margin_is_twice_a_packed_toolbar_s_so_a_lone_dialog_is_not_cramped(self):
         assert spacing.MARGIN_DIALOG == 2 * spacing.MARGIN_STANDARD
 
-    def test_its_gap_is_twice_the_ordinary_one(self):
+    def test_its_gap_is_twice_a_packed_toolbar_s_so_a_lone_dialog_is_not_cramped(self):
         assert spacing.GAP_DIALOG == 2 * spacing.GAP_MEDIUM
 
 
 class TestARowOfButtons:
-    def test_wrapped_rows_stand_further_apart_than_buttons_along_a_row(self):
+    def test_wrapped_rows_stand_further_apart_than_buttons_along_a_row_so_two_do_not_read_as_one_block(self):
         assert spacing.BUTTON_ROW_GAP > spacing.BUTTON_GAP
 
     def test_a_word_button_is_as_wide_as_two_hud_squares_and_the_gap_between_them(self):
