@@ -7,8 +7,10 @@ from unittest.mock import patch
 
 import pytest
 from PyQt6.QtCore import QEvent, QPoint, QPointF, QRect, Qt
-from PyQt6.QtGui import QCursor, QMouseEvent
+from PyQt6.QtGui import QCursor, QImage, QMouseEvent
 from PyQt6.QtWidgets import QApplication, QWidget
+
+from shared_ui.colors import BG_PRIMARY
 
 
 def alert_shown(**how: Any):
@@ -41,6 +43,15 @@ def icons_lacking(*names: str) -> Iterator[None]:
         for name in names:
             del icons[name]
         yield
+
+
+def rendered_on_the_dark_ground(widget: QWidget) -> QImage:
+    """A bare ``grab()`` paints every uncovered pixel with the palette's Window color, which is
+    light under Qt's offscreen backend, a ground no app ever shows beneath these widgets."""
+    image = QImage(widget.size(), QImage.Format.Format_ARGB32)
+    image.fill(BG_PRIMARY)
+    widget.render(image, flags=QWidget.RenderFlag.DrawChildren)
+    return image
 
 
 def ground(widget: QWidget) -> str:

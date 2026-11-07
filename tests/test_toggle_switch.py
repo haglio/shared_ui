@@ -5,8 +5,9 @@ from PyQt6.QtGui import QImage
 from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QHBoxLayout, QWidget
 
-from shared_ui.colors import BG_PRIMARY, TOGGLE_HANDLE, TOGGLE_OFF, TOGGLE_ON
+from shared_ui.colors import TOGGLE_HANDLE, TOGGLE_OFF, TOGGLE_ON
 from shared_ui.spacing import GAP_MEDIUM
+from shared_ui.testing import rendered_on_the_dark_ground
 from shared_ui.toggle_geometry import TRACK
 from shared_ui.toggle_switch import ToggleSwitch
 
@@ -15,10 +16,7 @@ _OFF_THE_SWITCH = 200
 
 def _rendered(switch: ToggleSwitch) -> QImage:
     switch.resize(switch.sizeHint())
-    image = QImage(switch.size(), QImage.Format.Format_ARGB32)
-    image.fill(BG_PRIMARY)
-    switch.render(image, flags=QWidget.RenderFlag.DrawChildren)
-    return image
+    return rendered_on_the_dark_ground(switch)
 
 
 def _mean_ink(switch: ToggleSwitch) -> float:

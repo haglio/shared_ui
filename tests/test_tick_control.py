@@ -1,24 +1,15 @@
 from __future__ import annotations
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor, QPixmap
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtGui import QColor
 
-from shared_ui.colors import BG_PRIMARY, BG_SECONDARY, BLUE
+from shared_ui.colors import BG_SECONDARY, BLUE
+from shared_ui.testing import rendered_on_the_dark_ground
 from shared_ui.tick_control import _INDICATOR, TickControl
 
 
-def _rendered(control):
-    """A bare ``grab()`` paints every uncovered pixel with the palette's Window color, which is
-    light under Qt's offscreen backend and reads as phantom tick pixels."""
-    pix = QPixmap(control.size())
-    pix.fill(BG_PRIMARY)
-    control.render(pix, flags=QWidget.RenderFlag.DrawChildren)
-    return pix.toImage()
-
-
 def _classify(control):
-    img = _rendered(control)
+    img = rendered_on_the_dark_ground(control)
     blue = white = dark = 0
     for x in range(_INDICATOR + 3):
         for y in range(control.height()):
@@ -34,7 +25,7 @@ def _classify(control):
 
 
 def _brightest_label_pixel(control) -> int:
-    img = _rendered(control)
+    img = rendered_on_the_dark_ground(control)
     return max(QColor(img.pixel(x, y)).red()
                for x in range(_INDICATOR + 8, control.width())
                for y in range(control.height()))
@@ -93,7 +84,7 @@ def test_an_empty_indicator_stands_on_the_raised_ground_rather_than_the_canvas()
     control = TickControl("Random")
     control.resize(140, 24)
 
-    middle = _rendered(control).pixelColor(_INDICATOR // 2, control.height() // 2)
+    middle = rendered_on_the_dark_ground(control).pixelColor(_INDICATOR // 2, control.height() // 2)
 
     assert middle == BG_SECONDARY
 
@@ -109,7 +100,7 @@ def test_half_checked_fills_the_indicator_and_draws_a_level_bar_where_the_tick_g
     control = _half_checked()
 
     blue, white, _ = _classify(control)
-    img = _rendered(control)
+    img = rendered_on_the_dark_ground(control)
     top = (control.height() - _INDICATOR) // 2
     bar_row = top + _INDICATOR // 2
     brightest_of = [max(QColor(img.pixel(x, y)).red() for x in range(_INDICATOR + 1))
