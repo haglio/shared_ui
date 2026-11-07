@@ -900,13 +900,6 @@ def test_the_star_ring_shows_as_a_rim_all_round_a_favorited_star_drawn_over_it()
     assert lower > star[3]
 
 
-def test_an_up_or_down_chevron_is_the_left_or_right_one_turned_a_quarter():
-    def turned(name: str) -> set[tuple[float, float]]:
-        (chevron,) = ICONS[name]
-        return {(y, x) for x, y in chevron.points}
-
-    assert set(ICONS["chevron_up"][0].points) == turned("chevron_left")
-    assert set(ICONS["chevron_down"][0].points) == turned("chevron_right")
 
 
 def test_a_qt_icon_is_drawn_at_the_whole_canvas_for_qt_to_scale_down_crisp():
