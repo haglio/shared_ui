@@ -5,7 +5,7 @@ import re
 from PyQt6.QtCore import QEvent, QPointF, Qt
 from PyQt6.QtGui import QColor, QMouseEvent, QTextDocumentFragment
 
-from shared_ui.colors import BLUE_LIGHT, TEXT_PRIMARY
+from shared_ui.colors import BLUE_LIGHT, GREEN, TEXT_PRIMARY
 from shared_ui.folder_path import FolderPath
 from shared_ui.icons import icon_then_text
 from shared_ui.testing import rendered_on_the_dark_ground
@@ -95,6 +95,15 @@ def test_a_step_can_wear_one_of_the_familys_icons_ahead_of_its_name():
                           size=path.fontMetrics().height()) in path.text()
     assert _links(path) == [("0", "All")]
     assert path.plain_text() == "All  \u203a  Favorites"
+
+
+def test_a_steps_icon_can_wear_a_color_of_its_own():
+    path = FolderPath("  ›  ")
+
+    path.set_path(["All", "Favorites"], icons={1: ("star", GREEN)})
+
+    assert icon_then_text("star", "Favorites", color=GREEN,
+                          size=path.fontMetrics().height()) in path.text()
 
 
 def _light_blue_ink(path: FolderPath) -> int:
