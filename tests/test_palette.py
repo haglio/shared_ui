@@ -19,7 +19,32 @@ def test_every_token_is_a_channel_triple():
         assert all(isinstance(c, int) and 0 <= c <= 255 for c in value), name
 
 
-def test_a_hover_lifts_whatever_ground_it_lands_on():
+def _lightness(rgb) -> int:
+    return QColor(*rgb).lightness()
+
+
+def test_the_grounds_run_darkest_to_lightest():
+    grounds = (palette.BG_PRIMARY, palette.BG_SECONDARY, palette.BG_TERTIARY, palette.BG_BUTTON,
+               palette.BG_KEYCAP, palette.BG_BUTTON_ACTIVE)
+
+    lightness = [_lightness(ground) for ground in grounds]
+
+    assert lightness == sorted(set(lightness))
+
+
+def test_the_text_tiers_run_brightest_to_dimmest():
+    tiers = (palette.TEXT_PRIMARY, palette.TEXT_SECONDARY, palette.TEXT_MUTED)
+
+    lightness = [_lightness(tier) for tier in tiers]
+
+    assert lightness == sorted(set(lightness), reverse=True)
+
+
+def test_the_loading_screen_s_hint_is_subtler_than_its_status():
+    assert _lightness(palette.LOADING_HINT) < _lightness(palette.LOADING_STATUS)
+
+
+def test_a_hover_lightens_whatever_ground_it_lands_on_and_never_darkens_it():
     assert palette.hovered(palette.BG_BUTTON) > palette.BG_BUTTON
     assert palette.hovered(palette.BLUE) > palette.BLUE
     assert palette.hovered((250, 250, 250)) == (255, 255, 255)
