@@ -6,11 +6,21 @@ import pytest
 from PIL import Image, ImageDraw
 
 from shared_ui import app_icon
-from shared_ui.app_icon import CANVAS, GRID, INSET, LETTERS, UNIT, assert_follows_the_family_spec
+from shared_ui.app_icon import (
+    CANVAS,
+    CORNER_SOFTENING_MAX,
+    GRID,
+    INSET,
+    LETTERS,
+    UNIT,
+    assert_follows_the_family_spec,
+)
 from shared_ui.palette import MAGENTA, WHITE
 
+_MORE_ROWS_THAN_THE_FAMILY_SOFTENS = CORNER_SOFTENING_MAX + 4
 
-def _draw(cells, *, inset=INSET, grid=GRID, ink=MAGENTA) -> Image.Image:
+
+def _drawn_by_the_test(cells, *, inset=INSET, grid=GRID, ink=MAGENTA, grown=0) -> Image.Image:
     image = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
     unit = grid / 5
@@ -19,11 +29,12 @@ def _draw(cells, *, inset=INSET, grid=GRID, ink=MAGENTA) -> Image.Image:
             if cell != "#":
                 continue
             x0, y0 = inset + column * unit, inset + row * unit
-            draw.rectangle((x0, y0, x0 + unit - 1, y0 + unit - 1), fill=(*ink, 255))
+            draw.rectangle((x0 - grown, y0 - grown, x0 + unit - 1 + grown, y0 + unit - 1 + grown),
+                           fill=(*ink, 255))
     return image
 
 
-def _ico(tmp_path: Path, image: Image.Image) -> Path:
+def _saved_by_the_test(tmp_path: Path, image: Image.Image) -> Path:
     path = tmp_path / "icon.ico"
     image.save(path, format="ICO", sizes=[(16, 16), (32, 32), (48, 48), (CANVAS, CANVAS)])
     return path
@@ -43,46 +54,47 @@ def test_the_x_inks_its_two_diagonals_and_nothing_else():
 
 @pytest.mark.parametrize("letter", sorted(LETTERS))
 def test_every_letter_drawn_to_the_grid_passes(tmp_path, letter):
-    assert_follows_the_family_spec(_ico(tmp_path, _draw(LETTERS[letter])), letter)
+    assert_follows_the_family_spec(_saved_by_the_test(tmp_path, _drawn_by_the_test(LETTERS[letter])), letter)
 
 
 def test_the_wrong_letter_is_named(tmp_path):
-    path = _ico(tmp_path, _draw(LETTERS["E"]))
+    path = _saved_by_the_test(tmp_path, _drawn_by_the_test(LETTERS["E"]))
 
     with pytest.raises(AssertionError, match=r"cell \(0, 4\).*'B' has it clear"):
         assert_follows_the_family_spec(path, "B")
 
 
 def test_a_letter_off_the_familys_grid_fails(tmp_path):
-    shrunk = _ico(tmp_path, _draw(LETTERS["O"], inset=INSET + 20, grid=GRID - 40))
+    shrunk = _saved_by_the_test(tmp_path, _drawn_by_the_test(LETTERS["O"], inset=INSET + 20, grid=GRID - 40))
 
     with pytest.raises(AssertionError, match="letter grid starts"):
         assert_follows_the_family_spec(shrunk, "O")
 
 
 def test_a_bar_wider_than_a_cell_fails(tmp_path):
-    image = _draw(LETTERS["O"])
+    image = _drawn_by_the_test(LETTERS["O"])
     ImageDraw.Draw(image).rectangle(
         (INSET + UNIT, INSET + UNIT, INSET + 4 * UNIT, INSET + 1.5 * UNIT), fill=(*MAGENTA, 255))
 
     with pytest.raises(AssertionError, match=r"cell \(1, 1\) is inked"):
-        assert_follows_the_family_spec(_ico(tmp_path, image), "O")
+        assert_follows_the_family_spec(_saved_by_the_test(tmp_path, image), "O")
 
 
 def test_ink_of_another_color_fails(tmp_path):
-    white = _ico(tmp_path, _draw(LETTERS["S"], ink=WHITE))
+    white = _saved_by_the_test(tmp_path, _drawn_by_the_test(LETTERS["S"], ink=WHITE))
 
     with pytest.raises(AssertionError, match="not MAGENTA"):
         assert_follows_the_family_spec(white, "S")
 
 
 def test_a_heavily_rounded_corner_fails(tmp_path):
-    image = _draw(LETTERS["O"])
+    image = _drawn_by_the_test(LETTERS["O"])
     draw = ImageDraw.Draw(image)
-    draw.polygon([(INSET, INSET), (INSET + 12, INSET), (INSET, INSET + 12)], fill=(0, 0, 0, 0))
+    carved = _MORE_ROWS_THAN_THE_FAMILY_SOFTENS
+    draw.polygon([(INSET, INSET), (INSET + carved, INSET), (INSET, INSET + carved)], fill=(0, 0, 0, 0))
 
     with pytest.raises(AssertionError, match="rounds over"):
-        assert_follows_the_family_spec(_ico(tmp_path, image), "O")
+        assert_follows_the_family_spec(_saved_by_the_test(tmp_path, image), "O")
 
 
 def test_the_grid_is_five_cells_of_one_bar():
@@ -105,10 +117,14 @@ def test_a_hud_draws_an_app_s_letter_as_its_cells_in_magenta_leaving_the_rest_al
                if image.getpixel(point) == (*MAGENTA, 255)]
     assert len(magenta) == sum(row.count("#") for row in LETTERS["L"]) * cell * cell
     assert image.getpixel((0, 0)) == (10, 20, 30, 255)
+    left = (35 - 5 * cell) // 2
+    a_blank_cell_of_the_l = (left + 2 * cell + cell // 2, left + cell // 2)
+    assert image.getpixel(a_blank_cell_of_the_l) == (10, 20, 30, 255)
 
 
 @pytest.mark.parametrize("letter", ["B", "F"])
-def test_a_hud_s_letter_lands_on_the_pixels_as_its_own_grid(letter):
+def test_a_hud_with_no_icon_file_to_load_draws_the_letter_from_its_own_grid(letter):
+    assert not list(Path(app_icon.__file__).parent.rglob("*.ico"))
     image = Image.new("RGBA", (18, 18), (0, 0, 0, 0))
 
     app_icon.draw_letter(ImageDraw.Draw(image), (0, 0, 18, 18), letter)
@@ -125,10 +141,17 @@ def test_a_hud_s_letter_lands_on_the_pixels_as_its_own_grid(letter):
 
 
 def test_a_bar_a_third_off_its_cell_fails_though_the_cells_middle_is_inked(tmp_path):
-    image = _draw(LETTERS["E"])
+    image = _drawn_by_the_test(LETTERS["E"])
     ImageDraw.Draw(image).rectangle(
         (INSET, INSET + 2 * UNIT, INSET + 5 * UNIT, INSET + 2 * UNIT + UNIT / 3),
         fill=(0, 0, 0, 0))
 
     with pytest.raises(AssertionError, match=r"cell \(2, \d\)"):
-        assert_follows_the_family_spec(_ico(tmp_path, image), "E")
+        assert_follows_the_family_spec(_saved_by_the_test(tmp_path, image), "E")
+
+
+@pytest.mark.parametrize("grown", [2, -2], ids=["a hair wide", "a hair narrow"])
+def test_a_bar_a_hair_wide_or_narrow_of_its_cell_still_passes(tmp_path, grown):
+    drawn = _drawn_by_the_test(LETTERS["E"], grown=grown)
+
+    assert_follows_the_family_spec(_saved_by_the_test(tmp_path, drawn), "E")

@@ -49,7 +49,7 @@ def draw_letter(draw, rect: tuple[int, int, int, int], letter: str) -> None:
 def _master(path: Path) -> Image.Image:
     image = Image.open(path)
     if image.size != (CANVAS, CANVAS):
-        image.size = (CANVAS, CANVAS)
+        image.size = (CANVAS, CANVAS)  # Pillow's ICO plugin loads the frame of the size set here
     return image.convert("RGBA")
 
 
