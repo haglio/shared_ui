@@ -171,14 +171,17 @@ def _copy() -> tuple:
 
 
 def _loop() -> tuple:
-    return (
+    an_arrow_round_the_top = (
         Line(12, 13, 32, 13),
         Arc(25, 13, 14, 14, 0, 90),
         Polygon(((34.5, 20), (43.5, 20), (39, 29))),
+    )
+    an_arrow_chasing_it_round_the_bottom = (
         Line(36, 35, 16, 35),
         Arc(9, 21, 14, 14, 180, 90),
         Polygon(((13.5, 28), (4.5, 28), (9, 19))),
     )
+    return (*an_arrow_round_the_top, *an_arrow_chasing_it_round_the_bottom)
 
 
 def _reset() -> tuple:
@@ -188,13 +191,12 @@ def _reset() -> tuple:
              cx + tip * math.cos(a), cy + tip * math.sin(a), 4.5)
         for a in (index * math.pi / 4 for index in range(8))
     )
-    return (
-        Ellipse(cx, cy, root, root, width=4.5),
-        *teeth,
-        Ellipse(cx, cy, 3.5, 3.5, width=3),
+    a_gear = (Ellipse(cx, cy, root, root, width=4.5), *teeth, Ellipse(cx, cy, 3.5, 3.5, width=3))
+    a_circular_arrow_at_its_corner = (
         Arc(28, 28, 16, 16, 35, 250, 3.6),
         Polygon(((45.5, 33), (39, 30.5), (41, 38))),
     )
+    return (*a_gear, *a_circular_arrow_at_its_corner)
 
 
 def _power() -> tuple:
@@ -348,21 +350,17 @@ def _compilation() -> tuple:
 
 
 def _headset() -> tuple:
-    return (
-        RoundedRect(6, 14, 36, 20, 8, width=3.6),
-        Ellipse(16, 24, 5, 5, fill=True),
-        Ellipse(32, 24, 5, 5, fill=True),
-        Line(1, 21, 6, 21, 3.4),
-        Line(42, 21, 47, 21, 3.4),
-    )
+    a_visor = RoundedRect(6, 14, 36, 20, 8, width=3.6)
+    two_lenses = (Ellipse(16, 24, 5, 5, fill=True), Ellipse(32, 24, 5, 5, fill=True))
+    a_strap_either_side = (Line(1, 21, 6, 21, 3.4), Line(42, 21, 47, 21, 3.4))
+    return (a_visor, *two_lenses, *a_strap_either_side)
 
 
 def _monitor() -> tuple:
-    return (
-        RoundedRect(5, 9, 38, 26, 3, width=3.6),
-        Line(24, 35, 24, 40, 3.6),
-        Line(14, 41, 34, 41, 3.6),
-    )
+    a_screen = RoundedRect(5, 9, 38, 26, 3, width=3.6)
+    a_stem_under_it = Line(24, 35, 24, 40, 3.6)
+    a_foot = Line(14, 41, 34, 41, 3.6)
+    return (a_screen, a_stem_under_it, a_foot)
 
 
 def _vr_hemisphere() -> tuple:
@@ -398,23 +396,26 @@ def _flat_2d() -> tuple:
 
 
 def _versions() -> tuple:
-    return (
+    two_sheets_leaning_apart = (
         RoundedRect(22, 5, 21, 26, 3, width=3.4),
         RoundedRect(5, 17, 21, 26, 3, width=3.4),
+    )
+    a_swap_arrow_across_them = (
         Line(15, 33, 33, 15, 4.0),
         Polygon(((36, 12), (26, 13), (35, 22))),
         Polygon(((12, 36), (22, 35), (13, 26))),
     )
+    return (*two_sheets_leaning_apart, *a_swap_arrow_across_them)
 
 
 def _funscript_jump() -> tuple:
-    return (
-        Line(4, 24, 15, 24, 4.5),
-        Polygon(((25, 24), (14, 17), (14, 31))),
+    an_arrow = (Line(4, 24, 15, 24, 4.5), Polygon(((25, 24), (14, 17), (14, 31))))
+    the_f_it_runs_into = (
         Line(31, 8, 31, 40, 4.5),
         Line(31, 8, 44, 8, 4.5),
         Line(31, 22, 41, 22, 4.5),
     )
+    return (*an_arrow, *the_f_it_runs_into)
 
 
 _COLUMN = RoundedRect(28, 8, 15, 32, 3, width=3.4)
@@ -518,9 +519,12 @@ def _fmode() -> tuple:
     return _grid_letter(LETTERS["F"])
 
 
+_AS_CHUNKY_AS_THE_TRANSPORT = PEN_WIDTH + 1
+
+
 def _expand_horizontal() -> tuple:
     return (
-        Line(15, 24, 33, 24, 6),
+        Line(15, 24, 33, 24, _AS_CHUNKY_AS_THE_TRANSPORT),
         Polygon(((5, 24), (17, 13), (17, 35))),
         Polygon(((43, 24), (31, 13), (31, 35))),
     )

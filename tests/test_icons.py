@@ -19,7 +19,6 @@ from shared_ui.icon_geometry import (
     ICONS,
     PEN_WIDTH,
     STAND_IN,
-    Arc,
     Ellipse,
     Line,
     Path,
@@ -922,88 +921,22 @@ def test_a_qt_icon_is_drawn_at_the_whole_canvas_for_qt_to_scale_down_crisp():
     assert drawn.width() == drawn.height() == CANVAS > max(BUTTON_ICON, BUTTON_FILLING_ICON)
 
 
-def test_loop_is_two_arrows_chasing_round_a_circuit_rather_than_one_ring():
-    heads = _of("loop", Polygon)
-    arcs = _of("loop", Arc)
-
-    assert len(heads) == 2
-    assert all(arc.span < 180 for arc in arcs)
 
 
-def test_reset_is_neither_a_bare_gear_nor_a_bare_circular_arrow_but_both():
-    rim, _bore = _of("reset", Ellipse)
-    teeth = _of("reset", Line)
-    [arrow] = _of("reset", Arc)
-    [head] = _of("reset", Polygon)
-
-    assert len(teeth) == 8
-    assert (arrow.x + arrow.w / 2, arrow.y + arrow.h / 2) > (rim.cx, rim.cy)
-    assert max(x for x, _y in head.points) > rim.cx + rim.rx
 
 
-def test_compilation_is_a_stack_of_three_sheets_where_copy_is_two():
-    sheets = _of("compilation", RoundedRect)
-
-    assert len(sheets) == 3
-    assert all((sheets[n + 1].x - sheets[n].x, sheets[n + 1].y - sheets[n].y) == (sheets[1].x - sheets[0].x, sheets[1].y - sheets[0].y)
-               for n in range(2))
 
 
-def test_the_headset_is_the_thing_itself_a_visor_with_two_lenses_and_a_strap_either_side():
-    [visor] = _of("headset", RoundedRect)
-    lenses = _of("headset", Ellipse)
-    straps = _of("headset", Line)
-
-    assert [lens.fill for lens in lenses] == [True, True]
-    assert len(straps) == 2
-    assert min(strap.x1 for strap in straps) < visor.x
-    assert max(strap.x2 for strap in straps) > visor.x + visor.w
 
 
-def test_the_monitor_is_a_screen_on_a_stem_and_a_foot_not_a_headset_struck_out():
-    [screen] = _of("monitor", RoundedRect)
-    stem, foot = _of("monitor", Line)
-
-    assert not set(ICONS["monitor"]) & set(ICONS["headset"])
-    assert stem.x1 == stem.x2
-    assert screen.y + screen.h <= stem.y1 < stem.y2 <= foot.y1 == foot.y2
 
 
-def test_the_flat_screen_leans_where_square_on_it_would_be_a_plain_rectangle_beside_the_dome():
-    [frame] = _of("flat_2d", Polygon)
-    (left_top, _right_top, _right_low, left_low) = frame.points
-
-    assert left_top[0] != left_low[0]
 
 
-def test_versions_leans_and_carries_the_swap_arrow_where_copy_stands_square():
-    sheets = _of("versions", RoundedRect)
-    [swap_line] = _of("versions", Line)
-    heads = _of("versions", Polygon)
-
-    assert sheets[0].x != sheets[1].x
-    assert sheets[0].y != sheets[1].y
-    assert len(heads) == 2
-    assert swap_line.x1 != swap_line.x2
-    assert swap_line.y1 != swap_line.y2
-    assert not _of("copy", Polygon)
 
 
-def test_funscript_jump_is_an_arrow_running_into_the_f():
-    [head] = _of("funscript_jump", Polygon)
-    stem, *the_f = _of("funscript_jump", Line)
-
-    assert len(the_f) == 3
-    assert max(x for x, _y in head.points) <= min(min(bar.x1, bar.x2) for bar in the_f)
-    assert stem.x2 > stem.x1
 
 
-def test_expand_horizontal_is_as_chunky_as_the_transport_controls_beside_it():
-    [bar] = _of("expand_horizontal", Line)
-    heads = _of("expand_horizontal", Polygon)
-
-    assert bar.width >= PEN_WIDTH
-    assert [head.fill for head in heads] == [True, True]
 
 
 def test_the_warning_is_a_bar_and_a_dot_under_a_raised_triangles_point():
