@@ -13,6 +13,7 @@ from shared_ui.palette import (
     BG_TERTIARY,
     BLUE,
     BORDER_SUBTLE,
+    PICKED_TEXT,
     TEXT_MUTED,
     TEXT_PRIMARY,
     Rgb,
@@ -83,7 +84,7 @@ def menu_rules() -> str:
     }}
     QMenu::item:selected {{
         background-color: {as_hex(BLUE)};
-        color: {as_hex(TEXT_PRIMARY)};
+        color: {as_hex(PICKED_TEXT)};
     }}
     QMenu::item:disabled {{
         color: {as_hex(TEXT_MUTED)};
@@ -124,12 +125,15 @@ def control_ground(color: Rgb, *controls: str) -> str:
     }}"""
 
 
+_A_BUTTON_S_FRAME = f"""border: 1px solid {as_hex(BORDER_SUBTLE)};
+        border-radius: {BUTTON_RADIUS}px;"""
+
+
 def button_rules() -> str:
     return f"""
     QPushButton {{
         color: {as_hex(TEXT_PRIMARY)};
-        border: 1px solid {as_hex(BORDER_SUBTLE)};
-        border-radius: {BUTTON_RADIUS}px;
+        {_A_BUTTON_S_FRAME}
         padding: {BUTTON_PAD_V}px {BUTTON_PAD_H}px;
     }}{control_ground(BG_BUTTON, "QPushButton")}{control_ground(BG_BUTTON_ACTIVE, "QPushButton:checked")}
     QPushButton:pressed, QPushButton:checked:pressed {{
@@ -160,8 +164,7 @@ def tool_button_rules() -> str:
     return f"""
     QToolButton {{
         color: {as_hex(TEXT_PRIMARY)};
-        border: 1px solid {as_hex(BORDER_SUBTLE)};
-        border-radius: {BUTTON_RADIUS}px;
+        {_A_BUTTON_S_FRAME}
         padding: {BUTTON_ICON_INSET}px {GAP_MEDIUM}px;
         font-weight: bold;
     }}{control_ground(BG_BUTTON, "QToolButton")}{control_ground(BG_BUTTON_ACTIVE, "QToolButton:checked")}
@@ -173,14 +176,13 @@ def tool_button_rules() -> str:
 
 def toolbar_rules() -> str:
     """Qt draws a toolbar's buttons faint and edge to edge, so an app opts its toolbar into
-    these with :func:`style_toolbar`; the family sheet leaves toolbars alone."""
+    these with :func:`style_toolbar` rather than the family sheet carrying them."""
     return f"""
     QToolBar {{
         spacing: {BUTTON_GAP}px;
     }}
     QToolButton {{
-        border: 1px solid {as_hex(BORDER_SUBTLE)};
-        border-radius: {BUTTON_RADIUS}px;
+        {_A_BUTTON_S_FRAME}
         {toolbar_padding(right=BUTTON_PAD_H_TIGHT)}
     }}{control_ground(BG_BUTTON, "QToolButton")}
     QToolButton:pressed {{
@@ -223,7 +225,7 @@ def picked_item_rules(view: str = "QAbstractItemView") -> str:
     return f"""
     {view}::item:selected {{
         background-color: {as_hex(BLUE)};
-        color: {as_hex(TEXT_PRIMARY)};
+        color: {as_hex(PICKED_TEXT)};
     }}"""
 
 

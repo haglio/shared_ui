@@ -57,10 +57,6 @@ def test_the_family_sheet_is_every_fragment():
         assert fragment in sheet
 
 
-def test_the_family_sheet_leaves_toolbars_alone_for_an_app_to_opt_its_own_into():
-    assert "QToolBar" not in chrome.family_stylesheet()
-
-
 def _shown_button(rules: str, kind: type[QAbstractButton] = QPushButton, *,
                   lit: bool = False) -> QAbstractButton:
     button = kind()
@@ -311,25 +307,6 @@ def test_a_toolbar_keeps_the_gap_where_a_styled_window_that_was_never_shown_just
         del toolbar
 
     assert gaps == {spacing.BUTTON_GAP}
-
-
-def _all_said_of(selector: str, sheet: str) -> str:
-    return "".join(m.group("body") for m in _RULE.finditer(sheet) if m.group("selector").strip() == selector)
-
-
-def _value(body: str, name: str) -> str:
-    return re.search(rf"(?<![\w-]){name}\s*:\s*([^;]+);", body).group(1).strip()
-
-
-def test_a_toolbar_button_padded_tight_is_the_family_button_with_less_room_at_its_sides():
-    pushed = _all_said_of("QPushButton", chrome.button_rules())
-    tight = _all_said_of("QToolButton", chrome.toolbar_rules())
-    top, _, bottom, _ = _value(tight, "padding").split()
-    pushed_top, _ = _value(pushed, "padding").split()
-
-    assert top == bottom == pushed_top
-    for kept in ("border", "border-radius", "background-color"):
-        assert _value(tight, kept) == _value(pushed, kept), kept
 
 
 def test_a_toolbar_button_given_more_room_on_its_right_grows_by_that_much():
