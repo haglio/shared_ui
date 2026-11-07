@@ -35,7 +35,7 @@ class TestIcons:
 
 
 class TestTheButtonSizes:
-    def test_there_are_two_and_the_hud_s_is_the_smaller_as_room_over_video_is_scarce(self):
+    def test_there_are_two_and_the_hud_s_is_the_smaller(self):
         sizes = {name for name, _ in _all_spacing_constants() if name.startswith("BUTTON_SIZE")}
 
         assert sizes == {"BUTTON_SIZE", "BUTTON_SIZE_HUD"}
