@@ -84,6 +84,10 @@ def _chevron(pointing_left: bool) -> tuple:
     return (Polyline(((near, upper), (far, 24), (near, lower))),)
 
 
+def _turned_a_quarter(shapes: tuple) -> tuple:
+    return tuple(Polyline(tuple((y, x) for x, y in shape.points), shape.width) for shape in shapes)
+
+
 _HISTORY_RING = (11, 13, 26, 26)
 
 
@@ -413,7 +417,7 @@ def _funscript_jump() -> tuple:
 
 _COLUMN = RoundedRect(28, 8, 15, 32, 3, width=3.4)
 _SLEEVE_X, _SLEEVE_W, _SLEEVE_H = 6.0, 15.0, 13.0
-_ARROW_X = 13.5
+_SLEEVE_MIDDLE_X = _SLEEVE_X + _SLEEVE_W / 2
 _ARROW_HALF = 7.0
 _ARROW_PEN = 4.0
 
@@ -429,9 +433,9 @@ def _sleeve(top: float) -> tuple:
 def _hold_arrow(tip: float, base: float) -> tuple:
     tail = base + (base - tip) * 0.7
     return (
-        Line(_ARROW_X, tail, _ARROW_X, base, _ARROW_PEN),
-        Polygon(((_ARROW_X, tip), (_ARROW_X - _ARROW_HALF, base),
-                 (_ARROW_X + _ARROW_HALF, base))),
+        Line(_SLEEVE_MIDDLE_X, tail, _SLEEVE_MIDDLE_X, base, _ARROW_PEN),
+        Polygon(((_SLEEVE_MIDDLE_X, tip), (_SLEEVE_MIDDLE_X - _ARROW_HALF, base),
+                 (_SLEEVE_MIDDLE_X + _ARROW_HALF, base))),
     )
 
 
@@ -452,7 +456,7 @@ _CROSS_PEN = 3.6
 
 
 def _hold_cross(middle: float) -> tuple:
-    left, right = _ARROW_X - _CROSS_HALF, _ARROW_X + _CROSS_HALF
+    left, right = _SLEEVE_MIDDLE_X - _CROSS_HALF, _SLEEVE_MIDDLE_X + _CROSS_HALF
     upper, lower = middle - _CROSS_HALF, middle + _CROSS_HALF
     return (
         Line(left, upper, right, lower, _CROSS_PEN),
@@ -538,13 +542,6 @@ _REGENERATE_CORNER = (
     Arc(29, 29, 15, 15, 35, 250, 3.4),
     Polygon(((45, 33), (39, 31), (41, 38))),
 )
-
-
-def _chevron_pointing(direction: str) -> tuple:
-    near, far, upper, lower = 15, 31, 9, 39
-    if direction == "down":
-        return (Polyline(((upper, near), (24, far), (lower, near))),)
-    return (Polyline(((upper, far), (24, near), (lower, far))),)
 
 
 def _double_chevron(pointing_left: bool) -> tuple:
@@ -677,7 +674,7 @@ ICONS: dict[str, tuple] = {
     "check": (
         Polyline(((10, 25), (19, 35), (38, 13)), 5.5),
     ),
-    "chevron_down": _chevron_pointing("down"),
+    "chevron_down": _turned_a_quarter(_chevron(pointing_left=False)),
     "chevron_left": _chevron(pointing_left=True),
     "chevron_right": _chevron(pointing_left=False),
     "clock": (
@@ -685,7 +682,7 @@ ICONS: dict[str, tuple] = {
         Line(24, 24, 24, 13),
         Line(24, 24, 33, 24),
     ),
-    "chevron_up": _chevron_pointing("up"),
+    "chevron_up": _turned_a_quarter(_chevron(pointing_left=True)),
     "chevrons_left": _double_chevron(pointing_left=True),
     "chevrons_right": _double_chevron(pointing_left=False),
     "circle": (Ellipse(24, 24, 17, 17),),

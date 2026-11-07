@@ -1,5 +1,6 @@
-"""Pillow has neither antialiasing nor round line caps, so an icon is drawn large and
-resampled down, with a filled dot laid at each line's end."""
+"""Pillow has neither antialiasing nor round line caps, so an icon is drawn four times too
+big, where its edges stop looking jagged at a HUD button's size, and resampled down, with a
+filled dot laid at each line's end."""
 
 from __future__ import annotations
 
