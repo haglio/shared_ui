@@ -19,6 +19,7 @@ from shared_ui.icon_geometry import (
     ICONS,
     PEN_WIDTH,
     STAND_IN,
+    Arc,
     Ellipse,
     Line,
     Path,
@@ -904,6 +905,42 @@ def test_a_qt_icon_is_drawn_at_the_whole_canvas_for_qt_to_scale_down_crisp():
     [drawn] = icons.qt_icon("mic").availableSizes()
 
     assert drawn.width() == drawn.height() == CANVAS > max(BUTTON_ICON, BUTTON_FILLING_ICON)
+
+
+def test_loop_is_two_arrows_chasing_round_a_circuit_rather_than_one_ring():
+    heads = _of("loop", Polygon)
+    arcs = _of("loop", Arc)
+
+    assert len(heads) == 2
+    assert all(arc.span < 180 for arc in arcs)
+
+
+def test_reset_is_neither_a_bare_gear_nor_a_bare_circular_arrow_but_both():
+    rim, _bore = _of("reset", Ellipse)
+    teeth = _of("reset", Line)
+    [arrow] = _of("reset", Arc)
+    [head] = _of("reset", Polygon)
+
+    assert len(teeth) == 8
+    assert (arrow.x + arrow.w / 2, arrow.y + arrow.h / 2) > (rim.cx, rim.cy)
+    assert max(x for x, _y in head.points) > rim.cx + rim.rx
+
+
+def test_compilation_is_a_stack_of_three_sheets_where_copy_is_two():
+    sheets = _of("compilation", RoundedRect)
+
+    assert len(sheets) == 3
+    assert all((sheets[n + 1].x - sheets[n].x, sheets[n + 1].y - sheets[n].y) == (sheets[1].x - sheets[0].x, sheets[1].y - sheets[0].y)
+               for n in range(2))
+
+
+def test_the_monitor_is_a_screen_on_a_stem_and_a_foot_not_a_headset_struck_out():
+    [screen] = _of("monitor", RoundedRect)
+    stem, foot = _of("monitor", Line)
+
+    assert not set(ICONS["monitor"]) & set(ICONS["headset"])
+    assert stem.x1 == stem.x2
+    assert screen.y + screen.h <= stem.y1 < stem.y2 <= foot.y1 == foot.y2
 
 
 def test_the_warning_is_a_bar_and_a_dot_under_a_raised_triangles_point():
