@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import json
+import os
+import subprocess
+import sys
 from collections.abc import Iterator
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
@@ -52,6 +57,31 @@ def rendered_on_the_dark_ground(widget: QWidget) -> QImage:
     image.fill(BG_PRIMARY)
     widget.render(image, flags=QWidget.RenderFlag.DrawChildren)
     return image
+
+
+_THIS_TREE = Path(__file__).resolve().parent.parent
+
+
+def toolkits_loaded_by_importing(*modules: str) -> set[str]:
+    # `python -c` puts the process cwd first on sys.path and nothing else, so the probe says
+    # which tree it read: from elsewhere it would import the primary checkout's copy, and a
+    # branch that dragged Qt or Pillow in would pass.
+    probe = (
+        f"import json, sys; import {', '.join(modules)}; "
+        "print(shared_ui.__file__); "
+        "print(json.dumps(sorted({m.split('.')[0] for m in sys.modules if m.split('.')[0] in ('PyQt6', 'PIL')})))"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", probe], cwd=_THIS_TREE,
+        env={**os.environ, "PYTHONPATH": str(_THIS_TREE)},
+        capture_output=True, text=True, check=True,
+    )
+    read_from, toolkits = result.stdout.splitlines()
+
+    assert Path(read_from).resolve().is_relative_to(_THIS_TREE), (
+        f"the probe read {read_from}, not the tree under test at {_THIS_TREE}"
+    )
+    return set(json.loads(toolkits))
 
 
 def ground(widget: QWidget) -> str:

@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import subprocess
-import sys
-
 from shared_ui import fonts, type_scale
+from shared_ui.testing import toolkits_loaded_by_importing
 
 
 def test_the_family_letters_in_one_face_at_four_sizes():
@@ -25,8 +23,4 @@ def test_a_size_in_pixels_is_its_height_on_a_96_dpi_screen():
 
 
 def test_the_sizes_are_read_without_loading_qt():
-    probe = ("import sys; import shared_ui.type_scale; "
-             "print(any(name.startswith('PyQt6') for name in sys.modules))")
-    ran = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True, check=True)
-
-    assert ran.stdout.strip() == "False"
+    assert "PyQt6" not in toolkits_loaded_by_importing("shared_ui.type_scale")

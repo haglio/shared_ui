@@ -1,10 +1,5 @@
 from __future__ import annotations
 
-import os
-import subprocess
-import sys
-from pathlib import Path
-
 from PIL import Image
 
 from shared_ui.loading_panel import DESKTOP, LoadingPanel, bar_box, icon_image, render, size
@@ -16,8 +11,7 @@ from shared_ui.palette import (
     LOADING_TROUGH,
     PREVIEW_INK,
 )
-
-_REPO_ROOT = Path(__file__).resolve().parent.parent
+from shared_ui.testing import toolkits_loaded_by_importing
 
 
 def _panel(**changes) -> LoadingPanel:
@@ -25,15 +19,7 @@ def _panel(**changes) -> LoadingPanel:
 
 
 def test_the_panel_is_drawn_once_with_pillow_alone_so_every_toolkit_shows_the_same_drawing():
-    probe = ("import sys; import shared_ui.loading_panel as panel; print(panel.__file__); "
-             "print(any(m == 'PyQt6' or m.startswith('PyQt6.') for m in sys.modules))")
-    ran = subprocess.run([sys.executable, "-c", probe], cwd=_REPO_ROOT,
-                         env={**os.environ, "PYTHONPATH": str(_REPO_ROOT)},
-                         capture_output=True, text=True, check=True)
-    read_from, qt_was_loaded = ran.stdout.splitlines()
-
-    assert Path(read_from).resolve().is_relative_to(_REPO_ROOT), read_from
-    assert qt_was_loaded == "False"
+    assert toolkits_loaded_by_importing("shared_ui.loading_panel") == {"PIL"}
     assert isinstance(render(_panel()), Image.Image)
 
 
