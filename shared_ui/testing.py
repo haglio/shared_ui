@@ -60,6 +60,10 @@ def ground(widget: QWidget) -> str:
 
 
 class Pointer:
+    """Offscreen, Qt hands a point to the window shown there first, so a window an earlier test
+    left up takes the pointer from one shown under it; and a press nobody let go of keeps the
+    pointer's own moves from reaching any widget, while a push button lights only on a move."""
+
     def __init__(self) -> None:
         self._resting = QCursor.pos()
 
