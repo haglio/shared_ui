@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import html
 
-from PyQt6.QtCore import QEvent, QPoint
+import pytest
+from PyQt6.QtCore import QEvent, QObject, QPoint
 from PyQt6.QtGui import QHelpEvent
 from PyQt6.QtWidgets import (
     QApplication,
@@ -19,6 +20,18 @@ from shared_ui.tooltip_shape import shape_long_tooltips, shaped
 
 LONG = ("How strictly the model obeys the prompt. Too low drifts off it; too high burns "
         "contrast & flattens <detail>.")
+
+
+@pytest.fixture
+def undone(qapp):
+    sheet, look = qapp.styleSheet(), qapp.palette()
+    yield qapp
+    qapp.setStyleSheet(sheet)
+    qapp.setPalette(look)
+    for shaper in qapp.findChildren(QObject):
+        if type(shaper).__name__ == "_ShapeLongTooltips":
+            qapp.removeEventFilter(shaper)
+            shaper.setParent(None)
 
 
 def _hover(widget, at: QPoint) -> None:
@@ -56,8 +69,8 @@ def test_a_tooltip_can_open_with_a_bold_white_lead():
         "Euler a on model pages.</p>")
 
 
-def test_the_dressed_app_shows_a_long_tooltip_as_a_block(qapp):
-    dress_application(qapp)
+def test_the_dressed_app_shows_a_long_tooltip_as_a_block(undone):
+    dress_application(undone)
     label = QLabel("hover me")
     label.setToolTip(LONG)
     label.show()
@@ -68,8 +81,8 @@ def test_the_dressed_app_shows_a_long_tooltip_as_a_block(qapp):
     label.close()
 
 
-def test_the_dressed_app_shows_a_long_choice_tooltip_as_a_block(qapp):
-    dress_application(qapp)
+def test_the_dressed_app_shows_a_long_choice_tooltip_as_a_block(undone):
+    dress_application(undone)
     choices = QListWidget()
     item = QListWidgetItem("euler")
     item.setToolTip(LONG)
@@ -82,8 +95,8 @@ def test_the_dressed_app_shows_a_long_choice_tooltip_as_a_block(qapp):
     choices.close()
 
 
-def test_an_app_that_keeps_its_own_style_sheet_can_still_shape_a_table_cells_tooltip(qapp):
-    shape_long_tooltips(qapp)
+def test_an_app_that_keeps_its_own_style_sheet_can_still_shape_a_table_cells_tooltip(undone):
+    shape_long_tooltips(undone)
     table = QTableWidget(1, 1)
     cell = QTableWidgetItem("stage")
     cell.setToolTip(LONG)
