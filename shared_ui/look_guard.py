@@ -57,13 +57,18 @@ class LookNotRead(Exception):
     pass
 
 
-def _tracked(root: Path, package: Path) -> list[Path]:
+def _tracked(root: Path) -> tuple[list[Path], str]:
     quiet = {name: value for name, value in os.environ.items() if not name.startswith("GIT_")}
-    listed = subprocess.run(["git", "-C", str(root), "ls-files", "-z", "--", str(package)],
+    listed = subprocess.run(["git", "-C", str(root), "ls-files", "-z"],
                             capture_output=True, text=True, encoding="utf-8", env=quiet, check=False)
-    files = [root / name for name in listed.stdout.split("\0") if name]
+    return [root / name for name in listed.stdout.split("\0") if name], listed.stderr
+
+
+def _under(package: Path, tracked: list[Path], root: Path, complaint: str) -> list[Path]:
+    package = root / package
+    files = [path for path in tracked if path == package or package in path.parents]
     if not files:
-        raise LookNotRead(f"nothing to read: {root} tracks nothing under {package}\n{listed.stderr}")
+        raise LookNotRead(f"nothing to read: {root} tracks nothing under {package}\n{complaint}")
     return files
 
 
@@ -305,8 +310,9 @@ _READERS = {".py": _in_python, ".html": _in_page, ".css": _in_page, ".js": _in_p
 
 def looks_of_its_own(root: Path, packages: Iterable[Path]) -> list[str]:
     found = []
+    tracked, complaint = _tracked(root)
     for package in packages:
-        for path in _tracked(root, package):
+        for path in _under(package, tracked, root, complaint):
             read = _READERS.get(path.suffix)
             if read is not None:
                 where = path.relative_to(root).as_posix()

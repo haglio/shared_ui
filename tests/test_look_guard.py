@@ -164,6 +164,17 @@ def test_a_package_that_tracks_nothing_is_refused_rather_than_passed(app):
         looks_of_its_own(checkout, [checkout / "drawing_room"])
 
 
+def test_the_checkout_is_asked_what_it_tracks_once_however_many_packages_are_read(app, monkeypatch):
+    checkout = app({f"room_{number}.py": "WIDTH = 4\n" for number in range(5)})
+    asked = []
+    ask = subprocess.run
+    monkeypatch.setattr(subprocess, "run", lambda command, **kwargs: asked.append(command) or ask(command, **kwargs))
+
+    looks_of_its_own(checkout, [checkout / "parlor" / f"room_{number}.py" for number in range(5)])
+
+    assert len(asked) == 1
+
+
 def test_the_failure_says_where_each_one_is_and_where_it_belongs(app):
     checkout = app({"tiles.py": "_TRACK = (56, 56, 62)\nPENCIL = '✎'\n"})
 
