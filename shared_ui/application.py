@@ -13,6 +13,8 @@ from PyQt6 import sip
 from PyQt6.QtCore import QObject, QThread
 from PyQt6.QtWidgets import QApplication, QWidget
 
+from shared_ui.tooltip_shape import shape_long_tooltips
+
 _log = logging.getLogger(__name__)
 
 
@@ -23,6 +25,7 @@ def application(argv: list[str]) -> Iterator[QApplication]:
         yield made_elsewhere
         return
     app = QApplication(argv)
+    shape_long_tooltips(app)
     try:
         yield app
     finally:
