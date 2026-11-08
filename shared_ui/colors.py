@@ -4,6 +4,7 @@ from PyQt6.QtGui import QColor, QPalette
 
 from shared_ui import palette
 from shared_ui.chrome import family_stylesheet
+from shared_ui.tooltip_shape import shape_long_tooltips
 
 BG_PRIMARY = QColor(*palette.BG_PRIMARY)
 BG_SECONDARY = QColor(*palette.BG_SECONDARY)
@@ -73,3 +74,4 @@ def family_palette(base: QPalette | None = None) -> QPalette:
 def dress_application(app, sheet: str | None = None) -> None:
     app.setPalette(family_palette(app.palette()))
     app.setStyleSheet(family_stylesheet() if sheet is None else sheet)
+    shape_long_tooltips(app)
