@@ -123,10 +123,14 @@ def _spanning(columns: int) -> str:
     return f' colspan="{columns}"' if columns > 1 else ""
 
 
+_WRAPPED_LINES_INDENTED = f"margin:0 0 0 {GAP_MEDIUM}px;text-indent:-{GAP_MEDIUM}px"
+
+
 def _cell(content: str, width: int, *, centered: bool = False) -> str:
     align = ' align="center"' if centered else ""
+    body = content if centered else f'<p style="{_WRAPPED_LINES_INDENTED}">{content}</p>'
     return (f'<td width="{width}"{align} valign="top" style="{_CELL_PADDING};color:{_TEXT}">'
-            f"{content}</td>")
+            f"{body}</td>")
 
 
 def _head(label: str, width: int, *, span: str = "", underlined: bool = False) -> str:
