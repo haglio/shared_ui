@@ -4,7 +4,7 @@ import re
 
 import pytest
 from PyQt6.QtCore import QEvent, QPoint, QSize, Qt
-from PyQt6.QtGui import QGuiApplication, QHelpEvent, QIcon, QTextDocumentFragment
+from PyQt6.QtGui import QGuiApplication, QHelpEvent, QIcon, QTextDocument, QTextDocumentFragment
 from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QApplication, QLabel, QLineEdit, QTextBrowser
 
@@ -180,6 +180,26 @@ def test_a_single_hotkey_column_centers_its_keys_and_a_forked_one_leaves_them_at
     assert all('align="center"' in cell for cell in _hotkey_cells(general))
     assert len(_hotkey_cells(navigation)) == 2
     assert not any('align="center"' in cell for cell in _hotkey_cells(navigation))
+
+
+def _line_starts_of(document: QTextDocument, text: str) -> list[float]:
+    block = document.find(text).block()
+    document.documentLayout().blockBoundingRect(block)
+    layout = block.layout()
+    return [layout.lineAt(index).x() for index in range(layout.lineCount())]
+
+
+def test_an_action_that_wraps_indents_its_later_lines_so_they_read_as_the_same_command():
+    long = CommandRef("seconds a made-up thing holds the screen before the show moves on to the "
+                      "next one, only while nothing holds it", ("hold seconds",))
+    document = QTextDocument()
+    document.setHtml(render_reference_html(
+        (ReferenceSection("Long", (ReferenceGroup("", (long,)),)),), 900))
+    document.setTextWidth(900)
+
+    first, *later = _line_starts_of(document, "seconds a made-up thing")
+    assert later
+    assert all(start > first for start in later)
 
 
 def test_an_untitled_group_has_no_heading_and_a_titled_one_has_its_own():
