@@ -123,16 +123,16 @@ def _spanning(columns: int) -> str:
     return f' colspan="{columns}"' if columns > 1 else ""
 
 
-def _cell(content: str, width: int, *, span: str = "") -> str:
-    return (f'<td width="{width}" valign="top"{span} style="{_CELL_PADDING};color:{_TEXT}">'
+def _cell(content: str, width: int, *, centered: bool = False) -> str:
+    align = ' align="center"' if centered else ""
+    return (f'<td width="{width}"{align} valign="top" style="{_CELL_PADDING};color:{_TEXT}">'
             f"{content}</td>")
 
 
-def _head(label: str, width: int, *, span: str = "", underlined: bool = False,
-          align: str = "center") -> str:
+def _head(label: str, width: int, *, span: str = "", underlined: bool = False) -> str:
     rule = f";border-bottom:{HAIRLINE}px solid {BORDER}" if underlined else ""
     text = f'<b style="color:{_MUTED}">{html.escape(label)}</b>' if label else ""
-    return (f'<td width="{width}" align="{align}" valign="middle"{span} style="{_CELL_PADDING}{rule}">'
+    return (f'<td width="{width}" align="center" valign="middle"{span} style="{_CELL_PADDING}{rule}">'
             f"{text}</td>")
 
 
@@ -163,12 +163,7 @@ class _Columns:
 
     @property
     def action(self) -> int:
-        return (self.width - self.controller - self.voice
-                - (HOTKEY_BLOCK_PX if self.keys else 0))
-
-    @property
-    def action_span(self) -> str:
-        return _spanning(1 + (not self.keys))
+        return self.width - HOTKEY_BLOCK_PX - self.controller - self.voice
 
 
 def _no_input() -> str:
@@ -179,12 +174,12 @@ def _header_rows(section: ReferenceSection, columns: _Columns) -> str:
     row = f'<tr style="background:{_HEADER_BG}">'
     forked = len(columns.keys) > 1
     rows = ' rowspan="2"' if forked else ""
-    action = _head("Action", columns.action, span=columns.action_span + rows, align="left")
+    action = _head("Action", columns.action, span=rows)
     controller = (_head(CONTROLLER_HEADER if columns.has_controller else "", columns.controller,
                         span=rows) if columns.controller else "")
     tail = controller + _head(VOICE_HEADER, columns.voice, span=rows) + "</tr>"
     if not columns.keys:
-        return row + action + tail
+        return row + action + _head("", HOTKEY_BLOCK_PX) + tail
     if not forked:
         return row + action + _head(HOTKEY_HEADER, columns.keys[0]) + tail
     return (
@@ -199,9 +194,10 @@ def _header_rows(section: ReferenceSection, columns: _Columns) -> str:
 
 def _input_cells(row: CommandRef, columns: _Columns) -> str:
     cells = [
-        _cell(" ".join(_keycap(key) for key in column) or _no_input(), width)
-        for column, width in zip(row.key_columns if columns.keys else (), columns.keys, strict=True)
-    ]
+        _cell(" ".join(_keycap(key) for key in column) or _no_input(), width,
+              centered=len(columns.keys) == 1)
+        for column, width in zip(row.key_columns, columns.keys, strict=True)
+    ] if columns.keys else [_cell("", HOTKEY_BLOCK_PX)]
     if not columns.controller:
         return "".join(cells)
     inputs = (html.escape(", ".join(row.controller)) or _no_input()) if columns.has_controller else ""
@@ -233,7 +229,7 @@ def render_reference_html(sections: tuple[ReferenceSection, ...], width: int) ->
                 action = (_anchored(row.description, next(anchors), color=_TEXT) if row.detail
                           else html.escape(row.description))
                 phrases = ", ".join(f'“{html.escape(p)}”' for p in row.voice) or _no_input()
-                parts.append("<tr>" + _cell(action, columns.action, span=columns.action_span)
+                parts.append("<tr>" + _cell(action, columns.action)
                              + _input_cells(row, columns) + _cell(phrases, columns.voice) + "</tr>")
             parts.append("</table>")
     parts.append("</body>")

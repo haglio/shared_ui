@@ -143,26 +143,43 @@ def test_a_forked_hotkey_head_spans_its_columns_centered_and_underlined():
     assert [cell[0] for cell in _cells_across(body)][1:5] == ["Right", "D", "—", "A / X"]
 
 
-def test_a_group_whose_rows_hold_no_key_spans_the_hotkey_block_with_its_action():
+def test_a_group_whose_rows_hold_no_key_keeps_its_actions_out_of_the_empty_hotkey_column():
     other = _tables(render_reference_html(_WITH_A_HEADSET, 1000))[3]
     grid = _grid_at(1000)
 
     assert _bold_labels(other) == ["Action", VOICE_HEADER]
-    for row in _rows_of(other):
-        cells = _cells_across(row)
-        assert tuple(cell[3] for cell in cells) == (2, 1, 1)
-        assert cells[0][2] == grid[CONTROLLER_HEADER]
-        assert cells[1][0] == ""
+    head, body = _rows_of(other)
+    assert [cell[1:] for cell in _cells_across(head)] == [cell[1:] for cell in _cells_across(body)] == [
+        (0, grid[HOTKEY_HEADER], 1),
+        (grid[HOTKEY_HEADER], HOTKEY_BLOCK_PX, 1),
+        (grid[CONTROLLER_HEADER], CONTROLLER_COLUMN_PX, 1),
+        (grid[VOICE_HEADER], VOICE_COLUMN_PX, 1),
+    ]
+    assert [cell[0] for cell in _cells_across(body)] == ["favorite", "", "", "“star”"]
 
 
-def test_every_head_sits_in_the_middle_of_its_cell_but_action_which_sits_over_the_actions():
+def test_every_head_action_included_sits_in_the_middle_of_its_cell():
     html = render_reference_html(_WITH_A_HEADSET, 1000)
     heads = re.findall(r"<td[^>]*>\s*<b[^>]*>[^<]+</b></td>", html)
 
-    assert heads
+    assert any(">Action<" in head for head in heads)
     for head in heads:
         assert 'valign="middle"' in head
-        assert ('align="left"' in head) == (">Action<" in head)
+        assert 'align="center"' in head
+
+
+def _hotkey_cells(table: str) -> list[str]:
+    return [cell for row in _rows_of(table) for cell in re.findall(r"<td[^>]*>.*?</td>", row)
+            if "<span style=\"background:" in cell]
+
+
+def test_a_single_hotkey_column_centers_its_keys_and_a_forked_one_leaves_them_at_the_left():
+    general, _voice, navigation, _other = _tables(render_reference_html(_WITH_A_HEADSET, 1000))
+
+    assert len(_hotkey_cells(general)) == 2
+    assert all('align="center"' in cell for cell in _hotkey_cells(general))
+    assert len(_hotkey_cells(navigation)) == 2
+    assert not any('align="center"' in cell for cell in _hotkey_cells(navigation))
 
 
 def test_an_untitled_group_has_no_heading_and_a_titled_one_has_its_own():
