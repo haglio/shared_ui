@@ -156,6 +156,14 @@ def _enhance_filter() -> tuple:
     return (*the_plus, a_funnel_from_its_lower_arm)
 
 
+def _originals() -> tuple:
+    low, high = 6.0, 42.0
+    ring = (high - low) / 5
+    the_origenerator_o = RoundedRect(low + ring / 2, low + ring / 2, high - low - ring,
+                                     high - low - ring, 1.5, width=ring)
+    return (the_origenerator_o, Line(43, 5, 5, 43))
+
+
 def _copy() -> tuple:
     radius = 3.5
     return (
@@ -802,6 +810,7 @@ ICONS: dict[str, tuple] = {
         Line(24, 37, 24, 42),
         Line(17, 42, 31, 42),
     ),
+    "originals": _originals(),
     "pair_in_circle": (_kind_ring(), *_kind_cells([[1, 3]], 5, 3, 0.6)),
     "park": _park(),
     "photo": (
