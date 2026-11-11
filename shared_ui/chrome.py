@@ -33,7 +33,7 @@ from shared_ui.spacing import (
 )
 
 if TYPE_CHECKING:
-    from PyQt6.QtWidgets import QToolBar
+    from shared_ui.qt.QtWidgets import QToolBar
 
 
 def ground_rules() -> str:

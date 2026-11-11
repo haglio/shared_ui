@@ -5,10 +5,6 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from functools import partial
 
-from PyQt6.QtCore import QEvent, QSize, Qt, pyqtSignal
-from PyQt6.QtGui import QGuiApplication, QIcon, QKeySequence, QShortcut
-from PyQt6.QtWidgets import QDialog, QTextBrowser, QToolTip, QVBoxLayout, QWidget
-
 from shared_ui.find_bar import FindBar
 from shared_ui.palette import (
     BG_KEYCAP,
@@ -20,6 +16,9 @@ from shared_ui.palette import (
     TEXT_PRIMARY,
     as_hex,
 )
+from shared_ui.qt.QtCore import QEvent, QSize, Qt, Signal
+from shared_ui.qt.QtGui import QGuiApplication, QIcon, QKeySequence, QShortcut
+from shared_ui.qt.QtWidgets import QDialog, QTextBrowser, QToolTip, QVBoxLayout, QWidget
 from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, GAP_SMALL, HAIRLINE, MARGIN_STANDARD
 from shared_ui.type_scale import FONT_UI, SIZE_BODY, SIZE_HEADING
 
@@ -308,7 +307,7 @@ def reference_first_size(available: QSize, *, at_least_wide: int) -> QSize:
 
 
 class ReferenceDialog(QDialog):
-    typing_invited = pyqtSignal()
+    typing_invited = Signal()
 
     def __init__(self, sections: tuple[ReferenceSection, ...], *, icon: QIcon,
                  parent: QWidget | None = None) -> None:

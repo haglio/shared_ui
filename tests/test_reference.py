@@ -3,12 +3,19 @@ from __future__ import annotations
 import re
 
 import pytest
-from PyQt6.QtCore import QEvent, QPoint, QSize, Qt
-from PyQt6.QtGui import QGuiApplication, QHelpEvent, QIcon, QTextDocument, QTextDocumentFragment
-from PyQt6.QtTest import QTest
-from PyQt6.QtWidgets import QApplication, QLabel, QLineEdit, QTextBrowser
+from shared_ui.qt.QtCore import QEvent, QPoint, QSize, Qt
+from shared_ui.qt.QtGui import (
+    QGuiApplication,
+    QHelpEvent,
+    QIcon,
+    QTextDocument,
+    QTextDocumentFragment,
+)
+from shared_ui.qt.QtTest import QTest
+from shared_ui.qt.QtWidgets import QApplication, QLabel, QLineEdit, QTextBrowser
 
 from shared_ui.find_bar import FindBar
+from shared_ui.qt import QtGui
 from shared_ui.reference import (
     ACTION_COLUMN_PX,
     BORDER,
@@ -257,7 +264,7 @@ def test_the_reference_shows_a_detail_as_a_rich_text_tooltip_over_its_action(wid
     nowhere = QPoint(0, 0)
     browser.event(QHelpEvent(QEvent.Type.ToolTip, nowhere, browser.viewport().mapToGlobal(nowhere)))
 
-    assert Qt.mightBeRichText(said[0])
+    assert QtGui.Qt.mightBeRichText(said[0])
     assert QTextDocumentFragment.fromHtml(said[0]).toPlainText() == _PAUSE.detail
     assert said[1] is None
     assert not browser.openLinks()

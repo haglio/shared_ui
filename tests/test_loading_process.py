@@ -12,6 +12,7 @@ from app_support.testing import window_dressed
 
 from shared_ui.loading_process import LoadingProcess, run, serve
 from shared_ui.loading_window import LoadingWindow
+from shared_ui.testing import appending_to
 
 
 def _window(**changes) -> LoadingWindow:
@@ -129,7 +130,7 @@ class TestTheWholeWay:
             steps=("Checking the tracker...", "Loading..."),
             cancel_hint="Press Esc to cancel opening Scripture")
         shown = []
-        window.shown.connect(shown.append)
+        window.shown.connect(appending_to(shown))
 
         assert _until(qapp, lambda: bool(shown), seconds=60)
         window.say("Loading...")

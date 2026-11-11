@@ -10,7 +10,7 @@ import pytest
 # display; the merge gate sets it for its own runs only, not for a run started by hand.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PyQt6.QtWidgets import QApplication
+from shared_ui.qt.QtWidgets import QApplication
 
 pytest_plugins = ("shared_ui.testing",)
 

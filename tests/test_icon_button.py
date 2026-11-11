@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import pytest
-from PyQt6.QtCore import QPoint, QRect, QSize
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QPushButton, QToolButton, QWidget
+from shared_ui.qt.QtCore import QPoint, QRect, QSize
+from shared_ui.qt.QtGui import QIcon
+from shared_ui.qt.QtWidgets import QPushButton, QToolButton, QWidget
 
 from shared_ui.chrome import family_stylesheet
 from shared_ui.icon_button import fill_square_with_icon

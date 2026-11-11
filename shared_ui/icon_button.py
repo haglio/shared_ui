@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from PyQt6.QtCore import QSize
-from PyQt6.QtWidgets import QAbstractButton
-
 from shared_ui.chrome import ICON_BUTTON_PROPERTY
+from shared_ui.qt.QtCore import QSize
+from shared_ui.qt.QtWidgets import QAbstractButton
 from shared_ui.spacing import BUTTON_ICON_INSET, BUTTON_SIZE
 
 __all__ = ["fill_square_with_icon"]

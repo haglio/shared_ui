@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from PyQt6.QtGui import QImage, QPainter
-from PyQt6.QtWidgets import QWidget
+from shared_ui.qt.QtGui import QImage, QPainter
+from shared_ui.qt.QtWidgets import QWidget
 
 
 class PressableDrawing(QWidget):

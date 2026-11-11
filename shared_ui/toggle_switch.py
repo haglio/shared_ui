@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from PyQt6.QtCore import QRectF, QSize, Qt
-from PyQt6.QtGui import QPainter, QPen
-from PyQt6.QtWidgets import QAbstractButton
-
 from shared_ui.colors import TEXT_SECONDARY, TOGGLE_HANDLE, TOGGLE_OFF, TOGGLE_ON
+from shared_ui.qt.QtCore import QRectF, QSize, Qt
+from shared_ui.qt.QtGui import QPainter, QPen
+from shared_ui.qt.QtWidgets import QAbstractButton
 from shared_ui.spacing import GAP_MEDIUM
 from shared_ui.toggle_geometry import HANDLE_INSET, TRACK, handle
 

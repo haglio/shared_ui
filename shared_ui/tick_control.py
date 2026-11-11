@@ -5,10 +5,6 @@ from __future__ import annotations
 
 from itertools import accumulate
 
-from PyQt6.QtCore import QPointF, QRectF, QSize, Qt
-from PyQt6.QtGui import QPainter, QPen, QPolygonF
-from PyQt6.QtWidgets import QCheckBox
-
 from shared_ui.colors import (
     BG_BUTTON_ACTIVE,
     BG_SECONDARY,
@@ -18,6 +14,9 @@ from shared_ui.colors import (
     TEXT_SECONDARY,
     WHITE,
 )
+from shared_ui.qt.QtCore import QPointF, QRectF, QSize, Qt
+from shared_ui.qt.QtGui import QPainter, QPen, QPolygonF
+from shared_ui.qt.QtWidgets import QCheckBox
 from shared_ui.spacing import BUTTON_RADIUS_HUD, GAP_MEDIUM
 
 _INDICATOR = 16

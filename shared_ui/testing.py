@@ -4,18 +4,18 @@ import json
 import os
 import subprocess
 import sys
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
 import pytest
-from PyQt6.QtCore import QEvent, QPoint, QPointF, QRect, Qt
-from PyQt6.QtGui import QCursor, QImage, QMouseEvent
-from PyQt6.QtWidgets import QApplication, QWidget
 
 from shared_ui.colors import BG_PRIMARY
+from shared_ui.qt.QtCore import QEvent, QPoint, QPointF, QRect, Qt
+from shared_ui.qt.QtGui import QCursor, QImage, QMouseEvent, QRegion
+from shared_ui.qt.QtWidgets import QApplication, QWidget
 
 
 def alert_shown(**how: Any):
@@ -50,12 +50,19 @@ def icons_lacking(*names: str) -> Iterator[None]:
         yield
 
 
+def appending_to(found: list) -> Callable[[Any], None]:
+    def append(value: Any) -> None:
+        found.append(value)
+
+    return append
+
+
 def rendered_on_the_dark_ground(widget: QWidget) -> QImage:
     """A bare ``grab()`` paints every uncovered pixel with the palette's Window color, which is
     light under Qt's offscreen backend, a ground no app ever shows beneath these widgets."""
     image = QImage(widget.size(), QImage.Format.Format_ARGB32)
     image.fill(BG_PRIMARY)
-    widget.render(image, flags=QWidget.RenderFlag.DrawChildren)
+    widget.render(image, QPoint(), QRegion(), QWidget.RenderFlag.DrawChildren)
     return image
 
 
@@ -69,7 +76,7 @@ def toolkits_loaded_by_importing(*modules: str) -> set[str]:
     probe = (
         f"import json, sys; import {', '.join(modules)}; "
         "print(shared_ui.__file__); "
-        "print(json.dumps(sorted({m.split('.')[0] for m in sys.modules if m.split('.')[0] in ('PyQt6', 'PIL')})))"
+        "print(json.dumps(sorted({m.split('.')[0] for m in sys.modules if m.split('.')[0] in ('PyQt6', 'PySide6', 'PIL')})))"
     )
     result = subprocess.run(
         [sys.executable, "-c", probe], cwd=_THIS_TREE,

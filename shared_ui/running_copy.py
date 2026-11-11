@@ -6,7 +6,7 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from PyQt6.QtNetwork import QLocalServer, QLocalSocket
+from shared_ui.qt.QtNetwork import QLocalServer, QLocalSocket
 
 _SEND_TIMEOUT_MS = 2000
 

@@ -1,13 +1,19 @@
 from __future__ import annotations
 
+import json
 import os
-import threading
+import subprocess
+import sys
+import textwrap
 import time
 import uuid
+from pathlib import Path
 
-from PyQt6.QtCore import QObject, pyqtSignal
+from shared_ui.qt.QtCore import QObject, Signal
 
-from shared_ui.running_copy import _hear, _pipe_server, ask, listen
+from shared_ui.running_copy import Answer, _hear, _pipe_server, ask, listen
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _name() -> str:
@@ -18,16 +24,43 @@ def _soon() -> float:
     return time.monotonic() + 10.0
 
 
-def _pumped_until_it_finishes(qapp, work):
-    done = []
-    thread = threading.Thread(target=lambda: done.append(work()), daemon=True)
-    thread.start()
-    deadline = time.monotonic() + 15.0
-    while thread.is_alive() and time.monotonic() < deadline:
+def _asked_from_another_process(qapp, name: str, said: bytes, *, within_s: float = 10.0) -> Answer | None:
+    asking = subprocess.Popen(
+        [sys.executable, "-c", textwrap.dedent(f"""
+            import json, time
+            from shared_ui.running_copy import ask
+            answer = ask({name!r}, {said!r}, until=time.monotonic() + {within_s})
+            print(json.dumps(None if answer is None else [answer.reply.decode(), answer.pid]))
+        """)], cwd=REPO_ROOT, stdout=subprocess.PIPE, text=True,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    deadline = time.monotonic() + within_s + 30.0
+    while asking.poll() is None and time.monotonic() < deadline:
         qapp.processEvents()
         time.sleep(0.01)
-    assert done, "the asking never finished"
-    return done[0]
+    assert asking.poll() is not None, "the asking never finished"
+    found = json.loads(asking.stdout.read())
+    return None if found is None else Answer(found[0].encode(), found[1])
+
+
+def _listening_in_another_process(name: str, words: bytes) -> tuple[subprocess.Popen, int]:
+    listening = subprocess.Popen(
+        [sys.executable, "-c", textwrap.dedent(f"""
+            import os
+            from shared_ui.qt.QtCore import QCoreApplication, QTimer
+            from shared_ui.running_copy import listen
+            app = QCoreApplication([])
+
+            def answer(said, reply):
+                reply({words!r})
+                QTimer.singleShot(0, app.quit)
+
+            server = listen({name!r}, answer)
+            QTimer.singleShot(20_000, app.quit)
+            print(os.getpid(), flush=True)
+            app.exec()
+        """)], cwd=REPO_ROOT, stdout=subprocess.PIPE, text=True,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    return listening, int(listening.stdout.readline())
 
 
 def _pump_until(qapp, condition) -> None:
@@ -51,7 +84,7 @@ def test_the_running_copy_replies_and_says_which_process_it_is(qapp):
 
     server = listen(name, reply_showing)
     try:
-        answer = _pumped_until_it_finishes(qapp, lambda: ask(name, b"open", until=_soon()))
+        answer = _asked_from_another_process(qapp, name, b"open")
     finally:
         server.close()
 
@@ -59,12 +92,22 @@ def test_the_running_copy_replies_and_says_which_process_it_is(qapp):
     assert heard == [b"open"]
 
 
+def test_the_asker_waits_for_the_running_copys_reply():
+    name = _name()
+    listening, its_pid = _listening_in_another_process(name, b"showing")
+
+    answer = ask(name, b"open", until=_soon())
+
+    assert (answer.reply, answer.pid) == (b"showing", its_pid)
+    assert listening.wait(timeout=30) == 0
+
+
 def test_a_caller_that_is_not_replied_to_is_let_go_rather_than_kept_waiting(qapp):
     name = _name()
     server = listen(name, lambda said, reply: None)
     try:
         started = time.monotonic()
-        answer = _pumped_until_it_finishes(qapp, lambda: ask(name, b"open", until=started + 10.0))
+        answer = _asked_from_another_process(qapp, name, b"open")
     finally:
         server.close()
 
@@ -92,7 +135,7 @@ def test_a_caller_is_heard_once_however_it_goes_on_to_hang_up(qapp):
     heard = []
     server = listen(name, lambda said, reply: heard.append(said))
     try:
-        _pumped_until_it_finishes(qapp, lambda: ask(name, b"open", until=_soon()))
+        _asked_from_another_process(qapp, name, b"open")
         for _ in range(20):
             qapp.processEvents()
             time.sleep(0.01)
@@ -113,8 +156,8 @@ def test_a_handle_that_is_no_pipe_names_no_process():
 
 
 class _Caller(QObject):
-    readyRead = pyqtSignal()
-    disconnected = pyqtSignal()
+    readyRead = Signal()
+    disconnected = Signal()
 
     def __init__(self, waiting: bytes) -> None:
         super().__init__()

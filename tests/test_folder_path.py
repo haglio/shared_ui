@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import re
 
-from PyQt6.QtCore import QEvent, QPointF, Qt
-from PyQt6.QtGui import QColor, QMouseEvent, QTextDocumentFragment
+from shared_ui.qt.QtCore import QEvent, QPointF, Qt
+from shared_ui.qt.QtGui import QColor, QMouseEvent, QTextDocumentFragment
 
 from shared_ui.colors import BLUE_LIGHT, GREEN, TEXT_PRIMARY
 from shared_ui.folder_path import FolderPath
 from shared_ui.icons import icon_then_text
-from shared_ui.testing import rendered_on_the_dark_ground
+from shared_ui.testing import appending_to, rendered_on_the_dark_ground
 
 
 def _links(path: FolderPath) -> list[tuple[str, str]]:
@@ -28,7 +28,7 @@ def test_clicking_a_step_says_which_step_it_was():
     path = FolderPath(" / ")
     path.set_path(["Library", "big_batch", "cuts"])
     clicked = []
-    path.step_clicked.connect(clicked.append)
+    path.step_clicked.connect(appending_to(clicked))
 
     path.linkActivated.emit({name: href for href, name in _links(path)}["big_batch"])
 
@@ -40,7 +40,7 @@ def test_a_click_of_the_mouse_on_a_step_reaches_it(qapp):
     path.set_path(["Library", "big_batch", "cuts"])
     path.resize(path.sizeHint())
     clicked = []
-    path.step_clicked.connect(clicked.append)
+    path.step_clicked.connect(appending_to(clicked))
     on_the_first_step = QPointF(3, path.height() / 2)
 
     for kind in (QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease):
