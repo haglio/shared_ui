@@ -28,10 +28,10 @@ HOTKEY_HEADER = "Hotkey"
 CONTROLLER_HEADER = "VR Controller"
 VOICE_HEADER = "Voice command"
 
-VOICE_COLUMN_PX = 220
+ACTION_COLUMN_PX = 220
 CONTROLLER_COLUMN_PX = 120
 HOTKEY_BLOCK_PX = 300
-ACTION_COLUMN_AT_LEAST_PX = 150
+VOICE_COLUMN_AT_LEAST_PX = 150
 
 
 @dataclass(frozen=True)
@@ -83,8 +83,8 @@ def _controller_column_px(sections: tuple[ReferenceSection, ...]) -> int:
 
 
 def narrowest_page_px(sections: tuple[ReferenceSection, ...]) -> int:
-    return (HOTKEY_BLOCK_PX + _controller_column_px(sections) + VOICE_COLUMN_PX
-            + ACTION_COLUMN_AT_LEAST_PX)
+    return (HOTKEY_BLOCK_PX + _controller_column_px(sections) + ACTION_COLUMN_PX
+            + VOICE_COLUMN_AT_LEAST_PX)
 
 
 def _tooltips(sections: tuple[ReferenceSection, ...]) -> tuple[str, ...]:
@@ -162,7 +162,6 @@ class _Columns:
     keys: tuple[int, ...]
     has_controller: bool
     controller: int
-    voice: int = VOICE_COLUMN_PX
 
     @classmethod
     def laid_out(cls, width: int, group: ReferenceGroup, section: ReferenceSection,
@@ -172,7 +171,11 @@ class _Columns:
 
     @property
     def action(self) -> int:
-        return self.width - HOTKEY_BLOCK_PX - self.controller - self.voice
+        return ACTION_COLUMN_PX
+
+    @property
+    def voice(self) -> int:
+        return self.width - ACTION_COLUMN_PX - HOTKEY_BLOCK_PX - self.controller
 
 
 def _no_input() -> str:

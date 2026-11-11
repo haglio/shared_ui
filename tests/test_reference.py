@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import QApplication, QLabel, QLineEdit, QTextBrowser
 
 from shared_ui.find_bar import FindBar
 from shared_ui.reference import (
-    ACTION_COLUMN_AT_LEAST_PX,
+    ACTION_COLUMN_PX,
     BORDER,
     CONTROLLER_COLUMN_PX,
     CONTROLLER_HEADER,
@@ -18,7 +18,7 @@ from shared_ui.reference import (
     HOTKEY_HEADER,
     REFERENCE_WINDOW_TITLE,
     ROOM_FOR_THE_FRAME_PX,
-    VOICE_COLUMN_PX,
+    VOICE_COLUMN_AT_LEAST_PX,
     VOICE_HEADER,
     CommandRef,
     ReferenceBrowser,
@@ -93,9 +93,13 @@ def _cells_across(row: str) -> list[tuple[str, int, int, int]]:
 
 
 def _grid_at(width: int, *, controller: int = CONTROLLER_COLUMN_PX) -> dict[str, int]:
-    action = width - HOTKEY_BLOCK_PX - controller - VOICE_COLUMN_PX
+    action = ACTION_COLUMN_PX
     return {"Action": 0, HOTKEY_HEADER: action, CONTROLLER_HEADER: action + HOTKEY_BLOCK_PX,
             VOICE_HEADER: action + HOTKEY_BLOCK_PX + controller}
+
+
+def _voice_column_at(width: int, *, controller: int = CONTROLLER_COLUMN_PX) -> int:
+    return width - ACTION_COLUMN_PX - HOTKEY_BLOCK_PX - controller
 
 
 def test_every_table_lays_its_columns_on_one_grid_so_the_heads_line_up_down_the_page():
@@ -111,7 +115,7 @@ def test_every_table_lays_its_columns_on_one_grid_so_the_heads_line_up_down_the_
                 if cells[0][0] == "Left":
                     continue
                 assert sum(cell[2] for cell in cells) == width
-                assert cells[-1][1:3] == (grid[VOICE_HEADER], VOICE_COLUMN_PX)
+                assert cells[-1][1:3] == (grid[VOICE_HEADER], _voice_column_at(width))
         assert {head: xs for head, xs in heads.items() if head in grid} == {
             head: {x} for head, x in grid.items()}
 
@@ -125,9 +129,9 @@ def test_a_page_where_no_row_has_a_controller_input_gives_that_column_no_room():
         for row in _rows_of(table):
             cells = _cells_across(row)
             assert sum(cell[2] for cell in cells) == 1000
-            assert cells[-1][1:3] == (grid[VOICE_HEADER], VOICE_COLUMN_PX)
-    assert narrowest_page_px(_NO_HEADSET) == (HOTKEY_BLOCK_PX + VOICE_COLUMN_PX
-                                              + ACTION_COLUMN_AT_LEAST_PX)
+            assert cells[-1][1:3] == (grid[VOICE_HEADER], _voice_column_at(1000, controller=0))
+    assert narrowest_page_px(_NO_HEADSET) == (HOTKEY_BLOCK_PX + ACTION_COLUMN_PX
+                                              + VOICE_COLUMN_AT_LEAST_PX)
     assert narrowest_page_px(_WITH_A_HEADSET) == narrowest_page_px(_NO_HEADSET) + CONTROLLER_COLUMN_PX
 
 
@@ -153,7 +157,7 @@ def test_a_group_whose_rows_hold_no_key_keeps_its_actions_out_of_the_empty_hotke
         (0, grid[HOTKEY_HEADER], 1),
         (grid[HOTKEY_HEADER], HOTKEY_BLOCK_PX, 1),
         (grid[CONTROLLER_HEADER], CONTROLLER_COLUMN_PX, 1),
-        (grid[VOICE_HEADER], VOICE_COLUMN_PX, 1),
+        (grid[VOICE_HEADER], _voice_column_at(1000), 1),
     ]
     assert [cell[0] for cell in _cells_across(body)] == ["favorite", "", "", "“star”"]
 
@@ -362,3 +366,12 @@ def test_a_section_says_whether_any_row_has_a_key_or_a_controller_input():
     assert not _GENERAL.has_controller
     assert _SLIDES.has_controller
     assert not ReferenceSection("Spoken", (ReferenceGroup("", (_LISTEN,)),)).has_keys
+
+
+def test_the_voice_column_takes_the_room_the_page_has_and_the_action_column_keeps_its_own():
+    for width in (1000, 1400):
+        [first, *_] = _tables(render_reference_html(_WITH_A_HEADSET, width))
+        cells = _cells_across(_rows_of(first)[0])
+        assert (cells[0][0], cells[0][2]) == ("Action", ACTION_COLUMN_PX)
+        assert (cells[-1][0], cells[-1][2]) == (VOICE_HEADER, _voice_column_at(width))
+    assert _voice_column_at(1400) > ACTION_COLUMN_PX
