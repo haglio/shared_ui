@@ -111,11 +111,16 @@ BORDER = as_hex(BORDER_SUBTLE)
 _CELL_PADDING = f"padding:{GAP_SMALL}px {MARGIN_STANDARD}px"
 
 
+def _letters_in_lower_case(label: str) -> str:
+    return "+".join(part.lower() if len(part) == 1 and part.isalpha() else part
+                    for part in label.split("+"))
+
+
 def _keycap(label: str) -> str:
     return (
         f'<span style="background:{_KEYCAP_BG};border:{HAIRLINE}px solid {BORDER};'
         f'padding:0 {GAP_SMALL}px;color:{_TEXT};font-family:\'{FONT_UI}\'">'
-        f"{html.escape(label)}</span>"
+        f"{html.escape(_letters_in_lower_case(label))}</span>"
     )
 
 
