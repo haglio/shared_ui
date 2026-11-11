@@ -287,7 +287,8 @@ _THE_ICONS = (
     "expand_horizontal", "export", "external_link", "filter", "flask", "flat_2d", "flip_ends",
     "fmode", "folder", "full", "funscript_jump", "grid", "headset", "human",
     "info", "jigsaw", "landscape", "latest", "lock", "log", "loop", "mic", "minus", "monitor",
-    "moon", "more", "more_vertical", "pair_in_circle", "park", "pause", "pencil", "photo", "play", "plus",
+    "moon", "more", "more_vertical", "originals", "pair_in_circle", "park", "pause", "pencil",
+    "photo", "play", "plus",
     "plus_outline", "portrait", "portrait_and_landscape", "portrait_beside_landscape", "power",
     "question", "redo_arrow", "regenerate_corner", "release", "reset", "restart", "retract",
     "save", "scene_to_clip", "settings", "shield", "shuffle", "slideshow",
@@ -295,6 +296,17 @@ _THE_ICONS = (
     "stop", "tag", "thumbs_up", "trash", "undo_arrow", "unlock", "versions", "vr_hemisphere",
     "warning", "wave", "wave_sawtooth", "wave_square", "wave_triangle", "working",
 )
+
+
+def test_originals_is_the_origenerator_o_struck_through_from_its_upper_right_like_a_zero():
+    ring, slash = ICONS["originals"]
+
+    outer_width = ring.w + ring.width
+    assert ring.w == ring.h
+    assert ring.width == pytest.approx(outer_width / 5)
+    assert (slash.x1 > slash.x2, slash.y1 < slash.y2) == (True, True)
+    middle = (ring.x + ring.w / 2, ring.y + ring.h / 2)
+    assert ((slash.x1 + slash.x2) / 2, (slash.y1 + slash.y2) / 2) == pytest.approx(middle)
 
 
 def test_the_icons_this_family_draws_are_the_ones_the_apps_ask_for():
