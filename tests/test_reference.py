@@ -140,7 +140,7 @@ def test_a_forked_hotkey_head_spans_its_columns_centered_and_underlined():
     assert "rowspan" in head
     assert [cell[:3] for cell in _cells_across(forks)] == [
         ("Left", 0, 100), ("Right", 100, 100), ("Both", 200, 100)]
-    assert [cell[0] for cell in _cells_across(body)][1:5] == ["Right", "D", "—", "A / X"]
+    assert [cell[0] for cell in _cells_across(body)][1:5] == ["Right", "d", "—", "A / X"]
 
 
 def test_a_group_whose_rows_hold_no_key_keeps_its_actions_out_of_the_empty_hotkey_column():
@@ -171,6 +171,13 @@ def test_every_head_action_included_sits_in_the_middle_of_its_cell():
 def _hotkey_cells(table: str) -> list[str]:
     return [cell for row in _rows_of(table) for cell in re.findall(r"<td[^>]*>.*?</td>", row)
             if "<span style=\"background:" in cell]
+
+
+def test_a_letter_key_is_shown_in_lower_case_so_a_capital_i_is_never_taken_for_an_l():
+    general, _voice, navigation, _other = _tables(render_reference_html(_WITH_A_HEADSET, 1000))
+    keys = [re.sub(r"<[^>]+>", "", cell) for cell in _hotkey_cells(general) + _hotkey_cells(navigation)]
+
+    assert keys == ["Ctrl+Alt+q", "Esc", "Right", "d"]
 
 
 def test_a_single_hotkey_column_centers_its_keys_and_a_forked_one_leaves_them_at_the_left():
@@ -312,7 +319,7 @@ def test_ctrl_f_opens_a_find_that_survives_the_page_being_laid_out_again(widgets
 
     assert dialog.findChild(QLabel, "findCount").text() == "1 of 1"
     [marked] = dialog.findChild(QTextBrowser).extraSelections()
-    assert marked.cursor.selectedText() == "Ctrl+Alt+Q"
+    assert marked.cursor.selectedText() == "Ctrl+Alt+q"
 
 
 def test_the_reference_find_keeps_off_the_windows_edges(widgets):
