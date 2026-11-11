@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from PyQt6.QtCore import QPoint, Qt
-from PyQt6.QtGui import QImage
-from PyQt6.QtTest import QTest
-from PyQt6.QtWidgets import QHBoxLayout, QWidget
+from shared_ui.qt.QtCore import QPoint, Qt
+from shared_ui.qt.QtGui import QImage
+from shared_ui.qt.QtTest import QTest
+from shared_ui.qt.QtWidgets import QHBoxLayout, QWidget
 
 from shared_ui.colors import TOGGLE_HANDLE, TOGGLE_OFF, TOGGLE_ON
 from shared_ui.spacing import GAP_MEDIUM
-from shared_ui.testing import rendered_on_the_dark_ground
+from shared_ui.testing import appending_to, rendered_on_the_dark_ground
 from shared_ui.toggle_geometry import TRACK
 from shared_ui.toggle_switch import ToggleSwitch
 
@@ -41,7 +41,7 @@ def test_starts_unchecked_and_set_checked_round_trips():
 def test_a_click_flips_the_state_and_announces_the_new_value():
     switch = ToggleSwitch()
     announced = []
-    switch.clicked.connect(announced.append)
+    switch.clicked.connect(appending_to(announced))
     QTest.mouseClick(switch, Qt.MouseButton.LeftButton)
     assert switch.isChecked()
     assert announced == [True]
@@ -53,7 +53,7 @@ def test_a_click_flips_the_state_and_announces_the_new_value():
 def test_only_the_left_button_flips_it():
     switch = ToggleSwitch()
     announced = []
-    switch.clicked.connect(announced.append)
+    switch.clicked.connect(appending_to(announced))
 
     QTest.mouseClick(switch, Qt.MouseButton.RightButton)
     QTest.mouseClick(switch, Qt.MouseButton.MiddleButton)
@@ -66,7 +66,7 @@ def test_a_press_dragged_off_the_switch_does_not_flip_it():
     switch = ToggleSwitch()
     switch.resize(switch.sizeHint())
     announced = []
-    switch.clicked.connect(announced.append)
+    switch.clicked.connect(appending_to(announced))
 
     QTest.mousePress(switch, Qt.MouseButton.LeftButton, pos=QPoint(19, 10))
     QTest.mouseRelease(switch, Qt.MouseButton.LeftButton, pos=QPoint(_OFF_THE_SWITCH, 10))

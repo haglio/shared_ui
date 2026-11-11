@@ -3,9 +3,9 @@ from __future__ import annotations
 import xml.etree.ElementTree as ET
 
 import pytest
-from PyQt6.QtCore import QByteArray, Qt
-from PyQt6.QtGui import QImage, QPainter
-from PyQt6.QtSvg import QSvgRenderer
+from shared_ui.qt.QtCore import QByteArray, Qt
+from shared_ui.qt.QtGui import QImage, QPainter
+from shared_ui.qt.QtSvg import QSvgRenderer
 
 from shared_ui import icons, icons_svg
 from shared_ui.colors import TEXT_PRIMARY

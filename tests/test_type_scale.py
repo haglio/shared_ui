@@ -23,4 +23,4 @@ def test_a_size_in_pixels_is_its_height_on_a_96_dpi_screen():
 
 
 def test_the_sizes_are_read_without_loading_qt():
-    assert "PyQt6" not in toolkits_loaded_by_importing("shared_ui.type_scale")
+    assert not {"PyQt6", "PySide6"} & toolkits_loaded_by_importing("shared_ui.type_scale")

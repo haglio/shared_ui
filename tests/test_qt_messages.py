@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from PyQt6.QtCore import QLoggingCategory
+from shared_ui.qt.QtCore import QLoggingCategory
 
 from shared_ui.qt_messages import silence_the_ffmpeg_format_dump
 

@@ -14,9 +14,9 @@ requires-python = ">=3.14"
 # Qt is an extra: `spacing` is
 # plain integers and `icons_pil` draws with Pillow alone, and those two modules
 # are the whole of what funestra imports from here -- so an unconditional
-# PyQt6 put a Qt wheel in every Funestra venv and on every runner that installs
+# Qt binding put a Qt wheel in every Funestra venv and on every runner that installs
 # one, for code that never touches it. Every consumer that uses the widgets
-# declares PyQt6 itself, and its own import gate says so.
+# declares its Qt binding itself, and its own import gate says so.
 #
 # app_support is not among these: every app pins it itself, and pip refuses two
 # pins of one repo that differ, so a pin here held every app to this repo's copy
@@ -37,11 +37,14 @@ dependencies = [
 # PyPI served that morning, which is how this family's gates came to run a major
 # version of the imaging stack past the one the machines have. Floors are what
 # the machine holds today.
-qt = ["PyQt6>=6,<7"]
+qt = ["PySide6>=6.11.2,<6.12", "shiboken6>=6.11.2,<6.12"]
 # The suite needs Qt, which is most of this package.
 dev = ["app-support @ git+https://github.com/haglio/app_support@v0.1.467",
        "pytest>=9,<10", "pytest-cov>=7,<8", "pytest-timeout>=2.4,<3", "vulture>=2.16,<3",
-       "ruff==0.16.6", "PyQt6>=6,<7"]
+       "ruff==0.16.6", "PySide6>=6.11.2,<6.12", "shiboken6>=6.11.2,<6.12",
+       # Until every app draws with PySide6, shared_ui.qt draws with PyQt6 under one
+       # that still does.
+       "PyQt6>=6,<7"]
 
 # Three lines of the icon drawing and the loading process excuse themselves from
 # coverage; the ceiling only comes down.

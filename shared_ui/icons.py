@@ -4,9 +4,6 @@ import html
 from dataclasses import dataclass
 from functools import cache
 
-from PyQt6.QtCore import QBuffer, QByteArray, QIODevice, QPointF, QRectF, Qt
-from PyQt6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap
-
 from shared_ui.colors import TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import (
     CANVAS,
@@ -21,6 +18,8 @@ from shared_ui.icon_geometry import (
     RoundedRect,
     shapes_of,
 )
+from shared_ui.qt.QtCore import QBuffer, QByteArray, QIODevice, QPointF, QRectF, Qt
+from shared_ui.qt.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap, QPolygonF
 from shared_ui.stand_in_tooltips import remember_the_stand_in_on
 
 __all__ = [
@@ -139,7 +138,7 @@ def _line(painter: QPainter, shape: Line, ink: QColor) -> None:
 
 def _polyline(painter: QPainter, shape: Polyline, ink: QColor) -> None:
     _set_pen(painter, ink, shape.width)
-    painter.drawPolyline(*(QPointF(px, py) for px, py in shape.points))
+    painter.drawPolyline(QPolygonF([QPointF(px, py) for px, py in shape.points]))
 
 
 def _polygon(painter: QPainter, shape: Polygon, ink: QColor) -> None:
@@ -148,7 +147,7 @@ def _polygon(painter: QPainter, shape: Polygon, ink: QColor) -> None:
         painter.setBrush(ink)
     else:
         _solid_or_outlined(painter, shape, ink)
-    painter.drawPolygon(*(QPointF(px, py) for px, py in shape.points))
+    painter.drawPolygon(QPolygonF([QPointF(px, py) for px, py in shape.points]))
 
 
 def _rounded_rect(painter: QPainter, shape: RoundedRect, ink: QColor) -> None:

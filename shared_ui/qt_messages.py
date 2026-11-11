@@ -2,7 +2,7 @@
 video ComfyUI made carries its prompt in those tags."""
 from __future__ import annotations
 
-from PyQt6.QtCore import QLoggingCategory
+from shared_ui.qt.QtCore import QLoggingCategory
 
 _FORMAT_DUMP = "qt.multimedia.ffmpeg.mediadataholder"
 

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor
+from shared_ui.qt.QtCore import Qt
+from shared_ui.qt.QtGui import QColor
 
 from shared_ui.colors import BG_SECONDARY, BLUE
-from shared_ui.testing import rendered_on_the_dark_ground
+from shared_ui.testing import appending_to, rendered_on_the_dark_ground
 from shared_ui.tick_control import _INDICATOR, TickControl
 
 
@@ -144,7 +144,7 @@ def test_presses_go_between_ticked_and_unticked_and_never_back_to_half_checked()
 def test_a_press_says_which_way_it_went_as_any_tick_does():
     pressed = []
     control = _half_checked()
-    control.clicked.connect(pressed.append)
+    control.clicked.connect(appending_to(pressed))
 
     control.click()
     control.click()

@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from PyQt6.QtGui import QFont
-
+from shared_ui.qt.QtGui import QFont
 from shared_ui.type_scale import (
     FONT_UI,
     SIZE_BODY,

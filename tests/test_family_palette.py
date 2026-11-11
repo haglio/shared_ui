@@ -3,8 +3,8 @@ from __future__ import annotations
 from collections import Counter
 
 import pytest
-from PyQt6.QtGui import QColor, QPalette
-from PyQt6.QtWidgets import QLineEdit
+from shared_ui.qt.QtGui import QColor, QPalette
+from shared_ui.qt.QtWidgets import QLineEdit
 
 from shared_ui import palette as tokens
 from shared_ui.chrome import family_stylesheet

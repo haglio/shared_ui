@@ -8,9 +8,9 @@ import uuid
 from itertools import pairwise
 
 import pytest
-from PyQt6.QtCore import QRectF, QSize, Qt
-from PyQt6.QtGui import QColor, QIcon, QImage, QPainter, QPen, QPixmap
-from PyQt6.QtWidgets import QLabel
+from shared_ui.qt.QtCore import QRectF, QSize, Qt
+from shared_ui.qt.QtGui import QColor, QIcon, QImage, QPainter, QPen, QPixmap
+from shared_ui.qt.QtWidgets import QLabel
 
 from shared_ui import icons
 from shared_ui.colors import GREEN, RED, TEXT_MUTED, TEXT_PRIMARY

@@ -9,46 +9,39 @@ import textwrap
 import weakref
 from pathlib import Path
 
-from PyQt6 import sip
-from PyQt6.QtCore import QObject, QThread
-from PyQt6.QtWidgets import QWidget
+from shared_ui.qt.QtCore import QObject, QThread
+from shared_ui.qt.QtWidgets import QWidget
 
 from shared_ui import application as application_module
 from shared_ui.application import application, delete_what_python_still_owns
+from shared_ui.qt import delete, is_deleted
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_a_close_leaves_pyqts_own_cleanup_nothing_to_delete():
-    # Only a process of its own can free its QApplication's wrapper, which is the moment
-    # PyQt walks its map of wrappers deleting what Python owns.
+def test_a_close_leaves_the_bindings_own_cleanup_nothing_to_delete():
     child = textwrap.dedent("""
-        import gc, json, sys, weakref
-        from PyQt6 import sip
-        from PyQt6.QtCore import QCoreApplication, QObject
-        from PyQt6.QtWidgets import QWidget
+        import gc, json, sys
+        from shared_ui.qt import is_deleted, owned_by_python
+        from shared_ui.qt.QtCore import QCoreApplication, QObject
+        from shared_ui.qt.QtWidgets import QWidget
         from shared_ui.application import application
 
-        kept, said = [], []
+        kept = []
 
         def owned():
             count = 0
             for found in gc.get_objects():
                 try:
                     if isinstance(found, QObject) and not isinstance(found, QCoreApplication):
-                        count += not sip.isdeleted(found) and sip.ispyowned(found)
+                        count += not is_deleted(found) and owned_by_python(found)
                 except ReferenceError:
                     pass
             return count
 
-        def main():
-            global watching
-            with application(sys.argv[:1]) as app:
-                kept.append(QWidget())
-                watching = weakref.ref(app, lambda _gone: said.append(owned()))
-
-        main()
-        print(json.dumps(said), flush=True)
+        with application(sys.argv[:1]):
+            kept.append(QWidget())
+        print(json.dumps([owned()]), flush=True)
     """)
     ran = subprocess.run([sys.executable, "-c", child], cwd=REPO_ROOT, timeout=120,
                          env=os.environ | {"QT_QPA_PLATFORM": "offscreen"},
@@ -65,7 +58,7 @@ def test_an_application_made_elsewhere_is_handed_through_and_left_alone(qapp):
     with application([]) as app:
         assert app is qapp
 
-    assert not sip.isdeleted(window)
+    assert not is_deleted(window)
 
 
 def test_an_application_made_here_has_what_python_owns_deleted_as_the_block_ends(monkeypatch):
@@ -114,7 +107,7 @@ def test_what_is_no_qt_object_is_passed_over(qapp):
 
     delete_what_python_still_owns(qapp, candidates=lambda: [object(), "a word", window])
 
-    assert sip.isdeleted(window)
+    assert is_deleted(window)
 
 
 class _Gone:
@@ -129,7 +122,7 @@ def test_a_weak_proxy_whose_object_is_gone_is_passed_over(qapp):
 
     delete_what_python_still_owns(qapp, candidates=lambda: [proxy, window])
 
-    assert sip.isdeleted(window)
+    assert is_deleted(window)
 
 
 class _StillRunning(QThread):
@@ -142,14 +135,14 @@ def test_a_thread_still_running_is_left_running(qapp):
 
     delete_what_python_still_owns(qapp, candidates=lambda: [thread])
 
-    assert not sip.isdeleted(thread)
+    assert not is_deleted(thread)
 
 
 def test_the_windows_go_before_what_they_were_using(qapp):
     used = QObject()
     window = QWidget()
     still_there = []
-    window.destroyed.connect(lambda: still_there.append(not sip.isdeleted(used)))
+    window.destroyed.connect(lambda: still_there.append(not is_deleted(used)))
 
     delete_what_python_still_owns(qapp, candidates=lambda: [used, window])
 
@@ -158,13 +151,12 @@ def test_the_windows_go_before_what_they_were_using(qapp):
 
 def test_what_went_with_an_earlier_deletion_is_passed_over(qapp):
     window = QWidget()
-    taken_along = QWidget()
-    taken_along.setParent(window)
-    sip.transferback(taken_along)
+    taken_along = QObject()
+    window.destroyed.connect(lambda: delete(taken_along))
 
     delete_what_python_still_owns(qapp, candidates=lambda: [window, taken_along])
 
-    assert sip.isdeleted(taken_along)
+    assert is_deleted(taken_along)
 
 
 def test_what_qt_owns_is_left_to_its_parent(qapp):
@@ -173,13 +165,13 @@ def test_what_qt_owns_is_left_to_its_parent(qapp):
 
     delete_what_python_still_owns(qapp, candidates=lambda: [child])
 
-    assert not sip.isdeleted(child)
+    assert not is_deleted(child)
 
 
 def test_the_application_itself_is_left_alone(qapp):
     delete_what_python_still_owns(qapp, candidates=lambda: [qapp])
 
-    assert not sip.isdeleted(qapp)
+    assert not is_deleted(qapp)
 
 
 def test_the_log_says_how_many_it_deleted(qapp, caplog):

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import pytest
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPalette
-from PyQt6.QtTest import QTest
-from PyQt6.QtWidgets import (
+from shared_ui.qt.QtCore import Qt
+from shared_ui.qt.QtGui import QPalette
+from shared_ui.qt.QtTest import QTest
+from shared_ui.qt.QtWidgets import (
     QApplication,
     QLabel,
     QLineEdit,

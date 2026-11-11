@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from PyQt6.QtWidgets import QPlainTextEdit, QTextBrowser, QVBoxLayout, QWidget
+from shared_ui.qt.QtWidgets import QPlainTextEdit, QTextBrowser, QVBoxLayout, QWidget
 
 from shared_ui.colors import YELLOW
 from shared_ui.text_find import TextFind

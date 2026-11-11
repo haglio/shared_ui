@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtWidgets import (
+from shared_ui.chrome import field_rules, tool_button_rules
+from shared_ui.icons import qt_icon
+from shared_ui.palette import TEXT_MUTED, as_hex
+from shared_ui.qt.QtCore import Qt, Signal
+from shared_ui.qt.QtWidgets import (
     QApplication,
     QHBoxLayout,
     QLabel,
@@ -12,10 +15,6 @@ from PyQt6.QtWidgets import (
     QToolButton,
     QWidget,
 )
-
-from shared_ui.chrome import field_rules, tool_button_rules
-from shared_ui.icons import qt_icon
-from shared_ui.palette import TEXT_MUTED, as_hex
 from shared_ui.spacing import GAP_MEDIUM, GAP_SMALL
 from shared_ui.text_find import TextFind
 
@@ -33,7 +32,7 @@ def _look() -> str:
 
 
 class _QueryField(QLineEdit):
-    pressed = pyqtSignal()
+    pressed = Signal()
 
     def mousePressEvent(self, event):
         self.pressed.emit()
@@ -41,7 +40,7 @@ class _QueryField(QLineEdit):
 
 
 class FindBar(QWidget):
-    typing_invited = pyqtSignal()
+    typing_invited = Signal()
 
     def __init__(self, label: str, placeholder: str, *, dismiss_key: str = "",
                  reveal: Callable[[QTextEdit], None] | None = None, parent=None):

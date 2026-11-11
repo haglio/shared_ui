@@ -3,18 +3,17 @@ from __future__ import annotations
 import html
 from collections.abc import Collection, Mapping, Sequence
 
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QColor
-from PyQt6.QtWidgets import QLabel
-
 from shared_ui.colors import BLUE_LIGHT, TEXT_PRIMARY
 from shared_ui.icons import icon_then_text
+from shared_ui.qt.QtCore import Qt, Signal
+from shared_ui.qt.QtGui import QColor
+from shared_ui.qt.QtWidgets import QLabel
 
 _LINK_STYLE = f"color: {BLUE_LIGHT.name()}; text-decoration: none;"
 
 
 class FolderPath(QLabel):
-    step_clicked = pyqtSignal(int)
+    step_clicked = Signal(int)
 
     def __init__(self, separator: str, parent=None):
         super().__init__(parent)

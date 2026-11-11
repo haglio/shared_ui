@@ -5,10 +5,10 @@ from __future__ import annotations
 import html
 import textwrap
 
-from PyQt6.QtCore import QEvent, QObject, QRect, Qt
-from PyQt6.QtWidgets import QAbstractItemView, QToolTip, QWidget
-
 from shared_ui.palette import WHITE, as_hex
+from shared_ui.qt.QtCore import QEvent, QObject, QRect
+from shared_ui.qt.QtGui import Qt
+from shared_ui.qt.QtWidgets import QAbstractItemView, QToolTip, QWidget
 
 __all__ = ["LONGEST_LINE", "shape_long_tooltips", "shaped"]
 

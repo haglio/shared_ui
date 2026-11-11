@@ -14,10 +14,10 @@ from pathlib import Path
 from typing import IO, TYPE_CHECKING
 
 from app_support import loading_screen
-from PyQt6.QtCore import QObject, pyqtSignal
 
 from shared_ui.loading_window import LoadingWindow, LoadingWindowSpec
 from shared_ui.preview import Preview
+from shared_ui.qt.QtCore import QObject, Signal
 
 if TYPE_CHECKING:
     from app_support.win32 import TaskbarApp
@@ -28,8 +28,8 @@ GONE_WITHIN_S = 5.0
 
 
 class LoadingProcess(QObject):
-    canceled = pyqtSignal()
-    shown = pyqtSignal(int)
+    canceled = Signal()
+    shown = Signal(int)
 
     def __init__(self, process: subprocess.Popen) -> None:
         super().__init__()
@@ -79,11 +79,11 @@ class LoadingProcess(QObject):
 
 
 class _Lines(QObject):
-    said = pyqtSignal(str)
-    ended = pyqtSignal()
+    said = Signal(str)
+    ended = Signal()
 
-    def __init__(self, stream: IO[str]) -> None:
-        super().__init__()
+    def __init__(self, stream: IO[str], window: LoadingWindow) -> None:
+        super().__init__(window)
         self._stream = stream
 
     def start(self) -> None:
@@ -97,7 +97,7 @@ class _Lines(QObject):
 
 def serve(window: LoadingWindow, lines_in: IO[str], lines_out: IO[str],
           quit: Callable[[], None]) -> _Lines:
-    lines = _Lines(lines_in)
+    lines = _Lines(lines_in, window)
     lines.said.connect(window.say)
     lines.ended.connect(window.accept)
     lines.ended.connect(quit)

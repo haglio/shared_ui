@@ -3,9 +3,9 @@ from __future__ import annotations
 import html
 
 import pytest
-from PyQt6.QtCore import QEvent, QObject, QPoint
-from PyQt6.QtGui import QHelpEvent
-from PyQt6.QtWidgets import (
+from shared_ui.qt.QtCore import QEvent, QObject, QPoint
+from shared_ui.qt.QtGui import QHelpEvent
+from shared_ui.qt.QtWidgets import (
     QApplication,
     QLabel,
     QListWidget,

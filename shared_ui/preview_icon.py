@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PyQt6.QtGui import QIcon, QImage, QPainter, QPixmap
-
 from shared_ui.colors import PREVIEW_INK
 from shared_ui.preview import Preview, inked_icon_file
+from shared_ui.qt.QtGui import QIcon, QImage, QPainter, QPixmap
 
 
 def icon_file(source: Path, preview: Preview | None, folder: Path) -> Path:

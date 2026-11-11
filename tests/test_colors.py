@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from itertools import pairwise
 
-from PyQt6.QtGui import QColor
+from shared_ui.qt.QtGui import QColor
 
 from shared_ui import colors, tick_control
 
