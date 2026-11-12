@@ -13,7 +13,11 @@ from shared_ui.qt.QtCore import QObject, QThread
 from shared_ui.qt.QtWidgets import QWidget
 
 from shared_ui import application as application_module
-from shared_ui.application import application, delete_what_python_still_owns
+from shared_ui.application import (
+    application,
+    close_the_windows_it_opened,
+    delete_what_python_still_owns,
+)
 from shared_ui.qt import delete, is_deleted
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -181,3 +185,16 @@ def test_the_log_says_how_many_it_deleted(qapp, caplog):
         delete_what_python_still_owns(qapp, candidates=lambda: windows)
 
     assert "Deleted 2 object(s) Python still owned" in caplog.text
+
+
+def test_the_windows_a_main_window_opened_close_with_it():
+    main, opened = QWidget(), QWidget()
+    main.show()
+    opened.show()
+
+    close_the_windows_it_opened(main)
+
+    assert not opened.isVisible()
+    assert main.isVisible()
+    delete(opened)
+    delete(main)
