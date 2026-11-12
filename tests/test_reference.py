@@ -3,19 +3,19 @@ from __future__ import annotations
 import re
 
 import pytest
-from shared_ui.qt.QtCore import QEvent, QPoint, QSize, Qt
-from shared_ui.qt.QtGui import (
+from PySide6 import QtGui
+from PySide6.QtCore import QEvent, QPoint, QSize, Qt
+from PySide6.QtGui import (
     QGuiApplication,
     QHelpEvent,
     QIcon,
     QTextDocument,
     QTextDocumentFragment,
 )
-from shared_ui.qt.QtTest import QTest
-from shared_ui.qt.QtWidgets import QApplication, QLabel, QLineEdit, QTextBrowser
+from PySide6.QtTest import QTest
+from PySide6.QtWidgets import QApplication, QLabel, QLineEdit, QTextBrowser
 
 from shared_ui.find_bar import FindBar
-from shared_ui.qt import QtGui
 from shared_ui.reference import (
     ACTION_COLUMN_PX,
     BORDER,

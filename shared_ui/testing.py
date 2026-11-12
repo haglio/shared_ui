@@ -11,11 +11,11 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+from PySide6.QtCore import QEvent, QPoint, QPointF, QRect, Qt
+from PySide6.QtGui import QCursor, QImage, QMouseEvent, QRegion
+from PySide6.QtWidgets import QApplication, QWidget
 
 from shared_ui.colors import BG_PRIMARY
-from shared_ui.qt.QtCore import QEvent, QPoint, QPointF, QRect, Qt
-from shared_ui.qt.QtGui import QCursor, QImage, QMouseEvent, QRegion
-from shared_ui.qt.QtWidgets import QApplication, QWidget
 
 
 def alert_shown(**how: Any):
@@ -76,7 +76,7 @@ def toolkits_loaded_by_importing(*modules: str) -> set[str]:
     probe = (
         f"import json, sys; import {', '.join(modules)}; "
         "print(shared_ui.__file__); "
-        "print(json.dumps(sorted({m.split('.')[0] for m in sys.modules if m.split('.')[0] in ('PyQt6', 'PySide6', 'PIL')})))"
+        "print(json.dumps(sorted({m.split('.')[0] for m in sys.modules if m.split('.')[0] in ('PySide6', 'PIL')})))"
     )
     result = subprocess.run(
         [sys.executable, "-c", probe], cwd=_THIS_TREE,

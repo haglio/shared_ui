@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from shared_ui.qt.QtCore import Qt
-from shared_ui.qt.QtGui import QColor
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
 
 from shared_ui.colors import BG_SECONDARY, BLUE
 from shared_ui.testing import appending_to, rendered_on_the_dark_ground

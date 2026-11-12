@@ -41,10 +41,7 @@ qt = ["PySide6>=6.12.0,<6.13", "shiboken6>=6.12.0,<6.13"]
 # The suite needs Qt, which is most of this package.
 dev = ["app-support @ git+https://github.com/haglio/app_support@v0.1.482",
        "pytest>=9,<10", "pytest-cov>=7,<8", "pytest-timeout>=2.4,<3", "vulture>=2.16,<3",
-       "ruff==0.16.6", "PySide6>=6.12.0,<6.13", "shiboken6>=6.12.0,<6.13",
-       # Until every app draws with PySide6, shared_ui.qt draws with PyQt6 under one
-       # that still does.
-       "PyQt6>=6,<7"]
+       "ruff==0.16.6", "PySide6>=6.12.0,<6.13", "shiboken6>=6.12.0,<6.13"]
 
 # Three lines of the icon drawing and the loading process excuse themselves from
 # coverage; the ceiling only comes down.

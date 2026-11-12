@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from app_support.win32 import force_foreground_window
-
-from shared_ui.qt.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication
 
 
 def bring_to_front(window) -> None:

@@ -9,8 +9,9 @@ import textwrap
 import weakref
 from pathlib import Path
 
-from shared_ui.qt.QtCore import QObject, QThread
-from shared_ui.qt.QtWidgets import QWidget
+import shiboken6
+from PySide6.QtCore import QObject, QThread
+from PySide6.QtWidgets import QWidget
 
 from shared_ui import application as application_module
 from shared_ui.application import (
@@ -18,7 +19,6 @@ from shared_ui.application import (
     close_the_windows_it_opened,
     delete_what_python_still_owns,
 )
-from shared_ui.qt import delete, is_deleted
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -26,9 +26,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 def test_a_close_leaves_the_bindings_own_cleanup_nothing_to_delete():
     child = textwrap.dedent("""
         import gc, json, sys
-        from shared_ui.qt import is_deleted, owned_by_python
-        from shared_ui.qt.QtCore import QCoreApplication, QObject
-        from shared_ui.qt.QtWidgets import QWidget
+        import shiboken6
+        from PySide6.QtCore import QCoreApplication, QObject
+        from PySide6.QtWidgets import QWidget
         from shared_ui.application import application
 
         kept = []
@@ -38,7 +38,7 @@ def test_a_close_leaves_the_bindings_own_cleanup_nothing_to_delete():
             for found in gc.get_objects():
                 try:
                     if isinstance(found, QObject) and not isinstance(found, QCoreApplication):
-                        count += not is_deleted(found) and owned_by_python(found)
+                        count += shiboken6.isValid(found) and shiboken6.ownedByPython(found)
                 except ReferenceError:
                     pass
             return count
@@ -62,7 +62,7 @@ def test_an_application_made_elsewhere_is_handed_through_and_left_alone(qapp):
     with application([]) as app:
         assert app is qapp
 
-    assert not is_deleted(window)
+    assert shiboken6.isValid(window)
 
 
 def test_an_application_made_here_has_what_python_owns_deleted_as_the_block_ends(monkeypatch):
@@ -111,7 +111,7 @@ def test_what_is_no_qt_object_is_passed_over(qapp):
 
     delete_what_python_still_owns(qapp, candidates=lambda: [object(), "a word", window])
 
-    assert is_deleted(window)
+    assert not shiboken6.isValid(window)
 
 
 class _Gone:
@@ -126,7 +126,7 @@ def test_a_weak_proxy_whose_object_is_gone_is_passed_over(qapp):
 
     delete_what_python_still_owns(qapp, candidates=lambda: [proxy, window])
 
-    assert is_deleted(window)
+    assert not shiboken6.isValid(window)
 
 
 class _StillRunning(QThread):
@@ -139,14 +139,14 @@ def test_a_thread_still_running_is_left_running(qapp):
 
     delete_what_python_still_owns(qapp, candidates=lambda: [thread])
 
-    assert not is_deleted(thread)
+    assert shiboken6.isValid(thread)
 
 
 def test_the_windows_go_before_what_they_were_using(qapp):
     used = QObject()
     window = QWidget()
     still_there = []
-    window.destroyed.connect(lambda: still_there.append(not is_deleted(used)))
+    window.destroyed.connect(lambda: still_there.append(shiboken6.isValid(used)))
 
     delete_what_python_still_owns(qapp, candidates=lambda: [used, window])
 
@@ -156,11 +156,11 @@ def test_the_windows_go_before_what_they_were_using(qapp):
 def test_what_went_with_an_earlier_deletion_is_passed_over(qapp):
     window = QWidget()
     taken_along = QObject()
-    window.destroyed.connect(lambda: delete(taken_along))
+    window.destroyed.connect(lambda: shiboken6.delete(taken_along))
 
     delete_what_python_still_owns(qapp, candidates=lambda: [window, taken_along])
 
-    assert is_deleted(taken_along)
+    assert not shiboken6.isValid(taken_along)
 
 
 def test_what_qt_owns_is_left_to_its_parent(qapp):
@@ -169,13 +169,13 @@ def test_what_qt_owns_is_left_to_its_parent(qapp):
 
     delete_what_python_still_owns(qapp, candidates=lambda: [child])
 
-    assert not is_deleted(child)
+    assert shiboken6.isValid(child)
 
 
 def test_the_application_itself_is_left_alone(qapp):
     delete_what_python_still_owns(qapp, candidates=lambda: [qapp])
 
-    assert not is_deleted(qapp)
+    assert shiboken6.isValid(qapp)
 
 
 def test_the_log_says_how_many_it_deleted(qapp, caplog):
@@ -196,5 +196,5 @@ def test_the_windows_a_main_window_opened_close_with_it():
 
     assert not opened.isVisible()
     assert main.isVisible()
-    delete(opened)
-    delete(main)
+    shiboken6.delete(opened)
+    shiboken6.delete(main)

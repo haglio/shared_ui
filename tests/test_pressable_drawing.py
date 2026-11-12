@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from shared_ui.qt.QtCore import QEvent, QPoint, QPointF, Qt
-from shared_ui.qt.QtGui import QMouseEvent
-from shared_ui.qt.QtTest import QTest
-from shared_ui.qt.QtWidgets import QApplication
+from PySide6.QtCore import QEvent, QPoint, QPointF, Qt
+from PySide6.QtGui import QMouseEvent
+from PySide6.QtTest import QTest
+from PySide6.QtWidgets import QApplication
 
 from shared_ui.pressable_drawing import PressableDrawing
 

@@ -4,10 +4,11 @@ import winsound
 from collections.abc import Iterator
 from contextlib import contextmanager
 
+from PySide6.QtCore import QPropertyAnimation, QRect, QSize, Qt
+from PySide6.QtGui import QColor, QPainter, QPixmap
+from PySide6.QtWidgets import QMessageBox, QWidget
+
 from shared_ui.palette import BLACK
-from shared_ui.qt.QtCore import QPropertyAnimation, QRect, QSize, Qt
-from shared_ui.qt.QtGui import QColor, QPainter, QPixmap
-from shared_ui.qt.QtWidgets import QMessageBox, QWidget
 
 _FADE_MS = 200
 _BLUR_DIVISOR = 16

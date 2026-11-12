@@ -3,9 +3,9 @@ from __future__ import annotations
 import re
 
 import pytest
-from shared_ui.qt.QtCore import QRect
-from shared_ui.qt.QtGui import QAction, QColor, QIcon, QImage, QPixmap
-from shared_ui.qt.QtWidgets import (
+from PySide6.QtCore import QRect
+from PySide6.QtGui import QAction, QColor, QIcon, QImage, QPixmap
+from PySide6.QtWidgets import (
     QAbstractButton,
     QApplication,
     QMenu,

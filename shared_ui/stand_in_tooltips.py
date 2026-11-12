@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from PySide6.QtCore import QCoreApplication, QEvent, QObject, QRect
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QAbstractButton, QToolTip
+
 from shared_ui.icon_geometry import tooltip_for
-from shared_ui.qt.QtCore import QCoreApplication, QEvent, QObject, QRect
-from shared_ui.qt.QtGui import QPixmap
-from shared_ui.qt.QtWidgets import QAbstractButton, QToolTip
 
 __all__ = ["remember_the_stand_in_on"]
 
