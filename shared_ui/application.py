@@ -31,6 +31,12 @@ def application(argv: list[str]) -> Iterator[QApplication]:
         delete_what_python_still_owns(app)
 
 
+def close_the_windows_it_opened(main: QWidget) -> None:
+    for window in QApplication.topLevelWidgets():
+        if window is not main and window.isVisible():
+            window.close()
+
+
 def delete_what_python_still_owns(
         app: QApplication, *, candidates: Callable[[], Iterable[object]] = gc.get_objects) -> None:
     owned = [found for found in candidates() if _python_owns(found) and found is not app]
