@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from shared_ui.qt.QtGui import QColor
+from PySide6.QtGui import QColor
 
 from shared_ui import colors, palette
 

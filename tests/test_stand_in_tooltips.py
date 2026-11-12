@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import pytest
-from shared_ui.qt.QtCore import QEvent, QPoint, Qt
-from shared_ui.qt.QtGui import QHelpEvent, QIcon, QPainter, QPixmap
-from shared_ui.qt.QtWidgets import (
+from PySide6.QtCore import QEvent, QPoint, Qt
+from PySide6.QtGui import QHelpEvent, QIcon, QPainter, QPixmap
+from PySide6.QtWidgets import (
     QApplication,
     QHBoxLayout,
     QPushButton,

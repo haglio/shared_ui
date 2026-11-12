@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import re
 
-from shared_ui.qt.QtCore import QEvent, QPointF, Qt
-from shared_ui.qt.QtGui import QColor, QMouseEvent, QTextDocumentFragment
+from PySide6.QtCore import QEvent, QPointF, Qt
+from PySide6.QtGui import QColor, QMouseEvent, QTextDocumentFragment
 
 from shared_ui.colors import BLUE_LIGHT, GREEN, TEXT_PRIMARY
 from shared_ui.folder_path import FolderPath

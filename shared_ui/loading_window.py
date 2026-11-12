@@ -8,6 +8,9 @@ from pathlib import Path
 
 from app_support import loading_screen
 from PIL import Image
+from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout
 
 from shared_ui.foreground import bring_to_front
 from shared_ui.loading_handover import TakingOver
@@ -15,9 +18,6 @@ from shared_ui.loading_panel import LoadingPanel, icon_image, render
 from shared_ui.palette import LOADING_ACCENT, PREVIEW_INK
 from shared_ui.preview import Preview
 from shared_ui.preview_icon_pil import in_preview_ink
-from shared_ui.qt.QtCore import Qt, QTimer, Signal
-from shared_ui.qt.QtGui import QImage, QPixmap
-from shared_ui.qt.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout
 
 CANCELING = "Canceling..."
 

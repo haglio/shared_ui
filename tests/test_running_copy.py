@@ -9,7 +9,7 @@ import time
 import uuid
 from pathlib import Path
 
-from shared_ui.qt.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal
 
 from shared_ui.running_copy import Answer, _hear, _pipe_server, ask, listen
 
@@ -46,7 +46,7 @@ def _listening_in_another_process(name: str, words: bytes) -> tuple[subprocess.P
     listening = subprocess.Popen(
         [sys.executable, "-c", textwrap.dedent(f"""
             import os
-            from shared_ui.qt.QtCore import QCoreApplication, QTimer
+            from PySide6.QtCore import QCoreApplication, QTimer
             from shared_ui.running_copy import listen
             app = QCoreApplication([])
 

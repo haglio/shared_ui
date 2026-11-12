@@ -7,6 +7,17 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
+from PySide6.QtCore import QObject, Qt, QThread, QUrl, Signal, Slot
+from PySide6.QtGui import QColor, QDesktopServices, QIcon, QPixmap
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+)
+
 from shared_ui import palette
 from shared_ui.chrome import button_rules
 from shared_ui.colors import (
@@ -16,16 +27,6 @@ from shared_ui.colors import (
 )
 from shared_ui.fonts import SIZE_BODY, make_font
 from shared_ui.icons import icon_pixmap
-from shared_ui.qt.QtCore import QObject, Qt, QThread, QUrl, Signal, Slot
-from shared_ui.qt.QtGui import QColor, QDesktopServices, QIcon, QPixmap
-from shared_ui.qt.QtWidgets import (
-    QApplication,
-    QDialog,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QVBoxLayout,
-)
 from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, MARGIN_DIALOG
 
 # Windows' own message dialogs draw their icon at this size.
@@ -38,8 +39,8 @@ DISMISSED = QDialog.DialogCode.Accepted.value + 1
 
 
 class _GuiThreadCall(QObject):
-    """Qt builds widgets on the GUI thread or not at all. The slot is decorated because PyQt
-    routes an undecorated callable through a proxy in the connecting thread."""
+    """Qt builds widgets on the GUI thread or not at all. The slot is decorated so the call
+    is queued to the thread this object was moved to, whichever thread asks."""
 
     _requested = Signal(object)
 

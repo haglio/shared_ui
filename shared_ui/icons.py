@@ -4,6 +4,9 @@ import html
 from dataclasses import dataclass
 from functools import cache
 
+from PySide6.QtCore import QBuffer, QByteArray, QIODevice, QPointF, QRectF, Qt
+from PySide6.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap, QPolygonF
+
 from shared_ui.colors import TEXT_MUTED, TEXT_PRIMARY
 from shared_ui.icon_geometry import (
     CANVAS,
@@ -18,8 +21,6 @@ from shared_ui.icon_geometry import (
     RoundedRect,
     shapes_of,
 )
-from shared_ui.qt.QtCore import QBuffer, QByteArray, QIODevice, QPointF, QRectF, Qt
-from shared_ui.qt.QtGui import QColor, QIcon, QPainter, QPainterPath, QPen, QPixmap, QPolygonF
 from shared_ui.stand_in_tooltips import remember_the_stand_in_on
 
 __all__ = [

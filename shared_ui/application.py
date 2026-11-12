@@ -9,9 +9,10 @@ import logging
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 
-from shared_ui.qt import delete, is_deleted, owned_by_python
-from shared_ui.qt.QtCore import QObject, QThread
-from shared_ui.qt.QtWidgets import QApplication, QWidget
+import shiboken6
+from PySide6.QtCore import QObject, QThread
+from PySide6.QtWidgets import QApplication, QWidget
+
 from shared_ui.tooltip_shape import shape_long_tooltips
 
 _log = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ def delete_what_python_still_owns(
     deleted = 0
     for found in sorted(owned, key=_windows_first):
         if _python_owns(found):
-            delete(found)
+            shiboken6.delete(found)
             deleted += 1
     _log.info("Deleted %d object(s) Python still owned, before the application went", deleted)
 
@@ -54,7 +55,7 @@ def _python_owns(found: object) -> bool:
             return False
     except ReferenceError:
         return False
-    return (not is_deleted(found) and owned_by_python(found)
+    return (shiboken6.isValid(found) and shiboken6.ownedByPython(found)
             and not (isinstance(found, QThread) and found.isRunning()))
 
 

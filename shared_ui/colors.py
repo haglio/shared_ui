@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from PySide6.QtGui import QColor, QPalette
+
 from shared_ui import palette
 from shared_ui.chrome import family_stylesheet
-from shared_ui.qt.QtGui import QColor, QPalette
 from shared_ui.tooltip_shape import shape_long_tooltips
 
 BG_PRIMARY = QColor(*palette.BG_PRIMARY)

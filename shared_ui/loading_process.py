@@ -14,10 +14,10 @@ from pathlib import Path
 from typing import IO, TYPE_CHECKING
 
 from app_support import loading_screen
+from PySide6.QtCore import QObject, Signal
 
 from shared_ui.loading_window import LoadingWindow, LoadingWindowSpec
 from shared_ui.preview import Preview
-from shared_ui.qt.QtCore import QObject, Signal
 
 if TYPE_CHECKING:
     from app_support.win32 import TaskbarApp

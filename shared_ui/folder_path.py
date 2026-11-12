@@ -3,11 +3,12 @@ from __future__ import annotations
 import html
 from collections.abc import Collection, Mapping, Sequence
 
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import QLabel
+
 from shared_ui.colors import BLUE_LIGHT, TEXT_PRIMARY
 from shared_ui.icons import icon_then_text
-from shared_ui.qt.QtCore import Qt, Signal
-from shared_ui.qt.QtGui import QColor
-from shared_ui.qt.QtWidgets import QLabel
 
 _LINK_STYLE = f"color: {BLUE_LIGHT.name()}; text-decoration: none;"
 

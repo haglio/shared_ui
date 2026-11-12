@@ -147,7 +147,7 @@ def test_drawing_a_hud_icon_never_drags_qt_into_a_player():
         "shared_ui.icons_pil", "shared_ui.icon_geometry", "shared_ui.palette", "shared_ui.chrome",
         "shared_ui.app_icon", "shared_ui.toggle_switch_pil")
 
-    assert not {"PyQt6", "PySide6"} & loaded, loaded
+    assert not {"PySide6"} & loaded, loaded
 
 
 def test_the_geometry_of_an_icon_or_a_switch_takes_no_toolkit_pillow_included():

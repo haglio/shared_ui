@@ -4,8 +4,8 @@ import time
 import winsound
 
 import pytest
-from shared_ui.qt.QtGui import QColor, QPainter
-from shared_ui.qt.QtWidgets import QMainWindow, QMessageBox, QWidget
+from PySide6.QtGui import QColor, QPainter
+from PySide6.QtWidgets import QMainWindow, QMessageBox, QWidget
 
 from shared_ui.hard_to_miss import FadedBackground, hard_to_miss, sure
 

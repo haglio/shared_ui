@@ -4,10 +4,10 @@ import threading
 from unittest.mock import patch
 
 import pytest
-from shared_ui.qt.QtCore import QMargins, QPoint, QRect, Qt, QThread, QTimer, QUrl
-from shared_ui.qt.QtGui import QColor, QFontMetrics, QIcon, QPalette, QPixmap, QTextDocument
-from shared_ui.qt.QtTest import QTest
-from shared_ui.qt.QtWidgets import QApplication, QDialog, QLabel, QPushButton
+from PySide6.QtCore import QMargins, QPoint, QRect, Qt, QThread, QTimer, QUrl
+from PySide6.QtGui import QColor, QFontMetrics, QIcon, QPalette, QPixmap, QTextDocument
+from PySide6.QtTest import QTest
+from PySide6.QtWidgets import QApplication, QDialog, QLabel, QPushButton
 
 from shared_ui.alert import (
     DISMISSED,

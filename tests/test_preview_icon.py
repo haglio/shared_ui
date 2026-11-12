@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from PIL import Image, ImageDraw
-from shared_ui.qt.QtGui import QImage
+from PySide6.QtGui import QImage
 
 from shared_ui.palette import MAGENTA, PREVIEW_INK
 from shared_ui.preview import Preview

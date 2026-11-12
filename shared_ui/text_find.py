@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from PySide6.QtGui import QTextCharFormat, QTextCursor
+from PySide6.QtWidgets import QTextEdit
+
 from shared_ui.colors import BG_PRIMARY, BLUE, TEXT_PRIMARY, YELLOW
-from shared_ui.qt.QtGui import QTextCharFormat, QTextCursor
-from shared_ui.qt.QtWidgets import QTextEdit
 
 __all__ = ["TextFind"]
 
