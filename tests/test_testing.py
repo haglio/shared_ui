@@ -12,6 +12,7 @@ from shared_ui import (
     colors,
     foreground,
     icon_geometry,
+    icons,
     loading_handover,
     loading_process,
     loading_window,
@@ -22,6 +23,7 @@ from shared_ui.testing import (
     application_stand_in,
     brought_to_front,
     ground,
+    icons_drawn,
     icons_lacking,
     loading_at_the_click,
     loading_process_opened,
@@ -103,6 +105,23 @@ def test_nothing_is_brought_to_the_front():
     with brought_to_front() as brought:
         foreground.bring_to_front("a window")
     brought.assert_called_once_with("a window")
+
+
+def test_every_icon_a_drawing_asks_for_is_named_in_the_order_it_is_drawn(qapp):
+    with icons_drawn() as drawn:
+        icons.qt_icon("power")
+        icons.icon_pixmap("cross", 16, colors.TEXT_PRIMARY)
+
+    assert drawn == ["power", "power", "cross"], (
+        "qt_icon draws its name twice, once for the button at rest and once grayed out")
+
+
+def test_icons_drawn_after_the_recording_ends_are_not_named(qapp):
+    with icons_drawn() as drawn:
+        pass
+    icons.icon_pixmap("cross", 16, colors.TEXT_PRIMARY)
+
+    assert drawn == []
 
 
 def test_an_icon_lacking_comes_back_after():
