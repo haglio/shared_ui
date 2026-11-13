@@ -38,6 +38,7 @@ MESSAGE_WIDTH_MAX = 480
 DISMISSED = QDialog.DialogCode.Accepted.value + 1
 
 WORK_ON_THIS = "Work on this"
+WORK_ON_THIS_TIP = "Opens a new session in Claude Desktop with what to look into typed in, ready to send"
 
 
 class _GuiThreadCall(QObject):
@@ -184,7 +185,9 @@ class AlertDialog(QDialog):
         buttons = QHBoxLayout()
         buttons.addStretch()
         if chosen.work_on_this is not None:
-            buttons.addWidget(_button(WORK_ON_THIS, lambda: self._open_and_close(chosen.work_on_this)))
+            work_on_this = _button(WORK_ON_THIS, lambda: self._open_and_close(chosen.work_on_this))
+            work_on_this.setToolTip(WORK_ON_THIS_TIP)
+            buttons.addWidget(work_on_this)
         buttons.addWidget(ok)
         if chosen.dismissible:
             buttons.addWidget(_button("Dismiss", lambda: self.done(DISMISSED)))

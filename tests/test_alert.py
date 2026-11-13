@@ -14,6 +14,7 @@ from shared_ui.alert import (
     ICON_SIZE,
     MESSAGE_WIDTH_MAX,
     MESSAGE_WIDTH_MIN,
+    WORK_ON_THIS_TIP,
     AlertDialog,
     Level,
     Link,
@@ -399,3 +400,10 @@ def test_an_alert_with_nothing_to_work_on_offers_no_work_on_this():
     dlg = AlertDialog("Example App", "Nothing to do.")
 
     assert [button.text() for button in _buttons_left_to_right(dlg)] == ["OK"]
+
+
+def test_work_on_this_says_in_its_tooltip_what_pressing_it_does():
+    dlg = AlertDialog("Example App", "The script matches no video.", work_on_this="claude://code/new")
+    work_on_this, _ok = _buttons_left_to_right(dlg)
+
+    assert work_on_this.toolTip() == WORK_ON_THIS_TIP
