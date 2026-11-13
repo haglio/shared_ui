@@ -374,3 +374,28 @@ def test_the_dialog_is_spaced_by_the_familys_dialog_tokens():
     assert margins == QMargins(
         MARGIN_DIALOG, MARGIN_DIALOG, MARGIN_DIALOG, MARGIN_DIALOG)
     assert dlg.layout().spacing() == GAP_DIALOG
+
+
+def test_work_on_this_opens_its_link_and_closes_the_dialog():
+    dlg = AlertDialog("Example App", "The script matches no video.", work_on_this="claude://code/new?q=made-up")
+    work_on_this, = [button for button in _buttons_left_to_right(dlg) if button.text() == "Work on this"]
+
+    with patch("shared_ui.alert.QDesktopServices") as desktop:
+        work_on_this.click()
+
+    desktop.openUrl.assert_called_once_with(QUrl("claude://code/new?q=made-up"))
+    assert dlg.result() == QDialog.DialogCode.Accepted
+
+
+def test_work_on_this_sits_left_of_ok_and_wears_the_body_font_ok_wears():
+    dlg = AlertDialog("Example App", "The script matches no video.", work_on_this="claude://code/new")
+    work_on_this, ok = _buttons_left_to_right(dlg)
+
+    assert [work_on_this.text(), ok.text()] == ["Work on this", "OK"]
+    assert work_on_this.font() == ok.font()
+
+
+def test_an_alert_with_nothing_to_work_on_offers_no_work_on_this():
+    dlg = AlertDialog("Example App", "Nothing to do.")
+
+    assert [button.text() for button in _buttons_left_to_right(dlg)] == ["OK"]
