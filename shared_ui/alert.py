@@ -37,6 +37,8 @@ MESSAGE_WIDTH_MAX = 480
 
 DISMISSED = QDialog.DialogCode.Accepted.value + 1
 
+WORK_ON_THIS = "Work on this"
+
 
 class _GuiThreadCall(QObject):
     """Qt builds widgets on the GUI thread or not at all. The slot is decorated so the call
@@ -126,6 +128,7 @@ class _AlertLook:
     button_text: str = "OK"
     links: Sequence[Link] = ()
     dismissible: bool = False
+    work_on_this: str | None = None
 
 
 class AlertDialog(QDialog):
@@ -180,6 +183,8 @@ class AlertDialog(QDialog):
 
         buttons = QHBoxLayout()
         buttons.addStretch()
+        if chosen.work_on_this is not None:
+            buttons.addWidget(_button(WORK_ON_THIS, lambda: self._open_and_close(chosen.work_on_this)))
         buttons.addWidget(ok)
         if chosen.dismissible:
             buttons.addWidget(_button("Dismiss", lambda: self.done(DISMISSED)))
@@ -191,6 +196,10 @@ class AlertDialog(QDialog):
         outer.setSpacing(GAP_DIALOG)
         outer.addLayout(said)
         outer.addLayout(buttons)
+
+    def _open_and_close(self, link: str) -> None:
+        QDesktopServices.openUrl(QUrl(link))
+        self.accept()
 
 
 def show_alert(title: str, message: str, **look) -> bool:
