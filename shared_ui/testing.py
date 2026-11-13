@@ -15,6 +15,7 @@ from PySide6.QtCore import QEvent, QPoint, QPointF, QRect, Qt
 from PySide6.QtGui import QCursor, QImage, QMouseEvent, QRegion
 from PySide6.QtWidgets import QApplication, QWidget
 
+from shared_ui import icons
 from shared_ui.colors import BG_PRIMARY
 
 
@@ -48,6 +49,19 @@ def icons_lacking(*names: str) -> Iterator[None]:
         for name in names:
             del icons[name]
         yield
+
+
+@contextmanager
+def icons_drawn() -> Iterator[list[str]]:
+    drawn: list[str] = []
+    shapes_of = icons.shapes_of
+
+    def recording(name: str):
+        drawn.append(name)
+        return shapes_of(name)
+
+    with patch("shared_ui.icons.shapes_of", recording):
+        yield drawn
 
 
 def appending_to(found: list) -> Callable[[Any], None]:
