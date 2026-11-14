@@ -371,6 +371,13 @@ def _monitor() -> tuple:
     return (a_screen, a_stem_under_it, a_foot)
 
 
+def _screen_arrow_down() -> tuple:
+    a_screen = RoundedRect(6, 4, 36, 22, 3, width=3.6)
+    an_arrow_out_through_its_foot = (Line(24, 12, 24, 43, 4.5),
+                                     Polyline(((15, 34), (24, 43), (33, 34)), 4.5))
+    return (a_screen, *an_arrow_out_through_its_foot)
+
+
 def _vr_hemisphere() -> tuple:
     return (
         Arc(4, 6, 40, 52, 0, 180, 3.6),
@@ -853,6 +860,7 @@ ICONS: dict[str, tuple] = {
     "scene_to_clip": _clip_scene_jump(to_scene=False),
     "shield": _shield(),
     "clips": _clip_on_the_timeline(_CLIPS_END),
+    "screen_arrow_down": _screen_arrow_down(),
     "settings": _cog(),
     "shuffle": _shuffle(),
     "slideshow": (

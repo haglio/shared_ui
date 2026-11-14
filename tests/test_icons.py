@@ -24,6 +24,7 @@ from shared_ui.icon_geometry import (
     Line,
     Path,
     Polygon,
+    Polyline,
     RoundedRect,
     icon_names,
 )
@@ -291,7 +292,7 @@ _THE_ICONS = (
     "photo", "play", "plus",
     "plus_outline", "portrait", "portrait_and_landscape", "portrait_beside_landscape", "power",
     "question", "redo_arrow", "regenerate_corner", "release", "reset", "restart", "retract",
-    "save", "scene_to_clip", "settings", "shield", "shuffle", "slideshow",
+    "save", "scene_to_clip", "screen_arrow_down", "settings", "shield", "shuffle", "slideshow",
     "snowflake_struck_out", "speaker", "speaker_off", "star", "star_outline", "star_ring",
     "stop", "tag", "thumbs_up", "trash", "undo_arrow", "unlock", "versions", "vr_hemisphere",
     "warning", "wave", "wave_sawtooth", "wave_square", "wave_triangle", "working",
@@ -953,6 +954,18 @@ def test_the_monitor_is_a_screen_on_a_stem_and_a_foot_not_a_headset_struck_out()
     assert not set(ICONS["monitor"]) & set(ICONS["headset"])
     assert stem.x1 == stem.x2
     assert screen.y + screen.h <= stem.y1 < stem.y2 <= foot.y1 == foot.y2
+
+
+def test_the_screen_arrow_down_is_a_screen_with_an_arrow_running_down_out_of_it():
+    [screen] = _of("screen_arrow_down", RoundedRect)
+    [stem] = _of("screen_arrow_down", Line)
+    [head] = _of("screen_arrow_down", Polyline)
+    bottom = screen.y + screen.h
+
+    assert stem.x1 == stem.x2 == screen.x + screen.w / 2
+    assert screen.y < stem.y1 < bottom < stem.y2
+    assert max(y for _x, y in head.points) == head.points[1][1] == stem.y2
+    assert min(y for _x, y in head.points) > bottom
 
 
 def test_the_warning_is_a_bar_and_a_dot_under_a_raised_triangles_point():
