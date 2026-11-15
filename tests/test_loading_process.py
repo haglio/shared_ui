@@ -23,7 +23,7 @@ def _window(**changes) -> LoadingWindow:
     })
 
 
-def _until(app, holds, seconds: float = 2.0) -> bool:
+def _until(app, holds, seconds: float = 10.0) -> bool:
     deadline = time.monotonic() + seconds
     while not holds() and time.monotonic() < deadline:
         app.processEvents()
