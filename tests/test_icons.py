@@ -282,7 +282,7 @@ def test_an_icon_drawn_over_a_chip_keeps_the_chip_underneath():
 
 _THE_ICONS = (
     "bolt", "cells_in_circle", "chart", "check", "chevron_down", "chevron_left",
-    "chevron_right", "chevron_up", "chevrons_left", "chevrons_right", "circle",
+    "chevron_right", "chevron_up", "chevrons_left", "chevrons_right", "circle", "circle_slash",
     "clip_to_scene", "clips", "clock", "compilation",
     "control_off", "copy", "cross", "crown", "database", "disc", "enhance_filter", "enlarge", "error",
     "expand_horizontal", "export", "external_link", "filter", "flask", "flat_2d", "flip_ends",
@@ -954,6 +954,15 @@ def test_the_monitor_is_a_screen_on_a_stem_and_a_foot_not_a_headset_struck_out()
     assert not set(ICONS["monitor"]) & set(ICONS["headset"])
     assert stem.x1 == stem.x2
     assert screen.y + screen.h <= stem.y1 < stem.y2 <= foot.y1 == foot.y2
+
+
+def test_the_circle_slash_is_a_ring_struck_from_its_upper_left_to_its_lower_right():
+    [ring] = _of("circle_slash", Ellipse)
+    [slash] = _of("circle_slash", Line)
+
+    assert ring.rx == ring.ry
+    assert (slash.x1 < slash.x2, slash.y1 < slash.y2) == (True, True)
+    assert ((slash.x1 + slash.x2) / 2, (slash.y1 + slash.y2) / 2) == pytest.approx((ring.cx, ring.cy))
 
 
 def test_the_screen_arrow_down_is_a_screen_with_an_arrow_running_down_out_of_it():

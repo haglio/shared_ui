@@ -738,6 +738,7 @@ ICONS: dict[str, tuple] = {
     "chevrons_left": _double_chevron(pointing_left=True),
     "chevrons_right": _double_chevron(pointing_left=False),
     "circle": (Ellipse(24, 24, 17, 17),),
+    "circle_slash": (Ellipse(24, 24, 18, 18, width=4.5), Line(11.3, 11.3, 36.7, 36.7, 4.5)),
     "clip_to_scene": _clip_scene_jump(to_scene=True),
     "compilation": _compilation(),
     "control_off": _control_off(),
