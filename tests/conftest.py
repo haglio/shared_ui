@@ -12,12 +12,11 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtWidgets import QApplication
 
+from shared_ui.gui_thread_collection import the_application
+
 pytest_plugins = ("shared_ui.testing",)
 
 
 @pytest.fixture(scope="session", autouse=True)
 def qapp():
-    app = QApplication.instance()
-    if app is None:
-        app = QApplication(sys.argv)
-    return app
+    return the_application(QApplication, sys.argv)
