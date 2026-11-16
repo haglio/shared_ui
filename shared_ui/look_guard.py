@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import ast
-import os
 import re
-import subprocess
 import unicodedata
 from collections.abc import Iterable
 from pathlib import Path
 
 from shared_ui.palette import CHANNEL_MAX, RGB_CHANNELS
+from shared_ui.tracked import tracked
 
 _LONG_HEX = re.compile(r"(?<![\w#&/])(#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}))\b(?!\s*\{)")
 _SHORT_HEX = re.compile(r"(?:^|[:=][^;{}:=]*?)(?<![\w#&/])(#[0-9a-fA-F]{3,4})\b(?!\s*\{)")
@@ -55,13 +54,6 @@ _SPACING_CALLS = {"setContentsMargins", "setSpacing", "setHorizontalSpacing", "s
 
 class LookNotRead(Exception):
     pass
-
-
-def _tracked(root: Path) -> tuple[list[Path], str]:
-    quiet = {name: value for name, value in os.environ.items() if not name.startswith("GIT_")}
-    listed = subprocess.run(["git", "-C", str(root), "ls-files", "-z"],
-                            capture_output=True, text=True, encoding="utf-8", env=quiet, check=False)
-    return [root / name for name in listed.stdout.split("\0") if name], listed.stderr
 
 
 def _under(package: Path, tracked: list[Path], root: Path, complaint: str) -> list[Path]:
@@ -310,9 +302,9 @@ _READERS = {".py": _in_python, ".html": _in_page, ".css": _in_page, ".js": _in_p
 
 def looks_of_its_own(root: Path, packages: Iterable[Path]) -> list[str]:
     found = []
-    tracked, complaint = _tracked(root)
+    tracked_files, complaint = tracked(root)
     for package in packages:
-        for path in _under(package, tracked, root, complaint):
+        for path in _under(package, tracked_files, root, complaint):
             read = _READERS.get(path.suffix)
             if read is not None:
                 where = path.relative_to(root).as_posix()
