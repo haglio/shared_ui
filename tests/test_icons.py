@@ -281,7 +281,7 @@ def test_an_icon_drawn_over_a_chip_keeps_the_chip_underneath():
 
 
 _THE_ICONS = (
-    "bolt", "cells_in_circle", "chart", "check", "chevron_down", "chevron_left",
+    "arrow_left", "arrow_right", "bolt", "cells_in_circle", "chart", "check", "chevron_down", "chevron_left",
     "chevron_right", "chevron_up", "chevrons_left", "chevrons_right", "circle", "circle_slash",
     "clip_to_scene", "clips", "clock", "compilation",
     "control_off", "copy", "cross", "crown", "database", "disc", "enhance_filter", "enlarge", "error",
@@ -297,6 +297,19 @@ _THE_ICONS = (
     "stop", "tag", "thumbs_up", "trash", "undo_arrow", "unlock", "versions", "vr_hemisphere",
     "warning", "wave", "wave_sawtooth", "wave_square", "wave_triangle", "working",
 )
+
+
+def test_the_plain_arrows_are_one_arrow_pointing_each_way():
+    def mirrored(shapes):
+        stem, head = shapes
+        return (stem.x1, stem.x2, [x for x, _y in head.points])
+
+    left_tail, left_tip, left_head = mirrored(ICONS["arrow_left"])
+    right_tail, right_tip, right_head = mirrored(ICONS["arrow_right"])
+
+    assert left_tip < left_tail
+    assert (CANVAS - left_tail, CANVAS - left_tip, [CANVAS - x for x in left_head]) == (
+        right_tail, right_tip, right_head)
 
 
 def test_originals_is_the_origenerator_o_struck_through_from_its_upper_right_like_a_zero():

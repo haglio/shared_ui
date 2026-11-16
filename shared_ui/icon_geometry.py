@@ -85,6 +85,14 @@ def _chevron(pointing_left: bool) -> tuple:
     return (Polyline(((near, upper), (far, 24), (near, lower))),)
 
 
+def _arrow(pointing_left: bool) -> tuple:
+    tail, tip, upper, lower, back = 40, 8, 13, 35, 11
+    if not pointing_left:
+        tail, tip, back = tip, tail, -back
+    return (Line(tail, 24, tip, 24, 4.5),
+            Polyline(((tip + back, upper), (tip, 24), (tip + back, lower)), 4.5))
+
+
 def _turned_a_quarter(shapes: tuple) -> tuple:
     return tuple(Polyline(tuple((y, x) for x, y in shape.points), shape.width) for shape in shapes)
 
@@ -726,6 +734,8 @@ ICONS: dict[str, tuple] = {
     "check": (
         Polyline(((10, 25), (19, 35), (38, 13)), 5.5),
     ),
+    "arrow_left": _arrow(pointing_left=True),
+    "arrow_right": _arrow(pointing_left=False),
     "chevron_down": _turned_a_quarter(_chevron(pointing_left=False)),
     "chevron_left": _chevron(pointing_left=True),
     "chevron_right": _chevron(pointing_left=False),
