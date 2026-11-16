@@ -79,6 +79,8 @@ def test_an_application_made_here_has_what_python_owns_deleted_as_the_block_ends
     monkeypatch.setattr(application_module, "QApplication", _NoApplicationYet)
     monkeypatch.setattr(application_module, "delete_what_python_still_owns", deleted_for.append)
     monkeypatch.setattr(application_module, "shape_long_tooltips", lambda _app: None)
+    monkeypatch.setattr(application_module, "collect_cycles_on_the_gui_thread",
+                        lambda _app: _CollectionStandIn([], _app))
 
     with application(["an app"]) as app:
         assert deleted_for == []
@@ -101,9 +103,48 @@ def test_an_application_made_here_shows_its_long_tooltips_as_blocks_of_lines(mon
     monkeypatch.setattr(application_module, "QApplication", _NoApplicationYet)
     monkeypatch.setattr(application_module, "delete_what_python_still_owns", lambda _app: None)
     monkeypatch.setattr(application_module, "shape_long_tooltips", shaping.append)
+    monkeypatch.setattr(application_module, "collect_cycles_on_the_gui_thread",
+                        lambda _app: _CollectionStandIn([], _app))
 
     with application(["an app"]) as app:
         assert shaping == [app]
+
+
+class _CollectionStandIn:
+    def __init__(self, made_for, app):
+        made_for.append(app)
+        self.stopped = False
+
+    def stop(self):
+        self.stopped = True
+
+
+def test_an_application_made_here_collects_cycles_on_its_gui_thread_until_the_block_ends(
+        monkeypatch):
+    made_for, collections = [], []
+
+    class _NoApplicationYet:
+        @staticmethod
+        def instance():
+            return None
+
+        def __init__(self, argv):
+            pass
+
+    def collect(app):
+        collections.append(_CollectionStandIn(made_for, app))
+        return collections[-1]
+
+    monkeypatch.setattr(application_module, "QApplication", _NoApplicationYet)
+    monkeypatch.setattr(application_module, "delete_what_python_still_owns", lambda _app: None)
+    monkeypatch.setattr(application_module, "shape_long_tooltips", lambda _app: None)
+    monkeypatch.setattr(application_module, "collect_cycles_on_the_gui_thread", collect)
+
+    with application(["an app"]) as app:
+        assert made_for == [app]
+        assert not collections[0].stopped
+
+    assert collections[0].stopped
 
 
 def test_what_is_no_qt_object_is_passed_over(qapp):
