@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import gc
 import threading
+import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 
 import pytest
+from PySide6.QtCore import QEventLoop
 
 from shared_ui.gui_thread_collection import collect_cycles_on_the_gui_thread
 
@@ -37,6 +39,12 @@ def _a_worker_that_allocates_past_the_threshold() -> list:
     return kept
 
 
+def _events_delivered_until(condition, app, *, seconds: float = 5.0) -> None:
+    deadline = time.monotonic() + seconds
+    while not condition() and time.monotonic() < deadline:
+        app.processEvents(QEventLoop.ProcessEventsFlag.AllEvents, 50)
+
+
 @pytest.fixture
 def collection(qapp):
     collecting = collect_cycles_on_the_gui_thread(qapp)
@@ -52,10 +60,10 @@ def test_python_collects_on_a_worker_thread_when_nothing_collects_on_the_gui_thr
     assert kept
 
 
-def test_what_a_worker_allocates_is_collected_on_the_gui_thread(collection, qtbot):
+def test_what_a_worker_allocates_is_collected_on_the_gui_thread(collection, qapp):
     with _collections_seen() as started_on:
         kept = _a_worker_that_allocates_past_the_threshold()
-        qtbot.waitUntil(lambda: bool(started_on), timeout=5000)
+        _events_delivered_until(lambda: bool(started_on), qapp)
 
     assert set(started_on) == {threading.main_thread().name}
     assert kept
