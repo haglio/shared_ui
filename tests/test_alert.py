@@ -303,13 +303,12 @@ def test_show_alert_says_whether_the_person_dismissed_it(closed_with, dismissed)
 def test_show_alert_builds_a_qapplication_for_a_dying_process_or_command_line_tool_that_has_none():
     with (
         patch("shared_ui.alert.AlertDialog"),
-        patch("shared_ui.alert.QApplication") as application,
+        patch("shared_ui.alert.the_application") as application,
     ):
-        application.instance.return_value = None
         application.return_value.thread.return_value = QThread.currentThread()
         show_alert("Example App", "Nothing to do.")
 
-    application.assert_called_once_with([])
+    application.assert_called_once_with(QApplication, [])
 
 
 def _show_alert_from_a_worker_thread(qapp, dialog_class, **kwargs) -> list[bool]:

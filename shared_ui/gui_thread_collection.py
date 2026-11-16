@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import gc
 
-from PySide6.QtCore import QObject, QTimer
+from PySide6.QtCore import QCoreApplication, QObject, QThread, QTimer
 
 CHECK_EVERY_MS = 50
 
@@ -34,3 +34,11 @@ class GuiThreadCollection(QObject):
 
 def collect_cycles_on_the_gui_thread(app: QObject) -> GuiThreadCollection:
     return GuiThreadCollection(app)
+
+
+def the_application[App: QCoreApplication](kind: type[App], argv: list[str]) -> App:
+    app = kind.instance() or kind(argv)
+    on_its_gui_thread = QThread.currentThread() == app.thread()
+    if on_its_gui_thread and app.findChild(GuiThreadCollection) is None:
+        collect_cycles_on_the_gui_thread(app)
+    return app

@@ -26,6 +26,7 @@ from shared_ui.colors import (
     family_palette,
 )
 from shared_ui.fonts import SIZE_BODY, make_font
+from shared_ui.gui_thread_collection import the_application
 from shared_ui.icons import icon_pixmap
 from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, MARGIN_DIALOG
 
@@ -206,7 +207,7 @@ class AlertDialog(QDialog):
 
 
 def show_alert(title: str, message: str, **look) -> bool:
-    app = QApplication.instance() or QApplication([])
+    app = the_application(QApplication, [])
 
     def open_it() -> int:
         return AlertDialog(title, message, **look).exec()
