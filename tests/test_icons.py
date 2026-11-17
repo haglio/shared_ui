@@ -295,7 +295,8 @@ _THE_ICONS = (
     "save", "scene_to_clip", "screen_arrow_down", "settings", "shield", "shuffle", "slideshow",
     "snowflake_struck_out", "speaker", "speaker_off", "star", "star_outline", "star_ring",
     "stop", "tag", "thumbs_up", "trash", "undo_arrow", "unlock", "versions", "vr_hemisphere",
-    "warning", "wave", "wave_sawtooth", "wave_square", "wave_triangle", "working",
+    "warning", "wave", "wave_reverse_sawtooth", "wave_sawtooth", "wave_square", "wave_triangle",
+    "working",
 )
 
 
@@ -396,7 +397,7 @@ def test_a_cross_takes_most_of_the_band_between_the_sleeve_and_the_frame_s_edge(
     assert abs(lower[0].y2 - lower[0].y1) >= 0.6 * (CANVAS - sleeve.y - sleeve.h)
 
 
-_WAVEFORMS = ("wave", "wave_triangle", "wave_square", "wave_sawtooth")
+_WAVEFORMS = ("wave", "wave_triangle", "wave_square", "wave_sawtooth", "wave_reverse_sawtooth")
 
 
 def test_each_waveform_is_drawn_in_the_frame_the_sine_fills():
@@ -405,13 +406,23 @@ def test_each_waveform_is_drawn_in_the_frame_the_sine_fills():
         assert all(abs(edge - sines) <= 1 for edge, sines in zip(frame, sine, strict=True)), name
 
 
-def test_the_sawtooth_climbs_at_once_and_falls_slowly_as_the_motion_does():
-    (saw,) = ICONS["wave_sawtooth"]
+def _climbs_and_falls(name: str) -> tuple[list[float], list[float]]:
+    (saw,) = ICONS[name]
     segments = list(pairwise(saw.points))
     climbs = [abs(x2 - x1) for (x1, y1), (x2, y2) in segments if y2 < y1]
     falls = [abs(x2 - x1) for (x1, y1), (x2, y2) in segments if y2 > y1]
     assert climbs
     assert falls
+    return climbs, falls
+
+
+def test_the_sawtooth_climbs_slowly_and_falls_at_once_as_the_motion_does():
+    climbs, falls = _climbs_and_falls("wave_sawtooth")
+    assert max(falls) < min(climbs)
+
+
+def test_the_reverse_sawtooth_climbs_at_once_and_falls_slowly_as_the_motion_does():
+    climbs, falls = _climbs_and_falls("wave_reverse_sawtooth")
     assert max(climbs) < min(falls)
 
 
