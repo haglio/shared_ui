@@ -4,5 +4,14 @@
   "private_imports": {},
   "private_reaches": {},
   "prose_lines": {},
-  "trailing_comments": {}
+  "trailing_comments": {},
+  "wall_clock_waits": {
+    "tests/test_alert.py": 1,
+    "tests/test_application.py": 1,
+    "tests/test_gui_thread_collection.py": 2,
+    "tests/test_hard_to_miss.py": 3,
+    "tests/test_loading_process.py": 5,
+    "tests/test_loading_window.py": 1,
+    "tests/test_running_copy.py": 13
+  }
 }
