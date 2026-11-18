@@ -7,7 +7,6 @@ import logging
 import math
 from dataclasses import dataclass
 
-from shared_ui.letter_grid import LETTERS
 from shared_ui.orientation import LANDSCAPE, PORTRAIT
 
 CANVAS = 48.0
@@ -162,14 +161,6 @@ def _enhance_filter() -> tuple:
         ((17, mouth), (45, mouth), (33.5, mouth + 10), (33.5, 45), (28.5, 41), (28.5, mouth + 10)),
         fill=False, width=3.2)
     return (*the_plus, a_funnel_from_its_lower_arm)
-
-
-def _originals() -> tuple:
-    low, high = 6.0, 42.0
-    ring = (high - low) / 5
-    the_origenerator_o = RoundedRect(low + ring / 2, low + ring / 2, high - low - ring,
-                                     high - low - ring, 1.5, width=ring)
-    return (the_origenerator_o, Line(43, 5, 5, 43))
 
 
 def _copy() -> tuple:
@@ -522,30 +513,6 @@ def _control_off() -> tuple:
             *_a_cross_where_an_arrowhead_was(8), *_a_cross_where_an_arrowhead_was(40))
 
 
-_GRID_CELLS = 5
-_GRID_INSET = 5.0
-_GRID_UNIT = (CANVAS - 2 * _GRID_INSET) / _GRID_CELLS
-
-
-def _grid_letter(rows: tuple[str, ...]) -> tuple:
-    blocks = []
-    for row, line in enumerate(rows):
-        for column, painted in enumerate(line):
-            if painted != "#":
-                continue
-            x = _GRID_INSET + column * _GRID_UNIT
-            y = _GRID_INSET + row * _GRID_UNIT
-            blocks.append(Polygon((
-                (x, y), (x + _GRID_UNIT, y),
-                (x + _GRID_UNIT, y + _GRID_UNIT), (x, y + _GRID_UNIT),
-            )))
-    return tuple(blocks)
-
-
-def _fmode() -> tuple:
-    return _grid_letter(LETTERS["F"])
-
-
 _AS_CHUNKY_AS_THE_TRANSPORT = PEN_WIDTH + 1
 
 
@@ -790,7 +757,6 @@ ICONS: dict[str, tuple] = {
         Line(16, 8, 32, 8),
         Polygon(((14, 29), (34, 29), (38, 36), (10, 36))),
     ),
-    "fmode": _fmode(),
     "folder": (
         Polyline(((8, 39), (8, 12), (20, 12), (24, 18), (40, 18), (40, 39), (8, 39))),
     ),
@@ -828,7 +794,6 @@ ICONS: dict[str, tuple] = {
         Line(24, 37, 24, 42),
         Line(17, 42, 31, 42),
     ),
-    "originals": _originals(),
     "pair_in_circle": (_kind_ring(), *_kind_cells([[1, 3]], 5, 3, 0.6)),
     "park": _park(),
     "photo": (
