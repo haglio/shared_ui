@@ -36,10 +36,8 @@ def test_a_longer_message_stays_up_a_quarter_second_longer_for_each_word():
 
 
 @pytest.fixture
-def host(qtbot) -> QWidget:
-    surface = QWidget()
-    qtbot.addWidget(surface)
-    return surface
+def host() -> QWidget:
+    return QWidget()
 
 
 def _a_message(host) -> MessageLabel:
@@ -82,9 +80,8 @@ def test_a_message_too_long_for_its_room_is_elided_to_fit(host, mark):
     assert (message.width() <= 300, "…" in message.text()) == (True, True)
 
 
-def test_a_message_that_is_a_window_of_its_own_is_elided_to_fit_too(qtbot):
+def test_a_message_that_is_a_window_of_its_own_is_elided_to_fit_too():
     message = MessageLabel()
-    qtbot.addWidget(message)
     message.say(_LONG * 3)
 
     message.fit_into(300)
