@@ -10,6 +10,7 @@ from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QDialog, QLabel, QPushButton
 
 from shared_ui.alert import (
+    COPY_TIP,
     DISMISSED,
     ICON_SIZE,
     MESSAGE_WIDTH_MAX,
@@ -122,7 +123,7 @@ def test_a_button_under_the_pointer_sits_one_step_lighter_than_at_rest(pointer):
     dlg.move(QApplication.primaryScreen().geometry().center())
     dlg.show()
     QApplication.processEvents()
-    button, = dlg.findChildren(QPushButton)
+    button = _ok(dlg)
     pointer.off(button)
     at_rest = ground(button)
     pointer.on(button)
@@ -135,7 +136,7 @@ def test_a_button_under_the_pointer_sits_one_step_lighter_than_at_rest(pointer):
 def test_the_ok_button_closes_the_dialog_and_says_what_the_caller_asked():
     dlg = AlertDialog("Example App", "Nothing to do.", button_text="Got it")
 
-    button, = dlg.findChildren(QPushButton)
+    button = _ok(dlg)
     assert button.text() == "Got it"
 
     button.click()
@@ -145,7 +146,7 @@ def test_the_ok_button_closes_the_dialog_and_says_what_the_caller_asked():
 def test_the_button_says_ok_when_the_caller_does_not_care():
     dlg = AlertDialog("Example App", "Nothing to do.")
 
-    button, = dlg.findChildren(QPushButton)
+    button = _ok(dlg)
     assert button.text() == "OK"
 
 
@@ -154,15 +155,20 @@ def _buttons_left_to_right(dlg: AlertDialog) -> list[QPushButton]:
     return [row.itemAt(i).widget() for i in range(row.count()) if row.itemAt(i).widget()]
 
 
+def _ok(dlg: AlertDialog) -> QPushButton:
+    ok, = [button for button in dlg.findChildren(QPushButton) if button.isDefault()]
+    return ok
+
+
 def test_a_dismissible_alert_offers_dismiss_to_the_right_of_ok():
     dlg = AlertDialog("Example App", "The drive is nearly full.", dismissible=True)
 
-    assert [button.text() for button in _buttons_left_to_right(dlg)] == ["OK", "Dismiss"]
+    assert [button.text() for button in _buttons_left_to_right(dlg)] == ["Copy", "OK", "Dismiss"]
 
 
 def test_dismiss_closes_the_dialog_as_dismissed_rather_than_as_ok():
     dlg = AlertDialog("Example App", "The drive is nearly full.", dismissible=True)
-    _ok, dismiss = _buttons_left_to_right(dlg)
+    *_, dismiss = _buttons_left_to_right(dlg)
 
     dismiss.click()
 
@@ -171,7 +177,7 @@ def test_dismiss_closes_the_dialog_as_dismissed_rather_than_as_ok():
 
 def test_dismiss_is_set_in_the_body_font_ok_wears():
     dlg = AlertDialog("Example App", "The drive is nearly full.", dismissible=True)
-    ok, dismiss = _buttons_left_to_right(dlg)
+    *_, ok, dismiss = _buttons_left_to_right(dlg)
 
     assert dismiss.font() == ok.font() == make_font(size=SIZE_BODY)
 
@@ -179,7 +185,7 @@ def test_dismiss_is_set_in_the_body_font_ok_wears():
 def test_the_message_and_the_button_are_set_in_the_familys_body_font():
     dlg = AlertDialog("Example App", "Nothing to do.")
 
-    button, = dlg.findChildren(QPushButton)
+    button = _ok(dlg)
     message, = [lbl for lbl in dlg.findChildren(QLabel) if lbl.text()]
 
     assert message.font() == make_font(size=SIZE_BODY)
@@ -389,7 +395,7 @@ def test_work_on_this_opens_its_link_and_closes_the_dialog():
 
 def test_work_on_this_sits_left_of_ok_and_wears_the_body_font_ok_wears():
     dlg = AlertDialog("Example App", "The script matches no video.", work_on_this="claude://code/new")
-    work_on_this, ok = _buttons_left_to_right(dlg)
+    _copy, work_on_this, ok = _buttons_left_to_right(dlg)
 
     assert [work_on_this.text(), ok.text()] == ["Work on this", "OK"]
     assert work_on_this.font() == ok.font()
@@ -398,11 +404,28 @@ def test_work_on_this_sits_left_of_ok_and_wears_the_body_font_ok_wears():
 def test_an_alert_with_nothing_to_work_on_offers_no_work_on_this():
     dlg = AlertDialog("Example App", "Nothing to do.")
 
-    assert [button.text() for button in _buttons_left_to_right(dlg)] == ["OK"]
+    assert [button.text() for button in _buttons_left_to_right(dlg)] == ["Copy", "OK"]
 
 
 def test_work_on_this_says_in_its_tooltip_what_pressing_it_does():
     dlg = AlertDialog("Example App", "The script matches no video.", work_on_this="claude://code/new")
-    work_on_this, _ok = _buttons_left_to_right(dlg)
+    _copy, work_on_this, _ok = _buttons_left_to_right(dlg)
 
     assert work_on_this.toolTip() == WORK_ON_THIS_TIP
+
+
+def test_copy_puts_the_title_and_the_message_on_the_clipboard_and_closes_the_dialog():
+    dlg = AlertDialog("Example App", "The scene file could not be read.")
+    copy, = [button for button in _buttons_left_to_right(dlg) if button.text() == "Copy"]
+
+    copy.click()
+
+    assert QApplication.clipboard().text() == "Example App\n\nThe scene file could not be read."
+    assert dlg.result() == QDialog.DialogCode.Accepted
+
+
+def test_copy_says_in_its_tooltip_what_pressing_it_does():
+    dlg = AlertDialog("Example App", "The scene file could not be read.")
+    copy, _ok = _buttons_left_to_right(dlg)
+
+    assert copy.toolTip() == COPY_TIP
