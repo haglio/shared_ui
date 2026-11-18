@@ -41,6 +41,9 @@ DISMISSED = QDialog.DialogCode.Accepted.value + 1
 WORK_ON_THIS = "Work on this"
 WORK_ON_THIS_TIP = "Opens a new session in Claude Desktop with what to look into typed in, ready to send"
 
+COPY = "Copy"
+COPY_TIP = "Copies this window's title and message, ready to paste"
+
 
 class _GuiThreadCall(QObject):
     """Qt builds widgets on the GUI thread or not at all. The slot is decorated so the call
@@ -185,8 +188,13 @@ class AlertDialog(QDialog):
 
         buttons = QHBoxLayout()
         buttons.addStretch()
+        self._said = f"{title}\n\n{message}"
+        copy = _button(COPY, self._copy_and_close)
+        copy.setToolTip(COPY_TIP)
+        buttons.addWidget(copy)
         if chosen.work_on_this is not None:
-            work_on_this = _button(WORK_ON_THIS, lambda: self._open_and_close(chosen.work_on_this))
+            self._work_on_this = chosen.work_on_this
+            work_on_this = _button(WORK_ON_THIS, self._open_and_close)
             work_on_this.setToolTip(WORK_ON_THIS_TIP)
             buttons.addWidget(work_on_this)
         buttons.addWidget(ok)
@@ -201,8 +209,12 @@ class AlertDialog(QDialog):
         outer.addLayout(said)
         outer.addLayout(buttons)
 
-    def _open_and_close(self, link: str) -> None:
-        QDesktopServices.openUrl(QUrl(link))
+    def _copy_and_close(self) -> None:
+        QApplication.clipboard().setText(self._said)
+        self.accept()
+
+    def _open_and_close(self) -> None:
+        QDesktopServices.openUrl(QUrl(self._work_on_this))
         self.accept()
 
 
