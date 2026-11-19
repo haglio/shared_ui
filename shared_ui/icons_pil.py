@@ -4,6 +4,7 @@ filled dot laid at each line's end."""
 
 from __future__ import annotations
 
+import functools
 import math
 
 from PIL import Image, ImageDraw
@@ -27,7 +28,11 @@ SUPERSAMPLE = 4
 
 
 def pil_icon(name: str, size: int, color) -> Image.Image:
-    edge = max(1, int(size))
+    return _drawn(name, max(1, int(size)), _rgba(color)).copy()
+
+
+@functools.lru_cache(maxsize=1024)
+def _drawn(name: str, edge: int, color: tuple[int, int, int, int]) -> Image.Image:
     big = edge * SUPERSAMPLE
     # Pillow's Lanczos overshoots at a hard edge: resampled colored ink leaves a halo brighter
     # than the ink. Resampled coverage saturates harmlessly, so the color goes on afterwards.
@@ -37,7 +42,7 @@ def pil_icon(name: str, size: int, color) -> Image.Image:
     for shape in shapes_of(name):
         _draw(draw, shape, CHANNEL_MAX, scale)
     mask = mask.resize((edge, edge), Image.LANCZOS)
-    red, green, blue, alpha = _rgba(color)
+    red, green, blue, alpha = color
     if alpha != CHANNEL_MAX:
         mask = mask.point(lambda value: value * alpha // CHANNEL_MAX)
     image = Image.new("RGBA", (edge, edge), (red, green, blue, 0))
