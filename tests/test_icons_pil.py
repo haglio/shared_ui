@@ -172,3 +172,30 @@ def test_a_path_written_in_a_frame_of_its_own_fills_the_canvas_that_frame_stands
     drawn = icons_pil.pil_icon("_a_square_in_a_frame_of_24", _SIZE, _INK)
 
     assert _pil_ink(drawn)[:4] == (0, 0, _SIZE - 1, _SIZE - 1)
+
+
+def test_an_icon_drawn_again_at_the_same_size_and_color_is_not_rasterized_again(monkeypatch):
+    shapes_drawn: list[str] = []
+    real_shapes_of = icons_pil.shapes_of
+
+    def counted(name):
+        shapes_drawn.append(name)
+        return real_shapes_of(name)
+
+    monkeypatch.setattr(icons_pil, "shapes_of", counted)
+    icons_pil._drawn.cache_clear()
+
+    first = [icons_pil.pil_icon("trash", 20, _INK) for _ in range(5)]
+    icons_pil.pil_icon("trash", 21, _INK)
+    icons_pil.pil_icon("trash", 20, (*_INK, 128))
+
+    assert shapes_drawn == ["trash", "trash", "trash"]
+    assert len({image.tobytes() for image in first}) == 1
+
+
+def test_a_drawn_icon_a_caller_paints_on_leaves_the_next_one_clean():
+    icons_pil._drawn.cache_clear()
+    painted = icons_pil.pil_icon("trash", 20, _INK)
+    painted.paste((255, 0, 0, 255), (0, 0, 20, 20))
+
+    assert icons_pil.pil_icon("trash", 20, _INK).tobytes() != painted.tobytes()
