@@ -13,7 +13,7 @@ from unittest.mock import patch
 import pytest
 from PySide6.QtCore import QEvent, QPoint, QPointF, QRect, Qt
 from PySide6.QtGui import QCursor, QImage, QMouseEvent, QRegion
-from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtWidgets import QApplication, QMessageBox, QWidget
 
 from shared_ui import icons
 from shared_ui.colors import BG_PRIMARY
@@ -41,6 +41,20 @@ def application_stand_in(application: Any):
 
 def brought_to_front(**how: Any):
     return patch("shared_ui.foreground.bring_to_front", **how)
+
+
+def questions_answered(monkeypatch: pytest.MonkeyPatch, answer: Any,
+                       while_asked: Callable[[QMessageBox], None] = lambda _box: None,
+                       ) -> list[QMessageBox]:
+    asked: list[QMessageBox] = []
+
+    def answering(box: QMessageBox) -> Any:
+        asked.append(box)
+        while_asked(box)
+        return answer
+
+    monkeypatch.setattr(QMessageBox, "exec", answering)
+    return asked
 
 
 @contextmanager
