@@ -6,6 +6,7 @@ from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QMessageBox
 
 from shared_ui.asking import asked, yes_or_no
+from shared_ui.testing import questions_answered
 
 
 @pytest.fixture
@@ -43,6 +44,6 @@ def test_the_box_asks_the_question_under_its_title(box):
     (QMessageBox.StandardButton.No, False),
 ])
 def test_asked_is_whether_the_answer_was_yes(qapp, monkeypatch, answer, is_yes):
-    monkeypatch.setattr(QMessageBox, "exec", lambda _box: answer)
+    questions_answered(monkeypatch, answer)
 
     assert asked(None, "Close It", "Are you sure?") is is_yes

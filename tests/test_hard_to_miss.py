@@ -8,6 +8,7 @@ from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QWidget
 
 from shared_ui.hard_to_miss import FadedBackground, hard_to_miss, sure
+from shared_ui.testing import questions_answered
 
 _BLACK_AND_WHITE_AVERAGE = 127
 
@@ -64,12 +65,6 @@ def _lightness_across_the_faded_window(window):
         return _lightness_across_the_middle(faded_backgrounds(window)[0].grab())
 
 
-def _answering(monkeypatch, button):
-    asked = []
-    monkeypatch.setattr(QMessageBox, "exec", lambda box: asked.append(box) or button)
-    return asked
-
-
 def test_the_window_behind_goes_dark_and_out_of_focus(window):
     levels = _lightness_across_the_faded_window(window)
 
@@ -122,25 +117,25 @@ def test_a_minimized_window_is_left_alone_and_the_alert_still_sounds(window, ale
     (QMessageBox.StandardButton.No, False),
 ])
 def test_sure_is_the_answer_to_a_yes_or_no_question(window, monkeypatch, answer, is_sure):
-    _answering(monkeypatch, answer)
+    questions_answered(monkeypatch, answer)
 
     assert sure(window, "Close It", "Are you sure?") is is_sure
 
 
 def test_sure_asks_over_the_window_with_yes_as_the_default(window, monkeypatch):
-    asked = _answering(monkeypatch, QMessageBox.StandardButton.No)
+    asked = questions_answered(monkeypatch, QMessageBox.StandardButton.No)
 
     sure(window, "Close It", "Are you sure?")
 
-    box = asked[0]
+    [box] = asked
     assert (box.parent(), box.windowTitle(), box.text()) == (window, "Close It", "Are you sure?")
     assert box.defaultButton() is box.button(QMessageBox.StandardButton.Yes)
 
 
 def test_sure_asks_over_the_faded_window_and_sounds_the_alert(window, monkeypatch, alert_sounds):
     faded_while_asked = []
-    monkeypatch.setattr(QMessageBox, "exec", lambda _box: faded_while_asked.extend(
-        faded_backgrounds(window)) or QMessageBox.StandardButton.No)
+    questions_answered(monkeypatch, QMessageBox.StandardButton.No,
+                       lambda _box: faded_while_asked.extend(faded_backgrounds(window)))
 
     sure(window, "Close It", "Are you sure?")
 
