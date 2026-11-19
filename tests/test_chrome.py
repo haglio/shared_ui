@@ -122,6 +122,23 @@ def test_a_disabled_button_reads_as_disabled_in_text_and_ground():
             < _button_ground(chrome.button_rules()).lightness())
 
 
+def _left_edge(button: QAbstractButton) -> QColor:
+    drawn = button.grab().toImage()
+    button.close()
+    return drawn.pixelColor(0, drawn.height() // 2)
+
+
+def test_the_button_enter_presses_wears_the_blue_edge_of_a_box_being_typed_in():
+    button = _shown_button(chrome.button_rules())
+    button.setDefault(True)
+
+    assert _left_edge(button) == QColor(*palette.BLUE)
+
+
+def test_a_button_enter_does_not_press_keeps_the_quiet_edge():
+    assert _left_edge(_shown_button(chrome.button_rules())) == QColor(*palette.BORDER_SUBTLE)
+
+
 def test_hovering_a_menu_row_that_cannot_be_clicked_promises_nothing():
     rules = _rules(chrome.menu_rules())
 
