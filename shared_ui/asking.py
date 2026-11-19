@@ -14,4 +14,4 @@ def yes_or_no(parent: QWidget | None, title: str, question: str) -> QMessageBox:
 
 
 def asked(parent: QWidget | None, title: str, question: str) -> bool:
-    return yes_or_no(parent, title, question).exec() == _YES
+    return QMessageBox.question(parent, title, question, _YES | _NO, _YES) == _YES

@@ -6,6 +6,7 @@ import subprocess
 import sys
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
@@ -43,17 +44,34 @@ def brought_to_front(**how: Any):
     return patch("shared_ui.foreground.bring_to_front", **how)
 
 
-def questions_answered(monkeypatch: pytest.MonkeyPatch, answer: Any,
-                       while_asked: Callable[[QMessageBox], None] = lambda _box: None,
-                       ) -> list[QMessageBox]:
-    asked: list[QMessageBox] = []
+@dataclass(frozen=True)
+class Asked:
+    parent: QWidget | None
+    title: str
+    text: str
+    default: QMessageBox.StandardButton
 
-    def answering(box: QMessageBox) -> Any:
-        asked.append(box)
-        while_asked(box)
+
+def questions_answered(monkeypatch: pytest.MonkeyPatch, answer: Any,
+                       while_asked: Callable[[Asked], None] = lambda _asked: None,
+                       ) -> list[Asked]:
+    asked: list[Asked] = []
+
+    def answering(question: Asked) -> Any:
+        asked.append(question)
+        while_asked(question)
         return answer
 
-    monkeypatch.setattr(QMessageBox, "exec", answering)
+    def answering_a_box(box: QMessageBox) -> Any:
+        return answering(Asked(box.parent(), box.windowTitle(), box.text(),
+                               box.standardButton(box.defaultButton())))
+
+    def answering_a_question(parent, title, text, _buttons=None,
+                             default=QMessageBox.StandardButton.NoButton) -> Any:
+        return answering(Asked(parent, title, text, default))
+
+    monkeypatch.setattr(QMessageBox, "exec", answering_a_box)
+    monkeypatch.setattr(QMessageBox, "question", staticmethod(answering_a_question))
     return asked
 
 

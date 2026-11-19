@@ -8,7 +8,7 @@ from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QWidget
 
 from shared_ui.hard_to_miss import FadedBackground, hard_to_miss, sure
-from shared_ui.testing import questions_answered
+from shared_ui.testing import Asked, questions_answered
 
 _BLACK_AND_WHITE_AVERAGE = 127
 
@@ -127,15 +127,14 @@ def test_sure_asks_over_the_window_with_yes_as_the_default(window, monkeypatch):
 
     sure(window, "Close It", "Are you sure?")
 
-    [box] = asked
-    assert (box.parent(), box.windowTitle(), box.text()) == (window, "Close It", "Are you sure?")
-    assert box.defaultButton() is box.button(QMessageBox.StandardButton.Yes)
+    [question] = asked
+    assert question == Asked(window, "Close It", "Are you sure?", QMessageBox.StandardButton.Yes)
 
 
 def test_sure_asks_over_the_faded_window_and_sounds_the_alert(window, monkeypatch, alert_sounds):
     faded_while_asked = []
     questions_answered(monkeypatch, QMessageBox.StandardButton.No,
-                       lambda _box: faded_while_asked.extend(faded_backgrounds(window)))
+                       lambda _asked: faded_while_asked.extend(faded_backgrounds(window)))
 
     sure(window, "Close It", "Are you sure?")
 
