@@ -119,3 +119,48 @@ def test_it_repaints_after_a_press_a_move_and_a_leave_since_each_can_change_the_
     QApplication.sendEvent(widget, QEvent(QEvent.Type.Leave))
 
     assert widget.updates == 3
+
+
+class _HalvesPointer(_Pointer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.half = "left"
+
+    def move(self, x: int, y: int) -> None:
+        super().move(x, y)
+        self.half = "left" if x < 20 else "right"
+
+
+class _ShowsOnlyTheHalfUnderThePointer(_Drawing):
+    def __init__(self, pointer: _HalvesPointer) -> None:
+        super().__init__(pointer)
+        self.halves = pointer
+        self.updates = 0
+
+    def what_the_pointer_shows(self) -> object:
+        return self.halves.half
+
+    def update(self) -> None:
+        self.updates += 1
+
+
+def test_moves_that_change_nothing_drawn_ask_for_no_repaint():
+    widget = _ShowsOnlyTheHalfUnderThePointer(_HalvesPointer())
+    widget.resize(40, 30)
+
+    for x in (1, 2, 3, 25, 26, 27):
+        _move(widget, x, 3)
+
+    assert widget.updates == 1
+
+
+def test_a_drawing_that_does_not_say_what_the_pointer_shows_repaints_on_every_move():
+    widget = _Drawing(_Pointer())
+    repaints = []
+    widget.update = lambda: repaints.append(1)
+    widget.resize(40, 30)
+
+    for x in (1, 2, 3):
+        _move(widget, x, 3)
+
+    assert len(repaints) == 3
