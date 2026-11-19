@@ -4,7 +4,14 @@ import math
 
 from PIL import ImageFont
 
-from shared_ui.lettering import WORDMARK_FACE, fit_text, load_font, wrap_text
+from shared_ui.lettering import WORDMARK_FACE, fit_text, line_height, load_font, wrap_text
+
+
+def test_a_line_is_as_tall_as_the_fonts_ascent_and_descent_together():
+    font = load_font(48)
+    ascent, descent = font.getmetrics()
+
+    assert line_height(font) == ascent + descent
 
 
 class TestALineCutToFit:
