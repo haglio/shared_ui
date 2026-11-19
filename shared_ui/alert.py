@@ -7,7 +7,8 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
-from PySide6.QtCore import QObject, Qt, QThread, QUrl, Signal, Slot
+from app_support import copyable_alert
+from PySide6.QtCore import QObject, Qt, QThread, QTimer, QUrl, Signal, Slot
 from PySide6.QtGui import QColor, QDesktopServices, QIcon, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
@@ -41,8 +42,6 @@ DISMISSED = QDialog.DialogCode.Accepted.value + 1
 WORK_ON_THIS = "Work on this"
 WORK_ON_THIS_TIP = "Opens a new session in Claude Desktop with what to look into typed in, ready to send"
 
-COPY = "Copy"
-COPY_TIP = "Copies this window's title and message, ready to paste"
 
 
 class _GuiThreadCall(QObject):
@@ -159,7 +158,7 @@ class AlertDialog(QDialog):
         self.setPalette(family_palette(self.palette()))
         self.setStyleSheet(f"""
             QDialog {{ background: {BG_TERTIARY.name()}; }}
-            QLabel {{ color: {TEXT_SECONDARY.name()}; }}
+            QLabel {{ color: {TEXT_SECONDARY.name()}; background: transparent; }}
             {button_rules()}
         """)
         icon = QLabel()
@@ -188,10 +187,12 @@ class AlertDialog(QDialog):
 
         buttons = QHBoxLayout()
         buttons.addStretch()
-        self._said = f"{title}\n\n{message}"
-        copy = _button(COPY, self._copy_and_close)
-        copy.setToolTip(COPY_TIP)
-        buttons.addWidget(copy)
+        self._said = copyable_alert.said(title, message)
+        self._copy = _button(copyable_alert.COPY, self._copy_and_say_so)
+        self._copy.setToolTip(copyable_alert.COPY_TIP)
+        self._back_to_copy = QTimer(self, singleShot=True, interval=copyable_alert.COPIED_SHOWN_MS)
+        self._back_to_copy.timeout.connect(self._offer_to_copy_again)
+        buttons.addWidget(self._copy)
         if chosen.work_on_this is not None:
             self._work_on_this = chosen.work_on_this
             work_on_this = _button(WORK_ON_THIS, self._open_and_close)
@@ -208,10 +209,16 @@ class AlertDialog(QDialog):
         outer.setSpacing(GAP_DIALOG)
         outer.addLayout(said)
         outer.addLayout(buttons)
+        self._copy.ensurePolished()
+        self._copy.setMinimumWidth(self._copy.sizeHint().width())
 
-    def _copy_and_close(self) -> None:
+    def _copy_and_say_so(self) -> None:
         QApplication.clipboard().setText(self._said)
-        self.accept()
+        self._copy.setText(copyable_alert.COPIED)
+        self._back_to_copy.start()
+
+    def _offer_to_copy_again(self) -> None:
+        self._copy.setText(copyable_alert.COPY)
 
     def _open_and_close(self) -> None:
         QDesktopServices.openUrl(QUrl(self._work_on_this))

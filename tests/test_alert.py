@@ -4,13 +4,13 @@ import threading
 from unittest.mock import patch
 
 import pytest
+from app_support.copyable_alert import COPY_TIP
 from PySide6.QtCore import QMargins, QPoint, QRect, Qt, QThread, QTimer, QUrl
 from PySide6.QtGui import QColor, QFontMetrics, QIcon, QPalette, QPixmap, QTextDocument
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QDialog, QLabel, QPushButton
 
 from shared_ui.alert import (
-    COPY_TIP,
     DISMISSED,
     ICON_SIZE,
     MESSAGE_WIDTH_MAX,
@@ -22,6 +22,7 @@ from shared_ui.alert import (
     icon_pixmap_for,
     show_alert,
 )
+from shared_ui.chrome import family_stylesheet
 from shared_ui.colors import (
     BG_BUTTON,
     BG_TERTIARY,
@@ -163,7 +164,7 @@ def _ok(dlg: AlertDialog) -> QPushButton:
 def test_a_dismissible_alert_offers_dismiss_to_the_right_of_ok():
     dlg = AlertDialog("Example App", "The drive is nearly full.", dismissible=True)
 
-    assert [button.text() for button in _buttons_left_to_right(dlg)] == ["Copy", "OK", "Dismiss"]
+    assert [button.text() for button in _buttons_left_to_right(dlg)] == ["Copy error message", "OK", "Dismiss"]
 
 
 def test_dismiss_closes_the_dialog_as_dismissed_rather_than_as_ok():
@@ -404,7 +405,7 @@ def test_work_on_this_sits_left_of_ok_and_wears_the_body_font_ok_wears():
 def test_an_alert_with_nothing_to_work_on_offers_no_work_on_this():
     dlg = AlertDialog("Example App", "Nothing to do.")
 
-    assert [button.text() for button in _buttons_left_to_right(dlg)] == ["Copy", "OK"]
+    assert [button.text() for button in _buttons_left_to_right(dlg)] == ["Copy error message", "OK"]
 
 
 def test_work_on_this_says_in_its_tooltip_what_pressing_it_does():
@@ -414,14 +415,32 @@ def test_work_on_this_says_in_its_tooltip_what_pressing_it_does():
     assert work_on_this.toolTip() == WORK_ON_THIS_TIP
 
 
-def test_copy_puts_the_title_and_the_message_on_the_clipboard_and_closes_the_dialog():
+def test_copy_error_message_puts_the_title_and_the_message_on_the_clipboard_and_leaves_the_window_up():
     dlg = AlertDialog("Example App", "The scene file could not be read.")
-    copy, = [button for button in _buttons_left_to_right(dlg) if button.text() == "Copy"]
+    dlg.show()
+    copy, = [button for button in _buttons_left_to_right(dlg) if button.text() == "Copy error message"]
 
     copy.click()
+    up = dlg.isVisible()
+    dlg.close()
 
     assert QApplication.clipboard().text() == "Example App\n\nThe scene file could not be read."
-    assert dlg.result() == QDialog.DialogCode.Accepted
+    assert up
+
+
+def test_the_button_says_copied_for_a_moment_and_then_offers_to_copy_again_at_the_same_width():
+    dlg = AlertDialog("Example App", "The scene file could not be read.")
+    copy, _ok = _buttons_left_to_right(dlg)
+    width = copy.sizeHint().width()
+
+    copy.click()
+    said = copy.text()
+    wide_while_copied = copy.minimumWidth()
+    back, = dlg.findChildren(QTimer)
+    back.timeout.emit()
+
+    assert (said, copy.text()) == ("Copied", "Copy error message")
+    assert wide_while_copied >= width
 
 
 def test_copy_says_in_its_tooltip_what_pressing_it_does():
@@ -429,3 +448,22 @@ def test_copy_says_in_its_tooltip_what_pressing_it_does():
     copy, _ok = _buttons_left_to_right(dlg)
 
     assert copy.toolTip() == COPY_TIP
+
+
+def test_the_message_sits_on_the_dialogs_ground_in_an_app_that_dresses_every_widget_in_the_familys():
+    app = QApplication.instance()
+    worn = app.styleSheet()
+    app.setStyleSheet(family_stylesheet())
+    try:
+        dlg = AlertDialog("Example App", "The scene file could not be read.")
+        dlg.show()
+        QApplication.processEvents()
+        message, = [label for label in dlg.findChildren(QLabel) if label.text()]
+        drawn = dlg.grab().toImage()
+        past_the_words = message.mapTo(dlg, QPoint(message.width() - 2, message.height() // 2))
+        behind_the_message = drawn.pixelColor(past_the_words).name()
+        dlg.close()
+    finally:
+        app.setStyleSheet(worn)
+
+    assert behind_the_message == BG_TERTIARY.name()
