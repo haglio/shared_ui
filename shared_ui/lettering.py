@@ -19,6 +19,11 @@ def load_font(px: int, face: str = BOLD_FACE) -> ImageFont.FreeTypeFont:
         return ImageFont.load_default(px)
 
 
+def line_height(font) -> int:
+    ascent, descent = font.getmetrics()
+    return ascent + descent
+
+
 def fit_text(font, text: str, width: int) -> str:
     if font.getlength(text) <= width or not text:
         return text

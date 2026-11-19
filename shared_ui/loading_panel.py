@@ -5,7 +5,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-from shared_ui.lettering import REGULAR_FACE, WORDMARK_FACE, fit_text, load_font
+from shared_ui.lettering import REGULAR_FACE, WORDMARK_FACE, fit_text, line_height, load_font
 from shared_ui.palette import (
     LOADING_ACCENT,
     LOADING_GROUND,
@@ -91,8 +91,8 @@ def _fonts(metrics: Metrics):
 
 def _tops(metrics: Metrics) -> tuple[int, ...]:
     wordmark_font, status_font, hint_font = _fonts(metrics)
-    rows = (metrics.icon, _line_height(wordmark_font), _line_height(status_font), metrics.bar[1],
-            _line_height(hint_font))
+    rows = (metrics.icon, line_height(wordmark_font), line_height(status_font), metrics.bar[1],
+            line_height(hint_font))
     tops, top = [], metrics.padding
     for row, gap in zip(rows, (*metrics.gaps, metrics.padding), strict=True):
         tops.append(top)
@@ -107,8 +107,3 @@ def _bar(draw: ImageDraw.ImageDraw, metrics: Metrics, top: int, fraction: float 
     filled = 0 if fraction is None else round(width * max(0.0, min(1.0, fraction)))
     if filled:
         draw.rectangle([left, top, left + filled - 1, top + height - 1], fill=LOADING_ACCENT)
-
-
-def _line_height(font) -> int:
-    ascent, descent = font.getmetrics()
-    return ascent + descent
