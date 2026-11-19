@@ -13,6 +13,9 @@ from shared_ui.message_shape import (
     INFO,
     MESSAGE_INK,
     WARNING,
+    answering_what_he_said,
+    is_answering_what_he_said,
+    mark_of_a_message_said_now,
     time_to_read_ms,
 )
 from shared_ui.palette import GREEN, RED, TEXT_PRIMARY, YELLOW
@@ -108,3 +111,23 @@ def test_marked_text_on_any_label_puts_the_drawing_before_the_words(host):
 
     assert message.text() == icon_then_text("warning", "can't remake this", color=QColor(*YELLOW),
                                             size=message.fontMetrics().height())
+
+
+def test_a_message_said_while_answering_what_he_said_carries_the_microphone():
+    with answering_what_he_said():
+        assert mark_of_a_message_said_now() == HEARD_MARK
+
+
+def test_a_message_said_otherwise_carries_no_mark():
+    assert mark_of_a_message_said_now() == ""
+
+
+def test_a_mark_given_outright_stands_while_answering_what_he_said():
+    with answering_what_he_said():
+        assert mark_of_a_message_said_now("trash") == "trash"
+
+
+def test_answering_what_he_said_ends_with_its_block():
+    with answering_what_he_said():
+        assert is_answering_what_he_said()
+    assert not is_answering_what_he_said()
