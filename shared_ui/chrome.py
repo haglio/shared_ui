@@ -127,6 +127,7 @@ def control_ground(color: Rgb, *controls: str) -> str:
 
 _A_BUTTON_S_FRAME = f"""border: 1px solid {as_hex(BORDER_SUBTLE)};
         border-radius: {BUTTON_RADIUS}px;"""
+_WHERE_THE_KEYBOARD_GOES = f"border: 1px solid {as_hex(BLUE)};"
 
 
 def button_rules() -> str:
@@ -138,6 +139,9 @@ def button_rules() -> str:
     }}{control_ground(BG_BUTTON, "QPushButton")}{control_ground(BG_BUTTON_ACTIVE, "QPushButton:checked")}
     QPushButton:pressed, QPushButton:checked:pressed {{
         background-color: {as_hex(BLUE)};
+    }}
+    QPushButton:default {{
+        {_WHERE_THE_KEYBOARD_GOES}
     }}
     QPushButton:disabled {{
         background-color: {as_hex(BG_SECONDARY)};
@@ -156,7 +160,7 @@ def field_rules() -> str:
         padding: {GAP_SMALL}px;
     }}
     QPlainTextEdit:focus, QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus {{
-        border: 1px solid {as_hex(BLUE)};
+        {_WHERE_THE_KEYBOARD_GOES}
     }}"""
 
 

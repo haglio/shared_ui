@@ -6,8 +6,9 @@ from contextlib import contextmanager
 
 from PySide6.QtCore import QPropertyAnimation, QRect, QSize, Qt
 from PySide6.QtGui import QColor, QPainter, QPixmap
-from PySide6.QtWidgets import QMessageBox, QWidget
+from PySide6.QtWidgets import QWidget
 
+from shared_ui.asking import asked
 from shared_ui.palette import BLACK
 
 _FADE_MS = 200
@@ -72,8 +73,4 @@ def hard_to_miss(window: QWidget) -> Iterator[None]:
 
 def sure(window: QWidget, title: str, question: str) -> bool:
     with hard_to_miss(window):
-        return QMessageBox.question(
-            window, title, question,
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No,
-        ) == QMessageBox.StandardButton.Yes
+        return asked(window, title, question)

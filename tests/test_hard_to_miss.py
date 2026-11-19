@@ -66,8 +66,7 @@ def _lightness_across_the_faded_window(window):
 
 def _answering(monkeypatch, button):
     asked = []
-    monkeypatch.setattr(QMessageBox, "question",
-                        staticmethod(lambda *args: asked.append(args) or button))
+    monkeypatch.setattr(QMessageBox, "exec", lambda box: asked.append(box) or button)
     return asked
 
 
@@ -128,22 +127,20 @@ def test_sure_is_the_answer_to_a_yes_or_no_question(window, monkeypatch, answer,
     assert sure(window, "Close It", "Are you sure?") is is_sure
 
 
-def test_sure_asks_with_no_as_the_default(window, monkeypatch):
+def test_sure_asks_over_the_window_with_yes_as_the_default(window, monkeypatch):
     asked = _answering(monkeypatch, QMessageBox.StandardButton.No)
 
     sure(window, "Close It", "Are you sure?")
 
-    parent, title, text, buttons, default = asked[0]
-    assert (parent, title, text) == (window, "Close It", "Are you sure?")
-    assert buttons == QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-    assert default == QMessageBox.StandardButton.No
+    box = asked[0]
+    assert (box.parent(), box.windowTitle(), box.text()) == (window, "Close It", "Are you sure?")
+    assert box.defaultButton() is box.button(QMessageBox.StandardButton.Yes)
 
 
 def test_sure_asks_over_the_faded_window_and_sounds_the_alert(window, monkeypatch, alert_sounds):
     faded_while_asked = []
-    monkeypatch.setattr(QMessageBox, "question", staticmethod(
-        lambda *_args: faded_while_asked.extend(faded_backgrounds(window))
-        or QMessageBox.StandardButton.No))
+    monkeypatch.setattr(QMessageBox, "exec", lambda _box: faded_while_asked.extend(
+        faded_backgrounds(window)) or QMessageBox.StandardButton.No)
 
     sure(window, "Close It", "Are you sure?")
 
