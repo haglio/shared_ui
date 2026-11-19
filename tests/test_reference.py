@@ -312,7 +312,7 @@ def _dialog(widgets, sections=_WITH_A_HEADSET):
 
 
 def test_the_reference_is_titled_for_what_it_holds(widgets):
-    assert _dialog(widgets).windowTitle() == REFERENCE_WINDOW_TITLE == "Hotkeys & Voice Commands Reference"
+    assert _dialog(widgets).windowTitle() == REFERENCE_WINDOW_TITLE == "Hotkeys & voice commands reference"
 
 
 def test_ctrl_f_opens_a_find_that_survives_the_page_being_laid_out_again(widgets):

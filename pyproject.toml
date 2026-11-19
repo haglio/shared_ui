@@ -77,3 +77,8 @@ namespaces = false
 # the record instead. The family's dependency gate holds it against the tree.
 [tool.haglio]
 siblings = ["app_support"]
+
+# The names the screen capitalizes inside sentence-case text
+# (app_support.sentence_case).
+[tool.haglio.sentence-case]
+names = ["Funestra"]

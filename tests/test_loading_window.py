@@ -17,7 +17,7 @@ from shared_ui.preview import Preview
 
 def _window(**changes) -> LoadingWindow:
     return LoadingWindow(**{
-        "caption": "Scripture Loading", "wordmark": "Scripture", "icon": None, "preview": None,
+        "caption": "Scripture loading", "wordmark": "Scripture", "icon": None, "preview": None,
         "steps": ("Checking the tracker...", "Loading...", "Building the window..."),
         **changes,
     })
@@ -27,7 +27,7 @@ class TestTheWindow:
     def test_it_is_the_panel_alone_under_the_caption_the_app_gives_it(self, qapp):
         window = _window()
 
-        assert window.windowTitle() == "Scripture Loading"
+        assert window.windowTitle() == "Scripture loading"
         assert window.windowFlags() & Qt.WindowType.FramelessWindowHint
         assert (window.width(), window.height()) == render(window.panel).size
 

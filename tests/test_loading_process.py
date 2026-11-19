@@ -17,7 +17,7 @@ from shared_ui.testing import appending_to
 
 def _window(**changes) -> LoadingWindow:
     return LoadingWindow(**{
-        "caption": "Scripture Loading", "wordmark": "Scripture", "icon": None, "preview": None,
+        "caption": "Scripture loading", "wordmark": "Scripture", "icon": None, "preview": None,
         "steps": ("Checking the tracker...", "Loading...", "Building the window..."),
         **changes,
     })
@@ -118,7 +118,7 @@ class TestTheWholeWay:
         monkeypatch.setenv(loading_screen.LINES, "[]")
 
         with patch("shared_ui.loading_process.subprocess.Popen") as started:
-            LoadingProcess.open(caption="Scripture Loading", wordmark="Scripture", icon=None, preview=None,
+            LoadingProcess.open(caption="Scripture loading", wordmark="Scripture", icon=None, preview=None,
                                 steps=("Loading...",))
 
         assert started.call_args.kwargs["env"][loading_screen.FOLDER] == str(tmp_path / "screen")
@@ -126,7 +126,7 @@ class TestTheWholeWay:
 
     def test_a_window_process_shows_itself_and_goes_when_the_start_is_done(self, qapp):
         window = LoadingProcess.open(
-            caption="Scripture Loading", wordmark="Scripture", icon=None, preview=None,
+            caption="Scripture loading", wordmark="Scripture", icon=None, preview=None,
             steps=("Checking the tracker...", "Loading..."),
             cancel_hint="Press Esc to cancel opening Scripture")
         shown = []
@@ -140,7 +140,7 @@ class TestTheWholeWay:
         told = io.StringIO()
         with window_dressed() as dress:
             code = run({
-                "caption": "Scripture Loading", "wordmark": "Scripture", "icon": None,
+                "caption": "Scripture loading", "wordmark": "Scripture", "icon": None,
                 "preview": "the scene list", "is_preview": True,
                 "steps": [["Checking the tracker...", 3.0], "Loading..."],
                 "cancel_hint": "", "app_id": "Example.App.Preview",
@@ -154,7 +154,7 @@ class TestTheWholeWay:
     def test_a_preview_window_wears_the_name_and_icon_its_taskbar_button_carries(self, qapp, tmp_path):
         with window_dressed() as dress:
             run({
-                "caption": "Scripture Loading", "wordmark": "Scripture", "icon": None,
+                "caption": "Scripture loading", "wordmark": "Scripture", "icon": None,
                 "preview": "the scene list", "is_preview": True, "steps": ["Loading..."],
                 "cancel_hint": "", "app_id": "Example.App.Preview",
                 "taskbar": {"name": "Scripture - preview of the scene list",

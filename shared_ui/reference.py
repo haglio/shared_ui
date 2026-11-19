@@ -23,7 +23,7 @@ from shared_ui.palette import (
 from shared_ui.spacing import GAP_DIALOG, GAP_MEDIUM, GAP_SMALL, HAIRLINE, MARGIN_STANDARD
 from shared_ui.type_scale import FONT_UI, SIZE_BODY, SIZE_HEADING
 
-REFERENCE_WINDOW_TITLE = "Hotkeys & Voice Commands Reference"
+REFERENCE_WINDOW_TITLE = "Hotkeys & voice commands reference"
 HOTKEY_HEADER = "Hotkey"
 CONTROLLER_HEADER = "VR Controller"
 VOICE_HEADER = "Voice command"
