@@ -13,6 +13,9 @@ class PressableDrawing(QWidget):
     def drawing(self) -> tuple[bytes, tuple[int, int]]:
         raise NotImplementedError
 
+    def what_the_pointer_shows(self) -> object:
+        return object()
+
     def paintEvent(self, event) -> None:
         raw, (width, height) = self.drawing()
         if width > self.width() or height > self.height():
@@ -26,8 +29,10 @@ class PressableDrawing(QWidget):
         self.update()
 
     def mouseMoveEvent(self, event) -> None:
+        shown = self.what_the_pointer_shows()
         self._pointer.move(*_at(event))
-        self.update()
+        if self.what_the_pointer_shows() != shown:
+            self.update()
 
     def mouseReleaseEvent(self, event) -> None:
         self._pointer.release()
