@@ -133,6 +133,7 @@ class _AlertLook:
     links: Sequence[Link] = ()
     dismissible: bool = False
     work_on_this: str | None = None
+    copyable: bool = True
 
 
 class AlertDialog(QDialog):
@@ -187,12 +188,8 @@ class AlertDialog(QDialog):
 
         buttons = QHBoxLayout()
         buttons.addStretch()
-        self._said = copyable_alert.said(title, message)
-        self._copy = _button(copyable_alert.COPY, self._copy_and_say_so)
-        self._copy.setToolTip(copyable_alert.COPY_TIP)
-        self._back_to_copy = QTimer(self, singleShot=True, interval=copyable_alert.COPIED_SHOWN_MS)
-        self._back_to_copy.timeout.connect(self._offer_to_copy_again)
-        buttons.addWidget(self._copy)
+        if chosen.copyable:
+            buttons.addWidget(self._offer_to_copy(title, message))
         if chosen.work_on_this is not None:
             self._work_on_this = chosen.work_on_this
             work_on_this = _button(WORK_ON_THIS, self._open_and_close)
@@ -209,6 +206,18 @@ class AlertDialog(QDialog):
         outer.setSpacing(GAP_DIALOG)
         outer.addLayout(said)
         outer.addLayout(buttons)
+        if chosen.copyable:
+            self._keep_copy_as_wide_as_copied()
+
+    def _offer_to_copy(self, title: str, message: str) -> QPushButton:
+        self._said = copyable_alert.said(title, message)
+        self._copy = _button(copyable_alert.COPY, self._copy_and_say_so)
+        self._copy.setToolTip(copyable_alert.COPY_TIP)
+        self._back_to_copy = QTimer(self, singleShot=True, interval=copyable_alert.COPIED_SHOWN_MS)
+        self._back_to_copy.timeout.connect(self._offer_to_copy_again)
+        return self._copy
+
+    def _keep_copy_as_wide_as_copied(self) -> None:
         self._copy.ensurePolished()
         self._copy.setMinimumWidth(self._copy.sizeHint().width())
 
