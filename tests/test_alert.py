@@ -408,6 +408,12 @@ def test_an_alert_with_nothing_to_work_on_offers_no_work_on_this():
     assert [button.text() for button in _buttons_left_to_right(dlg)] == ["Copy error message", "OK"]
 
 
+def test_a_message_he_would_never_report_offers_no_copy_error_message():
+    dlg = AlertDialog("Example App", "Your OSR2 is still on.\nTurn it off.", copyable=False)
+
+    assert [button.text() for button in _buttons_left_to_right(dlg)] == ["OK"]
+
+
 def test_work_on_this_says_in_its_tooltip_what_pressing_it_does():
     dlg = AlertDialog("Example App", "The script matches no video.", work_on_this="claude://code/new")
     _copy, work_on_this, _ok = _buttons_left_to_right(dlg)
