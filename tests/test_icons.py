@@ -285,7 +285,7 @@ _THE_ICONS = (
     "chevron_right", "chevron_up", "chevrons_left", "chevrons_right", "circle", "circle_slash",
     "clip_to_scene", "clips", "clock", "compilation",
     "control_off", "copy", "cross", "crown", "database", "disc", "enhance_filter", "enlarge", "error",
-    "expand_horizontal", "export", "external_link", "filter", "flask", "flat_2d", "flip_ends",
+    "expand_horizontal", "export", "external_link", "favorite_filter", "filter", "flask", "flat_2d", "flip_ends",
     "folder", "full", "funscript_jump", "grid", "headset", "human",
     "info", "jigsaw", "landscape", "latest", "lock", "log", "loop", "mic", "minus", "monitor",
     "moon", "more", "more_vertical", "pair_in_circle", "park", "pause", "pencil",
@@ -646,6 +646,14 @@ def test_the_enhance_filter_reads_as_one_sign_rather_than_two_controls_crowded_t
     assert _pieces(icon) == 1
 
     assert any(x <= 8 for x, _y in icon), "the plus's arm is missing"
+    assert any(y >= 42 for _x, y in icon), "the funnel's stem is missing"
+
+
+def test_the_favorite_filter_is_the_star_with_the_same_funnel_reading_as_one_sign():
+    icon = _ink(icons.icon_pixmap("favorite_filter", 48, TEXT_PRIMARY))
+    assert _pieces(icon) == 1
+
+    assert any(x <= 4 for x, _y in icon), "the star's left point is missing"
     assert any(y >= 42 for _x, y in icon), "the funnel's stem is missing"
 
 

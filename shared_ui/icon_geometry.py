@@ -111,14 +111,17 @@ def _history_arrow(forward: bool) -> tuple:
     )
 
 
-def _star(filled: bool) -> tuple:
-    cx, cy, outer, inner = 24, 25, 17, 7
+def _star_points(cx: float, cy: float, *, outer: float, inner: float) -> tuple:
     points = []
     for index in range(10):
         angle = -math.pi / 2 + index * math.pi / 5
         radius = outer if index % 2 == 0 else inner
         points.append((cx + radius * math.cos(angle), cy + radius * math.sin(angle)))
-    return (Polygon(tuple(points), fill=filled, width=3),)
+    return tuple(points)
+
+
+def _star(filled: bool) -> tuple:
+    return (Polygon(_star_points(24, 25, outer=17, inner=7), fill=filled, width=3),)
 
 
 def _shield() -> tuple:
@@ -149,18 +152,30 @@ def _plus_outline() -> tuple:
     return (Polygon(tuple(points), fill=False, width=2.4),)
 
 
+_FILTERED_SIGN_CENTER = 16.0
+_FILTERED_SIGN_REACH = 10.0
+
+
+def _a_funnel_opening_at(mouth: float) -> Polygon:
+    return Polygon(
+        ((17, mouth), (45, mouth), (33.5, mouth + 10), (33.5, 45), (28.5, 41), (28.5, mouth + 10)),
+        fill=False, width=3.2)
+
+
 def _enhance_filter() -> tuple:
-    x, y = 16.0, 16.0
-    bar, reach = 6.0, 10.0
+    x = y = _FILTERED_SIGN_CENTER
+    bar, reach = 6.0, _FILTERED_SIGN_REACH
     the_plus = (
         Line(x, y - reach, x, y + reach, bar),
         Line(x - reach, y, x + reach, y, bar),
     )
-    mouth = y + reach
-    a_funnel_from_its_lower_arm = Polygon(
-        ((17, mouth), (45, mouth), (33.5, mouth + 10), (33.5, 45), (28.5, 41), (28.5, mouth + 10)),
-        fill=False, width=3.2)
-    return (*the_plus, a_funnel_from_its_lower_arm)
+    return (*the_plus, _a_funnel_opening_at(y + reach))
+
+
+def _favorite_filter() -> tuple:
+    center = _FILTERED_SIGN_CENTER
+    the_star = Polygon(_star_points(center, center, outer=13, inner=5.5), fill=True, width=3)
+    return (the_star, _a_funnel_opening_at(center + _FILTERED_SIGN_REACH))
 
 
 def _copy() -> tuple:
@@ -732,6 +747,7 @@ ICONS: dict[str, tuple] = {
     "database": _database(),
     "disc": (Ellipse(24, 24, 21, 21, fill=True),),
     "enhance_filter": _enhance_filter(),
+    "favorite_filter": _favorite_filter(),
     "enlarge": (
         Polyline(((8, 19), (8, 8), (19, 8))), Polyline(((29, 8), (40, 8), (40, 19))),
         Polyline(((40, 29), (40, 40), (29, 40))), Polyline(((19, 40), (8, 40), (8, 29))),
