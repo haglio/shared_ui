@@ -281,7 +281,7 @@ def test_an_icon_drawn_over_a_chip_keeps_the_chip_underneath():
 
 
 _THE_ICONS = (
-    "arrow_left", "arrow_right", "bolt", "cells_in_circle", "chart", "check", "chevron_down", "chevron_left",
+    "arrow_left", "arrow_right", "arrow_up", "bolt", "cells_in_circle", "chart", "check", "chevron_down", "chevron_left",
     "chevron_right", "chevron_up", "chevrons_left", "chevrons_right", "circle", "circle_slash",
     "clip_to_scene", "clips", "clock", "compilation",
     "control_off", "copy", "cross", "crown", "database", "disc", "enhance_filter", "enlarge", "error",
@@ -291,7 +291,8 @@ _THE_ICONS = (
     "moon", "more", "more_vertical", "pair_in_circle", "park", "pause", "pencil",
     "photo", "play", "plus",
     "plus_outline", "portrait", "portrait_and_landscape", "portrait_beside_landscape", "power",
-    "question", "redo_arrow", "regenerate_corner", "release", "reset", "restart", "retract",
+    "question", "redo_arrow", "regenerate_corner", "release", "reset", "restart", "reticle",
+    "retract",
     "save", "scene_to_clip", "screen_arrow_down", "settings", "shield", "shuffle", "slideshow",
     "snowflake_struck_out", "speaker", "speaker_off", "star", "star_outline", "star_ring",
     "stop", "tag", "thumbs_up", "trash", "undo_arrow", "unlock", "versions", "vr_hemisphere",
@@ -311,6 +312,30 @@ def test_the_plain_arrows_are_one_arrow_pointing_each_way():
     assert left_tip < left_tail
     assert (CANVAS - left_tail, CANVAS - left_tip, [CANVAS - x for x in left_head]) == (
         right_tail, right_tip, right_head)
+
+
+def test_the_up_arrow_is_the_left_arrow_turned_to_point_up():
+    left_stem, left_head = ICONS["arrow_left"]
+    up_stem, up_head = ICONS["arrow_up"]
+
+    assert (up_stem.x1, up_stem.y1, up_stem.x2, up_stem.y2) == (
+        left_stem.y1, left_stem.x1, left_stem.y2, left_stem.x2)
+    assert up_stem.y2 < up_stem.y1
+    assert up_head.points == tuple((y, x) for x, y in left_head.points)
+    assert (up_stem.width, up_head.width) == (left_stem.width, left_head.width)
+
+
+def test_the_reticle_is_a_ring_with_a_tick_crossing_it_on_each_side():
+    ring, *ticks = ICONS["reticle"]
+    middle = CANVAS / 2
+
+    assert (ring.cx, ring.cy, ring.rx) == (middle, middle, ring.ry)
+    assert not ring.fill
+    reaches = sorted(
+        (tick.x1 - middle, tick.y1 - middle, tick.x2 - middle, tick.y2 - middle) for tick in ticks)
+    (out, _zero, near, _), *_rest = reaches
+    assert -middle < out < -ring.rx < near < 0
+    assert reaches == sorted([(out, 0, near, 0), (-near, 0, -out, 0), (0, out, 0, near), (0, -near, 0, -out)])
 
 
 def test_the_icons_this_family_draws_are_the_ones_the_apps_ask_for():
