@@ -13,6 +13,5 @@ _.eventFilter
 pytest_plugins
 pytestmark
 
-MESSAGE_TOP_MARGIN
 
 SIZES
