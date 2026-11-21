@@ -93,7 +93,27 @@ def _arrow(pointing_left: bool) -> tuple:
 
 
 def _turned_a_quarter(shapes: tuple) -> tuple:
-    return tuple(Polyline(tuple((y, x) for x, y in shape.points), shape.width) for shape in shapes)
+    def turned(shape):
+        if isinstance(shape, Line):
+            return Line(shape.y1, shape.x1, shape.y2, shape.x2, shape.width)
+        return Polyline(tuple((y, x) for x, y in shape.points), shape.width)
+
+    return tuple(turned(shape) for shape in shapes)
+
+
+_RETICLE_RING = 12.0
+_RETICLE_TICK_FROM = 4.0
+_RETICLE_TICK_TO = 17.0
+_RETICLE_PEN = 4.0
+
+
+def _reticle() -> tuple:
+    middle = CANVAS / 2
+    near, far = _RETICLE_TICK_FROM, _RETICLE_TICK_TO
+    across = Line(near, middle, far, middle, _RETICLE_PEN)
+    mirrored = Line(CANVAS - far, middle, CANVAS - near, middle, _RETICLE_PEN)
+    return (Ellipse(middle, middle, _RETICLE_RING, _RETICLE_RING, width=_RETICLE_PEN),
+            across, mirrored, *_turned_a_quarter((across, mirrored)))
 
 
 _HISTORY_RING = (11, 13, 26, 26)
@@ -718,6 +738,7 @@ ICONS: dict[str, tuple] = {
     ),
     "arrow_left": _arrow(pointing_left=True),
     "arrow_right": _arrow(pointing_left=False),
+    "arrow_up": _turned_a_quarter(_arrow(pointing_left=True)),
     "chevron_down": _turned_a_quarter(_chevron(pointing_left=False)),
     "chevron_left": _chevron(pointing_left=True),
     "chevron_right": _chevron(pointing_left=False),
@@ -843,6 +864,7 @@ ICONS: dict[str, tuple] = {
     "release": _release(),
     "reset": _reset(),
     "restart": _restart(),
+    "reticle": _reticle(),
     "retract": _retract(),
     "save": (
         Polygon(((8, 8), (33, 8), (40, 15), (40, 40), (8, 40)), fill=False, width=4),
