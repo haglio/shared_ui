@@ -43,7 +43,7 @@ def test_a_short_tooltip_stays_one_line():
 
 
 def test_a_long_tooltip_is_shown_as_a_block_of_lines():
-    assert shaped(LONG) == ('<p style="white-space:pre">How strictly the model obeys the prompt. '
+    assert shaped(LONG) == ('<p align="center" style="white-space:pre">How strictly the model obeys the prompt. '
                             "Too low drifts off it; too high burns\ncontrast &amp; flattens "
                             "&lt;detail&gt;.</p>")
 
@@ -51,7 +51,7 @@ def test_a_long_tooltip_is_shown_as_a_block_of_lines():
 def test_every_line_of_a_long_tooltip_is_at_most_eighty_characters():
     words = " ".join(f"word{n}" for n in range(60))
 
-    lines = html.unescape(shaped(words).removeprefix('<p style="white-space:pre">')
+    lines = html.unescape(shaped(words).removeprefix('<p align="center" style="white-space:pre">')
                           .removesuffix("</p>")).split("\n")
 
     assert max(len(line) for line in lines) <= 80
@@ -65,7 +65,7 @@ def test_a_tooltip_already_written_as_rich_text_is_left_as_written():
 
 def test_a_tooltip_can_open_with_a_bold_white_lead():
     assert shaped("Euler a on model pages.", lead="Recommended.") == (
-        f'<p style="white-space:pre"><b style="color:{WHITE.name()}">Recommended.</b> '
+        f'<p align="center" style="white-space:pre"><b style="color:{WHITE.name()}">Recommended.</b> '
         "Euler a on model pages.</p>")
 
 

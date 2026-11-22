@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from shared_ui import tooltip_look
 from shared_ui.palette import (
     BG_BUTTON,
     BG_BUTTON_ACTIVE,
@@ -45,13 +46,12 @@ def ground_rules() -> str:
 
 
 def tooltip_rules() -> str:
-    """A rounded style-sheet tooltip on Windows paints artifact rectangles around itself."""
     return f"""
     QToolTip {{
-        background-color: {as_hex(BG_TERTIARY)};
-        color: {as_hex(TEXT_PRIMARY)};
-        border: 1px solid {as_hex(BORDER_SUBTLE)};
-        padding: {BUTTON_PAD_V}px {BUTTON_PAD_H_TIGHT}px;
+        {tooltip_look.qt_box()}
+        {tooltip_look.qt_lettering()}
+        padding: {tooltip_look.PAD}px;
+        qproperty-alignment: AlignCenter;
     }}"""
 
 
