@@ -259,11 +259,11 @@ def show_alert(title: str, message: str, **look) -> bool:
     return closed_with == DISMISSED
 
 
-def show_fault(title: str, message: str, **look) -> bool:
+def show_error(title: str, message: str, **look) -> bool:
     return show_alert(title, message, copyable=True, **look)
 
 
-def show_notice(title: str, message: str, *, level: Level = Level.WARNING, icon: Path | QIcon | None = None,
+def show_warning(title: str, message: str, *, level: Level = Level.WARNING, icon: Path | QIcon | None = None,
                 button_text: str = "OK", links: Sequence[Link] = (), dismissible: bool = False) -> bool:
     return show_alert(title, message, copyable=False, level=level, icon=icon, button_text=button_text,
                       links=links, dismissible=dismissible)
