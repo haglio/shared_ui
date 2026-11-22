@@ -64,6 +64,20 @@ again to take an update -- shows none, which is why an app opens its own with
 `Loading.at_the_click`, and why a launcher something other than his click runs
 carries no `loading-screen`.
 
+## An error window is a fault or a notice, and the kind decides its buttons
+
+Every app opens its error windows through `shared_ui.alert`, as one of two kinds:
+
+- **`show_fault`** for a fault in the program -- something failed, usually with a
+  reason, a path or a log -- the kind of window a person takes to a Claude session.
+  It offers Copy error message, and Work on this where the app passes one.
+- **`show_notice`** for a window that is part of the app's normal use -- a reminder,
+  an "already running", a "do this first" -- whose words never change and which
+  says plainly what to do. It offers neither button.
+
+The kind is the code's to choose by that test: never ask the user which kind a
+window is, and never pass `copyable` to `show_alert` from an app.
+
 ## Its words
 
 - **`glossary.json` lists the things this library draws and their words, and `tests/test_glossary.py` holds the code to it.** A noun for a drawn thing is a row there before it is a word in the code; a rename moves the old word from the row's `code_today` to its `retired`.
