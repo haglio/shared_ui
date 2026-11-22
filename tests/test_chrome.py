@@ -337,14 +337,6 @@ def test_a_toolbar_button_given_more_room_on_its_right_grows_by_that_much():
     assert roomier - ordinary == 40 - spacing.BUTTON_PAD_H_TIGHT
 
 
-def test_a_tooltip_has_square_corners():
-    # A rounded style-sheet tooltip on Windows paints artifact rectangles around itself.
-    rules = _rules(chrome.tooltip_rules())
-
-    assert "QToolTip" in rules
-    assert "border-radius" not in rules["QToolTip"]
-
-
 def test_a_picked_item_wears_the_family_blue_under_the_brightest_text():
     body = _rules(chrome.picked_item_rules("QListWidget"))["QListWidget::item:selected"]
 

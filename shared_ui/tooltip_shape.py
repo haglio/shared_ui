@@ -25,7 +25,7 @@ def shaped(text: str, *, lead: str = "") -> str:
     if lead:
         bold = html.escape(lead, quote=False)
         block = f'<b style="color:{as_hex(WHITE)}">{bold}</b>' + block[len(bold):]
-    return '<p style="white-space:pre">' + block + "</p>"
+    return '<p align="center" style="white-space:pre">' + block + "</p>"
 
 
 class _ShapeLongTooltips(QObject):
