@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import sys
 import threading
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -136,6 +137,18 @@ class _AlertLook:
     copyable: bool = True
 
 
+def _claim_a_taskbar_identity_unless_the_app_has(app: str) -> None:
+    if sys.platform != "win32":
+        return
+    from app_support import win32  # noqa: PLC0415  (winreg, which it imports, is Windows' own)
+
+    try:
+        if win32.claimed_app_user_model_id() is None:
+            win32.set_app_user_model_id(copyable_alert.taskbar_identity(app))
+    except OSError:
+        pass
+
+
 class AlertDialog(QDialog):
     def __init__(
         self,
@@ -156,6 +169,7 @@ class AlertDialog(QDialog):
         if chosen.icon is not None:
             given = chosen.icon
             self.setWindowIcon(given if isinstance(given, QIcon) else QIcon(str(given)))
+            _claim_a_taskbar_identity_unless_the_app_has(title if isinstance(given, QIcon) else str(given))
         self.setPalette(family_palette(self.palette()))
         self.setStyleSheet(f"""
             QDialog {{ background: {BG_TERTIARY.name()}; }}

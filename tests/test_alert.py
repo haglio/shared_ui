@@ -4,7 +4,9 @@ import threading
 from unittest.mock import patch
 
 import pytest
+from app_support import copyable_alert
 from app_support.copyable_alert import COPY_TIP
+from app_support.testing import app_id_already_claimed, app_id_claimed
 from PySide6.QtCore import QMargins, QPoint, QRect, Qt, QThread, QTimer, QUrl
 from PySide6.QtGui import QColor, QFontMetrics, QIcon, QPalette, QPixmap, QTextDocument
 from PySide6.QtTest import QTest
@@ -252,6 +254,30 @@ def test_the_dialog_wears_the_apps_own_icon(tmp_path):
     dlg = AlertDialog("Example App", "Nothing to do.", icon=icon)
 
     assert not dlg.windowIcon().isNull()
+
+
+def _taskbar_identity_claimed_by_an_alert(icon, *, already_claimed: str | None) -> list[str]:
+    claimed = []
+    with app_id_already_claimed(already_claimed), app_id_claimed(side_effect=claimed.append):
+        AlertDialog("Example App", "Nothing to do.", icon=icon)
+    return claimed
+
+
+def test_an_alert_whose_app_claimed_no_taskbar_identity_claims_one_so_its_button_wears_the_icon(tmp_path):
+    # Unclaimed, Windows draws the taskbar button with the icon of the program running the
+    # window, the python interpreter, whatever icon the window wears.
+    icon = tmp_path / "app.ico"
+
+    assert _taskbar_identity_claimed_by_an_alert(icon, already_claimed=None) == [
+        copyable_alert.taskbar_identity(str(icon))]
+
+
+def test_an_alert_leaves_the_taskbar_identity_its_app_claimed(tmp_path):
+    assert _taskbar_identity_claimed_by_an_alert(tmp_path / "app.ico", already_claimed="Example.App") == []
+
+
+def test_an_alert_with_no_icon_of_its_apps_claims_no_taskbar_identity():
+    assert _taskbar_identity_claimed_by_an_alert(None, already_claimed=None) == []
 
 
 def test_the_dialog_wears_an_icon_the_app_has_already_drawn():
