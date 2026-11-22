@@ -14,7 +14,7 @@ from PySide6.QtCore import QObject, QThread
 from PySide6.QtWidgets import QApplication, QWidget
 
 from shared_ui.gui_thread_collection import collect_cycles_on_the_gui_thread
-from shared_ui.tooltip_shape import shape_long_tooltips
+from shared_ui.tooltip_reach import dress_tooltips
 
 _log = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ def application(argv: list[str]) -> Iterator[QApplication]:
         yield made_elsewhere
         return
     app = QApplication(argv)
-    shape_long_tooltips(app)
+    dress_tooltips(app)
     collection = collect_cycles_on_the_gui_thread(app)
     try:
         yield app
