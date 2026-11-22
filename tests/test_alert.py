@@ -21,6 +21,8 @@ from shared_ui.alert import (
     Link,
     icon_pixmap_for,
     show_alert,
+    show_fault,
+    show_notice,
 )
 from shared_ui.chrome import family_stylesheet
 from shared_ui.colors import (
@@ -473,3 +475,22 @@ def test_the_message_sits_on_the_dialogs_ground_in_an_app_that_dresses_every_wid
         app.setStyleSheet(worn)
 
     assert behind_the_message == BG_TERTIARY.name()
+
+
+def test_a_fault_in_the_program_offers_its_message_to_copy():
+    with patch("shared_ui.alert.show_alert") as shown:
+        show_fault("Example App", "The scene file could not be read.", work_on_this="claude://code/new")
+
+    assert shown.call_args.kwargs == {"copyable": True, "work_on_this": "claude://code/new"}
+
+
+def test_a_notice_that_is_part_of_the_apps_normal_use_offers_nothing_to_copy():
+    with patch("shared_ui.alert.show_alert") as shown:
+        show_notice("Example App", "Open a video first.", level=Level.WARNING)
+
+    assert (shown.call_args.kwargs["copyable"], shown.call_args.kwargs["level"]) == (False, Level.WARNING)
+
+
+def test_a_notice_offers_no_work_on_this_either():
+    with pytest.raises(TypeError):
+        show_notice("Example App", "Open a video first.", work_on_this="claude://code/new")
