@@ -183,6 +183,7 @@ def toolbar_rules() -> str:
     return f"""
     QToolBar {{
         spacing: {BUTTON_GAP}px;
+        border: none;
     }}
     QToolButton {{
         {_A_BUTTON_S_FRAME}

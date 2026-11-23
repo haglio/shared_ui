@@ -292,6 +292,19 @@ def test_a_toolbar_button_under_the_pointer_sits_one_step_lighter_than_at_rest(
     assert under_the_pointer == colors.hovered(QColor(at_rest)).name()
 
 
+def test_a_toolbar_draws_no_line_of_its_own_along_its_edges():
+    toolbar, button = _toolbar_button()
+    toolbar.resize(button.width() * 3, toolbar.height())
+    QApplication.processEvents()
+    drawn = toolbar.grab().toImage()
+    toolbar.close()
+
+    past_the_button = button.width() * 2
+    ground = drawn.pixelColor(past_the_button, drawn.height() // 2).name()
+    edges = {drawn.pixelColor(past_the_button, y).name() for y in (0, drawn.height() - 1)}
+    assert edges == {ground}, "the native style draws a gray line along a toolbar's top"
+
+
 def test_a_toolbar_s_buttons_stand_the_family_s_button_gap_apart():
     toolbar = QToolBar()
     chrome.style_toolbar(toolbar)
