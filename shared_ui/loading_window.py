@@ -15,9 +15,9 @@ from PySide6.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout
 from shared_ui.foreground import bring_to_front
 from shared_ui.loading_handover import TakingOver
 from shared_ui.loading_panel import LoadingPanel, icon_image, render
-from shared_ui.palette import LOADING_ACCENT, PREVIEW_INK
 from shared_ui.preview import Preview
 from shared_ui.preview_icon_pil import in_preview_ink
+from shared_ui.wordmark import wordmark_ink
 
 CANCELING = "Canceling..."
 
@@ -48,7 +48,7 @@ class LoadingWindow(QDialog):
             status=next(iter(self._done_before)),
             fraction=0.0,
             hint=spec.cancel_hint,
-            ink=LOADING_ACCENT if spec.preview is None else PREVIEW_INK,
+            ink=wordmark_ink(spec.preview),
             icon=_inked(icon_image(spec.icon), spec.preview),
         )
         self._panel = replace(self._opening, fraction=self._taking_over.carried(0.0))

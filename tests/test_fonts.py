@@ -5,6 +5,7 @@ from shared_ui.fonts import (
     SIZE_BODY,
     SIZE_HEADING,
     make_font,
+    wordmark_font,
 )
 
 
@@ -29,3 +30,17 @@ class TestMakeFont:
         a = make_font(FONT_UI, SIZE_BODY, False)
         b = make_font(FONT_UI, SIZE_BODY, False)
         assert a is b
+
+
+class TestWordmarkFont:
+    def test_the_wordmark_is_lettered_in_the_familys_body_size(self):
+        f = wordmark_font()
+        assert (f.family(), f.pointSize()) == (FONT_UI, SIZE_BODY)
+
+    def test_the_wordmark_is_bold_italic(self):
+        f = wordmark_font()
+        assert f.bold()
+        assert f.italic()
+
+    def test_each_wordmark_font_is_its_own_so_a_change_to_one_reaches_no_other(self):
+        assert wordmark_font() is not wordmark_font()
