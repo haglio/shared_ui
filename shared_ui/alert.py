@@ -134,7 +134,6 @@ class _AlertLook:
     links: Sequence[Link] = ()
     dismissible: bool = False
     work_on_this: str | None = None
-    copyable: bool = True
 
 
 def _claim_a_taskbar_identity_unless_the_app_has(app: str) -> None:
@@ -202,7 +201,7 @@ class AlertDialog(QDialog):
 
         buttons = QHBoxLayout()
         buttons.addStretch()
-        if chosen.copyable:
+        if chosen.level is Level.ERROR:
             buttons.addWidget(self._offer_to_copy(title, message))
         if chosen.work_on_this is not None:
             self._work_on_this = chosen.work_on_this
@@ -220,7 +219,7 @@ class AlertDialog(QDialog):
         outer.setSpacing(GAP_DIALOG)
         outer.addLayout(said)
         outer.addLayout(buttons)
-        if chosen.copyable:
+        if chosen.level is Level.ERROR:
             self._keep_copy_as_wide_as_copied()
 
     def _offer_to_copy(self, title: str, message: str) -> QPushButton:
@@ -259,11 +258,13 @@ def show_alert(title: str, message: str, **look) -> bool:
     return closed_with == DISMISSED
 
 
-def show_error(title: str, message: str, **look) -> bool:
-    return show_alert(title, message, copyable=True, **look)
+def show_error(title: str, message: str, *, icon: Path | QIcon | None = None, button_text: str = "OK",
+               links: Sequence[Link] = (), dismissible: bool = False, work_on_this: str | None = None) -> bool:
+    return show_alert(title, message, level=Level.ERROR, icon=icon, button_text=button_text, links=links,
+                      dismissible=dismissible, work_on_this=work_on_this)
 
 
-def show_warning(title: str, message: str, *, level: Level = Level.WARNING, icon: Path | QIcon | None = None,
-                button_text: str = "OK", links: Sequence[Link] = (), dismissible: bool = False) -> bool:
-    return show_alert(title, message, copyable=False, level=level, icon=icon, button_text=button_text,
-                      links=links, dismissible=dismissible)
+def show_warning(title: str, message: str, *, icon: Path | QIcon | None = None, button_text: str = "OK",
+                 links: Sequence[Link] = (), dismissible: bool = False) -> bool:
+    return show_alert(title, message, level=Level.WARNING, icon=icon, button_text=button_text, links=links,
+                      dismissible=dismissible)

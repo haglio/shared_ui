@@ -75,9 +75,10 @@ Every app opens these windows through `shared_ui.alert`, as one of two kinds:
   reminder, an "already running", a "do this first" -- whose words never change
   and which says plainly what to do. It offers neither button.
 
-The kind is the code's to choose by that test, apart from the icon (`level`),
-which each kind takes as before: never ask the user which kind a window is,
-and never pass `copyable` to `show_alert` from an app.
+The kind also decides the icon: an error shows the red X and a warning the
+yellow triangle, and neither takes a `level` from an app. The kind is the
+code's to choose by that test: never ask the user which kind a window is, and
+never call `show_alert` from an app.
 
 ## Its words
 
