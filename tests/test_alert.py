@@ -306,14 +306,14 @@ def test_show_alert_opens_the_dialog_the_caller_described(tmp_path):
         show_alert(
             "Example App",
             "Nothing to do.",
-            level=Level.INFO,
+            level=Level.WARNING,
             icon=icon,
             button_text="Got it",
             links=links,
         )
 
     dialog.assert_called_once_with(
-        "Example App", "Nothing to do.", level=Level.INFO, icon=icon, button_text="Got it", links=links,
+        "Example App", "Nothing to do.", level=Level.WARNING, icon=icon, button_text="Got it", links=links,
     )
     dialog.return_value.exec.assert_called_once_with()
 
@@ -436,8 +436,8 @@ def test_an_alert_with_nothing_to_work_on_offers_no_work_on_this():
     assert [button.text() for button in _buttons_left_to_right(dlg)] == ["Copy error message", "OK"]
 
 
-def test_a_message_he_would_never_report_offers_no_copy_error_message():
-    dlg = AlertDialog("Example App", "Your OSR2 is still on.\nTurn it off.", copyable=False)
+def test_a_warning_offers_no_copy_error_message():
+    dlg = AlertDialog("Example App", "Your OSR2 is still on.\nTurn it off.", level=Level.WARNING)
 
     assert [button.text() for button in _buttons_left_to_right(dlg)] == ["OK"]
 
@@ -503,18 +503,25 @@ def test_the_message_sits_on_the_dialogs_ground_in_an_app_that_dresses_every_wid
     assert behind_the_message == BG_TERTIARY.name()
 
 
-def test_an_error_in_the_program_offers_its_message_to_copy():
+def test_an_error_in_the_program_is_the_red_x_window():
     with patch("shared_ui.alert.show_alert") as shown:
         show_error("Example App", "The scene file could not be read.", work_on_this="claude://code/new")
 
-    assert shown.call_args.kwargs == {"copyable": True, "work_on_this": "claude://code/new"}
+    assert shown.call_args.kwargs["level"] is Level.ERROR
+    assert shown.call_args.kwargs["work_on_this"] == "claude://code/new"
 
 
-def test_a_warning_that_is_part_of_the_apps_normal_use_offers_nothing_to_copy():
+def test_a_warning_that_is_part_of_the_apps_normal_use_is_the_yellow_triangle_window():
     with patch("shared_ui.alert.show_alert") as shown:
-        show_warning("Example App", "Open a video first.", level=Level.WARNING)
+        show_warning("Example App", "Open a video first.")
 
-    assert (shown.call_args.kwargs["copyable"], shown.call_args.kwargs["level"]) == (False, Level.WARNING)
+    assert shown.call_args.kwargs["level"] is Level.WARNING
+
+
+@pytest.mark.parametrize("show", [show_error, show_warning])
+def test_neither_kind_lets_an_app_choose_its_icon(show):
+    with pytest.raises(TypeError):
+        show("Example App", "Open a video first.", level=Level.ERROR)
 
 
 def test_a_warning_offers_no_work_on_this_either():
