@@ -723,6 +723,9 @@ def _snowflake_struck_out() -> tuple:
     return (ring, *arms, slash)
 
 
+_RAISED_TRIANGLE = Polygon(((24, 7), (43, 40), (5, 40)), fill=False, width=4.5)
+
+
 ICONS: dict[str, tuple] = {
     "bolt": (
         Polygon(((34, 6), (28.5, 22.5), (36, 22.5), (14.5, 42), (20, 27.5), (12, 27.5))),
@@ -766,6 +769,7 @@ ICONS: dict[str, tuple] = {
         Line(37, 11, 11, 37, 5.5),
     ),
     "database": _database(),
+    "delta": (_RAISED_TRIANGLE,),
     "disc": (Ellipse(24, 24, 21, 21, fill=True),),
     "enhance_filter": _enhance_filter(),
     "favorite_filter": _favorite_filter(),
@@ -910,8 +914,7 @@ ICONS: dict[str, tuple] = {
     "unlock": _lock(open_=True),
     "versions": _versions(),
     "vr_hemisphere": _vr_hemisphere(),
-    "warning": (Polygon(((24, 7), (43, 40), (5, 40)), fill=False, width=4.5),
-                Line(24, 18, 24, 28, 5), Ellipse(24, 34.5, 2.8, 2.8, fill=True)),
+    "warning": (_RAISED_TRIANGLE, Line(24, 18, 24, 28, 5), Ellipse(24, 34.5, 2.8, 2.8, fill=True)),
     "wave": (
         Arc(6, 11, 18, 26, 0, 180),
         Arc(24, 11, 18, 26, 180, 180),
