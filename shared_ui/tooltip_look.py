@@ -1,33 +1,26 @@
 from __future__ import annotations
 
-from shared_ui.palette import BG_PRIMARY, BORDER_PANEL, TEXT_PRIMARY, as_hex, as_rgba
-from shared_ui.spacing import BUTTON_RADIUS, GAP_SMALL
-from shared_ui.type_scale import FONT_UI, SIZE_TINY, in_pixels
+from shared_ui.palette import BG_TERTIARY, BORDER_SUBTLE, TEXT_PRIMARY, as_hex
+from shared_ui.spacing import BUTTON_PAD_H_TIGHT, BUTTON_PAD_V
 
-__all__ = ["GROUND", "GROUND_ALPHA", "INK", "LETTERING", "LETTERING_SIZE", "OUTLINE", "PAD", "RADIUS",
+__all__ = ["GROUND", "INK", "OUTLINE", "PAD_H", "PAD_V",
            "qt_box", "qt_lettering", "web_box"]
 
-GROUND = BG_PRIMARY
-GROUND_ALPHA = 240
-OUTLINE = BORDER_PANEL
+GROUND = BG_TERTIARY
+OUTLINE = BORDER_SUBTLE
 INK = TEXT_PRIMARY
-RADIUS = BUTTON_RADIUS
-PAD = GAP_SMALL
-LETTERING = FONT_UI
-LETTERING_SIZE = SIZE_TINY
+PAD_V = BUTTON_PAD_V
+PAD_H = BUTTON_PAD_H_TIGHT
 
 
 def qt_box() -> str:
-    red, green, blue = GROUND
-    return (f"background-color: rgba({red}, {green}, {blue}, {GROUND_ALPHA}); "
-            f"border: 1px solid {as_hex(OUTLINE)}; border-radius: {RADIUS}px;")
+    return f"background-color: {as_hex(GROUND)}; border: 1px solid {as_hex(OUTLINE)};"
 
 
 def qt_lettering() -> str:
-    return f'color: {as_hex(INK)}; font: bold {LETTERING_SIZE}pt "{LETTERING}";'
+    return f"color: {as_hex(INK)};"
 
 
 def web_box() -> str:
-    return (f"background:{as_rgba(GROUND, round(GROUND_ALPHA / 255, 3))}; color:{as_hex(INK)}; "
-            f"border:1px solid {as_hex(OUTLINE)}; border-radius:{RADIUS}px; padding:{PAD}px; "
-            f"font:bold {in_pixels(LETTERING_SIZE)}px '{LETTERING}'; text-align:center")
+    return (f"background:{as_hex(GROUND)}; color:{as_hex(INK)}; "
+            f"border:1px solid {as_hex(OUTLINE)}; padding:{PAD_V}px {PAD_H}px")
