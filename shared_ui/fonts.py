@@ -12,7 +12,7 @@ from shared_ui.type_scale import (
     SIZE_TINY,
 )
 
-__all__ = ["FONT_UI", "SIZE_BODY", "SIZE_HEADING", "SIZE_SMALL", "SIZE_TINY", "make_font"]
+__all__ = ["FONT_UI", "SIZE_BODY", "SIZE_HEADING", "SIZE_SMALL", "SIZE_TINY", "make_font", "wordmark_font"]
 
 
 @lru_cache(maxsize=32)
@@ -25,4 +25,11 @@ def make_font(
     font.setPointSize(size)
     if bold:
         font.setBold(True)
+    return font
+
+
+def wordmark_font() -> QFont:
+    font = QFont(FONT_UI, SIZE_BODY)
+    font.setBold(True)
+    font.setItalic(True)
     return font
