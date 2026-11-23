@@ -8,7 +8,6 @@ from PySide6.QtWidgets import QApplication, QLabel, QToolTip
 from shared_ui import palette, tooltip_look
 from shared_ui.colors import dress_application
 from shared_ui.tooltip_shape import shaped
-from shared_ui.type_scale import in_pixels
 
 
 @pytest.fixture
@@ -35,42 +34,42 @@ def _shown_tooltip(text: str) -> QLabel:
     return shown[-1]
 
 
-def test_a_tooltip_is_a_rounded_box_the_screen_shows_through_at_its_corners(dressed):
+def test_a_tooltip_is_a_square_box_filled_to_its_corners(dressed):
     drawn = _shown_tooltip("Show this HUD again").grab().toImage()
 
-    corner = drawn.pixelColor(0, 0)
+    inside = drawn.pixelColor(1, 1)
     middle = drawn.pixelColor(drawn.width() // 2, drawn.height() - 2)
 
-    assert corner.alpha() == 0
+    assert (inside.red(), inside.green(), inside.blue()) == tooltip_look.GROUND
+    assert inside.alpha() == 255
     assert (middle.red(), middle.green(), middle.blue()) == tooltip_look.GROUND
-    assert middle.alpha() == tooltip_look.GROUND_ALPHA
 
 
-def test_a_tooltip_centers_its_words_as_a_hud_tooltip_does(dressed):
-    assert _shown_tooltip("Show this HUD again").alignment() & Qt.AlignmentFlag.AlignHCenter
+def test_a_tooltip_starts_its_words_at_the_left(dressed):
+    assert not _shown_tooltip("Show this HUD again").alignment() & Qt.AlignmentFlag.AlignHCenter
 
 
-def test_a_tooltip_is_lettered_in_the_huds_small_bold_type(dressed):
+def test_a_tooltip_is_lettered_as_the_apps_own_words_are(dressed):
     lettering = _shown_tooltip("Show this HUD again").font()
 
-    assert lettering.bold()
-    assert lettering.pointSize() == tooltip_look.LETTERING_SIZE
-    assert lettering.family() == tooltip_look.LETTERING
+    assert not lettering.bold()
+    assert lettering.pointSizeF() == dressed.font().pointSizeF()
+    assert lettering.family() == dressed.font().family()
 
 
-def test_every_line_of_a_long_tooltip_is_centered_under_the_one_above():
+def test_every_line_of_a_long_tooltip_starts_at_the_left():
     words = QTextDocument()
     words.setHtml(shaped(" ".join(f"word{n}" for n in range(60))))
 
-    assert words.firstBlock().blockFormat().alignment() & Qt.AlignmentFlag.AlignHCenter
+    assert not words.firstBlock().blockFormat().alignment() & Qt.AlignmentFlag.AlignHCenter
 
 
 def test_a_web_page_tooltip_draws_the_same_box_as_a_qt_one():
     rules = dict(part.split(":", 1) for part in tooltip_look.web_box().split("; "))
 
-    assert rules["background"] == palette.as_rgba(tooltip_look.GROUND, 0.941)
+    assert rules["background"] == palette.as_hex(tooltip_look.GROUND)
     assert rules["border"] == f"1px solid {palette.as_hex(tooltip_look.OUTLINE)}"
-    assert rules["border-radius"] == f"{tooltip_look.RADIUS}px"
-    assert rules["padding"] == f"{tooltip_look.PAD}px"
-    assert rules["text-align"] == "center"
-    assert rules["font"].startswith(f"bold {in_pixels(tooltip_look.LETTERING_SIZE)}px")
+    assert rules["padding"] == f"{tooltip_look.PAD_V}px {tooltip_look.PAD_H}px"
+    assert "border-radius" not in rules
+    assert "text-align" not in rules
+    assert "font" not in rules

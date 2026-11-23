@@ -50,8 +50,7 @@ def tooltip_rules() -> str:
     QToolTip {{
         {tooltip_look.qt_box()}
         {tooltip_look.qt_lettering()}
-        padding: {tooltip_look.PAD}px;
-        qproperty-alignment: AlignCenter;
+        padding: {tooltip_look.PAD_V}px {tooltip_look.PAD_H}px;
     }}"""
 
 

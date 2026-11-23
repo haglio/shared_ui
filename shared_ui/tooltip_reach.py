@@ -1,6 +1,5 @@
 """Qt shows a tooltip only over the active window unless that window is marked to
-always show them, and a style sheet's rounded tooltip keeps its square corners
-painted unless the tooltip's own window is see-through."""
+always show them."""
 from __future__ import annotations
 
 from PySide6.QtCore import QEvent, QObject, Qt
@@ -17,8 +16,6 @@ class _DressTooltipWindows(QObject):
             return False
         if event.type() == QEvent.Type.Show:
             watched.setAttribute(Qt.WidgetAttribute.WA_AlwaysShowToolTips)
-        elif event.type() == QEvent.Type.Polish and watched.metaObject().className() == "QTipLabel":
-            watched.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         return False
 
 
