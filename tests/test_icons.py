@@ -284,7 +284,7 @@ _THE_ICONS = (
     "arrow_left", "arrow_right", "arrow_up", "bolt", "cells_in_circle", "chart", "check", "chevron_down", "chevron_left",
     "chevron_right", "chevron_up", "chevrons_left", "chevrons_right", "circle", "circle_slash",
     "clip_to_scene", "clips", "clock", "compilation",
-    "control_off", "copy", "cross", "crown", "database", "disc", "enhance_filter", "enlarge", "error",
+    "control_off", "copy", "cross", "crown", "database", "delta", "disc", "enhance_filter", "enlarge", "error",
     "expand_horizontal", "export", "external_link", "favorite_filter", "filter", "flask", "flat_2d", "flip_ends",
     "folder", "full", "funscript_jump", "grid", "headset", "human",
     "info", "jigsaw", "landscape", "latest", "lock", "log", "loop", "mic", "minus", "monitor",
@@ -1032,6 +1032,10 @@ def test_the_warning_is_a_bar_and_a_dot_under_a_raised_triangles_point():
     assert point[1] < left[1] == right[1]
     assert bar.x1 == bar.x2 == dot.cx == point[0]
     assert point[1] < bar.y1 < bar.y2 < dot.cy < left[1]
+
+
+def test_the_delta_is_the_warnings_triangle_with_nothing_inside():
+    assert ICONS["delta"] == tuple(shape for shape in ICONS["warning"] if isinstance(shape, Polygon))
 
 
 def test_an_icon_drawn_to_fill_a_box_reaches_it_along_one_side_and_sits_in_its_middle():
