@@ -23,6 +23,10 @@ class _Grouped(QWidgetItem):
         self.group = group
 
 
+class _TrailingGroup(_Grouped, _Trailing):
+    pass
+
+
 class _Resume(NamedTuple):
     area: tuple[int, int, int]
     at: int
@@ -87,11 +91,12 @@ class FlowLayout(QLayout):
         self._group_spacing = spacing
         self.invalidate()
 
-    def add_group(self, widgets):
+    def add_group(self, widgets, *, trailing: bool = False):
         self._groups_added += 1
+        kind = _TrailingGroup if trailing else _Grouped
         for widget in widgets:
             self.addChildWidget(widget)
-            self.addItem(_Grouped(widget, self._groups_added))
+            self.addItem(kind(widget, self._groups_added))
 
     def add_full_row(self, widget):
         self.addChildWidget(widget)
