@@ -351,11 +351,19 @@ _WAVE_HALFWAY, _WAVE_LEVEL = (_WAVE_LEFT + _WAVE_RIGHT) / 2, (_WAVE_CREST + _WAV
 _POINTS_ALONG_A_WAVE = 36
 
 
+_HOW_LONG_A_WAVE_LINGERS_AT_ITS_ENDS = 0.6
+
+
+def _lingering_at_its_ends(swing: float) -> float:
+    return math.copysign(abs(swing) ** _HOW_LONG_A_WAVE_LINGERS_AT_ITS_ENDS, swing)
+
+
 def _one_wave_from_trough_to_trough() -> tuple:
     reach = _WAVE_TROUGH - _WAVE_LEVEL
     along = [step / _POINTS_ALONG_A_WAVE for step in range(_POINTS_ALONG_A_WAVE + 1)]
     return (Polyline(tuple(
-        (_WAVE_LEFT + part * (_WAVE_RIGHT - _WAVE_LEFT), _WAVE_LEVEL + reach * math.cos(math.tau * part))
+        (_WAVE_LEFT + part * (_WAVE_RIGHT - _WAVE_LEFT),
+         _WAVE_LEVEL + reach * _lingering_at_its_ends(math.cos(math.tau * part)))
         for part in along)),)
 
 
