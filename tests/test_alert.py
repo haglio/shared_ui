@@ -52,6 +52,16 @@ def test_the_dialog_carries_the_title_and_the_message():
     ]
 
 
+def test_a_folder_name_in_backticks_in_the_message_is_set_in_the_code_font():
+    dlg = AlertDialog("Example App", "Videos in `1_sorted` do not match.")
+
+    body = next(label for label in dlg.findChildren(QLabel) if "1_sorted" in label.text())
+    document = QTextDocument()
+    document.setHtml(body.text())
+    assert document.toPlainText() == "Videos in 1_sorted do not match."
+    assert body.textFormat() == Qt.TextFormat.RichText
+
+
 def _click(line: QLabel) -> None:
     QTest.mouseClick(line, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier,
                      QPoint(4, line.height() // 2))

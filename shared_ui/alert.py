@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 
 from shared_ui import palette
 from shared_ui.chrome import button_rules
+from shared_ui.code_text import as_rich_text
 from shared_ui.colors import (
     BG_TERTIARY,
     TEXT_SECONDARY,
@@ -180,6 +181,9 @@ class AlertDialog(QDialog):
         icon.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         body = QLabel(message)
+        if "`" in message:
+            body.setTextFormat(Qt.TextFormat.RichText)
+            body.setText(as_rich_text(message))
         body.setFont(make_font(size=SIZE_BODY))
         body.setWordWrap(True)
         body.setMinimumWidth(MESSAGE_WIDTH_MIN)

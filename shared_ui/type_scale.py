@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 FONT_UI = "Segoe UI"
+FONT_CODE = "Consolas"
 
 SIZE_TINY = 8
 SIZE_SMALL = 9
