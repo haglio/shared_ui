@@ -226,6 +226,28 @@ def test_a_group_that_does_not_fit_the_row_moves_to_the_next_row_whole(kept):
         "a group that starts a row starts at the row's edge, with no gap in front of it")
 
 
+def test_trailing_groups_sit_against_the_right_edge_and_wrap_whole_beside_a_leading_title(kept):
+    host = QWidget()
+    kept.append(host)
+    flow = FlowLayout(host, spacing=4, group_spacing=16)
+    title = QWidget()
+    title.setFixedSize(100, 40)
+    first, second = _squares(2), _squares(3)
+    flow.addWidget(title)
+    flow.add_group(first, trailing=True)
+    flow.add_group(second, trailing=True)
+
+    flow.setGeometry(QRect(0, 0, 500, 200))
+    assert title.pos().x() == 0
+    assert [square.x() for square in first + second] == [500 - 228 + n for n in (0, 44, 100, 144, 188)]
+    assert {square.y() for square in first + second} == {0}
+
+    flow.setGeometry(QRect(0, 0, 300, 200))
+    assert [square.y() for square in first + second] == [0, 0, 44, 44, 44]
+    assert first[-1].x() + 40 == 300
+    assert second[-1].x() + 40 == 300
+
+
 def test_groups_on_one_row_stand_the_wider_gap_apart(kept):
     host = QWidget()
     kept.append(host)
