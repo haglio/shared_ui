@@ -285,7 +285,8 @@ _THE_ICONS = (
     "chevron_right", "chevron_up", "chevrons_left", "chevrons_right", "circle", "circle_slash",
     "clip_to_scene", "clips", "clock", "compilation",
     "control_off", "copy", "cross", "crown", "database", "delta", "disc", "enhance_filter", "enlarge", "error",
-    "expand_horizontal", "export", "external_link", "favorite_filter", "filter", "flask", "flat_2d", "flip_ends",
+    "expand_horizontal", "export", "external_link", "favorite_filter", "filter", "flask", "flat_2d", "flick",
+    "flip_ends",
     "folder", "full", "funscript_jump", "grid", "headset", "human",
     "info", "jigsaw", "landscape", "latest", "lock", "log", "loop", "mic", "minus", "monitor",
     "moon", "more", "more_vertical", "pair_in_circle", "park", "pause", "pencil",
@@ -429,6 +430,35 @@ def test_each_waveform_is_drawn_in_the_frame_the_sine_fills():
     sine, *others = (_ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY)) for name in _WAVEFORMS)
     for name, frame in zip(_WAVEFORMS[1:], others, strict=True):
         assert all(abs(edge - sines) <= 1 for edge, sines in zip(frame, sine, strict=True)), name
+
+
+def _heights_across(name: str) -> tuple[float, float, float]:
+    left, top, right, bottom = _ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
+    ink = _ink(icons.icon_pixmap(name, 48, TEXT_PRIMARY))
+
+    def height_at(column: int) -> float:
+        rows = [y for x, y in ink if x == column]
+        return (bottom - sum(rows) / len(rows)) / (bottom - top)
+
+    return height_at(left + 2), height_at((left + right) // 2), height_at(right - 2)
+
+
+def test_a_flick_is_one_wave_from_its_trough_over_its_crest_to_its_trough():
+    starts, middle, ends = _heights_across("flick")
+    assert starts < 0.2
+    assert middle > 0.8
+    assert ends < 0.2
+
+
+def test_the_osr2_s_sine_starts_and_ends_in_its_middle_where_a_flick_s_wave_does_not():
+    starts, _middle, ends = _heights_across("wave")
+    assert 0.3 < starts < 0.7
+    assert 0.3 < ends < 0.7
+
+
+def test_a_flick_s_wave_is_drawn_in_the_frame_the_osr2_s_sine_fills():
+    flick, sine = (_ink_rect(icons.icon_pixmap(name, 48, TEXT_PRIMARY)) for name in ("flick", "wave"))
+    assert all(abs(edge - sines) <= 1 for edge, sines in zip(flick, sine, strict=True))
 
 
 def _climbs_and_falls(name: str) -> tuple[list[float], list[float]]:
