@@ -13,6 +13,7 @@ def kept():
     widgets = []
     yield widgets
     for widget in widgets:
+        widget.close()
         widget.deleteLater()
 
 
