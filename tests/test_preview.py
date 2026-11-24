@@ -39,11 +39,13 @@ def claude_desktop_keeps_no_records(tmp_path, monkeypatch) -> Path:
     return local
 
 
-def _claude_session(records: Path, title: str, checkout: Path, *, last_active: int = 1, name: str = "one") -> None:
+def _claude_session(records: Path, title: str, checkout: Path, *, last_active: int = 1, name: str = "one",
+                    **more) -> None:
     folder = records / "claude-code-sessions" / "account" / "project"
     folder.mkdir(parents=True, exist_ok=True)
     (folder / f"local_{name}.json").write_text(json.dumps(
-        {"title": title, "worktreePath": str(checkout), "cwd": str(checkout), "lastActivityAt": last_active}),
+        {"sessionId": f"local_{name}", "title": title, "worktreePath": str(checkout), "cwd": str(checkout),
+         "lastActivityAt": last_active, **more}),
         encoding="utf-8")
 
 
@@ -62,6 +64,14 @@ def test_the_sessions_name_is_found_where_an_app_outside_claudes_package_reads_i
     assert preview_of(worktree).feature == "Example scene pausing"
 
 
+def test_the_sessions_name_is_found_where_claude_keeps_a_windows_data_beside_its_package(
+        worktree, claude_desktop_keeps_no_records):
+    _claude_session(claude_desktop_keeps_no_records / "Claude-Data" / "claude_example", "Example scene pausing",
+                    worktree)
+
+    assert preview_of(worktree).feature == "Example scene pausing"
+
+
 def test_the_sessions_name_comes_before_what_the_branch_describes(worktree, claude_desktop_keeps_no_records):
     _git("config", "branch.claude/scene-one.description", "the example stage's new pause", cwd=worktree)
     _claude_session(claude_desktop_keeps_no_records / "Claude", "Example scene pausing", worktree)
@@ -69,13 +79,58 @@ def test_the_sessions_name_comes_before_what_the_branch_describes(worktree, clau
     assert preview_of(worktree).feature == "Example scene pausing"
 
 
-def test_of_two_sessions_on_one_worktree_the_one_at_work_most_recently_names_it(
+def test_of_two_sessions_on_its_branch_the_one_at_work_most_recently_names_it(
         worktree, claude_desktop_keeps_no_records):
+    records = claude_desktop_keeps_no_records / "Claude"
+    _claude_session(records, "Example scene stalling", worktree, last_active=1, name="older", branch="claude/scene-one")
+    _claude_session(records, "Example scene pausing", worktree, last_active=2, name="newer", branch="claude/scene-one")
+
+    assert preview_of(worktree).feature == "Example scene pausing"
+
+
+def test_two_sessions_nothing_tells_apart_leave_the_name_to_what_the_branch_describes(
+        worktree, claude_desktop_keeps_no_records):
+    _git("config", "branch.claude/scene-one.description", "the example stage's new pause", cwd=worktree)
     records = claude_desktop_keeps_no_records / "Claude"
     _claude_session(records, "Example scene stalling", worktree, last_active=1, name="older")
     _claude_session(records, "Example scene pausing", worktree, last_active=2, name="newer")
 
+    assert preview_of(worktree).feature == "the example stage's new pause"
+
+
+def test_one_session_seen_in_two_of_claudes_folders_is_still_one_session(worktree, claude_desktop_keeps_no_records):
+    profile = Path("ClaudeProfileB")
+    package = Path("Packages") / "Claude_example" / "LocalCache" / "Local"
+    for copy in (profile, package / profile):
+        _claude_session(claude_desktop_keeps_no_records / copy, "Example scene pausing", worktree)
+
     assert preview_of(worktree).feature == "Example scene pausing"
+
+
+def test_a_session_on_its_branch_names_it_over_one_whose_record_says_no_branch(
+        worktree, claude_desktop_keeps_no_records):
+    records = claude_desktop_keeps_no_records / "Claude"
+    _claude_session(records, "Example scene pausing", worktree, last_active=1, name="owner", branch="claude/scene-one")
+    _claude_session(records, "Example scene stalling", worktree, last_active=2, name="helper")
+
+    assert preview_of(worktree).feature == "Example scene pausing"
+
+
+def test_a_session_whose_record_names_another_branch_has_moved_on_and_names_nothing_here(
+        worktree, claude_desktop_keeps_no_records):
+    _claude_session(claude_desktop_keeps_no_records / "Claude", "Example scene pausing", worktree,
+                    last_active=1, name="owner")
+    _claude_session(claude_desktop_keeps_no_records / "ClaudeProfileB", "Example scene stalling", worktree,
+                    last_active=2, name="moved", branch="claude/scene-two")
+
+    assert preview_of(worktree).feature == "Example scene pausing"
+
+
+def test_an_archived_session_names_nothing(worktree, claude_desktop_keeps_no_records):
+    _claude_session(claude_desktop_keeps_no_records / "Claude", "Example scene pausing", worktree,
+                    branch="claude/scene-one", isArchived=True)
+
+    assert preview_of(worktree).feature == "claude/scene-one"
 
 
 def test_another_worktrees_session_names_nothing_here(worktree, tmp_path, claude_desktop_keeps_no_records):
