@@ -3,6 +3,7 @@ from __future__ import annotations
 from PySide6.QtGui import QTextDocument
 
 from shared_ui.code_text import as_rich_text
+from shared_ui.colors import BG_KEYCAP
 from shared_ui.type_scale import FONT_CODE
 
 
@@ -41,3 +42,17 @@ def test_text_with_no_backticks_reads_exactly_as_written_even_where_it_looks_lik
 
 def test_each_line_stays_a_line_of_its_own():
     assert _document("one\ntwo `x`").toPlainText() == "one\ntwo x"
+
+
+def test_a_name_in_backticks_sits_on_a_lighter_gray_than_the_text_around_it():
+    document = _document("moved into `1_sorted` today")
+    block = document.begin()
+    fragments = block.begin()
+    grounds = {}
+    while not fragments.atEnd():
+        fragment = fragments.fragment()
+        grounds[fragment.text().strip()] = fragment.charFormat().background().color().name()
+        fragments += 1
+
+    assert grounds["1_sorted"] == BG_KEYCAP.name()
+    assert grounds["moved into"] != BG_KEYCAP.name()
