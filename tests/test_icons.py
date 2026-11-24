@@ -450,6 +450,23 @@ def test_a_flick_is_one_wave_from_its_trough_over_its_crest_to_its_trough():
     assert ends < 0.2
 
 
+def test_a_flick_s_wave_starts_out_flatter_and_tops_out_wider_than_a_plain_sine():
+    (wave,) = ICONS["flick"]
+    (left, trough), (right, _trough_again) = wave.points[0], wave.points[-1]
+    crest = min(y for _x, y in wave.points)
+    heights = {(x - left) / (right - left): (trough - y) / (trough - crest) for x, y in wave.points}
+
+    def over_a_plain_sine(part: float) -> float:
+        return heights[part] - (1 - math.cos(math.tau * part)) / 2
+
+    near_its_ends = [part for part in heights if 0.1 < part < 0.2 or 0.8 < part < 0.9]
+    near_its_top = [part for part in heights if 0.3 < part < 0.4 or 0.6 < part < 0.7]
+    assert near_its_ends
+    assert near_its_top
+    assert all(over_a_plain_sine(part) < -0.03 for part in near_its_ends)
+    assert all(over_a_plain_sine(part) > 0.03 for part in near_its_top)
+
+
 def test_the_osr2_s_sine_starts_and_ends_in_its_middle_where_a_flick_s_wave_does_not():
     starts, _middle, ends = _heights_across("wave")
     assert 0.3 < starts < 0.7
