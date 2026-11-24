@@ -346,6 +346,31 @@ def _upright_arrow(column: float, *, pointing_up: bool) -> tuple:
     )
 
 
+_WAVE_LEFT, _WAVE_RIGHT, _WAVE_CREST, _WAVE_TROUGH = 6, 42, 11, 37
+_WAVE_HALFWAY, _WAVE_LEVEL = (_WAVE_LEFT + _WAVE_RIGHT) / 2, (_WAVE_CREST + _WAVE_TROUGH) / 2
+_POINTS_ALONG_A_WAVE = 36
+
+
+def _one_wave_from_trough_to_trough() -> tuple:
+    reach = _WAVE_TROUGH - _WAVE_LEVEL
+    along = [step / _POINTS_ALONG_A_WAVE for step in range(_POINTS_ALONG_A_WAVE + 1)]
+    return (Polyline(tuple(
+        (_WAVE_LEFT + part * (_WAVE_RIGHT - _WAVE_LEFT), _WAVE_LEVEL + reach * math.cos(math.tau * part))
+        for part in along)),)
+
+
+def _wave_through(*points: tuple[float, float]) -> tuple:
+    return (Polyline(points),)
+
+
+_LEFT_CREST, _LEFT_TROUGH, _LEFT_LEVEL = (
+    (_WAVE_LEFT, _WAVE_CREST), (_WAVE_LEFT, _WAVE_TROUGH), (_WAVE_LEFT, _WAVE_LEVEL))
+_HALFWAY_CREST, _HALFWAY_TROUGH = (_WAVE_HALFWAY, _WAVE_CREST), (_WAVE_HALFWAY, _WAVE_TROUGH)
+_RIGHT_CREST, _RIGHT_TROUGH, _RIGHT_LEVEL = (
+    (_WAVE_RIGHT, _WAVE_CREST), (_WAVE_RIGHT, _WAVE_TROUGH), (_WAVE_RIGHT, _WAVE_LEVEL))
+_HALF_A_WAVE_WIDE, _A_WAVE_TALL = _WAVE_HALFWAY - _WAVE_LEFT, _WAVE_TROUGH - _WAVE_CREST
+
+
 def _flip_ends() -> tuple:
     up_lane, down_lane = _PAIR_LANES
     return (*_upright_arrow(up_lane, pointing_up=True),
@@ -792,6 +817,7 @@ ICONS: dict[str, tuple] = {
     "flat_2d": _flat_2d(),
     "filter": (Polygon(((8, 10), (40, 10), (28, 25), (28, 38), (20, 42), (20, 25)),
                        fill=False, width=4),),
+    "flick": _one_wave_from_trough_to_trough(),
     "flip_ends": _flip_ends(),
     "flask": (
         Polyline(((19, 8), (19, 18), (9, 38), (39, 38), (29, 18), (29, 8))),
@@ -916,13 +942,18 @@ ICONS: dict[str, tuple] = {
     "vr_hemisphere": _vr_hemisphere(),
     "warning": (_RAISED_TRIANGLE, Line(24, 18, 24, 28, 5), Ellipse(24, 34.5, 2.8, 2.8, fill=True)),
     "wave": (
-        Arc(6, 11, 18, 26, 0, 180),
-        Arc(24, 11, 18, 26, 180, 180),
+        Arc(_WAVE_LEFT, _WAVE_CREST, _HALF_A_WAVE_WIDE, _A_WAVE_TALL, 0, 180),
+        Arc(_WAVE_HALFWAY, _WAVE_CREST, _HALF_A_WAVE_WIDE, _A_WAVE_TALL, 180, 180),
     ),
-    "wave_reverse_sawtooth": (Polyline(((6, 37), (6, 11), (24, 37), (24, 11), (42, 37))),),
-    "wave_sawtooth": (Polyline(((6, 37), (24, 11), (24, 37), (42, 11), (42, 37))),),
-    "wave_square": (Polyline(((6, 24), (6, 11), (24, 11), (24, 37), (42, 37), (42, 24))),),
-    "wave_triangle": (Polyline(((6, 24), (15, 11), (33, 37), (42, 24))),),
+    "wave_reverse_sawtooth": _wave_through(
+        _LEFT_TROUGH, _LEFT_CREST, _HALFWAY_TROUGH, _HALFWAY_CREST, _RIGHT_TROUGH),
+    "wave_sawtooth": _wave_through(
+        _LEFT_TROUGH, _HALFWAY_CREST, _HALFWAY_TROUGH, _RIGHT_CREST, _RIGHT_TROUGH),
+    "wave_square": _wave_through(
+        _LEFT_LEVEL, _LEFT_CREST, _HALFWAY_CREST, _HALFWAY_TROUGH, _RIGHT_TROUGH, _RIGHT_LEVEL),
+    "wave_triangle": _wave_through(
+        _LEFT_LEVEL, ((_WAVE_LEFT + _WAVE_HALFWAY) / 2, _WAVE_CREST),
+        ((_WAVE_HALFWAY + _WAVE_RIGHT) / 2, _WAVE_TROUGH), _RIGHT_LEVEL),
     "working": (Arc(7, 7, 34, 34, 90, 270),),
 }
 
