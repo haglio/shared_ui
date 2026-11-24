@@ -10,6 +10,8 @@ from pathlib import Path
 
 from app_support.subprocess_utils import hidden_subprocess_kwargs
 
+from shared_ui.claude_desktop_sessions import session_records
+
 _GIVE_UP_ON_GIT_AFTER_SECONDS = 5
 _LONGEST_FEATURE = 60
 _WHERE_EACH_KIND_OF_REBASE_NAMES_ITS_BRANCH = ("--git-path", "rebase-merge/head-name",
@@ -47,7 +49,7 @@ def _name_of_the_claude_session_working_in(checkout: Path) -> str | None:
 def _claude_sessions_working_in(checkout: Path, branches: set[str]) -> list[_ClaudeSession]:
     here = _same_folder_key(checkout)
     found: dict[object, _ClaudeSession] = {}
-    for record in _claude_desktop_session_records():
+    for record in session_records():
         try:
             session = json.loads(record.read_text(encoding="utf-8"))
             folder = session.get("worktreePath") or session.get("cwd")
@@ -70,16 +72,6 @@ def _claude_sessions_working_in(checkout: Path, branches: set[str]) -> list[_Cla
 def _same_folder_key(folder: Path | str) -> str:
     return os.path.normcase(os.path.normpath(str(folder)))
 
-
-def _claude_desktop_session_records() -> Iterator[Path]:
-    local = os.environ.get("LOCALAPPDATA")
-    places = [Path(base) for base in (os.environ.get("APPDATA"), local) if base]
-    if local:
-        places += [cache / kind for cache in Path(local).glob("Packages/Claude_*/LocalCache")
-                   for kind in ("Roaming", "Local")]
-    for place in places:
-        for data_folder in (*place.glob("Claude*"), *place.glob("Claude*/*")):
-            yield from data_folder.glob("claude-code-sessions/*/*/*.json")
 
 
 def _name_the_branch_gives(checkout: Path) -> str:
