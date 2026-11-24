@@ -29,23 +29,42 @@ def preview_of(checkout: Path) -> Preview | None:
                    or _name_the_branch_gives(checkout))
 
 
+@dataclass(frozen=True)
+class _ClaudeSession:
+    title: str
+    last_active: float
+    on_the_checkouts_branch: bool
+
+
 def _name_of_the_claude_session_working_in(checkout: Path) -> str | None:
-    newest = max(_claude_sessions_working_in(checkout), key=lambda session: session[0], default=None)
-    return newest[1] if newest else None
+    sessions = _claude_sessions_working_in(checkout, set(_branches_the_checkout_stands_on(checkout)))
+    on_its_branch = [session for session in sessions if session.on_the_checkouts_branch]
+    if on_its_branch:
+        return max(on_its_branch, key=lambda session: session.last_active).title
+    return sessions[0].title if len(sessions) == 1 else None
 
 
-def _claude_sessions_working_in(checkout: Path) -> Iterator[tuple[float, str]]:
+def _claude_sessions_working_in(checkout: Path, branches: set[str]) -> list[_ClaudeSession]:
     here = _same_folder_key(checkout)
+    found: dict[object, _ClaudeSession] = {}
     for record in _claude_desktop_session_records():
         try:
             session = json.loads(record.read_text(encoding="utf-8"))
             folder = session.get("worktreePath") or session.get("cwd")
             title = session.get("title")
+            branch = session.get("branch")
         except (OSError, ValueError, AttributeError):
             continue
-        if isinstance(folder, str) and isinstance(title, str) and title.strip() and _same_folder_key(folder) == here:
-            last_active = session.get("lastActivityAt")
-            yield (last_active if isinstance(last_active, (int, float)) else 0), title.strip()
+        if (not isinstance(folder, str) or not isinstance(title, str) or not title.strip()
+                or _same_folder_key(folder) != here or session.get("isArchived") is True):
+            continue
+        if isinstance(branch, str) and branches and branch not in branches:
+            continue
+        last_active = session.get("lastActivityAt")
+        found[session.get("sessionId") or record] = _ClaudeSession(
+            title=title.strip(), last_active=last_active if isinstance(last_active, (int, float)) else 0,
+            on_the_checkouts_branch=branch in branches)
+    return list(found.values())
 
 
 def _same_folder_key(folder: Path | str) -> str:
@@ -59,7 +78,8 @@ def _claude_desktop_session_records() -> Iterator[Path]:
         places += [cache / kind for cache in Path(local).glob("Packages/Claude_*/LocalCache")
                    for kind in ("Roaming", "Local")]
     for place in places:
-        yield from place.glob("Claude*/claude-code-sessions/*/*/*.json")
+        for data_folder in (*place.glob("Claude*"), *place.glob("Claude*/*")):
+            yield from data_folder.glob("claude-code-sessions/*/*/*.json")
 
 
 def _name_the_branch_gives(checkout: Path) -> str:
