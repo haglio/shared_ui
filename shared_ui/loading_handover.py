@@ -31,7 +31,7 @@ class TakingOver:
         start = 0.0 if self._shown is None else self._shown.fraction
         return start + (1 - start) * fraction
 
-    def done(self, panel: LoadingPanel, *, covers_every_monitor: bool = False) -> None:  # noqa: ARG002
+    def done(self, panel: LoadingPanel) -> None:
         if self._place is None:
             return
         self._place.say_taken()
