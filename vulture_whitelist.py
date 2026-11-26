@@ -20,3 +20,4 @@ pytestmark
 
 
 SIZES
+covers_every_monitor  # shared_ui/loading_handover.py TakingOver.done, still passed by Fun Time until it takes this release

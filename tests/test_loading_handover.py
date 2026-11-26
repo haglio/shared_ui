@@ -33,7 +33,7 @@ class TestStartingWithoutTheLaunchersScreen:
         assert (taking_over.carried(0.25), taking_over.panel_for(SIZE)) == (0.25, None)
 
     def test_nor_has_it_anywhere_to_leave_snapshots(self):
-        TakingOver.from_the_launcher({}).done(PANEL, covers_every_monitor=False)
+        TakingOver.from_the_launcher({}).done(PANEL)
 
     def test_a_launcher_whose_screen_is_not_up_hands_nothing_over(self, launched):
         taking_over = TakingOver.from_the_launcher(launched)
@@ -57,7 +57,7 @@ class TestTakingOver:
     def test_once_it_is_up_the_launchers_screen_is_told_to_go(self, launched):
         _place(launched).stand(loading_screen.Shown(left=10, top=20, fraction=0.5))
 
-        TakingOver.from_the_launcher(launched).done(PANEL, covers_every_monitor=False)
+        TakingOver.from_the_launcher(launched).done(PANEL)
 
         assert _place(launched).taken
 
@@ -126,7 +126,7 @@ def _snapshot(path) -> Image.Image:
 class TestTheSnapshotsForTheNextClick:
     @pytest.fixture
     def snapshots(self, launched):
-        TakingOver.from_the_launcher(launched).done(replace(PANEL, fraction=0.7), covers_every_monitor=True)
+        TakingOver.from_the_launcher(launched).done(replace(PANEL, fraction=0.7))
         return _place(launched).snapshots()
 
     def test_the_next_click_opens_on_the_panel_this_screen_opened_on_with_the_bar_empty(self, snapshots):
@@ -139,6 +139,3 @@ class TestTheSnapshotsForTheNextClick:
     def test_each_line_the_launcher_says_while_it_waits_is_this_panel_saying_it(self, snapshots):
         for line in ("Updating Example...", "Updating Hosted..."):
             assert _snapshot(snapshots.updating(line)).tobytes() == render(replace(PANEL, status=line)).tobytes()
-
-    def test_the_next_click_stands_where_this_screen_stands(self, snapshots):
-        assert snapshots.covers_every_monitor

@@ -31,7 +31,7 @@ class TakingOver:
         start = 0.0 if self._shown is None else self._shown.fraction
         return start + (1 - start) * fraction
 
-    def done(self, panel: LoadingPanel, *, covers_every_monitor: bool) -> None:
+    def done(self, panel: LoadingPanel, *, covers_every_monitor: bool = False) -> None:  # noqa: ARG002
         if self._place is None:
             return
         self._place.say_taken()
@@ -39,7 +39,7 @@ class TakingOver:
         self._place.leave_snapshots(
             opening=_png(opening), full=_png(replace(opening, fraction=1.0)),
             updating=[_png(replace(opening, status=line)) for line in self._place.lines],
-            bar=bar_box(), covers_every_monitor=covers_every_monitor)
+            bar=bar_box())
 
 
 def _png(panel: LoadingPanel) -> bytes:
