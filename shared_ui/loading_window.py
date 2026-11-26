@@ -81,7 +81,7 @@ class LoadingWindow(QDialog):
         self._show_the_panel()
 
     def _up(self) -> None:
-        self._taking_over.done(self._opening, covers_every_monitor=False)
+        self._taking_over.done(self._opening)
 
     def reject(self) -> None:
         self._canceling = True

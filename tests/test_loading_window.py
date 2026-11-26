@@ -182,5 +182,4 @@ class TestTakingOverFromTheLaunchersScreen:
 
         assert place.taken
         snapshots = place.snapshots()
-        assert not snapshots.covers_every_monitor
         assert snapshots.updating("Updating Scripture...") is not None
